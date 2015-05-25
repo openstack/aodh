@@ -32,7 +32,7 @@ import re
 # TODO(zqfan): When other oslo libraries switch over non-namespace'd
 # imports, we need to add them to the regexp below.
 oslo_namespace_imports = re.compile(
-    r"(from|import) oslo[.](concurrency|config|utils|i18n|serialization)")
+    r"(from|import) oslo[.](config|utils|i18n|serialization)")
 
 
 def check_oslo_namespace_imports(logical_line, physical_line, filename):

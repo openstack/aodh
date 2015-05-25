@@ -76,7 +76,6 @@ class HackingTestCase(testcase.TestCase):
 
     def test_oslo_namespace_imports_check(self):
         codes = [
-            "from oslo.concurrency import processutils",
             "from oslo.config import cfg",
             "import oslo.i18n",
             "from oslo.utils import timeutils",

@@ -13,26 +13,11 @@
 
 import operator
 
-import six
 from sqlalchemy import and_
 from sqlalchemy import asc
 from sqlalchemy import desc
 from sqlalchemy import not_
 from sqlalchemy import or_
-from sqlalchemy.orm import aliased
-
-import ceilometer
-from ceilometer.storage.sqlalchemy import models
-
-
-META_TYPE_MAP = {bool: models.MetaBool,
-                 str: models.MetaText,
-                 six.text_type: models.MetaText,
-                 type(None): models.MetaText,
-                 int: models.MetaBigInt,
-                 float: models.MetaFloat}
-if six.PY2:
-    META_TYPE_MAP[long] = models.MetaBigInt
 
 
 class QueryTransformer(object):
@@ -80,26 +65,7 @@ class QueryTransformer(object):
     def _handle_simple_op(self, simple_op, nodes):
         op = self._get_operator(simple_op)
         field_name, value = list(nodes.items())[0]
-        if field_name.startswith('resource_metadata.'):
-            return self._handle_metadata(op, field_name, value)
-        else:
-            return op(getattr(self.table, field_name), value)
-
-    def _handle_metadata(self, op, field_name, value):
-        if op == self.operators["in"]:
-            raise ceilometer.NotImplementedError('Metadata query with in '
-                                                 'operator is not implemented')
-        field_name = field_name[len('resource_metadata.'):]
-        meta_table = META_TYPE_MAP[type(value)]
-        meta_alias = aliased(meta_table)
-        on_clause = and_(self.table.internal_id == meta_alias.id,
-                         meta_alias.meta_key == field_name)
-        # outer join is needed to support metaquery
-        # with or operator on non existent metadata field
-        # see: test_query_non_existing_metadata_with_result
-        # test case.
-        self.query = self.query.outerjoin(meta_alias, on_clause)
-        return op(meta_alias.value, value)
+        return op(getattr(self.table, field_name), value)
 
     def _transform(self, sub_tree):
         operator, nodes = list(sub_tree.items())[0]

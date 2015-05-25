@@ -22,8 +22,6 @@ from oslo_utils import timeutils
 import webtest
 
 from ceilometer.api import app
-from ceilometer.publisher import utils
-from ceilometer import sample
 from ceilometer.tests import api as acl
 from ceilometer.tests.api import v2
 from ceilometer.tests import db as tests_db
@@ -81,35 +79,6 @@ class TestAPIACL(v2.FunctionalTest,
         super(TestAPIACL, self).setUp()
         self.environ = {'fake.cache': FakeMemcache()}
 
-        for cnt in [
-                sample.Sample(
-                    'meter.test',
-                    'cumulative',
-                    '',
-                    1,
-                    'user-good',
-                    'project-good',
-                    'resource-good',
-                    timestamp=datetime.datetime(2012, 7, 2, 10, 40),
-                    resource_metadata={'display_name': 'test-server',
-                                       'tag': 'self.sample'},
-                    source='test_source'),
-                sample.Sample(
-                    'meter.mine',
-                    'gauge',
-                    '',
-                    1,
-                    'user-fred',
-                    'project-good',
-                    'resource-56',
-                    timestamp=datetime.datetime(2012, 7, 2, 10, 43),
-                    resource_metadata={'display_name': 'test-server',
-                                       'tag': 'self.sample4'},
-                    source='test_source')]:
-            msg = utils.meter_message_from_counter(
-                cnt, self.CONF.publisher.telemetry_secret)
-            self.conn.record_metering_data(msg)
-
     def get_json(self, path, expect_errors=False, headers=None,
                  q=None, **params):
         return super(TestAPIACL, self).get_json(path,
@@ -139,80 +108,3 @@ class TestAPIACL(v2.FunctionalTest,
                                      "bc23a9d531064583ace8f67dad60f6bb",
                                  })
         self.assertEqual(401, response.status_int)
-
-    # FIXME(dhellmann): This test is not properly looking at the tenant
-    # info. We do not correctly detect the improper tenant. That's
-    # really something the keystone middleware would have to do using
-    # the incoming token, which we aren't providing.
-    #
-    # def test_authenticated_wrong_tenant(self):
-    #     response = self.get_json('/meters',
-    #                              expect_errors=True,
-    #                              headers={
-    #             "X-Roles": "admin",
-    #             "X-Tenant-Name": "achoo",
-    #             "X-Project-Id": "bc23a9d531064583ace8f67dad60f6bb",
-    #             })
-    #     self.assertEqual(401, response.status_int)
-
-    def test_authenticated(self):
-        data = self.get_json('/meters',
-                             headers={"X-Auth-Token": VALID_TOKEN,
-                                      "X-Roles": "admin",
-                                      "X-Tenant-Name": "admin",
-                                      "X-Project-Id":
-                                      "bc23a9d531064583ace8f67dad60f6bb",
-                                      })
-        ids = set(r['resource_id'] for r in data)
-        self.assertEqual(set(['resource-good', 'resource-56']), ids)
-
-    def test_with_non_admin_missing_project_query(self):
-        data = self.get_json('/meters',
-                             headers={"X-Roles": "Member",
-                                      "X-Auth-Token": VALID_TOKEN2,
-                                      "X-Project-Id": "project-good"})
-        ids = set(r['resource_id'] for r in data)
-        self.assertEqual(set(['resource-good', 'resource-56']), ids)
-
-    def test_with_non_admin(self):
-        data = self.get_json('/meters',
-                             headers={"X-Roles": "Member",
-                                      "X-Auth-Token": VALID_TOKEN2,
-                                      "X-Project-Id": "project-good"},
-                             q=[{'field': 'project_id',
-                                 'value': 'project-good',
-                                 }])
-        ids = set(r['resource_id'] for r in data)
-        self.assertEqual(set(['resource-good', 'resource-56']), ids)
-
-    def test_non_admin_wrong_project(self):
-        data = self.get_json('/meters',
-                             expect_errors=True,
-                             headers={"X-Roles": "Member",
-                                      "X-Auth-Token": VALID_TOKEN2,
-                                      "X-Project-Id": "project-good"},
-                             q=[{'field': 'project_id',
-                                 'value': 'project-wrong',
-                                 }])
-        self.assertEqual(401, data.status_int)
-
-    def test_non_admin_two_projects(self):
-        data = self.get_json('/meters',
-                             expect_errors=True,
-                             headers={"X-Roles": "Member",
-                                      "X-Auth-Token": VALID_TOKEN2,
-                                      "X-Project-Id": "project-good"},
-                             q=[{'field': 'project_id',
-                                 'value': 'project-good',
-                                 },
-                                {'field': 'project_id',
-                                 'value': 'project-naughty',
-                                 }])
-        self.assertEqual(401, data.status_int)
-
-    def test_non_admin_get_events(self):
-        data = self.get_json('/event_types', expect_errors=True,
-                             headers={"X-Roles": "Member",
-                                      "X-Auth-Token": VALID_TOKEN2,
-                                      "X-Project-Id": "project-good"})
-        self.assertEqual(401, data.status_int)

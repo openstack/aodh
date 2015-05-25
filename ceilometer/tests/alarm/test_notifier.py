@@ -52,7 +52,6 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             'oslo_context.context.generate_request_id',
             self._fake_generate_request_id))
 
-    @mock.patch('ceilometer.pipeline.setup_pipeline', mock.MagicMock())
     def test_init_host(self):
         # If we try to create a real RPC connection, init_host() never
         # returns. Mock it out so we can establish the service

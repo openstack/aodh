@@ -20,21 +20,12 @@
 
 from ceilometer.api.controllers.v2 import alarms
 from ceilometer.api.controllers.v2 import capabilities
-from ceilometer.api.controllers.v2 import events
-from ceilometer.api.controllers.v2 import meters
 from ceilometer.api.controllers.v2 import query
-from ceilometer.api.controllers.v2 import resources
-from ceilometer.api.controllers.v2 import samples
 
 
 class V2Controller(object):
     """Version 2 API controller root."""
 
-    resources = resources.ResourcesController()
-    meters = meters.MetersController()
-    samples = samples.SamplesController()
     alarms = alarms.AlarmsController()
-    event_types = events.EventTypesController()
-    events = events.EventsController()
     query = query.QueryController()
     capabilities = capabilities.CapabilitiesController()

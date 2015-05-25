@@ -116,18 +116,3 @@ def get_notifier(transport, publisher_id):
     serializer = RequestContextSerializer(JsonPayloadSerializer())
     notifier = oslo_messaging.Notifier(transport, serializer=serializer)
     return notifier.prepare(publisher_id=publisher_id)
-
-
-def convert_to_old_notification_format(priority, ctxt, publisher_id,
-                                       event_type, payload, metadata):
-    # FIXME(sileht): temporary convert notification to old format
-    # to focus on oslo_messaging migration before refactoring the code to
-    # use the new oslo_messaging facilities
-    notification = {'priority': priority,
-                    'payload': payload,
-                    'event_type': event_type,
-                    'publisher_id': publisher_id}
-    notification.update(metadata)
-    for k in ctxt:
-        notification['_context_' + k] = ctxt[k]
-    return notification

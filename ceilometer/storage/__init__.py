@@ -19,7 +19,6 @@ from oslo_config import cfg
 from oslo_db import options as db_options
 from oslo_log import log
 import retrying
-import six
 import six.moves.urllib.parse as urlparse
 from stevedore import driver
 
@@ -39,21 +38,6 @@ cfg.CONF.register_opts(OLD_OPTS)
 
 
 OPTS = [
-    cfg.IntOpt('metering_time_to_live',
-               default=-1,
-               help="Number of seconds that samples are kept "
-               "in the database for (<= 0 means forever).",
-               deprecated_opts=[cfg.DeprecatedOpt('time_to_live',
-                                                  'database')]),
-    cfg.IntOpt('event_time_to_live',
-               default=-1,
-               help=("Number of seconds that events are kept "
-                     "in the database for (<= 0 means forever).")),
-    cfg.StrOpt('metering_connection',
-               secret=True,
-               default=None,
-               help='The connection string used to connect to the metering '
-               'database. (if unset, connection is used)'),
     cfg.StrOpt('alarm_connection',
                secret=True,
                default=None,
@@ -63,11 +47,6 @@ OPTS = [
                default=-1,
                help=("Number of seconds that alarm histories are kept "
                      "in the database for (<= 0 means forever).")),
-    cfg.StrOpt('event_connection',
-               secret=True,
-               default=None,
-               help='The connection string used to connect to the event '
-               'database. (if unset, connection is used)'),
     cfg.StrOpt('mongodb_replica_set',
                default='',
                help='The name of the replica set which is used to connect to '
@@ -109,7 +88,7 @@ class StorageBadAggregate(Exception):
     code = 400
 
 
-def get_connection_from_config(conf, purpose='metering'):
+def get_connection_from_config(conf, purpose='alarm'):
     retries = conf.database.max_retries
 
     # Convert retry_interval secs to msecs for retry decorator
@@ -196,42 +175,3 @@ class SampleFilter(object):
                  self.source,
                  self.metaquery,
                  self.message_id))
-
-
-class EventFilter(object):
-    """Properties for building an Event query.
-
-    :param start_timestamp: UTC start datetime (mandatory)
-    :param end_timestamp: UTC end datetime (mandatory)
-    :param event_type: the name of the event. None for all.
-    :param message_id: the message_id of the event. None for all.
-    :param traits_filter: the trait filter dicts, all of which are optional.
-      This parameter is a list of dictionaries that specify trait values:
-
-    .. code-block:: python
-
-        {'key': <key>,
-        'string': <value>,
-        'integer': <value>,
-        'datetime': <value>,
-        'float': <value>,
-        'op': <eq, lt, le, ne, gt or ge> }
-    """
-
-    def __init__(self, start_timestamp=None, end_timestamp=None,
-                 event_type=None, message_id=None, traits_filter=None):
-        self.start_timestamp = utils.sanitize_timestamp(start_timestamp)
-        self.end_timestamp = utils.sanitize_timestamp(end_timestamp)
-        self.message_id = message_id
-        self.event_type = event_type
-        self.traits_filter = traits_filter or []
-
-    def __repr__(self):
-        return ("<EventFilter(start_timestamp: %s,"
-                " end_timestamp: %s,"
-                " event_type: %s,"
-                " traits: %s)>" %
-                (self.start_timestamp,
-                 self.end_timestamp,
-                 self.event_type,
-                 six.text_type(self.traits_filter)))

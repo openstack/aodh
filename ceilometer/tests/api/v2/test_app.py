@@ -25,14 +25,6 @@ from ceilometer import i18n
 from ceilometer.tests.api import v2
 
 
-class TestPecanApp(v2.FunctionalTest):
-
-    def test_pecan_extension_guessing_unset(self):
-        # check Pecan does not assume .jpg is an extension
-        response = self.app.get(self.PATH_PREFIX + '/meters/meter.jpg')
-        self.assertEqual('application/json', response.content_type)
-
-
 class TestApiMiddleware(v2.FunctionalTest):
 
     no_lang_translated_error = 'No lang translated error'

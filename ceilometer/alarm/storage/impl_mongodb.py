@@ -26,7 +26,6 @@ import pymongo
 
 from ceilometer.alarm.storage import pymongo_base
 from ceilometer import storage
-from ceilometer.storage import impl_mongodb
 from ceilometer.storage.mongo import utils as pymongo_utils
 
 cfg.CONF.import_opt('alarm_history_time_to_live', 'ceilometer.alarm.storage',
@@ -63,11 +62,36 @@ class Connection(pymongo_base.Connection):
         # needed.
         self.upgrade()
 
+    @staticmethod
+    def update_ttl(ttl, ttl_index_name, index_field, coll):
+        """Update or ensure time_to_live indexes.
+
+        :param ttl: time to live in seconds.
+        :param ttl_index_name: name of the index we want to update or ensure.
+        :param index_field: field with the index that we need to update.
+        :param coll: collection which indexes need to be updated.
+        """
+        indexes = coll.index_information()
+        if ttl <= 0:
+            if ttl_index_name in indexes:
+                coll.drop_index(ttl_index_name)
+            return
+
+        if ttl_index_name in indexes:
+            return coll.database.command(
+                'collMod', coll.name,
+                index={'keyPattern': {index_field: pymongo.ASCENDING},
+                       'expireAfterSeconds': ttl})
+
+        coll.ensure_index([(index_field, pymongo.ASCENDING)],
+                          expireAfterSeconds=ttl,
+                          name=ttl_index_name)
+
     def upgrade(self):
         super(Connection, self).upgrade()
         # Establish indexes
         ttl = cfg.CONF.database.alarm_history_time_to_live
-        impl_mongodb.Connection.update_ttl(
+        self.update_ttl(
             ttl, 'alarm_history_ttl', 'timestamp', self.db.alarm_history)
 
     def clear(self):

@@ -11,5 +11,3 @@ tests:
   url: /v2/capabilities
   response_json_paths:
       $.alarm_storage.['storage:production_ready']: true
-      $.event_storage.['storage:production_ready']: true
-      $.storage.['storage:production_ready']: true

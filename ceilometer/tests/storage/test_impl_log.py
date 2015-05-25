@@ -16,14 +16,10 @@
 """
 from oslotest import base
 
-from ceilometer.storage import impl_log
+from ceilometer.alarm.storage import impl_log
 
 
 class ConnectionTest(base.BaseTestCase):
     @staticmethod
     def test_get_connection():
-        conn = impl_log.Connection(None)
-        conn.record_metering_data({'counter_name': 'test',
-                                   'resource_id': __name__,
-                                   'counter_volume': 1,
-                                   })
+        impl_log.Connection(None)

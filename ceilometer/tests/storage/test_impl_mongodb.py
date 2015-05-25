@@ -21,9 +21,7 @@
 
 """
 
-from ceilometer.alarm.storage import impl_mongodb as impl_mongodb_alarm
-from ceilometer.event.storage import impl_mongodb as impl_mongodb_event
-from ceilometer.storage import impl_mongodb
+from ceilometer.alarm.storage import impl_mongodb as impl_mongodb
 from ceilometer.tests import base as test_base
 from ceilometer.tests import db as tests_db
 
@@ -33,22 +31,12 @@ class MongoDBConnection(tests_db.TestBase,
                         tests_db.MixinTestsWithBackendScenarios):
     def test_connection_pooling(self):
         test_conn = impl_mongodb.Connection(self.db_manager.url)
-        self.assertEqual(self.conn.conn, test_conn.conn)
+        self.assertEqual(self.alarm_conn.conn, test_conn.conn)
 
     def test_replica_set(self):
         url = self.db_manager._url + '?replicaSet=foobar'
         conn = impl_mongodb.Connection(url)
         self.assertTrue(conn.conn)
-
-    def test_recurse_sort_keys(self):
-        sort_keys = ['k1', 'k2', 'k3']
-        marker = {'k1': 'v1', 'k2': 'v2', 'k3': 'v3'}
-        flag = '$lt'
-        ret = impl_mongodb.Connection._recurse_sort_keys(sort_keys=sort_keys,
-                                                         marker=marker,
-                                                         flag=flag)
-        expect = {'k3': {'$lt': 'v3'}, 'k2': {'eq': 'v2'}, 'k1': {'eq': 'v1'}}
-        self.assertEqual(expect, ret)
 
 
 @tests_db.run_with('mongodb')
@@ -69,14 +57,6 @@ class IndexTest(tests_db.TestBase,
                          coll.index_information()
                          [index_name]['expireAfterSeconds'])
 
-    def test_meter_ttl_index_absent(self):
-        self._test_ttl_index_absent(self.conn, 'meter',
-                                    'metering_time_to_live')
-
-    def test_event_ttl_index_absent(self):
-        self._test_ttl_index_absent(self.event_conn, 'event',
-                                    'event_time_to_live')
-
     def test_alarm_history_ttl_index_absent(self):
         self._test_ttl_index_absent(self.alarm_conn, 'alarm_history',
                                     'alarm_history_time_to_live')
@@ -94,60 +74,12 @@ class IndexTest(tests_db.TestBase,
         conn.upgrade()
         self.assertNotIn(index_name, coll.index_information())
 
-    def test_meter_ttl_index_present(self):
-        self._test_ttl_index_present(self.conn, 'meter',
-                                     'metering_time_to_live')
-
-    def test_event_ttl_index_present(self):
-        self._test_ttl_index_present(self.event_conn, 'event',
-                                     'event_time_to_live')
-
     def test_alarm_history_ttl_index_present(self):
         self._test_ttl_index_present(self.alarm_conn, 'alarm_history',
                                      'alarm_history_time_to_live')
 
 
 class CapabilitiesTest(test_base.BaseTestCase):
-    # Check the returned capabilities list, which is specific to each DB
-    # driver
-
-    def test_capabilities(self):
-        expected_capabilities = {
-            'meters': {'query': {'simple': True,
-                                 'metadata': True,
-                                 'complex': False}},
-            'resources': {'query': {'simple': True,
-                                    'metadata': True,
-                                    'complex': False}},
-            'samples': {'query': {'simple': True,
-                                  'metadata': True,
-                                  'complex': True}},
-            'statistics': {'groupby': True,
-                           'query': {'simple': True,
-                                     'metadata': True,
-                                     'complex': False},
-                           'aggregation': {'standard': True,
-                                           'selectable': {
-                                               'max': True,
-                                               'min': True,
-                                               'sum': True,
-                                               'avg': True,
-                                               'count': True,
-                                               'stddev': True,
-                                               'cardinality': True}}
-                           },
-        }
-
-        actual_capabilities = impl_mongodb.Connection.get_capabilities()
-        self.assertEqual(expected_capabilities, actual_capabilities)
-
-    def test_event_capabilities(self):
-        expected_capabilities = {
-            'events': {'query': {'simple': True}},
-        }
-        actual_capabilities = impl_mongodb_event.Connection.get_capabilities()
-        self.assertEqual(expected_capabilities, actual_capabilities)
-
     def test_alarm_capabilities(self):
         expected_capabilities = {
             'alarms': {'query': {'simple': True,
@@ -156,13 +88,5 @@ class CapabilitiesTest(test_base.BaseTestCase):
                                              'complex': True}}},
         }
 
-        actual_capabilities = impl_mongodb_alarm.Connection.get_capabilities()
-        self.assertEqual(expected_capabilities, actual_capabilities)
-
-    def test_storage_capabilities(self):
-        expected_capabilities = {
-            'storage': {'production_ready': True},
-        }
-        actual_capabilities = (impl_mongodb.Connection.
-                               get_storage_capabilities())
+        actual_capabilities = impl_mongodb.Connection.get_capabilities()
         self.assertEqual(expected_capabilities, actual_capabilities)

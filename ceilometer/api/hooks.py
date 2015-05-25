@@ -16,15 +16,8 @@
 import threading
 
 from oslo_config import cfg
-from oslo_log import log
 
 from pecan import hooks
-
-from ceilometer.i18n import _LE
-from ceilometer import messaging
-from ceilometer import storage
-
-LOG = log.getLogger(__name__)
 
 
 class ConfigHook(hooks.PecanHook):
@@ -40,47 +33,11 @@ class ConfigHook(hooks.PecanHook):
 
 class DBHook(hooks.PecanHook):
 
-    def __init__(self):
-        self.storage_connection = DBHook.get_connection('metering')
-        self.event_storage_connection = DBHook.get_connection('event')
-        self.alarm_storage_connection = DBHook.get_connection('alarm')
-
-        if (not self.storage_connection and
-                not self.event_storage_connection and
-                not self.alarm_storage_connection):
-            raise Exception("Api failed to start. Failed to connect to "
-                            "databases, purpose:  %s" %
-                            ', '.join(['metering', 'event', 'alarm']))
+    def __init__(self, alarm_conn):
+        self.alarm_storage_connection = alarm_conn
 
     def before(self, state):
-        state.request.storage_conn = self.storage_connection
-        state.request.event_storage_conn = self.event_storage_connection
         state.request.alarm_storage_conn = self.alarm_storage_connection
-
-    @staticmethod
-    def get_connection(purpose):
-        try:
-            return storage.get_connection_from_config(cfg.CONF, purpose)
-        except Exception as err:
-            params = {"purpose": purpose, "err": err}
-            LOG.exception(_LE("Failed to connect to db, purpose %(purpose)s "
-                              "retry later: %(err)s") % params)
-
-
-class NotifierHook(hooks.PecanHook):
-    """Create and attach a notifier to the request.
-
-    Usually, samples will be push to notification bus by notifier when they
-    are posted via /v2/meters/ API.
-    """
-
-    def __init__(self):
-        transport = messaging.get_transport()
-        self.notifier = messaging.get_notifier(transport,
-                                               publisher_id="ceilometer.api")
-
-    def before(self, state):
-        state.request.notifier = self.notifier
 
 
 class TranslationHook(hooks.PecanHook):

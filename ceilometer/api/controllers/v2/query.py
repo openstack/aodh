@@ -31,10 +31,8 @@ import wsmeext.pecan as wsme_pecan
 from ceilometer.alarm.storage import models as alarm_models
 from ceilometer.api.controllers.v2 import alarms
 from ceilometer.api.controllers.v2 import base
-from ceilometer.api.controllers.v2 import samples
 from ceilometer.api import rbac
 from ceilometer.i18n import _
-from ceilometer import storage
 from ceilometer import utils
 
 LOG = log.getLogger(__name__)
@@ -329,36 +327,6 @@ class ValidatedComplexQuery(object):
         jsonschema.validate(orderby_expr, self.orderby_schema)
 
 
-class QuerySamplesController(rest.RestController):
-    """Provides complex query possibilities for samples."""
-
-    @wsme_pecan.wsexpose([samples.Sample], body=ComplexQuery)
-    def post(self, body):
-        """Define query for retrieving Sample data.
-
-        :param body: Query rules for the samples to be returned.
-        """
-
-        rbac.enforce('query_sample', pecan.request)
-
-        sample_name_mapping = {"resource": "resource_id",
-                               "meter": "counter_name",
-                               "type": "counter_type",
-                               "unit": "counter_unit",
-                               "volume": "counter_volume"}
-
-        query = ValidatedComplexQuery(body,
-                                      storage.models.Sample,
-                                      sample_name_mapping,
-                                      metadata_allowed=True)
-        query.validate(visibility_field="project_id")
-        conn = pecan.request.storage_conn
-        return [samples.Sample.from_db_model(s)
-                for s in conn.query_samples(query.filter_expr,
-                                            query.orderby,
-                                            query.limit)]
-
-
 class QueryAlarmHistoryController(rest.RestController):
     """Provides complex query possibilities for alarm history."""
     @wsme_pecan.wsexpose([alarms.AlarmChange], body=ComplexQuery)
@@ -405,5 +373,4 @@ class QueryAlarmsController(rest.RestController):
 
 class QueryController(rest.RestController):
 
-    samples = QuerySamplesController()
     alarms = QueryAlarmsController()

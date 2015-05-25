@@ -50,7 +50,8 @@ def write_autodoc_index():
     RSTDIR = os.path.abspath(os.path.join(BASE_DIR, "sourcecode"))
     SRCS = {'ceilometer': ROOT}
 
-    EXCLUDED_MODULES = ('ceilometer.tests',)
+    EXCLUDED_MODULES = ('ceilometer.tests',
+                        'ceilometer.storage.sqlalchemy.migrate_repo')
     CURRENT_SOURCES = {}
 
     if not(os.path.exists(RSTDIR)):

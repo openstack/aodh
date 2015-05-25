@@ -47,21 +47,6 @@ M: Doug Hellmann (dhellmann) <doug.hellmann@dreamhost.com>
 S: Maintained
 F: api/
 
-== events ==
-
-M: Julien Danjou (jd__)
-M: Sandy Walsh (sandywalsh)
-M: Monsyne Dragon (dragondm)
-S: Maintained
-F: notification.py
-F: storage/
-
-== pipeline ==
-
-M: Julien Danjou (jd__)
-S: Maintained
-F: publisher/, transformer/, pipeline.py
-
 == storage ==
 
 -- DB2 --

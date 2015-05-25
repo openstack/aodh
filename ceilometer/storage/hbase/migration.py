@@ -13,81 +13,8 @@
 """HBase storage backend migrations
 """
 
-import re
 
 from ceilometer.storage.hbase import utils as hbase_utils
-
-
-def migrate_resource_table(conn, table):
-    """Migrate table 'resource' in HBase.
-
-    Change qualifiers format from "%s+%s+%s!%s!%s" %
-    (rts, source, counter_name, counter_type,counter_unit)
-    in columns with meters f:m_*
-    to new separator format "%s:%s:%s:%s:%s" %
-    (rts, source, counter_name, counter_type,counter_unit)
-    """
-    resource_table = conn.table(table)
-    resource_filter = ("QualifierFilter(=, "
-                       "'regexstring:m_\\d{19}\\+"
-                       "[\\w-\\._]*\\+[\\w-\\._!]')")
-    gen = resource_table.scan(filter=resource_filter)
-    for row, data in gen:
-        columns = []
-        updated_columns = dict()
-        column_prefix = "f:"
-        for column, value in data.items():
-            if column.startswith('f:m_'):
-                columns.append(column)
-                parts = column[2:].split("+", 2)
-                parts.extend(parts.pop(2).split("!"))
-                column = hbase_utils.prepare_key(*parts)
-                updated_columns[column_prefix + column] = value
-        resource_table.put(row, updated_columns)
-        resource_table.delete(row, columns)
-
-
-def migrate_meter_table(conn, table):
-    """Migrate table 'meter' in HBase.
-
-    Change row format from "%s_%d_%s" % (counter_name, rts, message_signature)
-    to new separator format "%s:%s:%s" % (counter_name, rts, message_signature)
-    """
-    meter_table = conn.table(table)
-    meter_filter = ("RowFilter(=, "
-                    "'regexstring:[\\w\\._-]*_\\d{19}_\\w*')")
-    gen = meter_table.scan(filter=meter_filter)
-    for row, data in gen:
-        parts = row.rsplit('_', 2)
-        new_row = hbase_utils.prepare_key(*parts)
-        meter_table.put(new_row, data)
-        meter_table.delete(row)
-
-
-def migrate_event_table(conn, table):
-    """Migrate table 'event' in HBase.
-
-    Change row format from ""%d_%s" % timestamp, event_id,
-    to new separator format "%s:%s" % timestamp, event_id
-    Also change trait columns from %s+%s % trait.name, trait.dtype
-    to %s:%s % trait.name, trait.dtype
-    """
-    event_table = conn.table(table)
-    event_filter = "RowFilter(=, 'regexstring:\\d*_\\w*')"
-    gen = event_table.scan(filter=event_filter)
-    trait_pattern = re.compile("f:[\w\-_]*\+\w")
-    column_prefix = "f:"
-    for row, data in gen:
-        row_parts = row.split("_", 1)
-        update_data = {}
-        for column, value in data.items():
-            if trait_pattern.match(column):
-                trait_parts = column[2:].rsplit('+', 1)
-                column = hbase_utils.prepare_key(*trait_parts)
-            update_data[column_prefix + column] = value
-        new_row = hbase_utils.prepare_key(*row_parts)
-        event_table.put(new_row, update_data)
-        event_table.delete(row)
 
 
 def migrate_alarm_history_table(conn, table):
@@ -105,10 +32,7 @@ def migrate_alarm_history_table(conn, table):
         alarm_h_table.delete(row)
 
 
-TABLE_MIGRATION_FUNCS = {'resource': migrate_resource_table,
-                         'alarm_h': migrate_alarm_history_table,
-                         'meter': migrate_meter_table,
-                         'event': migrate_event_table}
+TABLE_MIGRATION_FUNCS = {'alarm_h': migrate_alarm_history_table}
 
 
 def migrate_tables(conn, tables):

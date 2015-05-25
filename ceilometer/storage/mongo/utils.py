@@ -25,8 +25,6 @@ from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import netutils
 import pymongo
-import six
-from six.moves.urllib import parse
 
 from ceilometer.i18n import _
 
@@ -36,10 +34,6 @@ LOG = log.getLogger(__name__)
 # library APIs, and should not be used like this.
 cfg.CONF.import_opt('max_retries', 'oslo_db.options', group="database")
 cfg.CONF.import_opt('retry_interval', 'oslo_db.options', group="database")
-
-EVENT_TRAIT_TYPES = {'none': 0, 'string': 1, 'integer': 2, 'float': 3,
-                     'datetime': 4}
-OP_SIGN = {'lt': '$lt', 'le': '$lte', 'ne': '$ne', 'gt': '$gt', 'ge': '$gte'}
 
 
 def make_timestamp_range(start, end,
@@ -66,163 +60,6 @@ def make_timestamp_range(start, end,
             end_timestamp_op = '$lt'
         ts_range[end_timestamp_op] = end
     return ts_range
-
-
-def make_events_query_from_filter(event_filter):
-    """Return start and stop row for filtering and a query.
-
-    Query is based on the selected parameter.
-
-    :param event_filter: storage.EventFilter object.
-    """
-    q = {}
-    ts_range = make_timestamp_range(event_filter.start_timestamp,
-                                    event_filter.end_timestamp)
-    if ts_range:
-        q['timestamp'] = ts_range
-    if event_filter.event_type:
-        q['event_type'] = event_filter.event_type
-    if event_filter.message_id:
-        q['_id'] = event_filter.message_id
-
-    if event_filter.traits_filter:
-        q.setdefault('traits')
-        for trait_filter in event_filter.traits_filter:
-            op = trait_filter.pop('op', 'eq')
-            dict_query = {}
-            for k, v in six.iteritems(trait_filter):
-                if v is not None:
-                    # All parameters in EventFilter['traits'] are optional, so
-                    # we need to check if they are in the query or no.
-                    if k == 'key':
-                        dict_query.setdefault('trait_name', v)
-                    elif k in ['string', 'integer', 'datetime', 'float']:
-                        dict_query.setdefault('trait_type',
-                                              EVENT_TRAIT_TYPES[k])
-                        dict_query.setdefault('trait_value',
-                                              v if op == 'eq'
-                                              else {OP_SIGN[op]: v})
-            dict_query = {'$elemMatch': dict_query}
-            if q['traits'] is None:
-                q['traits'] = dict_query
-            elif q.get('$and') is None:
-                q.setdefault('$and', [{'traits': q.pop('traits')},
-                                      {'traits': dict_query}])
-            else:
-                q['$and'].append({'traits': dict_query})
-    return q
-
-
-def make_query_from_filter(sample_filter, require_meter=True):
-    """Return a query dictionary based on the settings in the filter.
-
-    :param sample_filter: SampleFilter instance
-    :param require_meter: If true and the filter does not have a meter,
-                          raise an error.
-    """
-    q = {}
-
-    if sample_filter.user:
-        q['user_id'] = sample_filter.user
-    if sample_filter.project:
-        q['project_id'] = sample_filter.project
-
-    if sample_filter.meter:
-        q['counter_name'] = sample_filter.meter
-    elif require_meter:
-        raise RuntimeError('Missing required meter specifier')
-
-    ts_range = make_timestamp_range(sample_filter.start_timestamp,
-                                    sample_filter.end_timestamp,
-                                    sample_filter.start_timestamp_op,
-                                    sample_filter.end_timestamp_op)
-
-    if ts_range:
-        q['timestamp'] = ts_range
-
-    if sample_filter.resource:
-        q['resource_id'] = sample_filter.resource
-    if sample_filter.source:
-        q['source'] = sample_filter.source
-    if sample_filter.message_id:
-        q['message_id'] = sample_filter.message_id
-
-    # so the samples call metadata resource_metadata, so we convert
-    # to that.
-    q.update(dict(
-        ('resource_%s' % k, v) for (k, v) in six.iteritems(
-            improve_keys(sample_filter.metaquery, metaquery=True))))
-    return q
-
-
-def quote_key(key, reverse=False):
-    """Prepare key for storage data in MongoDB.
-
-    :param key: key that should be quoted
-    :param reverse: boolean, True --- if we need a reverse order of the keys
-                    parts
-    :return: iter of quoted part of the key
-    """
-    r = -1 if reverse else 1
-
-    for k in key.split('.')[::r]:
-        if k.startswith('$'):
-            k = parse.quote(k)
-        yield k
-
-
-def improve_keys(data, metaquery=False):
-    """Improves keys in dict if they contained '.' or started with '$'.
-
-    :param data: is a dictionary where keys need to be checked and improved
-    :param metaquery: boolean, if True dots are not escaped from the keys
-    :return: improved dictionary if keys contained dots or started with '$':
-            {'a.b': 'v'} -> {'a': {'b': 'v'}}
-            {'$ab': 'v'} -> {'%24ab': 'v'}
-    """
-    if not isinstance(data, dict):
-        return data
-
-    if metaquery:
-        for key in six.iterkeys(data):
-            if '.$' in key:
-                key_list = []
-                for k in quote_key(key):
-                    key_list.append(k)
-                new_key = '.'.join(key_list)
-                data[new_key] = data.pop(key)
-    else:
-        for key, value in data.items():
-            if isinstance(value, dict):
-                improve_keys(value)
-            if '.' in key:
-                new_dict = {}
-                for k in quote_key(key, reverse=True):
-                    new = {}
-                    new[k] = new_dict if new_dict else data.pop(key)
-                    new_dict = new
-                data.update(new_dict)
-            else:
-                if key.startswith('$'):
-                    new_key = parse.quote(key)
-                    data[new_key] = data.pop(key)
-    return data
-
-
-def unquote_keys(data):
-    """Restores initial view of 'quoted' keys in dictionary data
-
-    :param data: is a dictionary
-    :return: data with restored keys if they were 'quoted'.
-    """
-    if isinstance(data, dict):
-        for key, value in data.items():
-            if isinstance(value, dict):
-                unquote_keys(value)
-            if key.startswith('%24'):
-                k = parse.unquote(key)
-                data[k] = data.pop(key)
-    return data
 
 
 class ConnectionPool(object):

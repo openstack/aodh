@@ -6,17 +6,6 @@
     "service_role": "role:service",
     "iaas_role": "role:iaas",
 
-    "telemetry:get_samples": "rule:service_role or rule:iaas_role",
-    "telemetry:get_sample": "rule:context_is_project",
-    "telemetry:query_sample": "rule:context_is_admin",
-    "telemetry:create_samples": "rule:context_is_admin",
-
-    "telemetry:compute_statistics": "rule:context_is_admin",
-    "telemetry:get_meters": "rule:context_is_admin",
-
-    "telemetry:get_resource": "rule:context_is_admin",
-    "telemetry:get_resources": "rule:context_is_admin",
-
     "telemetry:get_alarm": "rule:context_is_admin",
     "telemetry:query_alarm": "rule:context_is_admin",
     "telemetry:get_alarm_state": "rule:context_is_admin",

@@ -84,41 +84,6 @@ class TestUtils(base.BaseTestCase):
             else:
                 self.assertIn((k, v), expected)
 
-    def test_restore_nesting_unested(self):
-        metadata = {'a': 'A', 'b': 'B'}
-        unwound = utils.restore_nesting(metadata)
-        self.assertIs(metadata, unwound)
-
-    def test_restore_nesting(self):
-        metadata = {'a': 'A', 'b': 'B',
-                    'nested:a': 'A',
-                    'nested:b': 'B',
-                    'nested:twice:c': 'C',
-                    'nested:twice:d': 'D',
-                    'embedded:e': 'E'}
-        unwound = utils.restore_nesting(metadata)
-        expected = {'a': 'A', 'b': 'B',
-                    'nested': {'a': 'A', 'b': 'B',
-                               'twice': {'c': 'C', 'd': 'D'}},
-                    'embedded': {'e': 'E'}}
-        self.assertEqual(expected, unwound)
-        self.assertIsNot(metadata, unwound)
-
-    def test_restore_nesting_with_separator(self):
-        metadata = {'a': 'A', 'b': 'B',
-                    'nested.a': 'A',
-                    'nested.b': 'B',
-                    'nested.twice.c': 'C',
-                    'nested.twice.d': 'D',
-                    'embedded.e': 'E'}
-        unwound = utils.restore_nesting(metadata, separator='.')
-        expected = {'a': 'A', 'b': 'B',
-                    'nested': {'a': 'A', 'b': 'B',
-                               'twice': {'c': 'C', 'd': 'D'}},
-                    'embedded': {'e': 'E'}}
-        self.assertEqual(expected, unwound)
-        self.assertIsNot(metadata, unwound)
-
     def test_decimal_to_dt_with_none_parameter(self):
         self.assertIsNone(utils.decimal_to_dt(None))
 
@@ -138,14 +103,6 @@ class TestUtils(base.BaseTestCase):
                          ('nested2[0].c', 'A'),
                          ('nested2[1].c', 'B')],
                          sorted(pairs, key=lambda x: x[0]))
-
-    def test_hash_of_set(self):
-        x = ['a', 'b']
-        y = ['a', 'b', 'a']
-        z = ['a', 'c']
-        self.assertEqual(utils.hash_of_set(x), utils.hash_of_set(y))
-        self.assertNotEqual(utils.hash_of_set(x), utils.hash_of_set(z))
-        self.assertNotEqual(utils.hash_of_set(y), utils.hash_of_set(z))
 
     def test_hash_ring(self):
         num_nodes = 10

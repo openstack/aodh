@@ -24,18 +24,12 @@ def main(argv):
         url = ("%s?table_prefix=%s" %
                (os.getenv("CEILOMETER_TEST_HBASE_URL"),
                 os.getenv("CEILOMETER_TEST_HBASE_TABLE_PREFIX", "test")))
-        conn = storage.get_connection(url, 'ceilometer.metering.storage')
         alarm_conn = storage.get_connection(url, 'ceilometer.alarm.storage')
-        event_conn = storage.get_connection(url, 'ceilometer.event.storage')
         for arg in argv:
             if arg == "--upgrade":
-                conn.upgrade()
                 alarm_conn.upgrade()
-                event_conn.upgrade()
             if arg == "--clear":
-                conn.clear()
                 alarm_conn.clear()
-                event_conn.clear()
 
 
 if __name__ == '__main__':

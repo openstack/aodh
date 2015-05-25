@@ -28,6 +28,8 @@ from ceilometer.api import middleware
 from ceilometer.i18n import _
 from ceilometer.i18n import _LW
 from ceilometer import service
+from ceilometer import storage
+
 
 LOG = log.getLogger(__name__)
 
@@ -61,8 +63,8 @@ def get_pecan_config():
 def setup_app(pecan_config=None, extra_hooks=None):
     # FIXME: Replace DBHook with a hooks.TransactionHook
     app_hooks = [hooks.ConfigHook(),
-                 hooks.DBHook(),
-                 hooks.NotifierHook(),
+                 hooks.DBHook(
+                     storage.get_connection_from_config(cfg.CONF, 'alarm'),),
                  hooks.TranslationHook()]
     if extra_hooks:
         app_hooks.extend(extra_hooks)

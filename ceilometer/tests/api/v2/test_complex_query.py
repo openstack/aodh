@@ -26,7 +26,6 @@ import wsme
 
 from ceilometer.alarm.storage import models as alarm_models
 from ceilometer.api.controllers.v2 import query
-from ceilometer.storage import models
 
 
 class FakeComplexQuery(query.ValidatedComplexQuery):
@@ -51,10 +50,7 @@ class TestComplexQuery(base.BaseTestCase):
         super(TestComplexQuery, self).setUp()
         self.useFixture(fixtures.MonkeyPatch(
             'pecan.response', mock.MagicMock()))
-        self.query = FakeComplexQuery(models.Sample,
-                                      sample_name_mapping,
-                                      True)
-        self.query_alarm = FakeComplexQuery(alarm_models.Alarm)
+        self.query = FakeComplexQuery(alarm_models.Alarm)
         self.query_alarmchange = FakeComplexQuery(
             alarm_models.AlarmChange)
 
@@ -120,7 +116,7 @@ class TestComplexQuery(base.BaseTestCase):
     def test_invalid_filter_misstyped_field_name_alarms(self):
         filter = {"=": {"enabbled": True}}
         self.assertRaises(jsonschema.ValidationError,
-                          self.query_alarm._validate_filter,
+                          self.query._validate_filter,
                           filter)
 
     def test_invalid_filter_misstyped_field_name_alarmchange(self):
@@ -141,7 +137,7 @@ class TestComplexQuery(base.BaseTestCase):
                   [{"=": {"project_id": 42}},
                    {"=": {"non_existing_field": 42}}]}
         self.assertRaises(jsonschema.ValidationError,
-                          self.query_alarm._validate_filter,
+                          self.query._validate_filter,
                           filter)
 
         filter = {"and":
@@ -166,7 +162,7 @@ class TestComplexQuery(base.BaseTestCase):
                     [{"=": {"project_id": 44}},
                      {"=": {"non_existing_field": 42}}]}]}
         self.assertRaises(jsonschema.ValidationError,
-                          self.query_alarm._validate_filter,
+                          self.query._validate_filter,
                           filter)
 
     def test_convert_orderby(self):
@@ -232,171 +228,3 @@ class TestComplexQuery(base.BaseTestCase):
         self.assertRaises(jsonschema.ValidationError,
                           self.query._validate_orderby,
                           orderby)
-
-
-class TestFilterSyntaxValidation(base.BaseTestCase):
-    def setUp(self):
-        super(TestFilterSyntaxValidation, self).setUp()
-        self.query = FakeComplexQuery(models.Sample,
-                                      sample_name_mapping,
-                                      True)
-
-    def test_simple_operator(self):
-        filter = {"=": {"project_id": "string_value"}}
-        self.query._validate_filter(filter)
-
-        filter = {"=>": {"project_id": "string_value"}}
-        self.query._validate_filter(filter)
-
-    def test_valid_value_types(self):
-        filter = {"=": {"project_id": "string_value"}}
-        self.query._validate_filter(filter)
-
-        filter = {"=": {"project_id": 42}}
-        self.query._validate_filter(filter)
-
-        filter = {"=": {"project_id": 3.14}}
-        self.query._validate_filter(filter)
-
-        filter = {"=": {"project_id": True}}
-        self.query._validate_filter(filter)
-
-        filter = {"=": {"project_id": False}}
-        self.query._validate_filter(filter)
-
-    def test_invalid_simple_operator(self):
-        filter = {"==": {"project_id": "string_value"}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-        filter = {"": {"project_id": "string_value"}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_more_than_one_operator_is_invalid(self):
-        filter = {"=": {"project_id": "string_value"},
-                  "<": {"": ""}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_empty_expression_is_invalid(self):
-        filter = {}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_invalid_field_name(self):
-        filter = {"=": {"": "value"}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-        filter = {"=": {" ": "value"}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-        filter = {"=": {"\t": "value"}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_more_than_one_field_is_invalid(self):
-        filter = {"=": {"project_id": "value", "resource_id": "value"}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_missing_field_after_simple_op_is_invalid(self):
-        filter = {"=": {}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_and_or(self):
-        filter = {"and": [{"=": {"project_id": "string_value"}},
-                          {"=": {"resource_id": "value"}}]}
-        self.query._validate_filter(filter)
-
-        filter = {"or": [{"and": [{"=": {"project_id": "string_value"}},
-                                  {"=": {"resource_id": "value"}}]},
-                         {"=": {"counter_name": "value"}}]}
-        self.query._validate_filter(filter)
-
-        filter = {"or": [{"and": [{"=": {"project_id": "string_value"}},
-                                  {"=": {"resource_id": "value"}},
-                                  {"<": {"counter_name": 42}}]},
-                         {"=": {"counter_name": "value"}}]}
-        self.query._validate_filter(filter)
-
-    def test_complex_operator_with_in(self):
-        filter = {"and": [{"<": {"counter_volume": 42}},
-                          {">=": {"counter_volume": 36}},
-                          {"in": {"project_id": ["project_id1",
-                                                 "project_id2",
-                                                 "project_id3"]}}]}
-        self.query._validate_filter(filter)
-
-    def test_invalid_complex_operator(self):
-        filter = {"xor": [{"=": {"project_id": "string_value"}},
-                          {"=": {"resource_id": "value"}}]}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_and_or_with_one_child_is_invalid(self):
-        filter = {"or": [{"=": {"project_id": "string_value"}}]}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_complex_operator_with_zero_child_is_invalid(self):
-        filter = {"or": []}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_more_than_one_complex_operator_is_invalid(self):
-        filter = {"and": [{"=": {"project_id": "string_value"}},
-                          {"=": {"resource_id": "value"}}],
-                  "or": [{"=": {"project_id": "string_value"}},
-                         {"=": {"resource_id": "value"}}]}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_not(self):
-        filter = {"not": {"=": {"project_id": "value"}}}
-        self.query._validate_filter(filter)
-
-        filter = {
-            "not":
-            {"or":
-             [{"and":
-               [{"=": {"project_id": "string_value"}},
-                {"=": {"resource_id": "value"}},
-                {"<": {"counter_name": 42}}]},
-              {"=": {"counter_name": "value"}}]}}
-        self.query._validate_filter(filter)
-
-    def test_not_with_zero_child_is_invalid(self):
-        filter = {"not": {}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_not_with_more_than_one_child_is_invalid(self):
-        filter = {"not": {"=": {"project_id": "value"},
-                          "!=": {"resource_id": "value"}}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)
-
-    def test_empty_in_query_not_passing(self):
-        filter = {"in": {"resource_id": []}}
-        self.assertRaises(jsonschema.ValidationError,
-                          self.query._validate_filter,
-                          filter)

@@ -27,32 +27,9 @@ import hashlib
 import multiprocessing
 import struct
 
-from oslo_concurrency import processutils
-from oslo_config import cfg
 from oslo_utils import timeutils
 from oslo_utils import units
 import six
-
-
-OPTS = [
-    cfg.StrOpt('rootwrap_config',
-               default="/etc/ceilometer/rootwrap.conf",
-               help='Path to the rootwrap configuration file to'
-                    'use for running commands as root'),
-]
-CONF = cfg.CONF
-CONF.register_opts(OPTS)
-
-
-def _get_root_helper():
-    return 'sudo ceilometer-rootwrap %s' % CONF.rootwrap_config
-
-
-def execute(*cmd, **kwargs):
-    """Convenience wrapper around oslo's execute() method."""
-    if 'run_as_root' in kwargs and 'root_helper' not in kwargs:
-        kwargs['root_helper'] = _get_root_helper()
-    return processutils.execute(*cmd, **kwargs)
 
 
 def decode_unicode(input):
@@ -87,19 +64,6 @@ def recursive_keypairs(d, separator=':'):
             yield name, decode_unicode(value)
         else:
             yield name, value
-
-
-def restore_nesting(d, separator=':'):
-    """Unwinds a flattened dict to restore nesting."""
-    d = copy.copy(d) if any([separator in k for k in d.keys()]) else d
-    for k, v in d.copy().items():
-        if separator in k:
-            top, rem = k.split(separator, 1)
-            nest = d[top] if isinstance(d.get(top), dict) else {}
-            nest[rem] = v
-            d[top] = restore_nesting(nest, separator)
-            del d[k]
-    return d
 
 
 def dt_to_decimal(utc):
@@ -205,22 +169,6 @@ def cpu_count():
         return 1
 
 
-def uniq(dupes, attrs):
-    """Exclude elements of dupes with a duplicated set of attribute values."""
-    key = lambda d: '/'.join([getattr(d, a) or '' for a in attrs])
-    keys = []
-    deduped = []
-    for d in dupes:
-        if key(d) not in keys:
-            deduped.append(d)
-            keys.append(key(d))
-    return deduped
-
-
-def hash_of_set(s):
-    return str(hash(frozenset(s)))
-
-
 class HashRing(object):
 
     def __init__(self, nodes, replicas=100):
@@ -249,12 +197,3 @@ class HashRing(object):
             return None
         pos = self._get_position_on_ring(key)
         return self._ring[self._sorted_keys[pos]]
-
-
-def kill_listeners(listeners):
-    # NOTE(gordc): correct usage of oslo.messaging listener is to stop(),
-    # which stops new messages, and wait(), which processes remaining
-    # messages and closes connection
-    for listener in listeners:
-        listener.stop()
-        listener.wait()

@@ -25,10 +25,8 @@ import wsme
 
 from ceilometer.alarm.storage import base as alarm_storage_base
 from ceilometer.api.controllers.v2 import base as v2_base
-from ceilometer.api.controllers.v2 import meters
 from ceilometer.api.controllers.v2 import utils
 from ceilometer import storage
-from ceilometer.storage import base as storage_base
 from ceilometer.tests import base as tests_base
 
 
@@ -153,34 +151,6 @@ class TestQuery(base.BaseTestCase):
                               value=value)
         expected = value
         self.assertEqual(expected, query._get_value_as_type())
-
-
-class TestValidateGroupByFields(base.BaseTestCase):
-
-    def test_valid_field(self):
-        result = meters._validate_groupby_fields(['user_id'])
-        self.assertEqual(['user_id'], result)
-
-    def test_valid_fields_multiple(self):
-        result = set(meters._validate_groupby_fields(
-            ['user_id', 'project_id', 'source']))
-        self.assertEqual(set(['user_id', 'project_id', 'source']), result)
-
-    def test_invalid_field(self):
-        self.assertRaises(wsme.exc.UnknownArgument,
-                          meters._validate_groupby_fields,
-                          ['wtf'])
-
-    def test_invalid_field_multiple(self):
-        self.assertRaises(wsme.exc.UnknownArgument,
-                          meters._validate_groupby_fields,
-                          ['user_id', 'wtf', 'project_id', 'source'])
-
-    def test_duplicate_fields(self):
-        result = set(
-            meters._validate_groupby_fields(['user_id', 'source', 'user_id'])
-        )
-        self.assertEqual(set(['user_id', 'source']), result)
 
 
 class TestQueryToKwArgs(tests_base.BaseTestCase):
@@ -355,47 +325,6 @@ class TestQueryToKwArgs(tests_base.BaseTestCase):
             alarm_storage_base.Connection.get_alarm_changes)
         valid_keys = ['alarm_id', 'on_behalf_of', 'project', 'search_offset',
                       'severity', 'timestamp', 'type', 'user']
-        msg = ("unrecognized field in query: %s, "
-               "valid keys: %s") % (q, valid_keys)
-        expected_exc = wsme.exc.UnknownArgument('abc', msg)
-        self.assertEqual(str(expected_exc), str(exc))
-
-    def test_sample_filter_valid_fields(self):
-        q = [v2_base.Query(field='abc',
-                           op='eq',
-                           value='abc')]
-        exc = self.assertRaises(
-            wsme.exc.UnknownArgument,
-            utils.query_to_kwargs, q, storage.SampleFilter.__init__)
-        valid_keys = ['message_id', 'meter', 'project', 'resource',
-                      'search_offset', 'source', 'timestamp', 'user']
-        msg = ("unrecognized field in query: %s, "
-               "valid keys: %s") % (q, valid_keys)
-        expected_exc = wsme.exc.UnknownArgument('abc', msg)
-        self.assertEqual(str(expected_exc), str(exc))
-
-    def test_get_meters_filter_valid_fields(self):
-        q = [v2_base.Query(field='abc',
-                           op='eq',
-                           value='abc')]
-        exc = self.assertRaises(
-            wsme.exc.UnknownArgument,
-            utils.query_to_kwargs, q, storage_base.Connection.get_meters)
-        valid_keys = ['project', 'resource', 'source', 'user']
-        msg = ("unrecognized field in query: %s, "
-               "valid keys: %s") % (q, valid_keys)
-        expected_exc = wsme.exc.UnknownArgument('abc', msg)
-        self.assertEqual(str(expected_exc), str(exc))
-
-    def test_get_resources_filter_valid_fields(self):
-        q = [v2_base.Query(field='abc',
-                           op='eq',
-                           value='abc')]
-        exc = self.assertRaises(
-            wsme.exc.UnknownArgument,
-            utils.query_to_kwargs, q, storage_base.Connection.get_resources)
-        valid_keys = ['project', 'resource',
-                      'search_offset', 'source', 'timestamp', 'user']
         msg = ("unrecognized field in query: %s, "
                "valid keys: %s") % (q, valid_keys)
         expected_exc = wsme.exc.UnknownArgument('abc', msg)

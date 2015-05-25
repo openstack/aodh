@@ -22,16 +22,13 @@
 """
 import mock
 
-
 try:
     import happybase   # noqa
 except ImportError:
     import testtools.testcase
     raise testtools.testcase.TestSkipped("happybase is needed")
 
-from ceilometer.alarm.storage import impl_hbase as hbase_alarm
-from ceilometer.event.storage import impl_hbase as hbase_event
-from ceilometer.storage import impl_hbase as hbase
+from ceilometer.alarm.storage import impl_hbase
 from ceilometer.tests import base as test_base
 from ceilometer.tests import db as tests_db
 
@@ -52,46 +49,13 @@ class ConnectionTest(tests_db.TestBase,
         def get_connection_pool(conf):
             return TestConn(conf['host'], conf['port'])
 
-        with mock.patch.object(hbase.Connection, '_get_connection_pool',
+        with mock.patch.object(impl_hbase.Connection, '_get_connection_pool',
                                side_effect=get_connection_pool):
-            conn = hbase.Connection('hbase://test_hbase:9090')
+            conn = impl_hbase.Connection('hbase://test_hbase:9090')
         self.assertIsInstance(conn.conn_pool, TestConn)
 
 
 class CapabilitiesTest(test_base.BaseTestCase):
-    # Check the returned capabilities list, which is specific to each DB
-    # driver
-
-    def test_capabilities(self):
-        expected_capabilities = {
-            'meters': {'query': {'simple': True,
-                                 'metadata': True,
-                                 'complex': False}},
-            'resources': {'query': {'simple': True,
-                                    'metadata': True,
-                                    'complex': False}},
-            'samples': {'query': {'simple': True,
-                                  'metadata': True,
-                                  'complex': False}},
-            'statistics': {'groupby': False,
-                           'query': {'simple': True,
-                                     'metadata': True,
-                                     'complex': False},
-                           'aggregation': {'standard': True,
-                                           'selectable': {
-                                               'max': False,
-                                               'min': False,
-                                               'sum': False,
-                                               'avg': False,
-                                               'count': False,
-                                               'stddev': False,
-                                               'cardinality': False}}
-                           },
-        }
-
-        actual_capabilities = hbase.Connection.get_capabilities()
-        self.assertEqual(expected_capabilities, actual_capabilities)
-
     def test_alarm_capabilities(self):
         expected_capabilities = {
             'alarms': {'query': {'simple': True,
@@ -100,20 +64,5 @@ class CapabilitiesTest(test_base.BaseTestCase):
                                              'complex': False}}},
         }
 
-        actual_capabilities = hbase_alarm.Connection.get_capabilities()
-        self.assertEqual(expected_capabilities, actual_capabilities)
-
-    def test_event_capabilities(self):
-        expected_capabilities = {
-            'events': {'query': {'simple': True}},
-        }
-
-        actual_capabilities = hbase_event.Connection.get_capabilities()
-        self.assertEqual(expected_capabilities, actual_capabilities)
-
-    def test_storage_capabilities(self):
-        expected_capabilities = {
-            'storage': {'production_ready': True},
-        }
-        actual_capabilities = hbase.Connection.get_storage_capabilities()
+        actual_capabilities = impl_hbase.Connection.get_capabilities()
         self.assertEqual(expected_capabilities, actual_capabilities)

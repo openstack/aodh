@@ -22,7 +22,6 @@ import ast
 import datetime
 import functools
 import inspect
-import json
 
 from oslo_utils import strutils
 from oslo_utils import timeutils
@@ -106,24 +105,6 @@ class Base(wtypes.DynamicBase):
                     for k in keys
                     if hasattr(self, k) and
                     getattr(self, k) != wsme.Unset)
-
-
-class Link(Base):
-    """A link representation."""
-
-    href = wtypes.text
-    "The url of a link"
-
-    rel = wtypes.text
-    "The name of a link"
-
-    @classmethod
-    def sample(cls):
-        return cls(href=('http://localhost:8777/v2/meters/volume?'
-                         'q.field=resource_id&'
-                         'q.value=bd9431c1-8d69-4ad3-803a-8d4a6b89fd36'),
-                   rel='volume'
-                   )
 
 
 class Query(Base):
@@ -258,16 +239,3 @@ class AlarmRule(Base):
     @staticmethod
     def update_hook(alarm):
         pass
-
-
-class JsonType(wtypes.UserType):
-    """A simple JSON type."""
-
-    basetype = wtypes.text
-    name = 'json'
-
-    @staticmethod
-    def validate(value):
-        # check that value can be serialised
-        json.dumps(value)
-        return value

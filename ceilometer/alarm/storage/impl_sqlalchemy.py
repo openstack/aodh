@@ -14,7 +14,6 @@
 
 from __future__ import absolute_import
 import datetime
-import os
 
 from oslo_config import cfg
 from oslo_db.sqlalchemy import session as db_session
@@ -45,32 +44,7 @@ AVAILABLE_STORAGE_CAPABILITIES = {
 
 
 class Connection(base.Connection):
-    """Put the data into a SQLAlchemy database.
-
-    Tables::
-
-        - meter
-          - meter definition
-          - { id: meter def id
-              name: meter name
-              type: meter type
-              unit: meter unit
-              }
-        - sample
-          - the raw incoming data
-          - { id: sample id
-              meter_id: meter id            (->meter.id)
-              user_id: user uuid
-              project_id: project uuid
-              resource_id: resource uuid
-              source_id: source id
-              resource_metadata: metadata dictionaries
-              volume: sample volume
-              timestamp: datetime
-              message_signature: message signature
-              message_id: message uuid
-              }
-    """
+    """Put the data into a SQLAlchemy database. """
     CAPABILITIES = utils.update_nested(base.Connection.CAPABILITIES,
                                        AVAILABLE_CAPABILITIES)
     STORAGE_CAPABILITIES = utils.update_nested(
@@ -88,12 +62,8 @@ class Connection(base.Connection):
         self._engine_facade = db_session.EngineFacade(url, **options)
 
     def upgrade(self):
-        # NOTE(gordc): to minimise memory, only import migration when needed
-        from oslo_db.sqlalchemy import migration
-        path = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                            '..', '..', 'storage', 'sqlalchemy',
-                            'migrate_repo')
-        migration.db_sync(self._engine_facade.get_engine(), path)
+        engine = self._engine_facade.get_engine()
+        models.Base.metadata.create_all(engine)
 
     def clear(self):
         engine = self._engine_facade.get_engine()

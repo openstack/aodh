@@ -20,17 +20,14 @@
 
 import copy
 import datetime
-import functools
 import inspect
 
 from oslo_utils import timeutils
 import pecan
-import six
 import wsme
 
 from ceilometer.api.controllers.v2 import base
 from ceilometer.api import rbac
-from ceilometer import utils
 
 
 def get_auth_project(on_behalf_of=None):
@@ -292,46 +289,3 @@ def _get_query_timestamps(args=None):
             'end_timestamp': end_timestamp,
             'start_timestamp_op': args.get('start_timestamp_op'),
             'end_timestamp_op': args.get('end_timestamp_op')}
-
-
-def flatten_metadata(metadata):
-    """Return flattened resource metadata.
-
-    Metadata is returned with flattened nested structures (except nested sets)
-    and with all values converted to unicode strings.
-    """
-    if metadata:
-        # After changing recursive_keypairs` output we need to keep
-        # flattening output unchanged.
-        # Example: recursive_keypairs({'a': {'b':{'c':'d'}}}, '.')
-        # output before: a.b:c=d
-        # output now: a.b.c=d
-        # So to keep the first variant just replace all dots except the first
-        return dict((k.replace('.', ':').replace(':', '.', 1),
-                     six.text_type(v))
-                    for k, v in utils.recursive_keypairs(metadata,
-                                                         separator='.')
-                    if type(v) is not set)
-    return {}
-
-
-# TODO(fabiog): this decorator should disappear and have a more unified
-# way of controlling access and scope. Before messing with this, though
-# I feel this file should be re-factored in smaller chunks one for each
-# controller (e.g. meters, alarms and so on ...). Right now its size is
-# overwhelming.
-def requires_admin(func):
-
-    @functools.wraps(func)
-    def wrapped(*args, **kwargs):
-        usr_limit, proj_limit = rbac.get_limited_to(pecan.request.headers)
-        # If User and Project are None, you have full access.
-        if usr_limit and proj_limit:
-            # since this decorator get's called out of wsme context
-            # raising exception results internal error so call abort
-            # for handling the error
-            ex = base.ProjectNotAuthorized(proj_limit)
-            pecan.core.abort(status_code=ex.code, detail=ex.msg)
-        return func(*args, **kwargs)
-
-    return wrapped

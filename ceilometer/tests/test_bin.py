@@ -57,19 +57,15 @@ class BinTestCase(base.BaseTestCase):
                                 stderr=subprocess.PIPE)
         __, err = subp.communicate()
         self.assertEqual(0, subp.poll())
-        self.assertIn(b"Nothing to clean, database metering "
-                      b"time to live is disabled", err)
-        self.assertIn(b"Nothing to clean, database event "
-                      b"time to live is disabled", err)
         self.assertIn(b"Nothing to clean, database alarm history "
                       b"time to live is disabled", err)
 
-    def _test_run_expirer_ttl_enabled(self, ttl_name, data_name):
+    def test_run_expirer_ttl_enabled(self):
         content = ("[DEFAULT]\n"
                    "rpc_backend=fake\n"
                    "[database]\n"
-                   "%s=1\n"
-                   "connection=log://localhost\n" % ttl_name)
+                   "alarm_history_time_to_live=1\n"
+                   "connection=log://localhost\n")
         if six.PY3:
             content = content.encode('utf-8')
         self.tempfile = fileutils.write_to_tempfile(content=content,
@@ -81,44 +77,10 @@ class BinTestCase(base.BaseTestCase):
                                 stderr=subprocess.PIPE)
         __, err = subp.communicate()
         self.assertEqual(0, subp.poll())
-        msg = "Dropping %s data with TTL 1" % data_name
+        msg = "Dropping alarm history data with TTL 1"
         if six.PY3:
             msg = msg.encode('utf-8')
         self.assertIn(msg, err)
-
-    def test_run_expirer_ttl_enabled(self):
-        self._test_run_expirer_ttl_enabled('metering_time_to_live',
-                                           'metering')
-        self._test_run_expirer_ttl_enabled('time_to_live', 'metering')
-        self._test_run_expirer_ttl_enabled('event_time_to_live', 'event')
-        self._test_run_expirer_ttl_enabled('alarm_history_time_to_live',
-                                           'alarm history')
-
-
-class BinSendSampleTestCase(base.BaseTestCase):
-    def setUp(self):
-        super(BinSendSampleTestCase, self).setUp()
-        pipeline_cfg_file = self.path_get('etc/ceilometer/pipeline.yaml')
-        content = ("[DEFAULT]\n"
-                   "rpc_backend=fake\n"
-                   "pipeline_cfg_file={0}\n".format(pipeline_cfg_file))
-        if six.PY3:
-            content = content.encode('utf-8')
-
-        self.tempfile = fileutils.write_to_tempfile(content=content,
-                                                    prefix='ceilometer',
-                                                    suffix='.conf')
-
-    def tearDown(self):
-        super(BinSendSampleTestCase, self).tearDown()
-        os.remove(self.tempfile)
-
-    def test_send_counter_run(self):
-        subp = subprocess.Popen(['ceilometer-send-sample',
-                                 "--config-file=%s" % self.tempfile,
-                                 "--sample-resource=someuuid",
-                                 "--sample-name=mycounter"])
-        self.assertEqual(0, subp.wait())
 
 
 class BinApiTestCase(base.BaseTestCase):
@@ -180,7 +142,6 @@ class BinApiTestCase(base.BaseTestCase):
                                     "--config-file=%s" % self.tempfile])
 
     def test_v2(self):
-
         content = ("[DEFAULT]\n"
                    "rpc_backend=fake\n"
                    "auth_strategy=noauth\n"
@@ -200,99 +161,8 @@ class BinApiTestCase(base.BaseTestCase):
 
         self.subp = self.run_api(content)
 
-        response, content = self.get_response('v2/meters')
-        self.assertEqual(200, response.status)
-        if six.PY3:
-            content = content.decode('utf-8')
-        self.assertEqual([], json.loads(content))
-
-    def test_v2_with_bad_storage_conn(self):
-
-        content = ("[DEFAULT]\n"
-                   "rpc_backend=fake\n"
-                   "auth_strategy=noauth\n"
-                   "debug=true\n"
-                   "pipeline_cfg_file={0}\n"
-                   "policy_file={1}\n"
-                   "api_paste_config={2}\n"
-                   "[api]\n"
-                   "port={3}\n"
-                   "[database]\n"
-                   "max_retries=1\n"
-                   "alarm_connection=log://localhost\n"
-                   "connection=dummy://localhost\n".
-                   format(self.pipeline_cfg_file,
-                          self.policy_file,
-                          self.paste,
-                          self.api_port))
-
-        self.subp = self.run_api(content)
-
         response, content = self.get_response('v2/alarms')
         self.assertEqual(200, response.status)
         if six.PY3:
             content = content.decode('utf-8')
         self.assertEqual([], json.loads(content))
-
-        response, content = self.get_response('v2/meters')
-        self.assertEqual(500, response.status)
-
-    def test_v2_with_all_bad_conns(self):
-
-        content = ("[DEFAULT]\n"
-                   "rpc_backend=fake\n"
-                   "auth_strategy=noauth\n"
-                   "debug=true\n"
-                   "pipeline_cfg_file={0}\n"
-                   "policy_file={1}\n"
-                   "api_paste_config={2}\n"
-                   "[api]\n"
-                   "port={3}\n"
-                   "[database]\n"
-                   "max_retries=1\n"
-                   "alarm_connection=dummy://localhost\n"
-                   "connection=dummy://localhost\n"
-                   "event_connection=dummy://localhost\n".
-                   format(self.pipeline_cfg_file,
-                          self.policy_file,
-                          self.paste,
-                          self.api_port))
-
-        self.subp = self.run_api(content, err_pipe=True)
-
-        __, err = self.subp.communicate()
-
-        self.assertIn(b"Api failed to start. Failed to connect to"
-                      b" databases, purpose:  metering, event, alarm", err)
-
-
-class BinCeilometerPollingServiceTestCase(base.BaseTestCase):
-    def setUp(self):
-        super(BinCeilometerPollingServiceTestCase, self).setUp()
-        content = ("[DEFAULT]\n"
-                   "rpc_backend=fake\n"
-                   "[database]\n"
-                   "connection=log://localhost\n")
-        if six.PY3:
-            content = content.encode('utf-8')
-        self.tempfile = fileutils.write_to_tempfile(content=content,
-                                                    prefix='ceilometer',
-                                                    suffix='.conf')
-        self.subp = None
-
-    def tearDown(self):
-        super(BinCeilometerPollingServiceTestCase, self).tearDown()
-        if self.subp:
-            self.subp.kill()
-        os.remove(self.tempfile)
-
-    def test_starting_with_duplication_namespaces(self):
-        self.subp = subprocess.Popen(['ceilometer-polling',
-                                      "--config-file=%s" % self.tempfile,
-                                      "--polling-namespaces",
-                                      "compute",
-                                      "compute"],
-                                     stderr=subprocess.PIPE)
-        out = self.subp.stderr.read(1024)
-        self.assertIn(b'Duplicated values: [\'compute\', \'compute\'] '
-                      b'found in CLI options, auto de-duplidated', out)
