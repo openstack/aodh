@@ -15,7 +15,7 @@
 High-Level Architecture
 =======================
 
-Each of Ceilometer's services are designed to scale horizontally. Additional
+Each of Aodh's services are designed to scale horizontally. Additional
 workers and nodes can be added depending on the expected load. It provides
 daemons to evaluate and notify based on defined alarming rules.
 
@@ -25,13 +25,13 @@ Evaluating the data
 Alarming Service
 ----------------
 
-The alarming component of Ceilometer, first delivered in the Havana
+The alarming component of Aodh, first delivered in the Havana
 version, allows you to set alarms based on threshold evaluation for a
 collection of samples. An alarm can be set on a single meter, or on a
 combination. For example, you may want to trigger an alarm when the memory
 consumption reaches 70% on a given instance if the instance has been up for
 more than 10 min. To setup an alarm, you will call
-:ref:`Ceilometer's API server <alarms-api>` specifying the alarm conditions and
+:ref:`Aodh's API server <alarms-api>` specifying the alarm conditions and
 an action to take.
 
 Of course, if you are not administrator of the cloud itself, you can only set

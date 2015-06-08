@@ -24,7 +24,7 @@
      An action triggered whenever a meter reaches a certain threshold.
 
    API server
-     HTTP REST API service for ceilometer.
+     HTTP REST API service for Aodh.
 
    ceilometer
      From Wikipedia [#]_:

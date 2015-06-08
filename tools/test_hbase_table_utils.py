@@ -15,16 +15,16 @@ import sys
 
 from oslo_config import cfg
 
-from ceilometer import storage
+from aodh import storage
 
 
 def main(argv):
-    cfg.CONF([], project='ceilometer')
-    if os.getenv("CEILOMETER_TEST_HBASE_URL"):
+    cfg.CONF([], project='aodh')
+    if os.getenv("AODH_TEST_HBASE_URL"):
         url = ("%s?table_prefix=%s" %
-               (os.getenv("CEILOMETER_TEST_HBASE_URL"),
-                os.getenv("CEILOMETER_TEST_HBASE_TABLE_PREFIX", "test")))
-        alarm_conn = storage.get_connection(url, 'ceilometer.alarm.storage')
+               (os.getenv("AODH_TEST_HBASE_URL"),
+                os.getenv("AODH_TEST_HBASE_TABLE_PREFIX", "test")))
+        alarm_conn = storage.get_connection(url, 'AODH.alarm.storage')
         for arg in argv:
             if arg == "--upgrade":
                 alarm_conn.upgrade()

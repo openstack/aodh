@@ -10,10 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-""" Sample of plugin for Ceilometer.
+""" Sample of plugin for Aodh.
 
-For more Ceilometer related benchmarks take a look here:
-github.com/stackforge/rally/blob/master/rally/benchmark/scenarios/ceilometer/
+For more Aodh related benchmarks take a look here:
+github.com/stackforge/rally/blob/master/rally/benchmark/scenarios/aodh/
 
 About plugins: https://rally.readthedocs.org/en/latest/plugins.html
 
@@ -23,5 +23,5 @@ Rally concepts https://wiki.openstack.org/wiki/Rally/Concepts
 from rally.benchmark.scenarios import base
 
 
-class CeilometerPlugin(base.Scenario):
+class AodhPlugin(base.Scenario):
     pass

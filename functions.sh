@@ -1,6 +1,6 @@
 function clean_exit(){
     local error_code="$?"
-    if test -n "$CEILOMETER_TEST_HBASE_URL"
+    if test -n "$AODH_TEST_HBASE_URL"
     then
             python tools/test_hbase_table_utils.py --clear
     fi

@@ -17,7 +17,7 @@
  Configuration Options
 =======================
 
-For the list and description of configuration options that can be set for Ceilometer in
+For the list and description of configuration options that can be set for Aodh in
 order to set up the services please see the
 `Telemetry section <http://docs.openstack.org/trunk/config-reference/content/ch_configuring-openstack-telemetry.html>`_
 in the OpenStack Manuals Configuration Reference.
@@ -56,7 +56,7 @@ To find out more about supported storage backends please take a look on the
 .. note::
 
     If you are changing the configuration on the fly to use HBase, as a storage
-    backend, you will need to restart the Ceilometer services that use the
+    backend, you will need to restart the Aodh services that use the
     database to allow the changes to take affect, i.e. the collector and API
     services.
 

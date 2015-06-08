@@ -14,7 +14,7 @@ Structure
   are able to use absolute paths in rally tasks.
   Files will be located in ~/.rally/extra/*
 
-* ceilometer is a task that is run in gates against Ceilometer
+* aodh is a task that is run in gates against aodh
 
 
 Useful links

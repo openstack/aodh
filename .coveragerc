@@ -1,7 +1,7 @@
 [run]
 branch = True
-source = ceilometer
-omit = ceilometer/tests/*, ceilometer/openstack/common/*
+source = aodh
+omit = aodh/tests/*, aodh/openstack/common/*
 
 [report]
 ignore-errors = True

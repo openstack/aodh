@@ -15,9 +15,9 @@
 
 .. _install:
 
-=======================
- Installing Ceilometer
-=======================
+=================
+ Installing Aodh
+=================
 
 .. toctree::
    :maxdepth: 2

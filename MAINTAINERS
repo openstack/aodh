@@ -1,10 +1,10 @@
 = Generalist Code Reviewers =
 
-The current members of ceilometer-core are listed here:
+The current members of aodh-core are listed here:
 
-  https://launchpad.net/~ceilometer-drivers/+members#active
+  https://launchpad.net/~aodh-drivers/+members#active
 
-This group can +2 and approve patches in Ceilometer. However, they may
+This group can +2 and approve patches in aodh. However, they may
 choose to seek feedback from the appropriate specialist maintainer before
 approving a patch if it is in any way controversial or risky.
 
@@ -31,7 +31,7 @@ Each  has an entry with the following keys:
       Maintained:  Has an active maintainer
       Orphan:      No current maintainer, feel free to step up!
       Obsolete:    Replaced by newer code, or a dead end, or out-dated
- F: Wildcard patterns, relative to ceilometer/
+ F: Wildcard patterns, relative to aodh/
 
 
 == alarms ==

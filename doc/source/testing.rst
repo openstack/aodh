@@ -17,7 +17,7 @@
 Running the Tests
 =================
 
-Ceilometer includes an extensive set of automated unit tests which are
+Aodh includes an extensive set of automated unit tests which are
 run through tox_.
 
 1. Install ``tox``::
@@ -37,11 +37,11 @@ run through tox_.
 
 3. Install the test dependencies::
 
-   $ sudo pip install -r /opt/stack/ceilometer/test-requirements.txt
+   $ sudo pip install -r /opt/stack/aodh/test-requirements.txt
 
 4. Run the unit and code-style tests::
 
-   $ cd /opt/stack/ceilometer
+   $ cd /opt/stack/aodh
    $ tox -e py27,pep8
 
    As tox is a wrapper around testr, it also accepts the same flags as testr.
@@ -57,20 +57,20 @@ run through tox_.
    environment. Here's an example, passing the name of a test since you'll
    normally only want to run the test that hits your breakpoint::
 
-       $ tox -e debug ceilometer.tests.test_bin
+       $ tox -e debug aodh.tests.test_bin
 
    For reference, the ``debug`` tox environment implements the instructions
    here: https://wiki.openstack.org/wiki/Testr#Debugging_.28pdb.29_Tests
 
 5. There is a growing suite of tests which use a tool called `gabbi`_ to
-   test and validate the behavior of the Ceilometer API. These tests are run
+   test and validate the behavior of the Aodh API. These tests are run
    when using the usual ``py27`` tox target but if desired they can be run by
    themselves::
 
    $ tox -e gabbi
 
    The YAML files used to drive the gabbi tests can be found in
-   ``ceilometer/tests/gabbi/gabbits``. If you are adding to or adjusting the
+   ``aodh/tests/gabbi/gabbits``. If you are adding to or adjusting the
    API you should consider adding tests here.
 
 .. _gabbi: https://gabbi.readthedocs.org/

@@ -26,7 +26,7 @@ Storage Backend Installation
 
 This step is a prerequisite for the collector, notification agent and API
 services. You may use one of the listed database backends below to store
-Ceilometer data.
+Aodh data.
 
 .. note::
    Please notice, MongoDB (and some other backends like DB2 and HBase)
@@ -38,17 +38,17 @@ Ceilometer data.
 MongoDB
 -------
 
-   The recommended Ceilometer storage backend is `MongoDB`. Follow the
+   The recommended Aodh storage backend is `MongoDB`. Follow the
    instructions to install the MongoDB_ package for your operating system, then
    start the service. The required minimum version of MongoDB is 2.4.
 
    To use MongoDB as the storage backend, change the 'database' section in
-   ceilometer.conf as follows::
+   aodh.conf as follows::
 
     [database]
-    connection = mongodb://username:password@host:27017/ceilometer
+    connection = mongodb://username:password@host:27017/aodh
 
-   If MongoDB is configured in replica set mode, add param in ceilometer.conf
+   If MongoDB is configured in replica set mode, add param in aodh.conf
    to use MongoReplicaSetClient::
 
     [database]
@@ -60,16 +60,16 @@ SQLalchemy-supported DBs
    You may alternatively use `MySQL` (or any other SQLAlchemy-supported DB
    like `PostgreSQL`).
 
-   In case of SQL-based database backends, you need to create a `ceilometer`
+   In case of SQL-based database backends, you need to create a `aodh`
    database first and then initialise it by running::
 
-    ceilometer-dbsync
+    aodh-dbsync
 
    To use MySQL as the storage backend, change the 'database' section in
-   ceilometer.conf as follows::
+   aodh.conf as follows::
 
     [database]
-    connection = mysql+pymysql://username:password@host/ceilometer?charset=utf8
+    connection = mysql+pymysql://username:password@host/aodh?charset=utf8
 
 HBase
 -----
@@ -99,7 +99,7 @@ HBase
    family for each one.
 
    To use HBase as the storage backend, change the 'database' section in
-   ceilometer.conf as follows::
+   aodh.conf as follows::
 
     [database]
     connection = hbase://hbase-thrift-host:9090
@@ -110,10 +110,10 @@ DB2
    DB2 installation should follow fresh IBM DB2 NoSQL installation docs.
 
    To use DB2 as the storage backend, change the 'database' section in
-   ceilometer.conf as follows::
+   aodh.conf as follows::
 
     [database]
-    connection = db2://username:password@host:27017/ceilometer
+    connection = db2://username:password@host:27017/aodh
 
 
 .. _HappyBase: http://happybase.readthedocs.org/en/latest/index.html#

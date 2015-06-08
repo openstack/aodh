@@ -14,10 +14,10 @@ returns a flattened dictionary of properties with associated boolean values -
 a 'False' or absent value means that the corresponding feature is not
 available in the backend.
 
-.. rest-controller:: ceilometer.api.controllers.v2.capabilities:CapabilitiesController
+.. rest-controller:: aodh.api.controllers.v2.capabilities:CapabilitiesController
    :webprefix: /v2/capabilities
 
-.. autotype:: ceilometer.api.controllers.v2.capabilities.Capabilities
+.. autotype:: aodh.api.controllers.v2.capabilities.Capabilities
    :members:
 
 .. _alarms-api:
@@ -25,40 +25,40 @@ available in the backend.
 Alarms
 ======
 
-.. rest-controller:: ceilometer.api.controllers.v2.alarms:AlarmsController
+.. rest-controller:: aodh.api.controllers.v2.alarms:AlarmsController
    :webprefix: /v2/alarms
 
-.. rest-controller:: ceilometer.api.controllers.v2.alarms:AlarmController
+.. rest-controller:: aodh.api.controllers.v2.alarms:AlarmController
    :webprefix: /v2/alarms
 
-.. autotype:: ceilometer.api.controllers.v2.alarms.Alarm
+.. autotype:: aodh.api.controllers.v2.alarms.Alarm
    :members:
 
-.. autotype:: ceilometer.api.controllers.v2.alarm_rules.threshold.AlarmThresholdRule
+.. autotype:: aodh.api.controllers.v2.alarm_rules.threshold.AlarmThresholdRule
    :members:
 
-.. autotype:: ceilometer.api.controllers.v2.alarm_rules.combination.AlarmCombinationRule
+.. autotype:: aodh.api.controllers.v2.alarm_rules.combination.AlarmCombinationRule
    :members:
 
-.. autotype:: ceilometer.api.controllers.v2.alarm_rules.gnocchi.MetricOfResourceRule
+.. autotype:: aodh.api.controllers.v2.alarm_rules.gnocchi.MetricOfResourceRule
    :members:
 
-.. autotype:: ceilometer.api.controllers.v2.alarm_rules.gnocchi.AggregationMetricByResourcesLookupRule
+.. autotype:: aodh.api.controllers.v2.alarm_rules.gnocchi.AggregationMetricByResourcesLookupRule
    :members:
 
-.. autotype:: ceilometer.api.controllers.v2.alarm_rules.gnocchi.AggregationMetricsByIdLookupRule
+.. autotype:: aodh.api.controllers.v2.alarm_rules.gnocchi.AggregationMetricsByIdLookupRule
    :members:
 
-.. autotype:: ceilometer.api.controllers.v2.alarms.AlarmTimeConstraint
+.. autotype:: aodh.api.controllers.v2.alarms.AlarmTimeConstraint
    :members:
 
-.. autotype:: ceilometer.api.controllers.v2.alarms.AlarmChange
+.. autotype:: aodh.api.controllers.v2.alarms.AlarmChange
    :members:
 
 Filtering Queries
 =================
 
-Ceilometer's REST API currently supports two types of queries. The Simple
+Aodh's REST API currently supports two types of queries. The Simple
 Query functionality provides simple filtering on several fields of the
 *Sample* type. Complex Query provides the possibility to specify queries
 with logical and comparison operators on the fields of *Sample*.
@@ -85,7 +85,7 @@ type (for example, if you apply a filter on a query for statistics,
 you won't target *duration_start* field of *Statistics*, but *timestamp*
 field of *Sample*).
 
-.. autotype:: ceilometer.api.controllers.v2.base.Query
+.. autotype:: aodh.api.controllers.v2.base.Query
    :members:
 
 Complex Query
@@ -114,11 +114,11 @@ The number of the returned items can be bounded using the *limit* option.
 
 The *filter*, *orderby* and *limit* are all optional fields in a query.
 
-.. rest-controller:: ceilometer.api.controllers.v2.query:QueryAlarmsController
+.. rest-controller:: aodh.api.controllers.v2.query:QueryAlarmsController
    :webprefix: /v2/query/alarms
 
-.. rest-controller:: ceilometer.api.controllers.v2.query:QueryAlarmHistoryController
+.. rest-controller:: aodh.api.controllers.v2.query:QueryAlarmHistoryController
    :webprefix: /v2/query/alarms/history
 
-.. autotype:: ceilometer.api.controllers.v2.query.ComplexQuery
+.. autotype:: aodh.api.controllers.v2.query.ComplexQuery
    :members:

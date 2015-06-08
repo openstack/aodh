@@ -36,18 +36,18 @@ Configuring devstack
       <http://devstack.org/localrc.html>`_ or `devstack configuration
       <http://devstack.org/configuration.html>`_.
 
-3. The ceilometer services are not enabled by default, so they must be
+3. The aodh services are not enabled by default, so they must be
    enabled in ``local.conf`` before running ``stack.sh``.
 
    This example ``local.conf`` file shows all of the settings required for
-   ceilometer::
+   aodh::
 
       [[local|localrc]]
 
-      # Enable the ceilometer alarming services
-      enable_service ceilometer-alarm-evaluator,ceilometer-alarm-notifier
+      # Enable the aodh alarming services
+      enable_service aodh-alarm-evaluator,aodh-alarm-notifier
 
-   The first group of daemons are necessary for core ceilometer functionality:
+   The first group of daemons are necessary for core aodh functionality:
    polling, event listening, and data collection.
 
 .. _devstack: http://www.devstack.org/

@@ -13,17 +13,17 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-==================================================
-Welcome to the Ceilometer developer documentation!
-==================================================
+============================================
+Welcome to the Aodh developer documentation!
+============================================
 
 What is the purpose of the project and vision for it?
 =====================================================
 
 * Provide alarms and notifications based on metrics.
 
-This documentation offers information on how Ceilometer works and how to
-contribute to the project.
+This documentation offers information on how Aodh works and how to contribute
+to the project.
 
 Overview
 ========
