@@ -21,9 +21,9 @@ from oslo_log import log
 from oslo_utils import timeutils
 from sqlalchemy import desc
 
-from aodh.alarm.storage import base
-from aodh.alarm.storage import models as alarm_api_models
 from aodh.i18n import _LI
+from aodh.storage import base
+from aodh.storage import models as alarm_api_models
 from aodh.storage.sqlalchemy import models
 from aodh.storage.sqlalchemy import utils as sql_utils
 from aodh import utils

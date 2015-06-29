@@ -17,12 +17,12 @@ import operator
 from oslo_log import log
 
 import aodh
-from aodh.alarm.storage import base
-from aodh.alarm.storage import models
 from aodh.i18n import _
+from aodh.storage import base
 from aodh.storage.hbase import base as hbase_base
 from aodh.storage.hbase import migration as hbase_migration
 from aodh.storage.hbase import utils as hbase_utils
+from aodh.storage import models
 from aodh import utils
 
 LOG = log.getLogger(__name__)

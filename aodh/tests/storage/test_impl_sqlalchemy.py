@@ -18,7 +18,7 @@
 
 """
 
-from aodh.alarm.storage import impl_sqlalchemy as impl_sqla_alarm
+from aodh.storage import impl_sqlalchemy as impl_sqla_alarm
 from aodh.tests import base as test_base
 
 

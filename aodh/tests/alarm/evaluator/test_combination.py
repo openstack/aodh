@@ -28,7 +28,7 @@ from oslo_utils import timeutils
 import pytz
 
 from aodh.alarm.evaluator import combination
-from aodh.alarm.storage import models
+from aodh.storage import models
 from aodh.tests.alarm.evaluator import base
 from aodh.tests import constants
 

@@ -21,8 +21,8 @@
 from oslo_log import log
 import pymongo
 
-from aodh.alarm.storage import base
-from aodh.alarm.storage import models
+from aodh.storage import base
+from aodh.storage import models
 from aodh.storage.mongo import utils as pymongo_utils
 from aodh import utils
 

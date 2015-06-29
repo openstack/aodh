@@ -20,7 +20,7 @@ import datetime
 import mock
 from oslo_utils import timeutils
 
-from aodh.alarm.storage import models as alarm_models
+from aodh.storage import models as alarm_models
 from aodh.tests import constants
 from aodh.tests import db as tests_db
 

@@ -25,8 +25,8 @@ import six
 from six import moves
 import six.moves.urllib.parse as urlparse
 
-from aodh.alarm.storage import models
 from aodh import messaging
+from aodh.storage import models
 from aodh.tests.api import v2
 from aodh.tests import constants
 from aodh.tests import db as tests_db

@@ -17,8 +17,8 @@
 
 from oslo_log import log
 
-from aodh.alarm.storage import base
 from aodh.i18n import _LI
+from aodh.storage import base
 
 LOG = log.getLogger(__name__)
 

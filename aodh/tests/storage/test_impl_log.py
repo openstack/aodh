@@ -16,7 +16,7 @@
 """
 from oslotest import base
 
-from aodh.alarm.storage import impl_log
+from aodh.storage import impl_log
 
 
 class ConnectionTest(base.BaseTestCase):

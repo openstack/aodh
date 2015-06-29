@@ -23,10 +23,10 @@ from oslotest import base
 from oslotest import mockpatch
 import wsme
 
-from aodh.alarm.storage import base as alarm_storage_base
 from aodh.api.controllers.v2 import base as v2_base
 from aodh.api.controllers.v2 import utils
 from aodh import storage
+from aodh.storage import base as alarm_storage_base
 from aodh.tests import base as tests_base
 
 

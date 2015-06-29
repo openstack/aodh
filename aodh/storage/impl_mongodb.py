@@ -24,11 +24,11 @@ from oslo_config import cfg
 from oslo_log import log
 import pymongo
 
-from aodh.alarm.storage import pymongo_base
 from aodh import storage
 from aodh.storage.mongo import utils as pymongo_utils
+from aodh.storage import pymongo_base
 
-cfg.CONF.import_opt('alarm_history_time_to_live', 'aodh.alarm.storage',
+cfg.CONF.import_opt('alarm_history_time_to_live', 'aodh.storage',
                     group="database")
 
 LOG = log.getLogger(__name__)

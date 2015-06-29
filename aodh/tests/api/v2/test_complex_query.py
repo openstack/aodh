@@ -24,8 +24,8 @@ import mock
 from oslotest import base
 import wsme
 
-from aodh.alarm.storage import models as alarm_models
 from aodh.api.controllers.v2 import query
+from aodh.storage import models as alarm_models
 
 
 class FakeComplexQuery(query.ValidatedComplexQuery):

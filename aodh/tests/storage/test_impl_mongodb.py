@@ -21,7 +21,7 @@
 
 """
 
-from aodh.alarm.storage import impl_mongodb as impl_mongodb
+from aodh.storage import impl_mongodb
 from aodh.tests import base as test_base
 from aodh.tests import db as tests_db
 

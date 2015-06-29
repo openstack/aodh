@@ -22,8 +22,8 @@ from oslo_config import fixture as fixture_config
 import six
 
 from aodh.alarm import rpc as rpc_alarm
-from aodh.alarm.storage import models
 from aodh import messaging
+from aodh.storage import models
 from aodh.tests import base as tests_base
 
 

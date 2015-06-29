@@ -22,7 +22,7 @@ import datetime
 
 from oslo_utils import timeutils
 
-from aodh.alarm.storage import models
+from aodh.storage import models
 from aodh.tests.api import v2 as tests_api
 from aodh.tests import db as tests_db
 

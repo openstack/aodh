@@ -28,7 +28,7 @@ except ImportError:
     import testtools.testcase
     raise testtools.testcase.TestSkipped("happybase is needed")
 
-from aodh.alarm.storage import impl_hbase
+from aodh.storage import impl_hbase
 from aodh.tests import base as test_base
 from aodh.tests import db as tests_db
 

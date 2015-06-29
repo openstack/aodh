@@ -28,11 +28,11 @@ from pecan import rest
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
-from aodh.alarm.storage import models as alarm_models
 from aodh.api.controllers.v2 import alarms
 from aodh.api.controllers.v2 import base
 from aodh.api import rbac
 from aodh.i18n import _
+from aodh.storage import models
 from aodh import utils
 
 LOG = log.getLogger(__name__)
@@ -339,7 +339,7 @@ class QueryAlarmHistoryController(rest.RestController):
         rbac.enforce('query_alarm_history', pecan.request)
 
         query = ValidatedComplexQuery(body,
-                                      alarm_models.AlarmChange)
+                                      models.AlarmChange)
         query.validate(visibility_field="on_behalf_of")
         conn = pecan.request.alarm_storage_conn
         return [alarms.AlarmChange.from_db_model(s)
@@ -362,7 +362,7 @@ class QueryAlarmsController(rest.RestController):
         rbac.enforce('query_alarm', pecan.request)
 
         query = ValidatedComplexQuery(body,
-                                      alarm_models.Alarm)
+                                      models.Alarm)
         query.validate(visibility_field="project_id")
         conn = pecan.request.alarm_storage_conn
         return [alarms.Alarm.from_db_model(s)

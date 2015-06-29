@@ -20,9 +20,9 @@ from oslo_context import context
 from oslo_log import log
 import six
 
-from aodh.alarm.storage import models
 from aodh.i18n import _
 from aodh import messaging
+from aodh.storage import models
 
 OPTS = [
     cfg.StrOpt('notifier_rpc_topic',

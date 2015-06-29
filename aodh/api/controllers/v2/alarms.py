@@ -39,13 +39,13 @@ import wsmeext.pecan as wsme_pecan
 
 import aodh
 from aodh import alarm as aodh_alarm
-from aodh.alarm.storage import models as alarm_models
 from aodh.api.controllers.v2.alarm_rules import combination
 from aodh.api.controllers.v2 import base
 from aodh.api.controllers.v2 import utils as v2_utils
 from aodh.api import rbac
 from aodh.i18n import _
 from aodh import messaging
+from aodh.storage import models
 from aodh import utils
 
 LOG = log.getLogger(__name__)
@@ -459,7 +459,7 @@ class AlarmController(rest.RestController):
     def _record_change(self, data, now, on_behalf_of=None, type=None):
         if not cfg.CONF.alarm.record_history:
             return
-        type = type or alarm_models.AlarmChange.RULE_CHANGE
+        type = type or models.AlarmChange.RULE_CHANGE
         scrubbed_data = utils.stringify_timestamps(data)
         detail = json.dumps(scrubbed_data)
         user_id = pecan.request.headers.get('X-User-Id')
@@ -533,10 +533,10 @@ class AlarmController(rest.RestController):
 
         ALARMS_RULES[data.type].plugin.update_hook(data)
 
-        old_alarm = Alarm.from_db_model(alarm_in).as_dict(alarm_models.Alarm)
-        updated_alarm = data.as_dict(alarm_models.Alarm)
+        old_alarm = Alarm.from_db_model(alarm_in).as_dict(models.Alarm)
+        updated_alarm = data.as_dict(models.Alarm)
         try:
-            alarm_in = alarm_models.Alarm(**updated_alarm)
+            alarm_in = models.Alarm(**updated_alarm)
         except Exception:
             LOG.exception(_("Error while putting alarm: %s") % updated_alarm)
             raise base.ClientSideError(_("Alarm incorrect"))
@@ -558,10 +558,10 @@ class AlarmController(rest.RestController):
         # ensure alarm exists before deleting
         alarm = self._alarm()
         self.conn.delete_alarm(alarm.alarm_id)
-        change = Alarm.from_db_model(alarm).as_dict(alarm_models.Alarm)
+        change = Alarm.from_db_model(alarm).as_dict(models.Alarm)
         self._record_change(change,
                             timeutils.utcnow(),
-                            type=alarm_models.AlarmChange.DELETION)
+                            type=models.AlarmChange.DELETION)
 
     @wsme_pecan.wsexpose([AlarmChange], [base.Query])
     def history(self, q=None):
@@ -605,7 +605,7 @@ class AlarmController(rest.RestController):
         alarm = self.conn.update_alarm(alarm)
         change = {'state': alarm.state}
         self._record_change(change, now, on_behalf_of=alarm.project_id,
-                            type=alarm_models.AlarmChange.STATE_TRANSITION)
+                            type=models.AlarmChange.STATE_TRANSITION)
         return alarm.state
 
     @wsme_pecan.wsexpose(state_kind_enum)
@@ -629,7 +629,7 @@ class AlarmsController(rest.RestController):
     def _record_creation(conn, data, alarm_id, now):
         if not cfg.CONF.alarm.record_history:
             return
-        type = alarm_models.AlarmChange.CREATION
+        type = models.AlarmChange.CREATION
         scrubbed_data = utils.stringify_timestamps(data)
         detail = json.dumps(scrubbed_data)
         user_id = pecan.request.headers.get('X-User-Id')
@@ -691,7 +691,7 @@ class AlarmsController(rest.RestController):
 
         ALARMS_RULES[data.type].plugin.create_hook(data)
 
-        change = data.as_dict(alarm_models.Alarm)
+        change = data.as_dict(models.Alarm)
 
         # make sure alarms are unique by name per project.
         alarms = list(conn.get_alarms(name=data.name,
@@ -702,7 +702,7 @@ class AlarmsController(rest.RestController):
                 status_code=409)
 
         try:
-            alarm_in = alarm_models.Alarm(**change)
+            alarm_in = models.Alarm(**change)
         except Exception:
             LOG.exception(_("Error while posting alarm: %s") % change)
             raise base.ClientSideError(_("Alarm incorrect"))

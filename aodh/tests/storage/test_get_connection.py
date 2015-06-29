@@ -19,8 +19,8 @@ from oslo_config import fixture as fixture_config
 from oslotest import base
 import retrying
 
-from aodh.alarm.storage import impl_log
 from aodh import storage
+from aodh.storage import impl_log
 
 import six
 

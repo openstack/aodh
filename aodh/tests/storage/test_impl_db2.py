@@ -23,7 +23,7 @@
 
 """
 
-from aodh.alarm.storage import impl_db2
+from aodh.storage import impl_db2
 from aodh.tests import base as test_base
 
 
