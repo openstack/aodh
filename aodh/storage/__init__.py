@@ -24,6 +24,8 @@ from stevedore import driver
 
 from aodh import utils
 
+_NAMESPACE = 'aodh.storage'
+
 
 LOG = log.getLogger(__name__)
 
@@ -38,11 +40,6 @@ cfg.CONF.register_opts(OLD_OPTS)
 
 
 OPTS = [
-    cfg.StrOpt('alarm_connection',
-               secret=True,
-               default=None,
-               help='The connection string used to connect to the alarm '
-               'database. (if unset, connection is used)'),
     cfg.IntOpt('alarm_history_time_to_live',
                default=-1,
                help=("Number of seconds that alarm histories are kept "
@@ -88,25 +85,19 @@ class StorageBadAggregate(Exception):
     code = 400
 
 
-def get_connection_from_config(conf, purpose='alarm'):
+def get_connection_from_config(conf):
     retries = conf.database.max_retries
 
     # Convert retry_interval secs to msecs for retry decorator
     @retrying.retry(wait_fixed=conf.database.retry_interval * 1000,
                     stop_max_attempt_number=retries if retries >= 0 else None)
     def _inner():
-        if conf.database_connection:
-            conf.set_override('connection', conf.database_connection,
-                              group='database')
-        namespace = 'aodh.%s.storage' % purpose
-        url = (getattr(conf.database, '%s_connection' % purpose) or
-               conf.database.connection)
-        return get_connection(url, namespace)
+        return get_connection(conf.database.connection)
 
     return _inner()
 
 
-def get_connection(url, namespace):
+def get_connection(url):
     """Return an open connection to the database."""
     connection_scheme = urlparse.urlparse(url).scheme
     # SqlAlchemy connections specify may specify a 'dialect' or
@@ -114,8 +105,8 @@ def get_connection(url, namespace):
     engine_name = connection_scheme.split('+')[0]
     # NOTE: translation not applied bug #1446983
     LOG.debug('looking for %(name)r driver in %(namespace)r',
-              {'name': engine_name, 'namespace': namespace})
-    mgr = driver.DriverManager(namespace, engine_name)
+              {'name': engine_name, 'namespace': _NAMESPACE})
+    mgr = driver.DriverManager(_NAMESPACE, engine_name)
     return mgr.driver(url)
 
 

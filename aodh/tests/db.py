@@ -50,7 +50,7 @@ class MongoDbManager(fixtures.Fixture):
                 message='.*you must provide a username and password.*')
             try:
                 self.alarm_connection = storage.get_connection(
-                    self.url, 'aodh.alarm.storage')
+                    self.url)
             except storage.StorageBadVersion as e:
                 raise testcase.TestSkipped(six.text_type(e))
 
@@ -66,7 +66,7 @@ class SQLManager(fixtures.Fixture):
     def setUp(self):
         super(SQLManager, self).setUp()
         self.alarm_connection = storage.get_connection(
-            self.url, 'aodh.alarm.storage')
+            self.url)
 
     @property
     def url(self):
@@ -104,7 +104,7 @@ class HBaseManager(fixtures.Fixture):
     def setUp(self):
         super(HBaseManager, self).setUp()
         self.alarm_connection = storage.get_connection(
-            self.url, 'aodh.alarm.storage')
+            self.url)
         # Unique prefix for each test to keep data is distinguished because
         # all test data is stored in one table
         data_prefix = str(uuid.uuid4().hex)
@@ -141,7 +141,7 @@ class SQLiteManager(fixtures.Fixture):
     def setUp(self):
         super(SQLiteManager, self).setUp()
         self.alarm_connection = storage.get_connection(
-            self.url, 'aodh.alarm.storage')
+            self.url)
 
 
 class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
@@ -193,7 +193,7 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
         self.alarm_conn = None
         super(TestBase, self).tearDown()
 
-    def _get_connection(self, url, namespace):
+    def _get_connection(self, url):
         return self.alarm_conn
 
     def _get_driver_manager(self, engine):

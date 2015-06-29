@@ -64,7 +64,7 @@ def setup_app(pecan_config=None, extra_hooks=None):
     # FIXME: Replace DBHook with a hooks.TransactionHook
     app_hooks = [hooks.ConfigHook(),
                  hooks.DBHook(
-                     storage.get_connection_from_config(cfg.CONF, 'alarm'),),
+                     storage.get_connection_from_config(cfg.CONF)),
                  hooks.TranslationHook()]
     if extra_hooks:
         app_hooks.extend(extra_hooks)
