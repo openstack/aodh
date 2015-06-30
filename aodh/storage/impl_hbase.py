@@ -109,7 +109,7 @@ class Connection(hbase_base.Connection, base.Connection):
             alarm_table = conn.table(self.ALARM_TABLE)
             alarm_table.put(_id, alarm_to_store)
             stored_alarm = hbase_utils.deserialize_entry(
-                alarm_table.row(_id))[0]
+                alarm_table.row(_id))
         return models.Alarm(**stored_alarm)
 
     create_alarm = update_alarm
@@ -135,7 +135,7 @@ class Connection(hbase_base.Connection, base.Connection):
         with self.conn_pool.connection() as conn:
             alarm_table = conn.table(self.ALARM_TABLE)
             gen = alarm_table.scan(filter=q)
-            alarms = [hbase_utils.deserialize_entry(data)[0]
+            alarms = [hbase_utils.deserialize_entry(data)
                       for ignored, data in gen]
             for alarm in sorted(
                     alarms,
@@ -162,7 +162,7 @@ class Connection(hbase_base.Connection, base.Connection):
             gen = alarm_history_table.scan(filter=q, row_start=start_row,
                                            row_stop=end_row)
             for ignored, data in gen:
-                stored_entry = hbase_utils.deserialize_entry(data)[0]
+                stored_entry = hbase_utils.deserialize_entry(data)
                 yield models.AlarmChange(**stored_entry)
 
     def record_alarm_change(self, alarm_change):

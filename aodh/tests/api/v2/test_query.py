@@ -210,19 +210,6 @@ class TestQueryToKwArgs(tests_base.BaseTestCase):
         self.assertEqual('gt', kwargs['start_timestamp_op'])
         self.assertEqual('lt', kwargs['end_timestamp_op'])
 
-    def test_sample_filter_meta(self):
-        q = [v2_base.Query(field='metadata.size',
-                           op='eq',
-                           value='20'),
-             v2_base.Query(field='resource_metadata.id',
-                           op='eq',
-                           value='meta_id')]
-        kwargs = utils.query_to_kwargs(q, storage.SampleFilter.__init__)
-        self.assertEqual(1, len(kwargs))
-        self.assertEqual(2, len(kwargs['metaquery']))
-        self.assertEqual(20, kwargs['metaquery']['metadata.size'])
-        self.assertEqual('meta_id', kwargs['metaquery']['metadata.id'])
-
     def test_sample_filter_non_equality_on_metadata(self):
         queries = [v2_base.Query(field='resource_metadata.image_id',
                                  op='gt',

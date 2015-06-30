@@ -217,7 +217,6 @@ def query_to_kwargs(query, db_func, internal_keys=None,
                    'resource_id': 'resource',
                    'type': 'alarm_type'}
     stamp = {}
-    metaquery = {}
     kwargs = {}
     for i in query:
         if i.field == 'timestamp':
@@ -233,16 +232,10 @@ def query_to_kwargs(query, db_func, internal_keys=None,
                     stamp['search_offset'] = i.value
                 elif i.field == 'enabled':
                     kwargs[i.field] = i._get_value_as_type('boolean')
-                elif i.field.startswith('metadata.'):
-                    metaquery[i.field] = i._get_value_as_type()
-                elif i.field.startswith('resource_metadata.'):
-                    metaquery[i.field[9:]] = i._get_value_as_type()
                 else:
                     key = translation.get(i.field, i.field)
                     kwargs[key] = i.value
 
-    if metaquery and 'metaquery' in inspect.getargspec(db_func)[0]:
-        kwargs['metaquery'] = metaquery
     if stamp:
         kwargs.update(_get_query_timestamps(stamp))
     return kwargs
