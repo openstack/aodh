@@ -75,15 +75,6 @@ def get_transport(url=None, optional=False, cache=True):
     return transport
 
 
-def cleanup():
-    """Cleanup the oslo_messaging layer."""
-    global TRANSPORTS, NOTIFIERS
-    NOTIFIERS = {}
-    for url in TRANSPORTS:
-        TRANSPORTS[url].cleanup()
-        del TRANSPORTS[url]
-
-
 def get_rpc_server(transport, topic, endpoint):
     """Return a configured oslo_messaging rpc server."""
     cfg.CONF.import_opt('host', 'aodh.service')
