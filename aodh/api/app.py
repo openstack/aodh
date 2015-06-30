@@ -91,23 +91,6 @@ def setup_app(pecan_config=None):
     return app
 
 
-class VersionSelectorApplication(object):
-    def __init__(self):
-        pc = get_pecan_config()
-
-        def not_found(environ, start_response):
-            start_response('404 Not Found', [])
-            return []
-
-        self.v1 = not_found
-        self.v2 = setup_app(pecan_config=pc)
-
-    def __call__(self, environ, start_response):
-        if environ['PATH_INFO'].startswith('/v1/'):
-            return self.v1(environ, start_response)
-        return self.v2(environ, start_response)
-
-
 def load_app():
     # Build the WSGI app
     cfg_file = None
@@ -145,5 +128,9 @@ def build_server():
                        app, processes=workers)
 
 
+def _app():
+    return setup_app(get_pecan_config())
+
+
 def app_factory(global_config, **local_conf):
-    return VersionSelectorApplication()
+    return _app()
