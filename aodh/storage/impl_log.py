@@ -26,30 +26,37 @@ LOG = log.getLogger(__name__)
 class Connection(base.Connection):
     """Log the data."""
 
-    def upgrade(self):
+    @staticmethod
+    def upgrade():
         pass
 
-    def clear(self):
+    @staticmethod
+    def clear():
         pass
 
-    def get_alarms(self, name=None, user=None, state=None, meter=None,
+    @staticmethod
+    def get_alarms(name=None, user=None, state=None, meter=None,
                    project=None, enabled=None, alarm_id=None,
                    alarm_type=None, severity=None):
         """Yields a lists of alarms that match filters."""
         return []
 
-    def create_alarm(self, alarm):
+    @staticmethod
+    def create_alarm(alarm):
         """Create alarm."""
         return alarm
 
-    def update_alarm(self, alarm):
+    @staticmethod
+    def update_alarm(alarm):
         """Update alarm."""
         return alarm
 
-    def delete_alarm(self, alarm_id):
+    @staticmethod
+    def delete_alarm(alarm_id):
         """Delete an alarm."""
 
-    def clear_expired_alarm_history_data(self, alarm_history_ttl):
+    @staticmethod
+    def clear_expired_alarm_history_data(alarm_history_ttl):
         """Clear expired alarm history data from the backend storage system.
 
         Clearing occurs according to the time-to-live.
