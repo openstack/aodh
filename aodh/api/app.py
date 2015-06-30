@@ -60,14 +60,12 @@ def get_pecan_config():
     return pecan.configuration.conf_from_file(filename)
 
 
-def setup_app(pecan_config=None, extra_hooks=None):
+def setup_app(pecan_config=None):
     # FIXME: Replace DBHook with a hooks.TransactionHook
     app_hooks = [hooks.ConfigHook(),
                  hooks.DBHook(
                      storage.get_connection_from_config(cfg.CONF)),
                  hooks.TranslationHook()]
-    if extra_hooks:
-        app_hooks.extend(extra_hooks)
 
     if not pecan_config:
         pecan_config = get_pecan_config()
