@@ -169,6 +169,10 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
             raise testcase.TestSkipped(
                 'Test is not applicable for %s' % engine)
 
+        # FIXME(jd) we need this to be sure ALL options are registered
+        # This module could be otherwise imported later by something else and
+        # fail because all options are not registered
+        import aodh.service  # noqa
         self.CONF = self.useFixture(fixture_config.Config()).conf
         self.CONF([], project='aodh', validate_default_values=True)
 
