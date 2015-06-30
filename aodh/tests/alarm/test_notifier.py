@@ -58,6 +58,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         # configuration.
         with mock.patch.object(self.service.rpc_server, 'start'):
             self.service.start()
+            self.service.stop()
 
     def test_notify_alarm(self):
         data = {
