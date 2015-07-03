@@ -18,8 +18,7 @@ from oslo_config import cfg
 # Register options for the service
 OPTS = [
     cfg.IntOpt('port',
-               default=8777,
-               deprecated_name='metering_api_port',
+               default=8042,
                deprecated_group='DEFAULT',
                help='The port for the aodh API server.',
                ),
