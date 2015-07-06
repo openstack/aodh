@@ -12,7 +12,7 @@
 
 # Server Specific Configurations
 server = {
-    'port': '8777',
+    'port': '8042',
     'host': '0.0.0.0'
 }
 
