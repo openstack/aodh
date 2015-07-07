@@ -23,4 +23,4 @@ NOTIFIER_EXTENSIONS_NAMESPACE = "aodh.alarm.notifier"
 
 NOTIFIERS = extension.ExtensionManager(NOTIFIER_EXTENSIONS_NAMESPACE,
                                        invoke_on_load=True)
-NOTIFIER_SCHEMAS = NOTIFIERS.map(lambda x: x.name)
+NOTIFIER_SCHEMAS = NOTIFIERS.names()

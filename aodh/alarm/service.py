@@ -65,8 +65,6 @@ class AlarmService(object):
             invoke_on_load=True,
             invoke_args=(rpc_alarm.RPCAlarmNotifier(),)
         )
-        self.supported_evaluators = [ext.name for ext in
-                                     self.evaluators.extensions]
 
     @property
     def _client(self):
@@ -99,7 +97,7 @@ class AlarmService(object):
 
     def _evaluate_alarm(self, alarm):
         """Evaluate the alarms assigned to this evaluator."""
-        if alarm.type not in self.supported_evaluators:
+        if alarm.type not in self.evaluators:
             LOG.debug(_('skipping alarm %s: type unsupported') %
                       alarm.alarm_id)
             return
