@@ -525,6 +525,7 @@ class AlarmController(rest.RestController):
         user_id = pecan.request.headers.get('X-User-Id')
         project_id = pecan.request.headers.get('X-Project-Id')
         on_behalf_of = on_behalf_of or project_id
+        severity = scrubbed_data.get('severity')
         payload = dict(event_id=str(uuid.uuid4()),
                        alarm_id=self._id,
                        type=type,
@@ -532,7 +533,8 @@ class AlarmController(rest.RestController):
                        user_id=user_id,
                        project_id=project_id,
                        on_behalf_of=on_behalf_of,
-                       timestamp=now)
+                       timestamp=now,
+                       severity=severity)
 
         try:
             self.conn.record_alarm_change(payload)
@@ -702,6 +704,7 @@ class AlarmsController(rest.RestController):
         detail = json.dumps(scrubbed_data)
         user_id = pecan.request.headers.get('X-User-Id')
         project_id = pecan.request.headers.get('X-Project-Id')
+        severity = scrubbed_data.get('severity')
         payload = dict(event_id=str(uuid.uuid4()),
                        alarm_id=alarm_id,
                        type=type,
@@ -709,7 +712,8 @@ class AlarmsController(rest.RestController):
                        user_id=user_id,
                        project_id=project_id,
                        on_behalf_of=project_id,
-                       timestamp=now)
+                       timestamp=now,
+                       severity=severity)
 
         try:
             conn.record_alarm_change(payload)

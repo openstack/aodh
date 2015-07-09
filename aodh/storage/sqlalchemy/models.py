@@ -143,3 +143,4 @@ class AlarmChange(Base):
     type = Column(String(20))
     detail = Column(Text)
     timestamp = Column(PreciseTimestamp, default=lambda: timeutils.utcnow())
+    severity = Column(String(50))

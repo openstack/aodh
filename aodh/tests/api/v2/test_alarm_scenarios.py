@@ -1992,6 +1992,15 @@ class TestAlarmsHistory(TestAlarmsBase):
         self.assertEqual(msg,
                          resp.json['error_message']['faultstring'])
 
+    def test_get_alarm_history_constrained_by_severity(self):
+        alarm = self._get_alarm('a')
+        self._update_alarm(alarm, dict(severity='low'))
+        query = dict(field='severity', op='eq', value='low')
+        history = self._get_alarm_history('a', query=query)
+        self.assertEqual(1, len(history))
+        self.assertEqual(jsonutils.dumps({'severity': 'low'}),
+                         history[0]['detail'])
+
     def test_get_nonexistent_alarm_history(self):
         # the existence of alarm history is independent of the
         # continued existence of the alarm itself
