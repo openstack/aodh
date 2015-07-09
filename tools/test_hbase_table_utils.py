@@ -24,7 +24,7 @@ def main(argv):
         url = ("%s?table_prefix=%s" %
                (os.getenv("AODH_TEST_HBASE_URL"),
                 os.getenv("AODH_TEST_HBASE_TABLE_PREFIX", "test")))
-        alarm_conn = storage.get_connection(url, 'AODH.alarm.storage')
+        alarm_conn = storage.get_connection(url)
         for arg in argv:
             if arg == "--upgrade":
                 alarm_conn.upgrade()

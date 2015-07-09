@@ -27,14 +27,12 @@ import six
 
 class EngineTest(base.BaseTestCase):
     def test_get_connection(self):
-        engine = storage.get_connection('log://localhost',
-                                        'aodh.alarm.storage')
+        engine = storage.get_connection('log://localhost')
         self.assertIsInstance(engine, impl_log.Connection)
 
     def test_get_connection_no_such_engine(self):
         try:
-            storage.get_connection('no-such-engine://localhost',
-                                   'aodh.metering.storage')
+            storage.get_connection('no-such-engine://localhost')
         except RuntimeError as err:
             self.assertIn('no-such-engine', six.text_type(err))
 
@@ -63,5 +61,5 @@ class ConnectionConfigTest(base.BaseTestCase):
 
     def test_only_default_url(self):
         self.CONF.set_override("connection", "log://", group="database")
-        conn = storage.get_connection_from_config(self.CONF, 'alarm')
+        conn = storage.get_connection_from_config(self.CONF)
         self.assertIsInstance(conn, impl_log.Connection)

@@ -60,7 +60,7 @@ class ConfigFixture(fixture.GabbiFixture):
                           group='oslo_policy')
 
         database_name = '%s-%s' % (db_url, str(uuid.uuid4()))
-        conf.set_override('alarm_connection', database_name, group='database')
+        conf.set_override('connection', database_name, group='database')
 
         conf.set_override('pecan_debug', True, group='api')
 
