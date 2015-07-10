@@ -1,0 +1,393 @@
+# Russian translations for aodh.
+# Copyright (C) 2015 ORGANIZATION
+# This file is distributed under the same license as the aodh project.
+#
+# Translators:
+# Altinbek <altinbek.089@mail.ru>, 2015
+msgid ""
+msgstr ""
+"Project-Id-Version:  Aodh\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-07-10 06:19+0000\n"
+"PO-Revision-Date: 2015-07-07 12:50+0000\n"
+"Last-Translator: Altinbek <altinbek.089@mail.ru>\n"
+"Language-Team: Russian (http://www.transifex.com/p/aodh/language/ru/)\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 1.3\n"
+
+#, python-format
+msgid "%(entity)s %(id)s Not Found"
+msgstr "%(entity)s %(id)s  не найдены"
+
+#, python-format
+msgid "%(name)s count exceeds maximum value %(maximum)d"
+msgstr "контент %(name)s превышает количество символов в  %(maximum)d"
+
+#, python-format
+msgid "%(rule)s must be set for %(type)s type alarm"
+msgstr "%(rule)s  должны быть установлены для %(type)s сигналов тревоги"
+
+#, python-format
+msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
+msgstr "%(rule1)s и %(rule2)s не могут работать одновременно"
+
+#, python-format
+msgid "%(worker_name)s value of %(workers)s is invalid, must be greater than 0"
+msgstr ""
+"%(worker_name)s в понимания %(workers)s входит то что, их должно быть "
+"больше  чем 0."
+
+#, python-format
+msgid "%d datapoints are unknown"
+msgstr "%d исходный код данных не известен"
+
+#, python-format
+msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
+msgstr ""
+"Без определения типа сигнала уведомленияn %(scheme)s не возможно "
+"действовать  %(alarm_id)s "
+
+#, python-format
+msgid "Alarm %(alarm_id)s not found in project %(project)s"
+msgstr "Сигнал   %(alarm_id)s не найдены в проекте %(project)s"
+
+#, python-format
+msgid "Alarm %s not found"
+msgstr "Сигнал  %s не найден"
+
+msgid "Alarm combination rule should contain at least two different alarm ids."
+msgstr ""
+"сигнал тревоги  должно содержать по крайней мере два различных "
+"идентификаторов сигнализации."
+
+msgid "Alarm incorrect"
+msgstr "Сигнализация неисправна"
+
+#, python-format
+msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
+msgstr "количество ошибок пользователем %(u)s  превысила норму %(p)s"
+
+#, python-format
+msgid ""
+"Alarm when %(meter_name)s is %(comparison_operator)s a %(statistic)s of "
+"%(threshold)s over %(period)s seconds"
+msgstr ""
+"При срабатываемости сигналатревоги   %(meter_name)s как "
+"%(comparison_operator)s a %(statistic)s в %(threshold)s  срабатывает за "
+"%(period)s  секунду"
+
+#, python-format
+msgid "Alarm with name=%s exists"
+msgstr "Сигнализация с именем=%s  существует"
+
+#, python-format
+msgid "Alarm with name='%s' exists"
+msgstr "Сигнализация с названием='%s' существует"
+
+#, python-format
+msgid "Alarms %(alarm_ids)s are in unknown state"
+msgstr "Сигнализация %(alarm_ids)s в не корректном состоянии"
+
+#, python-format
+msgid ""
+"Attempted to evaluate alarm %s, but it is not within its time constraint."
+msgstr ""
+"В попытке оценки сигнала тревоги %s, мы не входили в его временное "
+"ограничение."
+
+#, python-format
+msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
+msgstr ""
+"Не удается создать таблицу %(table_name)s, она уже существует. Игнорирование "
+"ошибки"
+
+msgid "Cannot delete table but ignoring error"
+msgstr "Не возможно удалить таблицу, игнорируя ошибку"
+
+msgid "Cannot disable table but ignoring error"
+msgstr "Невозможно отключить таблицу, игнорируя ошибку"
+
+#, python-format
+msgid "Cannot specify alarm %s itself in combination rule"
+msgstr "Не указывать  сигнал тревоги %s  в комбинации правило"
+
+#, python-format
+msgid "Combined state of alarms %s"
+msgstr "смешанное  состояние тревоги %s"
+
+msgid "Configuration:"
+msgstr "Конфигурация: "
+
+#, python-format
+msgid "Connecting to %(db)s on %(nodelist)s"
+msgstr "Подключение к %(db)s  на %(nodelist)s"
+
+msgid "Creating a new in-memory HBase Connection object"
+msgstr "Создание нового памяти в HBase Connection object"
+
+msgid "Dropping HBase schema..."
+msgstr "Удаление HBase схемы ..."
+
+#, python-format
+msgid "Error parsing HTTP response: %s"
+msgstr "Ошибка ввода HTTP кода: %s"
+
+#, python-format
+msgid "Error while posting alarm: %s"
+msgstr "Ошибка при отправке сигнала  тревоги: %s"
+
+#, python-format
+msgid "Error while putting alarm: %s"
+msgstr "Ошибка во время установки  тревоги: %s"
+
+#, python-format
+msgid "Failed to evaluate alarm %s"
+msgstr "не удалось определить тип тревоги %s"
+
+#, python-format
+msgid "Failed to parse the timestamp value %s"
+msgstr "Не удалось разобрать значение временной метки %s"
+
+#, python-format
+msgid "Filter expression not valid: %s"
+msgstr "Фильтр ввода не действует: %s"
+
+msgid "Limit should be positive"
+msgstr "Лимит должен быть точным"
+
+#, python-format
+msgid "Not Authorized to access %(aspect)s %(id)s"
+msgstr "Нет доступа к %(aspect)s %(id)s"
+
+#, python-format
+msgid ""
+"Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s priority from "
+"%(previous)s to %(current)s with action %(action)s because %(reason)s."
+msgstr ""
+"Сигнал тревоги  %(alarm_name)s %(alarm_id)s не работает потому что "
+"%(reason)s  в %(severity)s  приоритетом на  %(previous)s  %(current)s   "
+"влияние на действие %(action)s"
+
+#, python-format
+msgid ""
+"Notifying alarm %(alarm_name)s %(alarm_id)s with severity %(severity)s from "
+"%(previous)s to %(current)s with action %(action)s because %(reason)s. "
+"request-id: %(request_id)s "
+msgstr ""
+"сигналом тревоги %(alarm_name)s %(alarm_id)s не работает  %(severity)s "
+"потому что %(previous)s причина %(current)s  в действиях %(action)s "
+"%(reason)s   Запрос-ID:  %(request_id)s"
+
+#, python-format
+msgid "Notifying alarm %(id)s with action %(act)s"
+msgstr "Сигнал тревоги %(id)s во время его действии %(act)s"
+
+msgid "Opening in-memory HBase connection"
+msgstr "Открыть связь к  памяти в HBase"
+
+#, python-format
+msgid "Order-by expression not valid: %s"
+msgstr "вызов значения не активна: %s"
+
+#, python-format
+msgid ""
+"Remaining as %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"в последнее время %(most_recent)s оставаясь %(state)s у порога из-за "
+"%(count)d испытательных сигналов %(disposition)s"
+
+#, python-format
+msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr ""
+"Оставаясь %(state)s в состоянии уведомления %(state)s из-за тревоги "
+"%(alarm_ids)s"
+
+#, python-format
+msgid "Starting server in PID %s"
+msgstr "сервер начинается с PID %s"
+
+#, python-format
+msgid "String %s is not a valid isotime"
+msgstr "Строка %s  временно не активна"
+
+#, python-format
+msgid ""
+"The data type %(type)s is not supported. The supported data type list is: "
+"%(supported)s"
+msgstr ""
+"Тип данных %(type)s не поддерживается. Список поддерживаемых типов данных: "
+"%(supported)s"
+
+msgid "Time constraint names must be unique for a given alarm."
+msgstr "Название временного контента должна отличаться для сигнала превоги"
+
+#, python-format
+msgid "Timezone %s is not valid"
+msgstr "таймер %s  не актевирован"
+
+#, python-format
+msgid ""
+"Transition to %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"последнее время %(most_recent)s,  переход в состояния оповещения %(state)s "
+"из-за %(count)d попыток испытания%(disposition)s у порога"
+
+#, python-format
+msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr ""
+"Переход  %(state)s из состояния тревоги %(alarm_ids)s в  положение %(state)s"
+
+#, python-format
+msgid "Unable to connect to the database server: %(errmsg)s."
+msgstr "Не удается подключиться к серверу базы данных: %(errmsg)s. "
+
+#, python-format
+msgid ""
+"Unable to convert the value %(value)s to the expected data type %(type)s."
+msgstr ""
+"Невозможно преобразовать значение %(value)s с ожидаемым типом данных "
+"%(type)s."
+
+#, python-format
+msgid "Unable to notify alarm %s"
+msgstr "Невозможно оповещать о тревоге %s"
+
+msgid "Unable to notify for an alarm with no action"
+msgstr "Невозможно оповещать о тревоге, без действия на него"
+
+#, python-format
+msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
+msgstr ""
+"Невозможно разобраться в действиях %(action)s в сигнализации %(alarm_id)s"
+
+#, python-format
+msgid "Unable to parse action %s"
+msgstr "Невозможно разобрать действий %s"
+
+#, python-format
+msgid ""
+"Unable to reconnect to the primary mongodb after %(retries)d retries. Giving "
+"up."
+msgstr ""
+"Невозможно подключиться к первичной mongodb,  после попыток подключиться  "
+"%(retries)d. Сдаваться."
+
+#, python-format
+msgid ""
+"Unable to reconnect to the primary mongodb: %(errmsg)s. Trying again in "
+"%(retry_interval)d seconds."
+msgstr ""
+"Невозможно подключиться к первичной  mongodb: %(errmsg)s. Попытайтесь снова, "
+"через несколько секунд  %(retry_interval)d"
+
+#, python-format
+msgid ""
+"Unexpected exception converting %(value)s to the expected data type %(type)s."
+msgstr ""
+"мгновенное  преобразования значения %(value)s с ожидаемым типом данных "
+"%(type)s."
+
+#, python-format
+msgid "Unsupported action %s"
+msgstr "не поддерживается действие %s"
+
+#, python-format
+msgid "You are not authorized to create action: %s"
+msgstr "Вы не авторизованы, чтобы деиствовать: %s"
+
+#, python-format
+msgid ""
+"alarm %(alarm_id)s has no action configured for state transition from "
+"%(previous)s to state %(state)s, skipping the notification."
+msgstr ""
+"сигнализация %(alarm_id)s не работает, настройка для перехода от оповещения "
+"%(previous)s к оповещению%(state)s, пропускает предупреждать."
+
+#, python-format
+msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
+msgstr ""
+"Сигнализация %(id)s приводится в действие %(state)s потому что %(reason)s"
+
+msgid "alarm evaluation cycle failed"
+msgstr "Оценка цикла тревог не удался"
+
+msgid "alarm retrieval failed"
+msgstr "не удалось исправить согнал оповещения "
+
+msgid "alarm state update failed"
+msgstr "сигнал тревоги определить не удалось  "
+
+msgid "alarm stats retrieval failed"
+msgstr "Статистика сигнал оповещения  не получен"
+
+#, python-format
+msgid "alarm stats retrieval failed: %s"
+msgstr "Статистика сигнал оповещения не получен: %s"
+
+#, python-format
+msgid "comparing value %(value)s against threshold %(limit)s"
+msgstr "входящий сигнал %(value)s снова срабатывает  %(limit)s"
+
+#, python-format
+msgid "connecting to HBase on %(host)s:%(port)s"
+msgstr "подключения к HBase на %(host)s:%(port)s"
+
+#, python-format
+msgid "duplicate actions are found: %s, remove duplicate ones"
+msgstr "дублирующие действия найдены в: %s, удалить дубликаты из них"
+
+#, python-format
+msgid "evaluating alarm %s"
+msgstr "Оценка цикла %s"
+
+#, python-format
+msgid "excluded weak datapoints with sample counts %s"
+msgstr "Выявления слабых пунктов с испытания %s"
+
+#, python-format
+msgid "initiating evaluation cycle on %d alarms"
+msgstr "приступим к оценке цикла  %d alarms"
+
+#, python-format
+msgid "pruned statistics to %d"
+msgstr "куски статистики проверок %d"
+
+#, python-format
+msgid "query stats from %(start)s to %(now)s"
+msgstr "Статистика запросов от начало %(start)s по настоящее время %(now)s"
+
+#, python-format
+msgid "sanitize stats %s"
+msgstr "положение самопроверки на неполадки  %s"
+
+#, python-format
+msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
+msgstr "услуга на 0.0.0.0:%(sport)s, указывает на http://127.0.0.1:%(vport)s"
+
+#, python-format
+msgid "serving on http://%(host)s:%(port)s"
+msgstr "указатели на http://%(host)s:%(port)s"
+
+#, python-format
+msgid "skipping alarm %s: type unsupported"
+msgstr "упущения предупреждения %s не поддерживается системой"
+
+msgid "state invalid"
+msgstr "Неправильное состояние"
+
+msgid "state_timestamp should be datetime object"
+msgstr "В state_timestamp должен быть указан дата  объекта"
+
+#, python-format
+msgid "stats query %s"
+msgstr "запрос статистики  %s"
+
+msgid "timestamp should be datetime object"
+msgstr "должна быть указана дата вывода объекта"

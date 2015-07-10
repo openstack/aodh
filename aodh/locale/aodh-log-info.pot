@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 0.0.1.dev3911\n"
+"Project-Id-Version: aodh 0.0.1.dev3934\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-29 08:28+0200\n"
+"POT-Creation-Date: 2015-07-10 06:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,17 +31,17 @@ msgstr ""
 msgid "Left partitioning group %s"
 msgstr ""
 
-#: aodh/alarm/storage/impl_log.py:60
+#: aodh/cmd/eventlet/storage.py:43
+msgid "Nothing to clean, database alarm history time to live is disabled"
+msgstr ""
+
+#: aodh/storage/impl_log.py:67
 #, python-format
 msgid "Dropping alarm history data with TTL %d"
 msgstr ""
 
-#: aodh/alarm/storage/impl_sqlalchemy.py:309
+#: aodh/storage/impl_sqlalchemy.py:309
 #, python-format
 msgid "%d alarm histories are removed from database"
-msgstr ""
-
-#: aodh/cmd/eventlet/storage.py:43
-msgid "Nothing to clean, database alarm history time to live is disabled"
 msgstr ""
 

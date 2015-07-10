@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 0.0.1.dev3911\n"
+"Project-Id-Version: aodh 0.0.1.dev3934\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-29 08:28+0200\n"
+"POT-Creation-Date: 2015-07-10 06:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,51 +29,51 @@ msgid ""
 "%(previous)s to state %(state)s, skipping the notification."
 msgstr ""
 
-#: aodh/alarm/service.py:93
+#: aodh/alarm/service.py:91
 #, python-format
 msgid "initiating evaluation cycle on %d alarms"
 msgstr ""
 
-#: aodh/alarm/service.py:98
+#: aodh/alarm/service.py:96
 msgid "alarm evaluation cycle failed"
 msgstr ""
 
-#: aodh/alarm/service.py:103
+#: aodh/alarm/service.py:101
 #, python-format
 msgid "skipping alarm %s: type unsupported"
 msgstr ""
 
-#: aodh/alarm/service.py:107
+#: aodh/alarm/service.py:105
 #, python-format
 msgid "evaluating alarm %s"
 msgstr ""
 
-#: aodh/alarm/service.py:111
+#: aodh/alarm/service.py:109
 #, python-format
 msgid "Failed to evaluate alarm %s"
 msgstr ""
 
-#: aodh/alarm/service.py:179
+#: aodh/alarm/service.py:177
 #, python-format
 msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
 msgstr ""
 
-#: aodh/alarm/service.py:188
+#: aodh/alarm/service.py:186
 #, python-format
 msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
 msgstr ""
 
-#: aodh/alarm/service.py:194
+#: aodh/alarm/service.py:192
 #, python-format
 msgid "Notifying alarm %(id)s with action %(act)s"
 msgstr ""
 
-#: aodh/alarm/service.py:199
+#: aodh/alarm/service.py:197
 #, python-format
 msgid "Unable to notify alarm %s"
 msgstr ""
 
-#: aodh/alarm/service.py:220
+#: aodh/alarm/service.py:218
 msgid "Unable to notify for an alarm with no action"
 msgstr ""
 
@@ -184,41 +184,21 @@ msgid ""
 "%(reason)s. request-id: %(request_id)s "
 msgstr ""
 
-#: aodh/alarm/storage/impl_hbase.py:87
-msgid "Dropping HBase schema..."
-msgstr ""
-
-#: aodh/alarm/storage/impl_hbase.py:94
-msgid "Cannot disable table but ignoring error"
-msgstr ""
-
-#: aodh/alarm/storage/impl_hbase.py:98
-msgid "Cannot delete table but ignoring error"
-msgstr ""
-
-#: aodh/alarm/storage/models.py:70
-msgid "timestamp should be datetime object"
-msgstr ""
-
-#: aodh/alarm/storage/models.py:72
-msgid "state_timestamp should be datetime object"
-msgstr ""
-
-#: aodh/api/app.py:133
+#: aodh/api/app.py:114
 #, python-format
 msgid "Starting server in PID %s"
 msgstr ""
 
-#: aodh/api/app.py:134
+#: aodh/api/app.py:115
 msgid "Configuration:"
 msgstr ""
 
-#: aodh/api/app.py:138
+#: aodh/api/app.py:119
 #, python-format
 msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
 msgstr ""
 
-#: aodh/api/app.py:142
+#: aodh/api/app.py:123
 #, python-format
 msgid "serving on http://%(host)s:%(port)s"
 msgstr ""
@@ -389,6 +369,26 @@ msgid ""
 "%(threshold)s over %(period)s seconds"
 msgstr ""
 
+#: aodh/storage/impl_hbase.py:87
+msgid "Dropping HBase schema..."
+msgstr ""
+
+#: aodh/storage/impl_hbase.py:94
+msgid "Cannot disable table but ignoring error"
+msgstr ""
+
+#: aodh/storage/impl_hbase.py:98
+msgid "Cannot delete table but ignoring error"
+msgstr ""
+
+#: aodh/storage/models.py:70
+msgid "timestamp should be datetime object"
+msgstr ""
+
+#: aodh/storage/models.py:72
+msgid "state_timestamp should be datetime object"
+msgstr ""
+
 #: aodh/storage/hbase/base.py:45
 msgid "Creating a new in-memory HBase Connection object"
 msgstr ""
@@ -402,7 +402,7 @@ msgstr ""
 msgid "Opening in-memory HBase connection"
 msgstr ""
 
-#: aodh/storage/hbase/utils.py:278
+#: aodh/storage/hbase/utils.py:225
 #, python-format
 msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
 msgstr ""
@@ -412,19 +412,19 @@ msgstr ""
 msgid "Connecting to %(db)s on %(nodelist)s"
 msgstr ""
 
-#: aodh/storage/mongo/utils.py:102
+#: aodh/storage/mongo/utils.py:100
 #, python-format
 msgid "Unable to connect to the database server: %(errmsg)s."
 msgstr ""
 
-#: aodh/storage/mongo/utils.py:241
+#: aodh/storage/mongo/utils.py:239
 #, python-format
 msgid ""
 "Unable to reconnect to the primary mongodb after %(retries)d retries. "
 "Giving up."
 msgstr ""
 
-#: aodh/storage/mongo/utils.py:245
+#: aodh/storage/mongo/utils.py:243
 #, python-format
 msgid ""
 "Unable to reconnect to the primary mongodb: %(errmsg)s. Trying again in "
