@@ -52,7 +52,7 @@ Appendix
    :maxdepth: 1
 
    glossary
-   sourcecode/autoindex
+   api/index
 
 
 .. update index
