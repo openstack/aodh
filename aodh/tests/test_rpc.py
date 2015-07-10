@@ -21,8 +21,8 @@ from ceilometerclient.v2 import alarms
 from oslo_config import fixture as fixture_config
 import six
 
-from aodh.alarm import rpc as rpc_alarm
 from aodh import messaging
+from aodh import rpc
 from aodh.storage import models
 from aodh.tests import base as tests_base
 
@@ -50,7 +50,7 @@ class TestRPCAlarmNotifier(tests_base.BaseTestCase):
         self.setup_messaging(self.CONF)
 
         self.notifier_server = FakeNotifier(self.transport)
-        self.notifier = rpc_alarm.RPCAlarmNotifier()
+        self.notifier = rpc.RPCAlarmNotifier()
         self.alarms = [
             alarms.Alarm(None, info={
                 'name': 'instance_running_hot',

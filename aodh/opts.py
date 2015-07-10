@@ -14,11 +14,11 @@
 import itertools
 
 import aodh.alarm.notifier.rest
-import aodh.alarm.rpc
 import aodh.api
 import aodh.api.app
 import aodh.api.controllers.v2.alarms
 import aodh.coordination
+import aodh.rpc
 import aodh.service
 import aodh.storage
 
@@ -28,10 +28,10 @@ def list_opts():
         ('DEFAULT',
          itertools.chain(aodh.api.app.OPTS,
                          aodh.service.OPTS,
+                         aodh.rpc.OPTS,
                          aodh.storage.OLD_OPTS,)),
         ('alarm',
          itertools.chain(aodh.alarm.notifier.rest.OPTS,
-                         aodh.alarm.rpc.OPTS,
                          aodh.alarm.evaluator.gnocchi.OPTS,
                          aodh.api.controllers.v2.alarms.ALARM_API_OPTS)),
         ('api',

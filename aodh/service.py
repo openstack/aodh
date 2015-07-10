@@ -27,10 +27,10 @@ from oslo_utils import netutils
 import six
 from stevedore import extension
 
-from aodh.alarm import rpc as rpc_alarm
 from aodh import coordination
 from aodh.i18n import _
 from aodh import messaging
+from aodh import rpc
 from aodh import storage
 from aodh import utils
 
@@ -152,7 +152,7 @@ class AlarmService(object):
         self.evaluators = extension.ExtensionManager(
             namespace=self.EVALUATOR_EXTENSIONS_NAMESPACE,
             invoke_on_load=True,
-            invoke_args=(rpc_alarm.RPCAlarmNotifier(),)
+            invoke_args=(rpc.RPCAlarmNotifier(),)
         )
 
     def _evaluate_assigned_alarms(self):
@@ -227,7 +227,7 @@ class AlarmNotifierService(os_service.Service):
         super(AlarmNotifierService, self).__init__()
         transport = messaging.get_transport()
         self.rpc_server = messaging.get_rpc_server(
-            transport, cfg.CONF.alarm.notifier_rpc_topic, self)
+            transport, cfg.CONF.notifier_rpc_topic, self)
 
         self.notifiers = extension.ExtensionManager(
             self.NOTIFIER_EXTENSIONS_NAMESPACE,

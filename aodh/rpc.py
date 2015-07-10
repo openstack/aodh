@@ -27,11 +27,12 @@ from aodh.storage import models
 OPTS = [
     cfg.StrOpt('notifier_rpc_topic',
                default='alarm_notifier',
+               deprecated_group='alarm',
                help='The topic that aodh uses for alarm notifier '
                     'messages.'),
 ]
 
-cfg.CONF.register_opts(OPTS, group='alarm')
+cfg.CONF.register_opts(OPTS)
 
 LOG = log.getLogger(__name__)
 
@@ -40,7 +41,7 @@ class RPCAlarmNotifier(object):
     def __init__(self):
         transport = messaging.get_transport()
         self.client = messaging.get_rpc_client(
-            transport, topic=cfg.CONF.alarm.notifier_rpc_topic,
+            transport, topic=cfg.CONF.notifier_rpc_topic,
             version="1.0")
 
     def notify(self, alarm, previous, reason, reason_data):
