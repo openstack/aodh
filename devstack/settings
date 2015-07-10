@@ -1,0 +1,41 @@
+# turn on all the aodh services by default
+# API service
+enable_service aodh-api
+# Alarming
+enable_service aodh-alarm-notifier aodh-alarm-evaluator
+# Ensure legacy ceilometer alarm stuffs is disabled
+disable_service ceilometer-alarm-notifier ceilometer-alarm-evaluator
+
+# Default directories
+AODH_DIR=$DEST/aodh
+AODH_CONF_DIR=/etc/aodh
+AODH_CONF=$AODH_CONF_DIR/aodh.conf
+AODH_API_LOG_DIR=/var/log/aodh-api
+AODH_AUTH_CACHE_DIR=${AODH_AUTH_CACHE_DIR:-/var/cache/aodh}
+AODH_WSGI_DIR=${AODH_WSGI_DIR:-/var/www/aodh}
+
+# Set up database backend
+AODH_BACKEND=${AODH_BACKEND:-mysql}
+
+# Aodh connection info.
+AODH_SERVICE_PROTOCOL=http
+AODH_SERVICE_HOST=$SERVICE_HOST
+AODH_SERVICE_PORT=${AODH_SERVICE_PORT:-8042}
+AODH_USE_MOD_WSGI=${AODH_USE_MOD_WSGI:-${ENABLE_HTTPD_MOD_WSGI_SERVICES}}
+
+# To enable OSprofiler change value of this variable to "notifications,profiler"
+AODH_NOTIFICATION_TOPICS=${AODH_NOTIFICATION_TOPICS:-notifications}
+
+AODH_COORDINATION_URL=${AODH_COORDINATION_URL:-}
+
+# Tell Tempest this project is present
+TEMPEST_SERVICES+=,aodh
+
+# Set up default directories for client and middleware
+GITDIR["python-ceilometerclient"]=$DEST/python-ceilometerclient
+
+# Get rid of this before done.
+# Tell emacs to use shell-script-mode
+## Local variables:
+## mode: shell-script
+## End:
