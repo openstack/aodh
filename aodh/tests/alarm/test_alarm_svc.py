@@ -12,13 +12,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Tests for aodh.alarm.service.SingletonAlarmService.
+"""Tests for aodh.service.SingletonAlarmService.
 """
 import mock
 from oslo_config import fixture as fixture_config
 from stevedore import extension
 
-from aodh.alarm import service
+from aodh import service
 from aodh.tests import base as tests_base
 
 
@@ -52,8 +52,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
                        coordination_heartbeat=1.0,
                        coordination_active=False):
         self.CONF.set_override('evaluation_interval',
-                               test_interval,
-                               group='alarm')
+                               test_interval)
         self.CONF.set_override('heartbeat',
                                coordination_heartbeat,
                                group='coordination')

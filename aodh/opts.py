@@ -1,4 +1,4 @@
-# Copyright 2014 eNovance
+# Copyright 2014-2015 eNovance
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,7 +15,6 @@ import itertools
 
 import aodh.alarm.notifier.rest
 import aodh.alarm.rpc
-import aodh.alarm.service
 import aodh.api
 import aodh.api.app
 import aodh.api.controllers.v2.alarms
@@ -32,7 +31,6 @@ def list_opts():
                          aodh.storage.OLD_OPTS,)),
         ('alarm',
          itertools.chain(aodh.alarm.notifier.rest.OPTS,
-                         aodh.alarm.service.OPTS,
                          aodh.alarm.rpc.OPTS,
                          aodh.alarm.evaluator.gnocchi.OPTS,
                          aodh.api.controllers.v2.alarms.ALARM_API_OPTS)),

@@ -21,8 +21,7 @@ from oslotest import mockpatch
 import requests
 import six.moves.urllib.parse as urlparse
 
-from aodh import alarm as aodh_alarm
-from aodh.alarm import service
+from aodh import service
 from aodh.tests import base as tests_base
 
 
@@ -72,7 +71,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             'reason_data': {'fire': 'everywhere'}
         }
         self.service.notify_alarm(context.get_admin_context(), data)
-        notifications = aodh_alarm.NOTIFIERS['test'].obj.notifications
+        notifications = self.service.notifiers['test'].obj.notifications
         self.assertEqual(1, len(notifications))
         self.assertEqual((urlparse.urlsplit(data['actions'][0]),
                           data['alarm_id'],
@@ -219,7 +218,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         with mock.patch('oslo_utils.netutils.urlsplit',
                         self._fake_urlsplit):
             LOG = mock.MagicMock()
-            with mock.patch('aodh.alarm.service.LOG', LOG):
+            with mock.patch('aodh.service.LOG', LOG):
                 self.service.notify_alarm(
                     context.get_admin_context(),
                     {
@@ -231,7 +230,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
     def test_notify_alarm_invalid_action(self):
         LOG = mock.MagicMock()
-        with mock.patch('aodh.alarm.service.LOG', LOG):
+        with mock.patch('aodh.service.LOG', LOG):
             self.service.notify_alarm(
                 context.get_admin_context(),
                 {

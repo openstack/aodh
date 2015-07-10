@@ -40,7 +40,6 @@ from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
 import aodh
-from aodh import alarm as aodh_alarm
 from aodh.api.controllers.v2.alarm_rules import combination
 from aodh.api.controllers.v2 import base
 from aodh.api.controllers.v2 import utils as v2_utils
@@ -48,6 +47,7 @@ from aodh.api import rbac
 from aodh.i18n import _
 from aodh import keystone_client
 from aodh import messaging
+from aodh import service
 from aodh.storage import models
 from aodh import utils
 
@@ -183,6 +183,9 @@ class AlarmTimeConstraint(base.Base):
 ALARMS_RULES = extension.ExtensionManager("aodh.alarm.rule")
 LOG.debug("alarm rules plugin loaded: %s" % ",".join(ALARMS_RULES.names()))
 
+ACTIONS_SCHEMA = extension.ExtensionManager(
+    service.AlarmNotifierService.NOTIFIER_EXTENSIONS_NAMESPACE).names()
+
 
 class Alarm(base.Base):
     """Representation of an alarm.
@@ -309,7 +312,6 @@ class Alarm(base.Base):
 
     @staticmethod
     def check_alarm_actions(alarm):
-        actions_schema = aodh_alarm.NOTIFIER_SCHEMAS
         max_actions = cfg.CONF.alarm.alarm_max_actions
         for state in state_kind:
             actions_name = state.replace(" ", "_") + '_actions'
@@ -338,7 +340,7 @@ class Alarm(base.Base):
                 except Exception:
                     error = _("Unable to parse action %s") % action
                     raise base.ClientSideError(error)
-                if url.scheme not in actions_schema:
+                if url.scheme not in ACTIONS_SCHEMA:
                     error = _("Unsupported action %s") % action
                     raise base.ClientSideError(error)
                 if limited and url.scheme in ('log', 'test'):
