@@ -27,9 +27,7 @@ tests:
   response_headers:
       allow: GET, POST
 
-# TODO(chdent): A POST should return a location header.
 - name: createAlarm
-  xfail: true
   desc: Creates an alarm.
   url: /v2/alarms
   method: POST

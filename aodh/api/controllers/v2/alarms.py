@@ -765,6 +765,7 @@ class AlarmsController(rest.RestController):
 
         alarm = conn.create_alarm(alarm_in)
         self._record_creation(conn, change, alarm.alarm_id, now)
+        v2_utils.set_resp_location_hdr("/v2/alarms/" + alarm.alarm_id)
         return Alarm.from_db_model(alarm)
 
     @wsme_pecan.wsexpose([Alarm], [base.Query])
