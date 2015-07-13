@@ -117,6 +117,11 @@ def make_query(**kwargs):
                 q.append("ColumnPrefixFilter('%s')" % value)
             elif key == 'event_id':
                 q.append("RowFilter ( = , 'regexstring:\d*:%s')" % value)
+            elif key == 'exclude':
+                for k, v in six.iteritems(value):
+                    q.append("SingleColumnValueFilter "
+                             "('f', '%(k)s', !=, 'binary:%(v)s', true, true)" %
+                             {'k': quote(k), 'v': dump(v)})
             else:
                 q.append("SingleColumnValueFilter "
                          "('f', '%s', =, 'binary:%s', true, true)" %

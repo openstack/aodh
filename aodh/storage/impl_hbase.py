@@ -123,7 +123,7 @@ class Connection(hbase_base.Connection, base.Connection):
 
     def get_alarms(self, name=None, user=None, state=None, meter=None,
                    project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None):
+                   alarm_type=None, severity=None, exclude=None):
 
         if meter:
             raise aodh.NotImplementedError(
@@ -132,7 +132,8 @@ class Connection(hbase_base.Connection, base.Connection):
         q = hbase_utils.make_query(alarm_id=alarm_id, name=name,
                                    enabled=enabled, user_id=user,
                                    project_id=project, state=state,
-                                   type=alarm_type, severity=severity)
+                                   type=alarm_type, severity=severity,
+                                   exclude=exclude)
 
         with self.conn_pool.connection() as conn:
             alarm_table = conn.table(self.ALARM_TABLE)
