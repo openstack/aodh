@@ -19,6 +19,7 @@
 # under the License.
 
 import datetime
+import itertools
 import json
 import uuid
 
@@ -32,6 +33,7 @@ import pecan
 from pecan import rest
 import pytz
 import six
+from six.moves.urllib import parse as urlparse
 from stevedore import extension
 import wsme
 from wsme import types as wtypes
@@ -44,6 +46,7 @@ from aodh.api.controllers.v2 import base
 from aodh.api.controllers.v2 import utils as v2_utils
 from aodh.api import rbac
 from aodh.i18n import _
+from aodh import keystone_client
 from aodh import messaging
 from aodh.storage import models
 from aodh import utils
@@ -378,6 +381,52 @@ class Alarm(base.Base):
                                      for tc in self.time_constraints]
         return d
 
+    @staticmethod
+    def _is_trust_url(url):
+        return url.scheme in ('trust+http', 'trust+https')
+
+    def update_actions(self, old_alarm=None):
+        trustor_user_id = pecan.request.headers.get('X-User-Id')
+        trustor_project_id = pecan.request.headers.get('X-Project-Id')
+        roles = pecan.request.headers.get('X-Roles', '')
+        if roles:
+            roles = roles.split(',')
+        else:
+            roles = []
+        auth_plugin = pecan.request.environ.get('keystone.token_auth')
+        for actions in (self.ok_actions, self.alarm_actions,
+                        self.insufficient_data_actions):
+            for index, action in enumerate(actions[:]):
+                url = netutils.urlsplit(action)
+                if self._is_trust_url(url):
+                    if '@' not in url.netloc:
+                        # We have a trust action without a trust ID, create it
+                        trust_id = keystone_client.create_trust_id(
+                            trustor_user_id, trustor_project_id, roles,
+                            auth_plugin)
+                        netloc = '%s:delete@%s' % (trust_id, url.netloc)
+                        url = list(url)
+                        url[1] = netloc
+                        actions[index] = urlparse.urlunsplit(url)
+        if old_alarm:
+            for key in ('ok_actions', 'alarm_actions',
+                        'insufficient_data_actions'):
+                for action in getattr(old_alarm, key):
+                    url = netutils.urlsplit(action)
+                    if (self._is_trust_url(url) and url.password and
+                            action not in getattr(self, key)):
+                        keystone_client.delete_trust_id(
+                            url.username, auth_plugin)
+
+    def delete_actions(self):
+        auth_plugin = pecan.request.environ.get('keystone.token_auth')
+        for action in itertools.chain(self.ok_actions, self.alarm_actions,
+                                      self.insufficient_data_actions):
+            url = netutils.urlsplit(action)
+            if self._is_trust_url(url) and url.password:
+                keystone_client.delete_trust_id(url.username, auth_plugin)
+
+
 Alarm.add_attributes(**{"%s_rule" % ext.name: ext.plugin
                         for ext in ALARMS_RULES})
 
@@ -533,7 +582,9 @@ class AlarmController(rest.RestController):
 
         ALARMS_RULES[data.type].plugin.update_hook(data)
 
-        old_alarm = Alarm.from_db_model(alarm_in).as_dict(models.Alarm)
+        old_data = Alarm.from_db_model(alarm_in)
+        old_alarm = old_data.as_dict(models.Alarm)
+        data.update_actions(old_data)
         updated_alarm = data.as_dict(models.Alarm)
         try:
             alarm_in = models.Alarm(**updated_alarm)
@@ -558,7 +609,9 @@ class AlarmController(rest.RestController):
         # ensure alarm exists before deleting
         alarm = self._alarm()
         self.conn.delete_alarm(alarm.alarm_id)
-        change = Alarm.from_db_model(alarm).as_dict(models.Alarm)
+        alarm_object = Alarm.from_db_model(alarm)
+        alarm_object.delete_actions()
+        change = alarm_object.as_dict(models.Alarm)
         self._record_change(change,
                             timeutils.utcnow(),
                             type=models.AlarmChange.DELETION)
@@ -693,6 +746,7 @@ class AlarmsController(rest.RestController):
 
         change = data.as_dict(models.Alarm)
 
+        data.update_actions()
         # make sure alarms are unique by name per project.
         alarms = list(conn.get_alarms(name=data.name,
                                       project=data.project_id))
