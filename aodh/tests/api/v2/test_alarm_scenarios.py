@@ -63,18 +63,6 @@ class TestAlarmsBase(v2.FunctionalTest,
         self.assertEqual(1, len(match), 'alarm %s not found' % id)
         return match[0]
 
-    def _get_alarm_history(self, alarm, auth_headers=None, query=None,
-                           expect_errors=False, status=200):
-        url = '/alarms/%s/history' % alarm['alarm_id']
-        if query:
-            url += '?q.op=%(op)s&q.value=%(value)s&q.field=%(field)s' % query
-        resp = self.get_json(url,
-                             headers=auth_headers or self.auth_headers,
-                             expect_errors=expect_errors)
-        if expect_errors:
-            self.assertEqual(status, resp.status_code)
-        return resp
-
     def _update_alarm(self, alarm, updated_data, auth_headers=None):
         data = self._get_alarm(alarm['alarm_id'])
         data.update(updated_data)
@@ -86,18 +74,6 @@ class TestAlarmsBase(v2.FunctionalTest,
         self.delete('/alarms/%s' % alarm['alarm_id'],
                     headers=auth_headers or self.auth_headers,
                     status=204)
-
-    def _assert_is_subset(self, expected, actual):
-        for k, v in six.iteritems(expected):
-            self.assertEqual(v, actual.get(k), 'mismatched field: %s' % k)
-        self.assertIsNotNone(actual['event_id'])
-
-    def _assert_in_json(self, expected, actual):
-        actual = jsonutils.dumps(jsonutils.loads(actual), sort_keys=True)
-        for k, v in six.iteritems(expected):
-            fragment = jsonutils.dumps({k: v}, sort_keys=True)[1:-1]
-            self.assertIn(fragment, actual,
-                          '%s not in %s' % (fragment, actual))
 
 
 class TestListEmptyAlarms(TestAlarmsBase):
@@ -2265,6 +2241,301 @@ class TestAlarms(TestAlarmsBase):
                       params='not valid',
                       status=400)
 
+    def test_alarms_sends_notification(self):
+        # Hit the AlarmsController ...
+        json = {
+            'name': 'sent_notification',
+            'type': 'threshold',
+            'severity': 'low',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'comparison_operator': 'gt',
+                'threshold': 2.0,
+                'statistic': 'avg',
+            }
+
+        }
+        endpoint = mock.MagicMock()
+        target = oslo_messaging.Target(topic="notifications")
+        listener = messaging.get_notification_listener(
+            self.transport, [target], [endpoint])
+        listener.start()
+        endpoint.info.side_effect = lambda *args: listener.stop()
+        self.post_json('/alarms', params=json, headers=self.auth_headers)
+        listener.wait()
+
+        class PayloadMatcher(object):
+            def __eq__(self, payload):
+                return (payload['detail']['name'] == 'sent_notification' and
+                        payload['type'] == 'creation' and
+                        payload['detail']['rule']['meter_name'] == 'ameter' and
+                        set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
+                             'project_id', 'timestamp',
+                             'user_id']).issubset(payload.keys()))
+
+        endpoint.info.assert_called_once_with(
+            {'resource_uuid': None,
+             'domain': None,
+             'project_domain': None,
+             'auth_token': None,
+             'is_admin': False,
+             'user': None,
+             'tenant': None,
+             'read_only': False,
+             'show_deleted': False,
+             'user_identity': '- - - - -',
+             'request_id': mock.ANY,
+             'user_domain': None},
+            'aodh.api', 'alarm.creation',
+            PayloadMatcher(), mock.ANY)
+
+    def test_alarm_sends_notification(self):
+        # Hit the AlarmController (with alarm_id supplied) ...
+        data = self.get_json('/alarms')
+        del_alarm_name = "name1"
+        for d in data:
+            if d['name'] == del_alarm_name:
+                del_alarm_id = d['alarm_id']
+
+        with mock.patch.object(messaging, 'get_notifier') as get_notifier:
+            notifier = get_notifier.return_value
+
+            self.delete('/alarms/%s' % del_alarm_id,
+                        headers=self.auth_headers, status=204)
+            get_notifier.assert_called_once_with(mock.ANY,
+                                                 publisher_id='aodh.api')
+        calls = notifier.info.call_args_list
+        self.assertEqual(1, len(calls))
+        args, _ = calls[0]
+        context, event_type, payload = args
+        self.assertEqual('alarm.deletion', event_type)
+        self.assertEqual(del_alarm_name, payload['detail']['name'])
+        self.assertTrue(set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
+                             'project_id', 'timestamp', 'type',
+                             'user_id']).issubset(payload.keys()))
+
+    @mock.patch('aodh.keystone_client.get_client')
+    def test_post_gnocchi_resources_alarm(self, __):
+        json = {
+            'enabled': False,
+            'name': 'name_post',
+            'state': 'ok',
+            'type': 'gnocchi_resources_threshold',
+            'severity': 'critical',
+            'ok_actions': ['http://something/ok'],
+            'alarm_actions': ['http://something/alarm'],
+            'insufficient_data_actions': ['http://something/no'],
+            'repeat_actions': True,
+            'gnocchi_resources_threshold_rule': {
+                'metric': 'ameter',
+                'comparison_operator': 'le',
+                'aggregation_method': 'count',
+                'threshold': 50,
+                'evaluation_periods': 3,
+                'granularity': 180,
+                'resource_type': 'instance',
+                'resource_id': '209ef69c-c10c-4efb-90ff-46f4b2d90d2e',
+            }
+        }
+
+        with mock.patch('requests.get',
+                        side_effect=requests.ConnectionError()):
+            resp = self.post_json('/alarms', params=json,
+                                  headers=self.auth_headers,
+                                  expect_errors=True)
+            self.assertEqual(503, resp.status_code, resp.body)
+
+        with mock.patch('requests.get',
+                        return_value=mock.Mock(status_code=500,
+                                               body="my_custom_error",
+                                               text="my_custom_error")):
+            resp = self.post_json('/alarms', params=json,
+                                  headers=self.auth_headers,
+                                  expect_errors=True)
+            self.assertEqual(503, resp.status_code, resp.body)
+            self.assertIn('my_custom_error',
+                          resp.json['error_message']['faultstring'])
+
+        cap_result = mock.Mock(status_code=201,
+                               text=jsonutils.dumps(
+                                   {'aggregation_methods': ['count']}))
+        resource_result = mock.Mock(status_code=200, text="blob")
+        with mock.patch('requests.get', side_effect=[cap_result,
+                                                     resource_result]
+                        ) as gnocchi_get:
+            self.post_json('/alarms', params=json, headers=self.auth_headers)
+
+            gnocchi_url = self.CONF.alarms.gnocchi_url
+            capabilities_url = urlparse.urljoin(gnocchi_url,
+                                                '/v1/capabilities')
+            resource_url = urlparse.urljoin(
+                gnocchi_url,
+                '/v1/resource/instance/209ef69c-c10c-4efb-90ff-46f4b2d90d2e'
+            )
+
+            expected = [mock.call(capabilities_url,
+                                  headers=mock.ANY),
+                        mock.call(resource_url,
+                                  headers=mock.ANY)]
+            self.assertEqual(expected, gnocchi_get.mock_calls)
+
+        alarms = list(self.alarm_conn.get_alarms(enabled=False))
+        self.assertEqual(1, len(alarms))
+        self._verify_alarm(json, alarms[0])
+
+    @mock.patch('aodh.keystone_client.get_client')
+    def test_post_gnocchi_metrics_alarm(self, __):
+        json = {
+            'enabled': False,
+            'name': 'name_post',
+            'state': 'ok',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            'severity': 'critical',
+            'ok_actions': ['http://something/ok'],
+            'alarm_actions': ['http://something/alarm'],
+            'insufficient_data_actions': ['http://something/no'],
+            'repeat_actions': True,
+            'gnocchi_aggregation_by_metrics_threshold_rule': {
+                'metrics': ['b3d9d8ab-05e8-439f-89ad-5e978dd2a5eb',
+                            '009d4faf-c275-46f0-8f2d-670b15bac2b0'],
+                'comparison_operator': 'le',
+                'aggregation_method': 'count',
+                'threshold': 50,
+                'evaluation_periods': 3,
+                'granularity': 180,
+            }
+        }
+
+        cap_result = mock.Mock(status_code=200,
+                               text=jsonutils.dumps(
+                                   {'aggregation_methods': ['count']}))
+        with mock.patch('requests.get', return_value=cap_result):
+            self.post_json('/alarms', params=json, headers=self.auth_headers)
+
+        alarms = list(self.alarm_conn.get_alarms(enabled=False))
+        self.assertEqual(1, len(alarms))
+        self._verify_alarm(json, alarms[0])
+
+    @mock.patch('aodh.keystone_client.get_client')
+    def test_post_gnocchi_aggregation_alarm_project_constraint(self, __):
+        self.CONF.set_override('gnocchi_url', 'http://localhost:8041',
+                               group='alarms')
+        json = {
+            'enabled': False,
+            'name': 'project_constraint',
+            'state': 'ok',
+            'type': 'gnocchi_aggregation_by_resources_threshold',
+            'severity': 'critical',
+            'ok_actions': ['http://something/ok'],
+            'alarm_actions': ['http://something/alarm'],
+            'insufficient_data_actions': ['http://something/no'],
+            'repeat_actions': True,
+            'gnocchi_aggregation_by_resources_threshold_rule': {
+                'metric': 'ameter',
+                'comparison_operator': 'le',
+                'aggregation_method': 'count',
+                'threshold': 50,
+                'evaluation_periods': 3,
+                'granularity': 180,
+                'resource_type': 'instance',
+                'query': '{"=": {"server_group": "my_autoscaling_group"}}',
+            }
+        }
+
+        cap_result = mock.Mock(status_code=201,
+                               text=jsonutils.dumps(
+                                   {'aggregation_methods': ['count']}))
+        resource_result = mock.Mock(status_code=200, text="blob")
+        query_check_result = mock.Mock(status_code=200, text="blob")
+
+        expected_query = ('{"and": [{"=": {"created_by_project_id": "%s"}}, '
+                          '{"=": {"server_group": "my_autoscaling_group"}}]}' %
+                          self.auth_headers['X-Project-Id'])
+
+        with mock.patch('requests.get',
+                        side_effect=[cap_result, resource_result]):
+            with mock.patch('requests.post',
+                            side_effect=[query_check_result]) as fake_post:
+
+                self.post_json('/alarms', params=json,
+                               headers=self.auth_headers)
+
+                self.assertEqual([mock.call(
+                    url=('http://localhost:8041/v1/aggregation/'
+                         'resource/instance/metric/ameter'),
+                    headers={'Content-Type': 'application/json',
+                             'X-Auth-Token': mock.ANY},
+                    params={'aggregation': 'count'},
+                    data=expected_query)],
+                    fake_post.mock_calls),
+
+        alarms = list(self.alarm_conn.get_alarms(enabled=False))
+        self.assertEqual(1, len(alarms))
+
+        json['gnocchi_aggregation_by_resources_threshold_rule']['query'] = (
+            expected_query)
+        self._verify_alarm(json, alarms[0])
+
+
+class TestAlarmsHistory(TestAlarmsBase):
+
+    def setUp(self):
+        super(TestAlarmsHistory, self).setUp()
+        alarm = models.Alarm(
+            name='name1',
+            type='threshold',
+            enabled=True,
+            alarm_id='a',
+            description='a',
+            state='insufficient data',
+            severity='critical',
+            state_timestamp=constants.MIN_DATETIME,
+            timestamp=constants.MIN_DATETIME,
+            ok_actions=[],
+            insufficient_data_actions=[],
+            alarm_actions=[],
+            repeat_actions=True,
+            user_id=self.auth_headers['X-User-Id'],
+            project_id=self.auth_headers['X-Project-Id'],
+            time_constraints=[dict(name='testcons',
+                                   start='0 11 * * *',
+                                   duration=300)],
+            rule=dict(comparison_operator='gt',
+                      threshold=2.0,
+                      statistic='avg',
+                      evaluation_periods=60,
+                      period=1,
+                      meter_name='meter.test',
+                      query=[dict(field='project_id',
+                                  op='eq',
+                                  value=self.auth_headers['X-Project-Id'])
+                             ]))
+        self.alarm_conn.update_alarm(alarm)
+
+    def _get_alarm_history(self, alarm, auth_headers=None, query=None,
+                           expect_errors=False, status=200):
+        url = '/alarms/%s/history' % alarm['alarm_id']
+        if query:
+            url += '?q.op=%(op)s&q.value=%(value)s&q.field=%(field)s' % query
+        resp = self.get_json(url,
+                             headers=auth_headers or self.auth_headers,
+                             expect_errors=expect_errors)
+        if expect_errors:
+            self.assertEqual(status, resp.status_code)
+        return resp
+
+    def _assert_is_subset(self, expected, actual):
+        for k, v in six.iteritems(expected):
+            self.assertEqual(v, actual.get(k), 'mismatched field: %s' % k)
+        self.assertIsNotNone(actual['event_id'])
+
+    def _assert_in_json(self, expected, actual):
+        actual = jsonutils.dumps(jsonutils.loads(actual), sort_keys=True)
+        for k, v in six.iteritems(expected):
+            fragment = jsonutils.dumps({k: v}, sort_keys=True)[1:-1]
+            self.assertIn(fragment, actual,
+                          '%s not in %s' % (fragment, actual))
+
     def test_record_alarm_history_config(self):
         self.CONF.set_override('record_history', False, group='alarm')
         alarm = self._get_alarm('a')
@@ -2528,8 +2799,8 @@ class TestAlarms(TestAlarmsBase):
         self._assert_in_json(alarm, history[0]['detail'])
 
     def test_get_alarm_history_constrained_by_alarm_id_failed(self):
-        alarm = self._get_alarm('b')
-        query = dict(field='alarm_id', op='eq', value='b')
+        alarm = self._get_alarm('a')
+        query = dict(field='alarm_id', op='eq', value='a')
         resp = self._get_alarm_history(alarm, query=query,
                                        expect_errors=True, status=400)
         msg = ('Unknown argument: "alarm_id": unrecognized'
@@ -2537,12 +2808,12 @@ class TestAlarms(TestAlarmsBase):
                " {value!r} Unset>], valid keys: ['project', "
                "'search_offset', 'severity', 'timestamp',"
                " 'type', 'user']")
-        msg = msg.format(key=u'alarm_id', value=u'b')
+        msg = msg.format(key=u'alarm_id', value=u'a')
         self.assertEqual(msg,
                          resp.json['error_message']['faultstring'])
 
     def test_get_alarm_history_constrained_by_not_supported_rule(self):
-        alarm = self._get_alarm('b')
+        alarm = self._get_alarm('a')
         query = dict(field='abcd', op='eq', value='abcd')
         resp = self._get_alarm_history(alarm, query=query,
                                        expect_errors=True, status=400)
@@ -2560,241 +2831,6 @@ class TestAlarms(TestAlarmsBase):
         # continued existence of the alarm itself
         history = self._get_alarm_history(dict(alarm_id='foobar'))
         self.assertEqual([], history)
-
-    def test_alarms_sends_notification(self):
-        # Hit the AlarmsController ...
-        json = {
-            'name': 'sent_notification',
-            'type': 'threshold',
-            'severity': 'low',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'comparison_operator': 'gt',
-                'threshold': 2.0,
-                'statistic': 'avg',
-            }
-
-        }
-        endpoint = mock.MagicMock()
-        target = oslo_messaging.Target(topic="notifications")
-        listener = messaging.get_notification_listener(
-            self.transport, [target], [endpoint])
-        listener.start()
-        endpoint.info.side_effect = lambda *args: listener.stop()
-        self.post_json('/alarms', params=json, headers=self.auth_headers)
-        listener.wait()
-
-        class PayloadMatcher(object):
-            def __eq__(self, payload):
-                return (payload['detail']['name'] == 'sent_notification' and
-                        payload['type'] == 'creation' and
-                        payload['detail']['rule']['meter_name'] == 'ameter' and
-                        set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
-                             'project_id', 'timestamp',
-                             'user_id']).issubset(payload.keys()))
-
-        endpoint.info.assert_called_once_with(
-            {'resource_uuid': None,
-             'domain': None,
-             'project_domain': None,
-             'auth_token': None,
-             'is_admin': False,
-             'user': None,
-             'tenant': None,
-             'read_only': False,
-             'show_deleted': False,
-             'user_identity': '- - - - -',
-             'request_id': mock.ANY,
-             'user_domain': None},
-            'aodh.api', 'alarm.creation',
-            PayloadMatcher(), mock.ANY)
-
-    def test_alarm_sends_notification(self):
-        # Hit the AlarmController (with alarm_id supplied) ...
-        data = self.get_json('/alarms')
-        del_alarm_name = "name1"
-        for d in data:
-            if d['name'] == del_alarm_name:
-                del_alarm_id = d['alarm_id']
-
-        with mock.patch.object(messaging, 'get_notifier') as get_notifier:
-            notifier = get_notifier.return_value
-
-            self.delete('/alarms/%s' % del_alarm_id,
-                        headers=self.auth_headers, status=204)
-            get_notifier.assert_called_once_with(mock.ANY,
-                                                 publisher_id='aodh.api')
-        calls = notifier.info.call_args_list
-        self.assertEqual(1, len(calls))
-        args, _ = calls[0]
-        context, event_type, payload = args
-        self.assertEqual('alarm.deletion', event_type)
-        self.assertEqual(del_alarm_name, payload['detail']['name'])
-        self.assertTrue(set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
-                             'project_id', 'timestamp', 'type',
-                             'user_id']).issubset(payload.keys()))
-
-    @mock.patch('aodh.keystone_client.get_client')
-    def test_post_gnocchi_resources_alarm(self, __):
-        json = {
-            'enabled': False,
-            'name': 'name_post',
-            'state': 'ok',
-            'type': 'gnocchi_resources_threshold',
-            'severity': 'critical',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'gnocchi_resources_threshold_rule': {
-                'metric': 'ameter',
-                'comparison_operator': 'le',
-                'aggregation_method': 'count',
-                'threshold': 50,
-                'evaluation_periods': 3,
-                'granularity': 180,
-                'resource_type': 'instance',
-                'resource_id': '209ef69c-c10c-4efb-90ff-46f4b2d90d2e',
-            }
-        }
-
-        with mock.patch('requests.get',
-                        side_effect=requests.ConnectionError()):
-            resp = self.post_json('/alarms', params=json,
-                                  headers=self.auth_headers,
-                                  expect_errors=True)
-            self.assertEqual(503, resp.status_code, resp.body)
-
-        with mock.patch('requests.get',
-                        return_value=mock.Mock(status_code=500,
-                                               body="my_custom_error",
-                                               text="my_custom_error")):
-            resp = self.post_json('/alarms', params=json,
-                                  headers=self.auth_headers,
-                                  expect_errors=True)
-            self.assertEqual(503, resp.status_code, resp.body)
-            self.assertIn('my_custom_error',
-                          resp.json['error_message']['faultstring'])
-
-        cap_result = mock.Mock(status_code=201,
-                               text=jsonutils.dumps(
-                                   {'aggregation_methods': ['count']}))
-        resource_result = mock.Mock(status_code=200, text="blob")
-        with mock.patch('requests.get', side_effect=[cap_result,
-                                                     resource_result]
-                        ) as gnocchi_get:
-            self.post_json('/alarms', params=json, headers=self.auth_headers)
-
-            gnocchi_url = self.CONF.alarms.gnocchi_url
-            capabilities_url = urlparse.urljoin(gnocchi_url,
-                                                '/v1/capabilities')
-            resource_url = urlparse.urljoin(
-                gnocchi_url,
-                '/v1/resource/instance/209ef69c-c10c-4efb-90ff-46f4b2d90d2e'
-            )
-
-            expected = [mock.call(capabilities_url,
-                                  headers=mock.ANY),
-                        mock.call(resource_url,
-                                  headers=mock.ANY)]
-            self.assertEqual(expected, gnocchi_get.mock_calls)
-
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(1, len(alarms))
-        self._verify_alarm(json, alarms[0])
-
-    @mock.patch('aodh.keystone_client.get_client')
-    def test_post_gnocchi_metrics_alarm(self, __):
-        json = {
-            'enabled': False,
-            'name': 'name_post',
-            'state': 'ok',
-            'type': 'gnocchi_aggregation_by_metrics_threshold',
-            'severity': 'critical',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'gnocchi_aggregation_by_metrics_threshold_rule': {
-                'metrics': ['b3d9d8ab-05e8-439f-89ad-5e978dd2a5eb',
-                            '009d4faf-c275-46f0-8f2d-670b15bac2b0'],
-                'comparison_operator': 'le',
-                'aggregation_method': 'count',
-                'threshold': 50,
-                'evaluation_periods': 3,
-                'granularity': 180,
-            }
-        }
-
-        cap_result = mock.Mock(status_code=200,
-                               text=jsonutils.dumps(
-                                   {'aggregation_methods': ['count']}))
-        with mock.patch('requests.get', return_value=cap_result):
-            self.post_json('/alarms', params=json, headers=self.auth_headers)
-
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(1, len(alarms))
-        self._verify_alarm(json, alarms[0])
-
-    @mock.patch('aodh.keystone_client.get_client')
-    def test_post_gnocchi_aggregation_alarm_project_constraint(self, __):
-        self.CONF.set_override('gnocchi_url', 'http://localhost:8041',
-                               group='alarms')
-        json = {
-            'enabled': False,
-            'name': 'project_constraint',
-            'state': 'ok',
-            'type': 'gnocchi_aggregation_by_resources_threshold',
-            'severity': 'critical',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'gnocchi_aggregation_by_resources_threshold_rule': {
-                'metric': 'ameter',
-                'comparison_operator': 'le',
-                'aggregation_method': 'count',
-                'threshold': 50,
-                'evaluation_periods': 3,
-                'granularity': 180,
-                'resource_type': 'instance',
-                'query': '{"=": {"server_group": "my_autoscaling_group"}}',
-            }
-        }
-
-        cap_result = mock.Mock(status_code=201,
-                               text=jsonutils.dumps(
-                                   {'aggregation_methods': ['count']}))
-        resource_result = mock.Mock(status_code=200, text="blob")
-        query_check_result = mock.Mock(status_code=200, text="blob")
-
-        expected_query = ('{"and": [{"=": {"created_by_project_id": "%s"}}, '
-                          '{"=": {"server_group": "my_autoscaling_group"}}]}' %
-                          self.auth_headers['X-Project-Id'])
-
-        with mock.patch('requests.get',
-                        side_effect=[cap_result, resource_result]):
-            with mock.patch('requests.post',
-                            side_effect=[query_check_result]) as fake_post:
-
-                self.post_json('/alarms', params=json,
-                               headers=self.auth_headers)
-
-                self.assertEqual([mock.call(
-                    url=('http://localhost:8041/v1/aggregation/'
-                         'resource/instance/metric/ameter'),
-                    headers={'Content-Type': 'application/json',
-                             'X-Auth-Token': mock.ANY},
-                    params={'aggregation': 'count'},
-                    data=expected_query)],
-                    fake_post.mock_calls),
-
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(1, len(alarms))
-
-        json['gnocchi_aggregation_by_resources_threshold_rule']['query'] = (
-            expected_query)
-        self._verify_alarm(json, alarms[0])
 
 
 class TestAlarmsQuotas(TestAlarmsBase):
