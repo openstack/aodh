@@ -17,6 +17,8 @@ import datetime
 import operator
 import six
 
+from ceilometerclient import client as ceiloclient
+from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
 
@@ -25,6 +27,9 @@ from aodh.alarm.evaluator import utils
 from aodh.i18n import _, _LW
 
 LOG = log.getLogger(__name__)
+
+cfg.CONF.import_opt('http_timeout', 'aodh.service')
+cfg.CONF.import_group('service_credentials', 'aodh.service')
 
 COMPARATORS = {
     'gt': operator.gt,
@@ -41,6 +46,29 @@ class ThresholdEvaluator(evaluator.Evaluator):
     # the sliding evaluation window is extended to allow
     # for reporting/ingestion lag
     look_back = 1
+
+    def __init__(self, notifier):
+        super(ThresholdEvaluator, self).__init__(notifier)
+        self.api_client = None
+
+    @property
+    def _client(self):
+        """Construct or reuse an authenticated API client."""
+        if not self.api_client:
+            auth_config = cfg.CONF.service_credentials
+            creds = dict(
+                os_auth_url=auth_config.os_auth_url,
+                os_region_name=auth_config.os_region_name,
+                os_tenant_name=auth_config.os_tenant_name,
+                os_password=auth_config.os_password,
+                os_username=auth_config.os_username,
+                os_cacert=auth_config.os_cacert,
+                os_endpoint_type=auth_config.os_endpoint_type,
+                insecure=auth_config.insecure,
+                timeout=cfg.CONF.http_timeout,
+            )
+            self.api_client = ceiloclient.get_client(2, **creds)
+        return self.api_client
 
     @classmethod
     def _bound_duration(cls, alarm):

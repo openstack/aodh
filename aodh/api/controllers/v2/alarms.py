@@ -55,10 +55,6 @@ LOG = log.getLogger(__name__)
 
 
 ALARM_API_OPTS = [
-    cfg.BoolOpt('record_history',
-                default=True,
-                help='Record alarm change events.'
-                ),
     cfg.IntOpt('user_alarm_quota',
                default=None,
                help='Maximum number of alarms defined for a user.'
@@ -74,6 +70,7 @@ ALARM_API_OPTS = [
 ]
 
 cfg.CONF.register_opts(ALARM_API_OPTS, group='alarm')
+cfg.CONF.import_opt('record_history', 'aodh.alarm.evaluator', 'alarm')
 
 state_kind = ["ok", "alarm", "insufficient data"]
 state_kind_enum = wtypes.Enum(str, *state_kind)

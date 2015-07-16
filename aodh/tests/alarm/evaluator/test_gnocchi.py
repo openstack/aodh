@@ -177,9 +177,8 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self.requests.post.return_value = FakeResponse(200, [])
         self._evaluate_all_alarms()
         self._assert_all_alarms('insufficient data')
-        expected = [mock.call(alarm.alarm_id, state='insufficient data')
-                    for alarm in self.alarms]
-        update_calls = self.api_client.alarms.set_state.call_args_list
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual(expected, update_calls)
         expected = [mock.call(
             alarm,
@@ -241,9 +240,8 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
             self.requests.post.mock_calls)
 
         self._assert_all_alarms('alarm')
-        expected = [mock.call(alarm.alarm_id, state='alarm')
-                    for alarm in self.alarms]
-        update_calls = self.api_client.alarms.set_state.call_args_list
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual(expected, update_calls)
         reasons = ['Transition to alarm due to 5 samples outside'
                    ' threshold, most recent: %s' % avgs.values[-1],
@@ -272,9 +270,8 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self.requests.get.side_effect = [avgs, maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
-        expected = [mock.call(alarm.alarm_id, state='ok')
-                    for alarm in self.alarms]
-        update_calls = self.api_client.alarms.set_state.call_args_list
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual(expected, update_calls)
         reasons = ['Transition to ok due to 5 samples inside'
                    ' threshold, most recent: %s' % avgs.values[-1],
@@ -304,7 +301,7 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self._assert_all_alarms('ok')
         self.assertEqual(
             [],
-            self.api_client.alarms.set_state.call_args_list)
+            self.storage_conn.update_alarm.call_args_list)
         self.assertEqual([], self.notifier.notify.call_args_list)
 
     def test_equivocal_from_known_state_and_repeat_actions(self):
@@ -320,7 +317,7 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self.requests.get.side_effect = [avgs, maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
-        self.assertEqual([], self.api_client.alarms.set_state.call_args_list)
+        self.assertEqual([], self.storage_conn.update_alarm.call_args_list)
         reason = ('Remaining as ok due to 4 samples inside'
                   ' threshold, most recent: 8.0')
         reason_datas = self._reason_data('inside', 4, 8.0)
@@ -340,7 +337,7 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self.requests.get.side_effect = [avgs, maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('alarm')
-        self.assertEqual([], self.api_client.alarms.set_state.call_args_list)
+        self.assertEqual([], self.storage_conn.update_alarm.call_args_list)
         reason = ('Remaining as alarm due to 4 samples outside'
                   ' threshold, most recent: 7.0')
         reason_datas = self._reason_data('outside', 4, 7.0)
@@ -362,9 +359,8 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self.requests.get.side_effect = [avgs, maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('alarm')
-        expected = [mock.call(alarm.alarm_id, state='alarm')
-                    for alarm in self.alarms]
-        update_calls = self.api_client.alarms.set_state.call_args_list
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual(expected, update_calls)
         reasons = ['Transition to alarm due to 5 samples outside'
                    ' threshold, most recent: %s' % avgs.values[-1],
@@ -392,9 +388,8 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self.requests.get.side_effect = [avgs, maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('alarm')
-        expected = [mock.call(alarm.alarm_id, state='alarm')
-                    for alarm in self.alarms]
-        update_calls = self.api_client.alarms.set_state.call_args_list
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual(expected, update_calls)
         reasons = ['Transition to alarm due to 5 samples outside'
                    ' threshold, most recent: %s' % avgs.values[-1],
@@ -431,7 +426,7 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self.requests.get.return_value = []
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
-        update_calls = self.api_client.alarms.set_state.call_args_list
+        update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual([], update_calls,
                          "Alarm should not change state if the current "
                          " time is outside its time constraint.")

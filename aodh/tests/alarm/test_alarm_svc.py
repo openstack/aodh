@@ -38,7 +38,8 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
                     self.threshold_eval),
             ]
         )
-        self.api_client = mock.MagicMock()
+
+        self.storage_conn = mock.MagicMock()
         self.svc = service.AlarmEvaluationService()
         self.svc.tg = mock.Mock()
         self.svc.partition_coordinator = mock.MagicMock()
@@ -56,8 +57,8 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         self.CONF.set_override('heartbeat',
                                coordination_heartbeat,
                                group='coordination')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
+        with mock.patch('aodh.storage.get_connection_from_config',
+                        return_value=self.storage_conn):
             p_coord_mock = self.svc.partition_coordinator
             p_coord_mock.is_active.return_value = coordination_active
 
@@ -93,9 +94,9 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
 
     def test_evaluation_cycle(self):
         alarm = mock.Mock(type='threshold')
-        self.api_client.alarms.list.return_value = [alarm]
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
+        self.storage_conn.get_alarms.return_value = [alarm]
+        with mock.patch('aodh.storage.get_connection_from_config',
+                        return_value=self.storage_conn):
             p_coord_mock = self.svc.partition_coordinator
             p_coord_mock.extract_my_subset.return_value = [alarm]
 
@@ -110,10 +111,10 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
             mock.Mock(type='threshold', name='bad'),
             mock.Mock(type='threshold', name='good'),
         ]
-        self.api_client.alarms.list.return_value = alarms
+        self.storage_conn.get_alarms.return_value = alarms
         self.threshold_eval.evaluate.side_effect = [Exception('Boom!'), None]
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
+        with mock.patch('aodh.storage.get_connection_from_config',
+                        return_value=self.storage_conn):
             p_coord_mock = self.svc.partition_coordinator
             p_coord_mock.extract_my_subset.return_value = alarms
 
@@ -127,32 +128,9 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
             mock.Mock(type='threshold')
         ]
 
-        self.api_client.alarms.list.return_value = alarms
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
+        self.storage_conn.get_alarms.return_value = alarms
+        with mock.patch('aodh.storage.get_connection_from_config',
+                        return_value=self.storage_conn):
             self.svc.start()
             self.svc._evaluate_assigned_alarms()
             self.threshold_eval.evaluate.assert_called_once_with(alarms[1])
-
-    def test_singleton_endpoint_types(self):
-        endpoint_types = ["internalURL", "publicURL"]
-        for endpoint_type in endpoint_types:
-            self.CONF.set_override('os_endpoint_type',
-                                   endpoint_type,
-                                   group='service_credentials')
-            with mock.patch('ceilometerclient.client.get_client') as client:
-                self.svc.api_client = None
-                self.svc._evaluate_assigned_alarms()
-                conf = self.CONF.service_credentials
-                expected = [mock.call(2,
-                                      os_auth_url=conf.os_auth_url,
-                                      os_region_name=conf.os_region_name,
-                                      os_tenant_name=conf.os_tenant_name,
-                                      os_password=conf.os_password,
-                                      os_username=conf.os_username,
-                                      os_cacert=conf.os_cacert,
-                                      os_endpoint_type=conf.os_endpoint_type,
-                                      timeout=self.CONF.http_timeout,
-                                      insecure=conf.insecure)]
-                actual = client.call_args_list
-                self.assertEqual(expected, actual)

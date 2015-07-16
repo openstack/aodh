@@ -19,7 +19,6 @@
 
 import abc
 
-from ceilometerclient import client as ceiloclient
 from oslo_config import cfg
 from oslo_log import log
 from oslo_service import service as os_service
@@ -32,6 +31,7 @@ from aodh.alarm import rpc as rpc_alarm
 from aodh import coordination as coordination
 from aodh.i18n import _
 from aodh import messaging
+from aodh import storage
 
 
 OPTS = [
@@ -45,8 +45,6 @@ OPTS = [
 ]
 
 cfg.CONF.register_opts(OPTS, group='alarm')
-cfg.CONF.import_opt('http_timeout', 'aodh.service')
-cfg.CONF.import_group('service_credentials', 'aodh.service')
 
 LOG = log.getLogger(__name__)
 
@@ -56,8 +54,14 @@ class AlarmService(object):
 
     def __init__(self):
         super(AlarmService, self).__init__()
+        self.storage_conn = None
         self._load_evaluators()
-        self.api_client = None
+
+    @property
+    def _storage_conn(self):
+        if not self.storage_conn:
+            self.storage_conn = storage.get_connection_from_config(cfg.CONF)
+        return self.storage_conn
 
     def _load_evaluators(self):
         self.evaluators = extension.ExtensionManager(
@@ -65,25 +69,6 @@ class AlarmService(object):
             invoke_on_load=True,
             invoke_args=(rpc_alarm.RPCAlarmNotifier(),)
         )
-
-    @property
-    def _client(self):
-        """Construct or reuse an authenticated API client."""
-        if not self.api_client:
-            auth_config = cfg.CONF.service_credentials
-            creds = dict(
-                os_auth_url=auth_config.os_auth_url,
-                os_region_name=auth_config.os_region_name,
-                os_tenant_name=auth_config.os_tenant_name,
-                os_password=auth_config.os_password,
-                os_username=auth_config.os_username,
-                os_cacert=auth_config.os_cacert,
-                os_endpoint_type=auth_config.os_endpoint_type,
-                insecure=auth_config.insecure,
-                timeout=cfg.CONF.http_timeout,
-            )
-            self.api_client = ceiloclient.get_client(2, **creds)
-        return self.api_client
 
     def _evaluate_assigned_alarms(self):
         try:
@@ -123,6 +108,7 @@ class AlarmEvaluationService(AlarmService, os_service.Service):
 
     def start(self):
         super(AlarmEvaluationService, self).start()
+        self.storage_conn = storage.get_connection_from_config(cfg.CONF)
         self.partition_coordinator.start()
         self.partition_coordinator.join_group(self.PARTITIONING_GROUP_NAME)
 
@@ -144,8 +130,7 @@ class AlarmEvaluationService(AlarmService, os_service.Service):
         self.tg.add_timer(604800, lambda: None)
 
     def _assigned_alarms(self):
-        all_alarms = self._client.alarms.list(q=[{'field': 'enabled',
-                                                  'value': True}])
+        all_alarms = self._storage_conn.get_alarms(enabled=True)
         return self.partition_coordinator.extract_my_subset(
             self.PARTITIONING_GROUP_NAME, all_alarms)
 

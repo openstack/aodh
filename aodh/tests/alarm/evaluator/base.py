@@ -24,6 +24,8 @@ class TestEvaluatorBase(base.BaseTestCase):
         self.api_client = mock.Mock()
         self.notifier = mock.MagicMock()
         self.evaluator = self.EVALUATOR(self.notifier)
+        self.storage_conn = mock.MagicMock()
+        self.evaluator.storage_conn = self.storage_conn
         self.prepare_alarms()
 
     @staticmethod

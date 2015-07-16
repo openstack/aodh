@@ -18,17 +18,22 @@
 
 import abc
 import datetime
+import json
 
-from ceilometerclient import client as ceiloclient
 import croniter
 from oslo_config import cfg
+from oslo_context import context
 from oslo_log import log
 from oslo_utils import timeutils
 import pytz
 import six
+import uuid
 
+import aodh
 from aodh.i18n import _
-
+from aodh import messaging
+from aodh import storage
+from aodh.storage import models
 
 LOG = log.getLogger(__name__)
 
@@ -36,8 +41,15 @@ UNKNOWN = 'insufficient data'
 OK = 'ok'
 ALARM = 'alarm'
 
-cfg.CONF.import_opt('http_timeout', 'aodh.service')
-cfg.CONF.import_group('service_credentials', 'aodh.service')
+
+OPTS = [
+    cfg.BoolOpt('record_history',
+                default=True,
+                help='Record alarm change events.'
+                ),
+]
+
+cfg.CONF.register_opts(OPTS, group="alarm")
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -46,39 +58,57 @@ class Evaluator(object):
 
     def __init__(self, notifier):
         self.notifier = notifier
-        self.api_client = None
+        self.storage_conn = None
 
     @property
-    def _client(self):
-        """Construct or reuse an authenticated API client."""
-        if not self.api_client:
-            auth_config = cfg.CONF.service_credentials
-            creds = dict(
-                os_auth_url=auth_config.os_auth_url,
-                os_region_name=auth_config.os_region_name,
-                os_tenant_name=auth_config.os_tenant_name,
-                os_password=auth_config.os_password,
-                os_username=auth_config.os_username,
-                os_cacert=auth_config.os_cacert,
-                os_endpoint_type=auth_config.os_endpoint_type,
-                insecure=auth_config.insecure,
-                timeout=cfg.CONF.http_timeout,
-            )
-            self.api_client = ceiloclient.get_client(2, **creds)
-        return self.api_client
+    def _storage_conn(self):
+        if not self.storage_conn:
+            self.storage_conn = storage.get_connection_from_config(cfg.CONF)
+        return self.storage_conn
+
+    def _record_change(self, alarm):
+        if not cfg.CONF.alarm.record_history:
+            return
+        type = models.AlarmChange.STATE_TRANSITION
+        detail = json.dumps({'state': alarm.state})
+        # TODO(liusheng) the user_id and project_id should be
+        # specify than None?
+        user_id = None
+        project_id = None
+        on_behalf_of = alarm.project_id
+        now = timeutils.utcnow()
+        payload = dict(event_id=str(uuid.uuid4()),
+                       alarm_id=alarm.alarm_id,
+                       type=type,
+                       detail=detail,
+                       user_id=user_id,
+                       project_id=project_id,
+                       on_behalf_of=on_behalf_of,
+                       timestamp=now)
+
+        try:
+            self._storage_conn.record_alarm_change(payload)
+        except aodh.NotImplementedError:
+            pass
+        notification = "alarm.state_transition"
+        transport = messaging.get_transport()
+        notifier = messaging.get_notifier(transport,
+                                          publisher_id="aodh.alarm.evaluator")
+        notifier.info(context.RequestContext(), notification, payload)
 
     def _refresh(self, alarm, state, reason, reason_data):
         """Refresh alarm state."""
         try:
             previous = alarm.state
+            alarm.state = state
             if previous != state:
                 LOG.info(_('alarm %(id)s transitioning to %(state)s because '
                            '%(reason)s') % {'id': alarm.alarm_id,
                                             'state': state,
                                             'reason': reason})
 
-                self._client.alarms.set_state(alarm.alarm_id, state=state)
-            alarm.state = state
+                self._storage_conn.update_alarm(alarm)
+                self._record_change(alarm)
             if self.notifier:
                 self.notifier.notify(alarm, previous, reason, reason_data)
         except Exception:

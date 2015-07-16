@@ -41,9 +41,12 @@ class TestEvaluatorBaseClass(base.BaseTestCase):
                 pass
 
         ev = EvaluatorSub(notifier)
-        ev.api_client = mock.MagicMock()
+        ev.storage_conn = mock.MagicMock()
+        ev._record_change = mock.MagicMock()
         ev._refresh(mock.MagicMock(), mock.MagicMock(),
                     mock.MagicMock(), mock.MagicMock())
+        ev.storage_conn.update_alarm.assert_called_once_with(mock.ANY)
+        ev._record_change.assert_called_once_with(mock.ANY)
         self.assertTrue(self.called)
 
     @mock.patch.object(timeutils, 'utcnow')

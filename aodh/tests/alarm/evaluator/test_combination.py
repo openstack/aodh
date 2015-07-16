@@ -111,233 +111,207 @@ class TestEvaluate(base.TestEvaluatorBase):
                 [self._reason_data(alarm_ids1), self._reason_data(alarm_ids2)])
 
     def test_retry_transient_api_failure(self):
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            broken = exc.CommunicationError(message='broken')
-            self.api_client.alarms.get.side_effect = [
-                broken,
-                broken,
-                broken,
-                broken,
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-            ]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('insufficient data')
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('ok')
+        broken = exc.CommunicationError(message='broken')
+        self.storage_conn.get_alarms.side_effect = [
+            broken,
+            broken,
+            broken,
+            broken,
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+        ]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('insufficient data')
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
 
     def test_simple_insufficient(self):
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            broken = exc.CommunicationError(message='broken')
-            self.api_client.alarms.get.side_effect = broken
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('insufficient data')
-            expected = [mock.call(alarm.alarm_id, state='insufficient data')
-                        for alarm in self.alarms]
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual(expected, update_calls)
-            expected = [mock.call(
-                alarm,
-                'ok',
-                ('Alarms %s are in unknown state' %
-                 (",".join(alarm.rule['alarm_ids']))),
-                self._reason_data(alarm.rule['alarm_ids']))
-                for alarm in self.alarms]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        broken = exc.CommunicationError(message='broken')
+        self.storage_conn.get_alarms.side_effect = broken
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('insufficient data')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        expected = [mock.call(
+            alarm,
+            'ok',
+            ('Alarms %s are in unknown state' %
+             (",".join(alarm.rule['alarm_ids']))),
+            self._reason_data(alarm.rule['alarm_ids']))
+            for alarm in self.alarms]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_to_ok_with_all_ok(self):
         self._set_all_alarms('insufficient data')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.alarms.get.side_effect = [
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-            ]
-            self._evaluate_all_alarms()
-            expected = [mock.call(alarm.alarm_id, state='ok')
-                        for alarm in self.alarms]
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual(expected, update_calls)
-            reasons, reason_datas = self._combination_transition_reason(
-                'ok',
-                self.alarms[0].rule['alarm_ids'],
-                self.alarms[1].rule['alarm_ids'])
-            expected = [mock.call(alarm, 'insufficient data',
-                                  reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        self.storage_conn.get_alarms.side_effect = [
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+        ]
+        self._evaluate_all_alarms()
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reasons, reason_datas = self._combination_transition_reason(
+            'ok',
+            self.alarms[0].rule['alarm_ids'],
+            self.alarms[1].rule['alarm_ids'])
+        expected = [mock.call(alarm, 'insufficient data',
+                              reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_to_ok_with_one_alarm(self):
         self._set_all_alarms('alarm')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.alarms.get.side_effect = [
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('alarm'),
-                self._get_alarm('ok'),
-            ]
-            self._evaluate_all_alarms()
-            expected = [mock.call(alarm.alarm_id, state='ok')
-                        for alarm in self.alarms]
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual(expected, update_calls)
-            reasons, reason_datas = self._combination_transition_reason(
-                'ok',
-                self.alarms[0].rule['alarm_ids'],
-                [self.alarms[1].rule['alarm_ids'][1]])
-            expected = [mock.call(alarm, 'alarm', reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        self.storage_conn.get_alarms.side_effect = [
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('alarm'),
+            self._get_alarm('ok'),
+        ]
+        self._evaluate_all_alarms()
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reasons, reason_datas = self._combination_transition_reason(
+            'ok',
+            self.alarms[0].rule['alarm_ids'],
+            [self.alarms[1].rule['alarm_ids'][1]])
+        expected = [mock.call(alarm, 'alarm', reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_to_alarm_with_all_alarm(self):
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.alarms.get.side_effect = [
-                self._get_alarm('alarm'),
-                self._get_alarm('alarm'),
-                self._get_alarm('alarm'),
-                self._get_alarm('alarm'),
-            ]
-            self._evaluate_all_alarms()
-            expected = [mock.call(alarm.alarm_id, state='alarm')
-                        for alarm in self.alarms]
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual(expected, update_calls)
-            reasons, reason_datas = self._combination_transition_reason(
-                'alarm',
-                self.alarms[0].rule['alarm_ids'],
-                self.alarms[1].rule['alarm_ids'])
-            expected = [mock.call(alarm, 'ok', reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        self.storage_conn.get_alarms.side_effect = [
+            self._get_alarm('alarm'),
+            self._get_alarm('alarm'),
+            self._get_alarm('alarm'),
+            self._get_alarm('alarm'),
+        ]
+        self._evaluate_all_alarms()
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reasons, reason_datas = self._combination_transition_reason(
+            'alarm',
+            self.alarms[0].rule['alarm_ids'],
+            self.alarms[1].rule['alarm_ids'])
+        expected = [mock.call(alarm, 'ok', reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_to_alarm_with_one_insufficient_data(self):
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.alarms.get.side_effect = [
-                self._get_alarm('insufficient data'),
-                self._get_alarm('alarm'),
-                self._get_alarm('alarm'),
-                self._get_alarm('alarm'),
-            ]
-            self._evaluate_all_alarms()
-            expected = [mock.call(alarm.alarm_id, state='alarm')
-                        for alarm in self.alarms]
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual(expected, update_calls)
-            reasons, reason_datas = self._combination_transition_reason(
-                'alarm',
-                [self.alarms[0].rule['alarm_ids'][1]],
-                self.alarms[1].rule['alarm_ids'])
-            expected = [mock.call(alarm, 'ok', reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        self.storage_conn.get_alarms.side_effect = [
+            self._get_alarm('insufficient data'),
+            self._get_alarm('alarm'),
+            self._get_alarm('alarm'),
+            self._get_alarm('alarm'),
+        ]
+        self._evaluate_all_alarms()
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reasons, reason_datas = self._combination_transition_reason(
+            'alarm',
+            [self.alarms[0].rule['alarm_ids'][1]],
+            self.alarms[1].rule['alarm_ids'])
+        expected = [mock.call(alarm, 'ok', reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_to_alarm_with_one_ok(self):
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.alarms.get.side_effect = [
-                self._get_alarm('ok'),
-                self._get_alarm('alarm'),
-                self._get_alarm('alarm'),
-                self._get_alarm('alarm'),
-            ]
-            self._evaluate_all_alarms()
-            expected = [mock.call(alarm.alarm_id, state='alarm')
-                        for alarm in self.alarms]
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual(expected, update_calls)
-            reasons, reason_datas = self._combination_transition_reason(
-                'alarm',
-                [self.alarms[0].rule['alarm_ids'][1]],
-                self.alarms[1].rule['alarm_ids'])
-            expected = [mock.call(alarm, 'ok', reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        self.storage_conn.get_alarms.side_effect = [
+            self._get_alarm('ok'),
+            self._get_alarm('alarm'),
+            self._get_alarm('alarm'),
+            self._get_alarm('alarm'),
+        ]
+        self._evaluate_all_alarms()
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reasons, reason_datas = self._combination_transition_reason(
+            'alarm',
+            [self.alarms[0].rule['alarm_ids'][1]],
+            self.alarms[1].rule['alarm_ids'])
+        expected = [mock.call(alarm, 'ok', reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_to_unknown(self):
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            broken = exc.CommunicationError(message='broken')
-            self.api_client.alarms.get.side_effect = [
-                broken,
-                self._get_alarm('ok'),
-                self._get_alarm('insufficient data'),
-                self._get_alarm('ok'),
-            ]
-            self._evaluate_all_alarms()
-            expected = [mock.call(alarm.alarm_id, state='insufficient data')
-                        for alarm in self.alarms]
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual(expected, update_calls)
-            reasons = ['Alarms %s are in unknown state'
-                       % self.alarms[0].rule['alarm_ids'][0],
-                       'Alarms %s are in unknown state'
-                       % self.alarms[1].rule['alarm_ids'][0]]
-            reason_datas = [
-                self._reason_data([self.alarms[0].rule['alarm_ids'][0]]),
-                self._reason_data([self.alarms[1].rule['alarm_ids'][0]])]
-            expected = [mock.call(alarm, 'ok', reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        broken = exc.CommunicationError(message='broken')
+        self.storage_conn.get_alarms.side_effect = [
+            broken,
+            self._get_alarm('ok'),
+            self._get_alarm('insufficient data'),
+            self._get_alarm('ok'),
+        ]
+        self._evaluate_all_alarms()
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reasons = ['Alarms %s are in unknown state'
+                   % self.alarms[0].rule['alarm_ids'][0],
+                   'Alarms %s are in unknown state'
+                   % self.alarms[1].rule['alarm_ids'][0]]
+        reason_datas = [
+            self._reason_data([self.alarms[0].rule['alarm_ids'][0]]),
+            self._reason_data([self.alarms[1].rule['alarm_ids'][0]])]
+        expected = [mock.call(alarm, 'ok', reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_no_state_change(self):
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.alarms.get.side_effect = [
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-            ]
-            self._evaluate_all_alarms()
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual([], update_calls)
-            self.assertEqual([], self.notifier.notify.call_args_list)
+
+        self.storage_conn.get_alarms.side_effect = [
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+        ]
+        self._evaluate_all_alarms()
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual([], update_calls)
+        self.assertEqual([], self.notifier.notify.call_args_list)
 
     def test_no_state_change_and_repeat_actions(self):
         self.alarms[0].repeat_actions = True
         self.alarms[1].repeat_actions = True
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.alarms.get.side_effect = [
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-            ]
-            self._evaluate_all_alarms()
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual([], update_calls)
-            reasons, reason_datas = self._combination_remaining_reason(
-                'ok',
-                self.alarms[0].rule['alarm_ids'],
-                self.alarms[1].rule['alarm_ids'])
-            expected = [mock.call(alarm, 'ok', reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
+        self.storage_conn.get_alarms.side_effect = [
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+        ]
+        self._evaluate_all_alarms()
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual([], update_calls)
+        reasons, reason_datas = self._combination_remaining_reason(
+            'ok',
+            self.alarms[0].rule['alarm_ids'],
+            self.alarms[1].rule['alarm_ids'])
+        expected = [mock.call(alarm, 'ok', reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
 
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     @mock.patch.object(timeutils, 'utcnow')
     def test_state_change_inside_time_constraint(self, mock_utcnow):
@@ -353,30 +327,27 @@ class TestEvaluate(base.TestEvaluatorBase):
         dt = datetime.datetime(2014, 1, 1, 12, 0, 0,
                                tzinfo=pytz.timezone('Europe/Ljubljana'))
         mock_utcnow.return_value = dt.astimezone(pytz.UTC)
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.alarms.get.side_effect = [
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-            ]
-            self._evaluate_all_alarms()
-            expected = [mock.call(alarm.alarm_id, state='ok')
-                        for alarm in self.alarms]
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual(expected, update_calls,
-                             "Alarm should change state if the current "
-                             "time is inside its time constraint.")
-            reasons, reason_datas = self._combination_transition_reason(
-                'ok',
-                self.alarms[0].rule['alarm_ids'],
-                self.alarms[1].rule['alarm_ids'])
-            expected = [mock.call(alarm, 'insufficient data',
-                                  reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        self.storage_conn.get_alarms.side_effect = [
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+        ]
+        self._evaluate_all_alarms()
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls,
+                         "Alarm should change state if the current "
+                         "time is inside its time constraint.")
+        reasons, reason_datas = self._combination_transition_reason(
+            'ok',
+            self.alarms[0].rule['alarm_ids'],
+            self.alarms[1].rule['alarm_ids'])
+        expected = [mock.call(alarm, 'insufficient data',
+                              reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     @mock.patch.object(timeutils, 'utcnow')
     def test_no_state_change_outside_time_constraint(self, mock_utcnow):
@@ -392,17 +363,16 @@ class TestEvaluate(base.TestEvaluatorBase):
         dt = datetime.datetime(2014, 1, 1, 15, 0, 0,
                                tzinfo=pytz.timezone('Europe/Ljubljana'))
         mock_utcnow.return_value = dt.astimezone(pytz.UTC)
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.alarms.get.side_effect = [
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-                self._get_alarm('ok'),
-            ]
-            self._evaluate_all_alarms()
-            update_calls = self.api_client.alarms.set_state.call_args_list
-            self.assertEqual([], update_calls,
-                             "Alarm should not change state if the current "
-                             " time is outside its time constraint.")
-            self.assertEqual([], self.notifier.notify.call_args_list)
+
+        self.storage_conn.get_alarms.side_effect = [
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+            self._get_alarm('ok'),
+        ]
+        self._evaluate_all_alarms()
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual([], update_calls,
+                         "Alarm should not change state if the current "
+                         " time is outside its time constraint.")
+        self.assertEqual([], self.notifier.notify.call_args_list)
