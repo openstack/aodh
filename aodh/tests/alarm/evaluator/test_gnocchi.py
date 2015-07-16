@@ -158,7 +158,7 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         means = self._get_stats(60, [self.alarms[0].rule['threshold'] - v
                                      for v in moves.xrange(5)])
         maxs = self._get_stats(300, [self.alarms[1].rule['threshold'] + v
-                                     for v in moves.xrange(1, 4)])
+                                     for v in moves.xrange(4)])
         avgs2 = self._get_stats(50, [self.alarms[2].rule['threshold'] - v
                                      for v in moves.xrange(6)])
         self.requests.get.side_effect = [Exception('boom'),

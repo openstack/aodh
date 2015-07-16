@@ -15,6 +15,7 @@
 
 import datetime
 import operator
+import six
 
 from oslo_log import log
 from oslo_utils import timeutils
@@ -42,7 +43,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
     look_back = 1
 
     @classmethod
-    def _bound_duration(cls, alarm, constraints):
+    def _bound_duration(cls, alarm):
         """Bound the duration of the statistics query."""
         now = timeutils.utcnow()
         # when exclusion of weak datapoints is enabled, we extend
@@ -50,15 +51,12 @@ class ThresholdEvaluator(evaluator.Evaluator):
         # trend to be established
         look_back = (cls.look_back if not alarm.rule.get('exclude_outliers')
                      else alarm.rule['evaluation_periods'])
-        window = (alarm.rule['period'] *
-                  (alarm.rule['evaluation_periods'] + look_back))
+        window = ((alarm.rule.get('period', None) or alarm.rule['granularity'])
+                  * (alarm.rule['evaluation_periods'] + look_back))
         start = now - datetime.timedelta(seconds=window)
         LOG.debug(_('query stats from %(start)s to '
                     '%(now)s') % {'start': start, 'now': now})
-        after = dict(field='timestamp', op='ge', value=start.isoformat())
-        before = dict(field='timestamp', op='le', value=now.isoformat())
-        constraints.extend([before, after])
-        return constraints
+        return start.isoformat(), now.isoformat()
 
     @staticmethod
     def _sanitize(alarm, statistics):
@@ -81,11 +79,17 @@ class ThresholdEvaluator(evaluator.Evaluator):
         # in practice statistics are always sorted by period start, not
         # strictly required by the API though
         statistics = statistics[-alarm.rule['evaluation_periods']:]
+        result_statistics = [getattr(stat, alarm.rule['statistic'])
+                             for stat in statistics]
         LOG.debug(_('pruned statistics to %d') % len(statistics))
-        return statistics
+        return result_statistics
 
-    def _statistics(self, alarm, query):
+    def _statistics(self, alarm, start, end):
         """Retrieve statistics over the current window."""
+        after = dict(field='timestamp', op='ge', value=start)
+        before = dict(field='timestamp', op='le', value=end)
+        query = alarm.rule['query']
+        query.extend([before, after])
         LOG.debug(_('stats query %s') % query)
         try:
             return self._client.statistics.list(
@@ -111,8 +115,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
             # consistent since thirdparty software may depend on old format.
             reason = _('%d datapoints are unknown') % alarm.rule[
                 'evaluation_periods']
-            last = None if not statistics else (
-                getattr(statistics[-1], alarm.rule['statistic']))
+            last = None if not statistics else statistics[-1]
             reason_data = self._reason_data('unknown',
                                             alarm.rule['evaluation_periods'],
                                             last)
@@ -130,7 +133,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
         """Fabricate reason string."""
         count = len(statistics)
         disposition = 'inside' if state == evaluator.OK else 'outside'
-        last = getattr(statistics[-1], alarm.rule['statistic'])
+        last = statistics[-1]
         transition = alarm.state != state
         reason_data = cls._reason_data(disposition, count, last)
         if transition:
@@ -179,20 +182,13 @@ class ThresholdEvaluator(evaluator.Evaluator):
                         'within its time constraint.') % alarm.alarm_id)
             return
 
-        query = self._bound_duration(
-            alarm,
-            alarm.rule['query']
-        )
-
-        statistics = self._sanitize(
-            alarm,
-            self._statistics(alarm, query)
-        )
+        start, end = self._bound_duration(alarm)
+        statistics = self._statistics(alarm, start, end)
+        statistics = self._sanitize(alarm, statistics)
 
         if self._sufficient(alarm, statistics):
-            def _compare(stat):
+            def _compare(value):
                 op = COMPARATORS[alarm.rule['comparison_operator']]
-                value = getattr(stat, alarm.rule['statistic'])
                 limit = alarm.rule['threshold']
                 LOG.debug(_('comparing value %(value)s against threshold'
                             ' %(limit)s') %
@@ -201,4 +197,4 @@ class ThresholdEvaluator(evaluator.Evaluator):
 
             self._transition(alarm,
                              statistics,
-                             [_compare(statistic) for statistic in statistics])
+                             list(six.moves.map(_compare, statistics)))
