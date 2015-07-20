@@ -14,15 +14,10 @@
 # under the License.
 """Rest alarm notifier with trusted authentication."""
 
-from oslo_config import cfg
 from six.moves.urllib import parse
 
 from aodh.alarm.notifier import rest
 from aodh import keystone_client
-
-
-cfg.CONF.import_opt('http_timeout', 'aodh.service')
-cfg.CONF.import_group('service_credentials', 'aodh.service')
 
 
 class TrustRestAlarmNotifier(rest.RestAlarmNotifier):
