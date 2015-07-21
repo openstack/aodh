@@ -127,8 +127,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         action = 'https://host/action'
         certificate = "/etc/ssl/cert/whatever.pem"
 
-        self.CONF.set_override("rest_notifier_certificate_file", certificate,
-                               group='alarm')
+        self.CONF.set_override("rest_notifier_certificate_file", certificate)
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:
@@ -146,10 +145,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         certificate = "/etc/ssl/cert/whatever.pem"
         key = "/etc/ssl/cert/whatever.key"
 
-        self.CONF.set_override("rest_notifier_certificate_file", certificate,
-                               group='alarm')
-        self.CONF.set_override("rest_notifier_certificate_key", key,
-                               group='alarm')
+        self.CONF.set_override("rest_notifier_certificate_file", certificate)
+        self.CONF.set_override("rest_notifier_certificate_key", key)
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:
@@ -165,8 +162,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
     def test_notify_alarm_rest_action_with_ssl_verify_disable_by_cfg(self):
         action = 'https://host/action'
 
-        self.CONF.set_override("rest_notifier_ssl_verify", False,
-                               group='alarm')
+        self.CONF.set_override("rest_notifier_ssl_verify", False)
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:
@@ -196,8 +192,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
     def test_notify_alarm_rest_action_with_ssl_verify_enable_by_user(self):
         action = 'https://host/action?aodh-alarm-ssl-verify=1'
 
-        self.CONF.set_override("rest_notifier_ssl_verify", False,
-                               group='alarm')
+        self.CONF.set_override("rest_notifier_ssl_verify", False)
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:

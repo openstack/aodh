@@ -16,8 +16,8 @@
 
 from six.moves.urllib import parse
 
-from aodh.alarm.notifier import rest
 from aodh import keystone_client
+from aodh.notifier import rest
 
 
 class TrustRestAlarmNotifier(rest.RestAlarmNotifier):

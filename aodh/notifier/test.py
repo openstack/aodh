@@ -14,7 +14,7 @@
 # under the License.
 """Test alarm notifier."""
 
-from aodh.alarm import notifier
+from aodh import notifier
 
 
 class TestAlarmNotifier(notifier.AlarmNotifier):

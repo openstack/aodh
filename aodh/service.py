@@ -221,7 +221,7 @@ class AlarmEvaluationService(AlarmService, os_service.Service):
 
 
 class AlarmNotifierService(os_service.Service):
-    NOTIFIER_EXTENSIONS_NAMESPACE = "aodh.alarm.notifier"
+    NOTIFIER_EXTENSIONS_NAMESPACE = "aodh.notifier"
 
     def __init__(self):
         super(AlarmNotifierService, self).__init__()

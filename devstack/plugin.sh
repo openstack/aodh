@@ -263,7 +263,7 @@ function start_aodh {
         fi
     fi
 
-    run_process aodh-alarm-notifier "$AODH_BIN_DIR/aodh-alarm-notifier --config-file $AODH_CONF"
+    run_process aodh-notifier "$AODH_BIN_DIR/aodh-notifier --config-file $AODH_CONF"
     run_process aodh-alarm-evaluator "$AODH_BIN_DIR/aodh-alarm-evaluator --config-file $AODH_CONF"
 }
 
@@ -274,7 +274,7 @@ function stop_aodh {
         restart_apache_server
     fi
     # Kill the aodh screen windows
-    for serv in aodh-api aodh-alarm-notifier aodh-alarm-evaluator; do
+    for serv in aodh-api aodh-notifier aodh-alarm-evaluator; do
         stop_process $serv
     done
 }

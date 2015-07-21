@@ -45,7 +45,7 @@ Configuring devstack
       [[local|localrc]]
 
       # Enable the aodh alarming services
-      enable_service aodh-alarm-evaluator,aodh-alarm-notifier
+      enable_service aodh-alarm-evaluator,aodh-notifier
 
    The first group of daemons are necessary for core aodh functionality:
    polling, event listening, and data collection.

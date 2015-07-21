@@ -16,8 +16,8 @@
 
 from oslo_log import log
 
-from aodh.alarm import notifier
 from aodh.i18n import _
+from aodh import notifier
 
 LOG = log.getLogger(__name__)
 

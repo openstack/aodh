@@ -22,33 +22,37 @@ from oslo_serialization import jsonutils
 import requests
 import six.moves.urllib.parse as urlparse
 
-from aodh.alarm import notifier
 from aodh.i18n import _
+from aodh import notifier
 
 LOG = log.getLogger(__name__)
 
 OPTS = [
     cfg.StrOpt('rest_notifier_certificate_file',
                default='',
+               deprecated_group="alarm",
                help='SSL Client certificate for REST notifier.'
                ),
     cfg.StrOpt('rest_notifier_certificate_key',
                default='',
+               deprecated_group="alarm",
                help='SSL Client private key for REST notifier.'
                ),
     cfg.BoolOpt('rest_notifier_ssl_verify',
                 default=True,
+                deprecated_group="alarm",
                 help='Whether to verify the SSL Server certificate when '
                 'calling alarm action.'
                 ),
     cfg.IntOpt('rest_notifier_max_retries',
                default=0,
+               deprecated_group="alarm",
                help='Number of retries for REST notifier',
                ),
 
 ]
 
-cfg.CONF.register_opts(OPTS, group="alarm")
+cfg.CONF.register_opts(OPTS)
 
 
 class RestAlarmNotifier(notifier.AlarmNotifier):
@@ -78,14 +82,14 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
                   'headers': headers}
 
         if action.scheme == 'https':
-            default_verify = int(cfg.CONF.alarm.rest_notifier_ssl_verify)
+            default_verify = int(cfg.CONF.rest_notifier_ssl_verify)
             options = urlparse.parse_qs(action.query)
             verify = bool(int(options.get('aodh-alarm-ssl-verify',
                                           [default_verify])[-1]))
             kwargs['verify'] = verify
 
-            cert = cfg.CONF.alarm.rest_notifier_certificate_file
-            key = cfg.CONF.alarm.rest_notifier_certificate_key
+            cert = cfg.CONF.rest_notifier_certificate_file
+            key = cfg.CONF.rest_notifier_certificate_key
             if cert:
                 kwargs['cert'] = (cert, key) if key else cert
 
@@ -93,7 +97,7 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
         # library. However, there's no interval between retries in urllib3
         # implementation. It will be better to put some interval between
         # retries (future work).
-        max_retries = cfg.CONF.alarm.rest_notifier_max_retries
+        max_retries = cfg.CONF.rest_notifier_max_retries
         session = requests.Session()
         session.mount(action.geturl(),
                       requests.adapters.HTTPAdapter(max_retries=max_retries))
