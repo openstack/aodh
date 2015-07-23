@@ -2365,7 +2365,7 @@ class TestAlarms(TestAlarmsBase):
                         ) as gnocchi_get:
             self.post_json('/alarms', params=json, headers=self.auth_headers)
 
-            gnocchi_url = self.CONF.alarms.gnocchi_url
+            gnocchi_url = self.CONF.gnocchi_url
             capabilities_url = urlparse.urljoin(gnocchi_url,
                                                 '/v1/capabilities')
             resource_url = urlparse.urljoin(
@@ -2418,8 +2418,7 @@ class TestAlarms(TestAlarmsBase):
 
     @mock.patch('aodh.keystone_client.get_client')
     def test_post_gnocchi_aggregation_alarm_project_constraint(self, __):
-        self.CONF.set_override('gnocchi_url', 'http://localhost:8041',
-                               group='alarms')
+        self.CONF.set_override('gnocchi_url', 'http://localhost:8041')
         json = {
             'enabled': False,
             'name': 'project_constraint',

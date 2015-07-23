@@ -30,7 +30,7 @@ OPTS = [
                help='URL to Gnocchi.'),
 ]
 
-cfg.CONF.register_opts(OPTS, group="alarms")
+cfg.CONF.register_opts(OPTS)
 cfg.CONF.import_opt('http_timeout', 'aodh.service')
 
 
@@ -38,7 +38,7 @@ class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
 
     def __init__(self, notifier):
         super(threshold.ThresholdEvaluator, self).__init__(notifier)
-        self.gnocchi_url = cfg.CONF.alarms.gnocchi_url
+        self.gnocchi_url = cfg.CONF.gnocchi_url
         self._ks_client = None
 
     @property

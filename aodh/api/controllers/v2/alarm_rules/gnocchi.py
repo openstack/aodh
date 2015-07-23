@@ -24,8 +24,7 @@ from aodh.api.controllers.v2 import utils as v2_utils
 from aodh import keystone_client
 
 
-cfg.CONF.import_opt('gnocchi_url', 'aodh.evaluator.gnocchi',
-                    group="alarms")
+cfg.CONF.import_opt('gnocchi_url', 'aodh.evaluator.gnocchi')
 
 
 class GnocchiUnavailable(Exception):
@@ -65,7 +64,7 @@ class AlarmGnocchiThresholdRule(base.AlarmRule):
     @staticmethod
     def _get_aggregation_methods():
         ks_client = keystone_client.get_client()
-        gnocchi_url = cfg.CONF.alarms.gnocchi_url
+        gnocchi_url = cfg.CONF.gnocchi_url
         headers = {'Content-Type': "application/json",
                    'X-Auth-Token': ks_client.auth_token}
         try:
@@ -105,7 +104,7 @@ class MetricOfResourceRule(AlarmGnocchiThresholdRule):
 
         rule = alarm.gnocchi_resources_threshold_rule
         ks_client = keystone_client.get_client()
-        gnocchi_url = cfg.CONF.alarms.gnocchi_url
+        gnocchi_url = cfg.CONF.gnocchi_url
         headers = {'Content-Type': "application/json",
                    'X-Auth-Token': ks_client.auth_token}
         try:
@@ -165,7 +164,7 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
         ks_client = keystone_client.get_client()
         request = {
             'url': "%s/v1/aggregation/resource/%s/metric/%s" % (
-                cfg.CONF.alarms.gnocchi_url,
+                cfg.CONF.gnocchi_url,
                 rule.resource_type,
                 rule.metric),
             'headers': {'Content-Type': "application/json",
