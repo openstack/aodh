@@ -22,9 +22,9 @@ import subprocess
 import time
 
 import httplib2
+from oslo_utils import fileutils
 import six
 
-from aodh.openstack.common import fileutils
 from aodh.tests import base
 
 
