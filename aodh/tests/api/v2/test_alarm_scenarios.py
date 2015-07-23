@@ -2537,14 +2537,14 @@ class TestAlarmsHistory(TestAlarmsBase):
                           '%s not in %s' % (fragment, actual))
 
     def test_record_alarm_history_config(self):
-        self.CONF.set_override('record_history', False, group='alarm')
+        self.CONF.set_override('record_history', False)
         alarm = self._get_alarm('a')
         history = self._get_alarm_history(alarm)
         self.assertEqual([], history)
         self._update_alarm(alarm, dict(name='renamed'))
         history = self._get_alarm_history(alarm)
         self.assertEqual([], history)
-        self.CONF.set_override('record_history', True, group='alarm')
+        self.CONF.set_override('record_history', True)
         self._update_alarm(alarm, dict(name='foobar'))
         history = self._get_alarm_history(alarm)
         self.assertEqual(1, len(history))

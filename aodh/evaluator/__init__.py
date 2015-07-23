@@ -45,11 +45,12 @@ ALARM = 'alarm'
 OPTS = [
     cfg.BoolOpt('record_history',
                 default=True,
+                deprecated_group="alarm",
                 help='Record alarm change events.'
                 ),
 ]
 
-cfg.CONF.register_opts(OPTS, group="alarm")
+cfg.CONF.register_opts(OPTS)
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -67,7 +68,7 @@ class Evaluator(object):
         return self.storage_conn
 
     def _record_change(self, alarm):
-        if not cfg.CONF.alarm.record_history:
+        if not cfg.CONF.record_history:
             return
         type = models.AlarmChange.STATE_TRANSITION
         detail = json.dumps({'state': alarm.state})
@@ -93,7 +94,7 @@ class Evaluator(object):
         notification = "alarm.state_transition"
         transport = messaging.get_transport()
         notifier = messaging.get_notifier(transport,
-                                          publisher_id="aodh.alarm.evaluator")
+                                          publisher_id="aodh.evaluator")
         notifier.info(context.RequestContext(), notification, payload)
 
     def _refresh(self, alarm, state, reason, reason_data):

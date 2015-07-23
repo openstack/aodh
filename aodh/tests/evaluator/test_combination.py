@@ -15,7 +15,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Tests for aodh/alarm/evaluator/combination.py
+"""Tests for aodh/evaluator/combination.py
 """
 
 import datetime
@@ -27,10 +27,10 @@ import mock
 from oslo_utils import timeutils
 import pytz
 
-from aodh.alarm.evaluator import combination
+from aodh.evaluator import combination
 from aodh.storage import models
-from aodh.tests.alarm.evaluator import base
 from aodh.tests import constants
+from aodh.tests.evaluator import base
 
 
 class TestEvaluate(base.TestEvaluatorBase):

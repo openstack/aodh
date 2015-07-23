@@ -70,7 +70,7 @@ ALARM_API_OPTS = [
 ]
 
 cfg.CONF.register_opts(ALARM_API_OPTS, group='alarm')
-cfg.CONF.import_opt('record_history', 'aodh.alarm.evaluator', 'alarm')
+cfg.CONF.import_opt('record_history', 'aodh.evaluator')
 
 state_kind = ["ok", "alarm", "insufficient data"]
 state_kind_enum = wtypes.Enum(str, *state_kind)
@@ -507,7 +507,7 @@ class AlarmController(rest.RestController):
         return alarms[0]
 
     def _record_change(self, data, now, on_behalf_of=None, type=None):
-        if not cfg.CONF.alarm.record_history:
+        if not cfg.CONF.record_history:
             return
         type = type or models.AlarmChange.RULE_CHANGE
         scrubbed_data = utils.stringify_timestamps(data)
@@ -681,7 +681,7 @@ class AlarmsController(rest.RestController):
 
     @staticmethod
     def _record_creation(conn, data, alarm_id, now):
-        if not cfg.CONF.alarm.record_history:
+        if not cfg.CONF.record_history:
             return
         type = models.AlarmChange.CREATION
         scrubbed_data = utils.stringify_timestamps(data)

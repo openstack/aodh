@@ -19,7 +19,7 @@
 from oslo_log import log
 from six import moves
 
-from aodh.alarm import evaluator
+from aodh import evaluator
 from aodh.i18n import _
 
 LOG = log.getLogger(__name__)

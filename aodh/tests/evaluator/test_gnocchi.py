@@ -25,10 +25,10 @@ import pytz
 import six
 from six import moves
 
-from aodh.alarm.evaluator import gnocchi
+from aodh.evaluator import gnocchi
 from aodh.storage import models
-from aodh.tests.alarm.evaluator import base
 from aodh.tests import constants
+from aodh.tests.evaluator import base
 
 
 class FakeResponse(object):
@@ -56,7 +56,7 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self.useFixture(mockpatch.Patch('ceilometerclient.client.get_client',
                                         return_value=self.api_client))
         self.requests = self.useFixture(mockpatch.Patch(
-            'aodh.alarm.evaluator.gnocchi.requests')).mock
+            'aodh.evaluator.gnocchi.requests')).mock
 
     def prepare_alarms(self):
         self.alarms = [

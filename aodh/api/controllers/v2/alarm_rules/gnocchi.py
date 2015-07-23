@@ -24,7 +24,7 @@ from aodh.api.controllers.v2 import utils as v2_utils
 from aodh import keystone_client
 
 
-cfg.CONF.import_opt('gnocchi_url', 'aodh.alarm.evaluator.gnocchi',
+cfg.CONF.import_opt('gnocchi_url', 'aodh.evaluator.gnocchi',
                     group="alarms")
 
 

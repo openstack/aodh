@@ -22,8 +22,8 @@ from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
 
-from aodh.alarm import evaluator
-from aodh.alarm.evaluator import utils
+from aodh import evaluator
+from aodh.evaluator import utils
 from aodh.i18n import _, _LW
 
 LOG = log.getLogger(__name__)

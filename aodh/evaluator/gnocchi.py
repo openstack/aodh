@@ -13,12 +13,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from aodh.alarm.evaluator import threshold
 from oslo_config import cfg
 from oslo_log import log
 from oslo_serialization import jsonutils
 import requests
 
+from aodh.evaluator import threshold
 from aodh.i18n import _
 from aodh import keystone_client
 

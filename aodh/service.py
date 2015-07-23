@@ -135,7 +135,7 @@ def prepare_service(argv=None):
 
 @six.add_metaclass(abc.ABCMeta)
 class AlarmService(object):
-    EVALUATOR_EXTENSIONS_NAMESPACE = "aodh.alarm.evaluator"
+    EVALUATOR_EXTENSIONS_NAMESPACE = "aodh.evaluator"
 
     def __init__(self):
         super(AlarmService, self).__init__()

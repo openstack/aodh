@@ -12,7 +12,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""class for tests in aodh/alarm/evaluator/__init__.py
+"""class for tests in aodh/evaluator/__init__.py
 """
 import datetime
 
@@ -20,7 +20,7 @@ import mock
 from oslo_utils import timeutils
 from oslotest import base
 
-from aodh.alarm import evaluator
+from aodh import evaluator
 
 
 class TestEvaluatorBaseClass(base.BaseTestCase):
