@@ -44,7 +44,7 @@ class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
     @property
     def ks_client(self):
         if self._ks_client is None:
-            self._ks_client = keystone_client.get_client()
+            self._ks_client = keystone_client.get_client(cfg.CONF)
         return self._ks_client
 
     def _get_headers(self, content_type="application/json"):

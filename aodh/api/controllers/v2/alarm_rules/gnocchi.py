@@ -63,7 +63,7 @@ class AlarmGnocchiThresholdRule(base.AlarmRule):
     # @cachetools.ttl_cache(maxsize=1, ttl=600)
     @staticmethod
     def _get_aggregation_methods():
-        ks_client = keystone_client.get_client()
+        ks_client = keystone_client.get_client(cfg.CONF)
         gnocchi_url = cfg.CONF.gnocchi_url
         headers = {'Content-Type': "application/json",
                    'X-Auth-Token': ks_client.auth_token}
@@ -103,7 +103,7 @@ class MetricOfResourceRule(AlarmGnocchiThresholdRule):
               cls).validate_alarm(alarm)
 
         rule = alarm.gnocchi_resources_threshold_rule
-        ks_client = keystone_client.get_client()
+        ks_client = keystone_client.get_client(cfg.CONF)
         gnocchi_url = cfg.CONF.gnocchi_url
         headers = {'Content-Type': "application/json",
                    'X-Auth-Token': ks_client.auth_token}
@@ -161,7 +161,7 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
                         query]})
 
         # Delegate the query validation to gnocchi
-        ks_client = keystone_client.get_client()
+        ks_client = keystone_client.get_client(cfg.CONF)
         request = {
             'url': "%s/v1/aggregation/resource/%s/metric/%s" % (
                 cfg.CONF.gnocchi_url,

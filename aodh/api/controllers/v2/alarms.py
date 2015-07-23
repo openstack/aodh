@@ -403,6 +403,7 @@ class Alarm(base.Base):
                             # We have a trust action without a trust ID,
                             # create it
                             trust_id = keystone_client.create_trust_id(
+                                cfg.CONF,
                                 trustor_user_id, trustor_project_id, roles,
                                 auth_plugin)
                             netloc = '%s:delete@%s' % (trust_id, url.netloc)
@@ -417,6 +418,7 @@ class Alarm(base.Base):
                     if (self._is_trust_url(url) and url.password and
                             action not in getattr(self, key)):
                         keystone_client.delete_trust_id(
+                            cfg.CONF,
                             url.username, auth_plugin)
 
     def delete_actions(self):
@@ -425,7 +427,8 @@ class Alarm(base.Base):
                                       self.insufficient_data_actions):
             url = netutils.urlsplit(action)
             if self._is_trust_url(url) and url.password:
-                keystone_client.delete_trust_id(url.username, auth_plugin)
+                keystone_client.delete_trust_id(cfg.CONF,
+                                                url.username, auth_plugin)
 
 
 Alarm.add_attributes(**{"%s_rule" % ext.name: ext.plugin

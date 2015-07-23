@@ -14,6 +14,7 @@
 # under the License.
 """Rest alarm notifier with trusted authentication."""
 
+from oslo_config import cfg
 from six.moves.urllib import parse
 
 from aodh import keystone_client
@@ -35,7 +36,7 @@ class TrustRestAlarmNotifier(rest.RestAlarmNotifier):
                reason, reason_data):
         trust_id = action.username
 
-        client = keystone_client.get_v3_client(trust_id)
+        client = keystone_client.get_v3_client(cfg.CONF, trust_id)
 
         # Remove the fake user
         netloc = action.netloc.split("@")[1]

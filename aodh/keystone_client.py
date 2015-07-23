@@ -19,28 +19,24 @@ from keystoneclient import exceptions as ks_exception
 from keystoneclient import session as ks_session
 from keystoneclient.v2_0 import client as ks_client
 from keystoneclient.v3 import client as ks_client_v3
-from oslo_config import cfg
-
-cfg.CONF.import_group('service_credentials', 'aodh.service')
-cfg.CONF.import_opt('http_timeout', 'aodh.service')
 
 
-def get_client():
+def get_client(conf):
     return ks_client.Client(
-        username=cfg.CONF.service_credentials.os_username,
-        password=cfg.CONF.service_credentials.os_password,
-        tenant_id=cfg.CONF.service_credentials.os_tenant_id,
-        tenant_name=cfg.CONF.service_credentials.os_tenant_name,
-        cacert=cfg.CONF.service_credentials.os_cacert,
-        auth_url=cfg.CONF.service_credentials.os_auth_url,
-        region_name=cfg.CONF.service_credentials.os_region_name,
-        insecure=cfg.CONF.service_credentials.insecure,
-        timeout=cfg.CONF.http_timeout,)
+        username=conf.service_credentials.os_username,
+        password=conf.service_credentials.os_password,
+        tenant_id=conf.service_credentials.os_tenant_id,
+        tenant_name=conf.service_credentials.os_tenant_name,
+        cacert=conf.service_credentials.os_cacert,
+        auth_url=conf.service_credentials.os_auth_url,
+        region_name=conf.service_credentials.os_region_name,
+        insecure=conf.service_credentials.insecure,
+        timeout=conf.http_timeout,)
 
 
-def get_v3_client(trust_id=None):
+def get_v3_client(conf, trust_id=None):
     """Return a client for keystone v3 endpoint, optionally using a trust."""
-    auth_url = cfg.CONF.service_credentials.os_auth_url
+    auth_url = conf.service_credentials.os_auth_url
     try:
         auth_url_noneversion = auth_url.replace('/v2.0', '/')
         discover = ks_discover.Discover(auth_url=auth_url_noneversion)
@@ -52,25 +48,26 @@ def get_v3_client(trust_id=None):
     except Exception:
         auth_url = auth_url.replace('/v2.0', '/v3')
     return ks_client_v3.Client(
-        username=cfg.CONF.service_credentials.os_username,
-        password=cfg.CONF.service_credentials.os_password,
-        cacert=cfg.CONF.service_credentials.os_cacert,
+        username=conf.service_credentials.os_username,
+        password=conf.service_credentials.os_password,
+        cacert=conf.service_credentials.os_cacert,
         auth_url=auth_url,
-        region_name=cfg.CONF.service_credentials.os_region_name,
-        insecure=cfg.CONF.service_credentials.insecure,
-        timeout=cfg.CONF.http_timeout,
+        region_name=conf.service_credentials.os_region_name,
+        insecure=conf.service_credentials.insecure,
+        timeout=conf.http_timeout,
         trust_id=trust_id)
 
 
-def create_trust_id(trustor_user_id, trustor_project_id, roles, auth_plugin):
+def create_trust_id(conf, trustor_user_id, trustor_project_id,
+                    roles, auth_plugin):
     """Create a new trust using the aodh service user."""
-    admin_client = get_v3_client()
+    admin_client = get_v3_client(conf)
 
     trustee_user_id = admin_client.auth_ref.user_id
 
     session = ks_session.Session.construct({
-        'cacert': cfg.CONF.service_credentials.os_cacert,
-        'insecure': cfg.CONF.service_credentials.insecure})
+        'cacert': conf.service_credentials.os_cacert,
+        'insecure': conf.service_credentials.insecure})
 
     client = ks_client_v3.Client(session=session, auth=auth_plugin)
 
@@ -82,11 +79,11 @@ def create_trust_id(trustor_user_id, trustor_project_id, roles, auth_plugin):
     return trust.id
 
 
-def delete_trust_id(trust_id, auth_plugin):
+def delete_trust_id(conf, trust_id, auth_plugin):
     """Delete a trust previously setup for the aodh user."""
     session = ks_session.Session.construct({
-        'cacert': cfg.CONF.service_credentials.os_cacert,
-        'insecure': cfg.CONF.service_credentials.insecure})
+        'cacert': conf.service_credentials.os_cacert,
+        'insecure': conf.service_credentials.insecure})
 
     client = ks_client_v3.Client(session=session, auth=auth_plugin)
     try:
