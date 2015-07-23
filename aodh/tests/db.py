@@ -84,6 +84,8 @@ class PgSQLManager(SQLManager):
         self._conn.execute(
             'CREATE DATABASE %s WITH TEMPLATE template0;' % self._db_name)
         self._conn.connection.set_isolation_level(1)
+        self._conn.close()
+        self._engine.dispose()
 
 
 class MySQLManager(SQLManager):
@@ -95,6 +97,8 @@ class MySQLManager(SQLManager):
             self._url.replace('template1', ''))
         self._conn = self._engine.connect()
         self._conn.execute('CREATE DATABASE %s;' % self._db_name)
+        self._conn.close()
+        self._engine.dispose()
 
 
 class HBaseManager(fixtures.Fixture):
