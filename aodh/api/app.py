@@ -27,7 +27,6 @@ from aodh.api import hooks
 from aodh.api import middleware
 from aodh.i18n import _
 from aodh.i18n import _LW
-from aodh import service
 from aodh import storage
 
 
@@ -41,6 +40,7 @@ OPTS = [
                help="Configuration file for WSGI definition of API."
                ),
     cfg.IntOpt('api_workers', default=1,
+               min=1,
                help='Number of workers for aodh API server.'),
 ]
 
@@ -74,7 +74,7 @@ def setup_app(pecan_config=None):
 
     # NOTE(sileht): pecan debug won't work in multi-process environment
     pecan_debug = CONF.api.pecan_debug
-    if service.get_workers('api') != 1 and pecan_debug:
+    if cfg.CONF.api_workers != 1 and pecan_debug:
         pecan_debug = False
         LOG.warning(_LW('pecan_debug cannot be enabled, if workers is > 1, '
                         'the value is overrided with False'))
@@ -123,9 +123,8 @@ def build_server():
         LOG.info(_("serving on http://%(host)s:%(port)s") % (
                  {'host': host, 'port': port}))
 
-    workers = service.get_workers('api')
     serving.run_simple(cfg.CONF.api.host, cfg.CONF.api.port,
-                       app, processes=workers)
+                       app, processes=cfg.CONF.api_workers)
 
 
 def _app():

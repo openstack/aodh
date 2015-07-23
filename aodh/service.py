@@ -32,7 +32,6 @@ from aodh.i18n import _
 from aodh import messaging
 from aodh import rpc
 from aodh import storage
-from aodh import utils
 
 
 OPTS = [
@@ -103,21 +102,6 @@ CLI_OPTS = [
 cfg.CONF.register_cli_opts(CLI_OPTS, group="service_credentials")
 
 LOG = log.getLogger(__name__)
-
-
-class WorkerException(Exception):
-    """Exception for errors relating to service workers."""
-
-
-def get_workers(name):
-    workers = (cfg.CONF.get('%s_workers' % name) or
-               utils.cpu_count())
-    if workers and workers < 1:
-        msg = (_("%(worker_name)s value of %(workers)s is invalid, "
-                 "must be greater than 0") %
-               {'worker_name': '%s_workers' % name, 'workers': str(workers)})
-        raise WorkerException(msg)
-    return workers
 
 
 def prepare_service(argv=None):
