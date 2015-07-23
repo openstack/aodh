@@ -148,23 +148,3 @@ class TestRPCAlarmNotifier(tests_base.BaseTestCase):
         })
         self.notifier.notify(alarm, 'alarm', "what?", {})
         self.assertEqual(0, len(self.notifier_server.notified))
-
-
-class FakeCoordinator(object):
-    def __init__(self, transport):
-        self.rpc = messaging.get_rpc_server(
-            transport, "alarm_partition_coordination", self)
-        self.notified = []
-
-    def presence(self, context, data):
-        self._record('presence', data)
-
-    def allocate(self, context, data):
-        self._record('allocate', data)
-
-    def assign(self, context, data):
-        self._record('assign', data)
-
-    def _record(self, method, data):
-        self.notified.append((method, data))
-        self.rpc.stop()
