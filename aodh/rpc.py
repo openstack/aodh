@@ -39,7 +39,7 @@ LOG = log.getLogger(__name__)
 
 class RPCAlarmNotifier(object):
     def __init__(self):
-        transport = messaging.get_transport()
+        transport = messaging.get_transport(cfg.CONF)
         self.client = messaging.get_rpc_client(
             transport, topic=cfg.CONF.notifier_rpc_topic,
             version="1.0")

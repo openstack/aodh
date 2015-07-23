@@ -28,9 +28,9 @@ from aodh.tests import base as tests_base
 
 
 class FakeNotifier(object):
-    def __init__(self, transport):
+    def __init__(self, conf, transport):
         self.rpc = messaging.get_rpc_server(
-            transport, "alarm_notifier", self)
+            conf, transport, "alarm_notifier", self)
         self.notified = []
 
     def start(self, expected_length):
@@ -49,7 +49,7 @@ class TestRPCAlarmNotifier(tests_base.BaseTestCase):
         self.CONF = self.useFixture(fixture_config.Config()).conf
         self.setup_messaging(self.CONF)
 
-        self.notifier_server = FakeNotifier(self.transport)
+        self.notifier_server = FakeNotifier(self.CONF, self.transport)
         self.notifier = rpc.RPCAlarmNotifier()
         self.alarms = [
             alarms.Alarm(None, info={

@@ -92,7 +92,7 @@ class Evaluator(object):
         except aodh.NotImplementedError:
             pass
         notification = "alarm.state_transition"
-        transport = messaging.get_transport()
+        transport = messaging.get_transport(cfg.CONF)
         notifier = messaging.get_notifier(transport,
                                           publisher_id="aodh.evaluator")
         notifier.info(context.RequestContext(), notification, payload)

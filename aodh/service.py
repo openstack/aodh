@@ -225,9 +225,9 @@ class AlarmNotifierService(os_service.Service):
 
     def __init__(self):
         super(AlarmNotifierService, self).__init__()
-        transport = messaging.get_transport()
+        transport = messaging.get_transport(cfg.CONF)
         self.rpc_server = messaging.get_rpc_server(
-            transport, cfg.CONF.notifier_rpc_topic, self)
+            cfg.CONF, transport, cfg.CONF.notifier_rpc_topic, self)
 
         self.notifiers = extension.ExtensionManager(
             self.NOTIFIER_EXTENSIONS_NAMESPACE,

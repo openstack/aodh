@@ -13,7 +13,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
 from oslo_context import context
 import oslo_messaging
 from oslo_serialization import jsonutils
@@ -55,14 +54,14 @@ def setup():
     oslo_messaging.set_transport_defaults('aodh')
 
 
-def get_transport(url=None, optional=False, cache=True):
+def get_transport(conf, url=None, optional=False, cache=True):
     """Initialise the oslo_messaging layer."""
     global TRANSPORTS, DEFAULT_URL
     cache_key = url or DEFAULT_URL
     transport = TRANSPORTS.get(cache_key)
     if not transport or not cache:
         try:
-            transport = oslo_messaging.get_transport(cfg.CONF, url)
+            transport = oslo_messaging.get_transport(conf, url)
         except oslo_messaging.InvalidTransportURL as e:
             if not optional or e.url:
                 # NOTE(sileht): oslo_messaging is configured but unloadable
@@ -75,10 +74,9 @@ def get_transport(url=None, optional=False, cache=True):
     return transport
 
 
-def get_rpc_server(transport, topic, endpoint):
+def get_rpc_server(conf, transport, topic, endpoint):
     """Return a configured oslo_messaging rpc server."""
-    cfg.CONF.import_opt('host', 'aodh.service')
-    target = oslo_messaging.Target(server=cfg.CONF.host, topic=topic)
+    target = oslo_messaging.Target(server=conf.host, topic=topic)
     serializer = RequestContextSerializer(JsonPayloadSerializer())
     return oslo_messaging.get_rpc_server(transport, target,
                                          [endpoint], executor='eventlet',

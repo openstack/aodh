@@ -478,7 +478,7 @@ class AlarmChange(base.Base):
 def _send_notification(event, payload):
     notification = event.replace(" ", "_")
     notification = "alarm.%s" % notification
-    transport = messaging.get_transport()
+    transport = messaging.get_transport(cfg.CONF)
     notifier = messaging.get_notifier(transport, publisher_id="aodh.api")
     # FIXME(sileht): perhaps we need to copy some infos from the
     # pecan request headers like nova does
