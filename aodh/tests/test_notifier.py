@@ -21,7 +21,7 @@ from oslotest import mockpatch
 import requests
 import six.moves.urllib.parse as urlparse
 
-from aodh import service
+from aodh import notifier
 from aodh.tests import base as tests_base
 
 
@@ -46,7 +46,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         super(TestAlarmNotifier, self).setUp()
         self.CONF = self.useFixture(fixture_config.Config()).conf
         self.setup_messaging(self.CONF)
-        self.service = service.AlarmNotifierService()
+        self.service = notifier.AlarmNotifierService()
         self.useFixture(mockpatch.Patch(
             'oslo_context.context.generate_request_id',
             self._fake_generate_request_id))
@@ -213,7 +213,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         with mock.patch('oslo_utils.netutils.urlsplit',
                         self._fake_urlsplit):
             LOG = mock.MagicMock()
-            with mock.patch('aodh.service.LOG', LOG):
+            with mock.patch('aodh.notifier.LOG', LOG):
                 self.service.notify_alarm(
                     context.get_admin_context(),
                     {
@@ -225,7 +225,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
     def test_notify_alarm_invalid_action(self):
         LOG = mock.MagicMock()
-        with mock.patch('aodh.service.LOG', LOG):
+        with mock.patch('aodh.notifier.LOG', LOG):
             self.service.notify_alarm(
                 context.get_admin_context(),
                 {

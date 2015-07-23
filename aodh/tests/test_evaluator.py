@@ -18,7 +18,7 @@ import mock
 from oslo_config import fixture as fixture_config
 from stevedore import extension
 
-from aodh import service
+from aodh import evaluator
 from aodh.tests import base as tests_base
 
 
@@ -40,7 +40,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         )
 
         self.storage_conn = mock.MagicMock()
-        self.svc = service.AlarmEvaluationService()
+        self.svc = evaluator.AlarmEvaluationService()
         self.svc.tg = mock.Mock()
         self.svc.partition_coordinator = mock.MagicMock()
         p_coord = self.svc.partition_coordinator

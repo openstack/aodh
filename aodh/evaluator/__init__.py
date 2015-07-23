@@ -24,14 +24,18 @@ import croniter
 from oslo_config import cfg
 from oslo_context import context
 from oslo_log import log
+from oslo_service import service as os_service
 from oslo_utils import timeutils
 import pytz
 import six
+from stevedore import extension
 import uuid
 
 import aodh
+from aodh import coordination
 from aodh.i18n import _
 from aodh import messaging
+from aodh import rpc
 from aodh import storage
 from aodh.storage import models
 
@@ -163,3 +167,90 @@ class Evaluator(object):
         evaluate an alarm
         alarm Alarm: an instance of the Alarm
         """
+
+
+@six.add_metaclass(abc.ABCMeta)
+class AlarmService(object):
+    EVALUATOR_EXTENSIONS_NAMESPACE = "aodh.evaluator"
+
+    def __init__(self):
+        super(AlarmService, self).__init__()
+        self.storage_conn = None
+        self._load_evaluators()
+
+    @property
+    def _storage_conn(self):
+        if not self.storage_conn:
+            self.storage_conn = storage.get_connection_from_config(cfg.CONF)
+        return self.storage_conn
+
+    def _load_evaluators(self):
+        self.evaluators = extension.ExtensionManager(
+            namespace=self.EVALUATOR_EXTENSIONS_NAMESPACE,
+            invoke_on_load=True,
+            invoke_args=(rpc.RPCAlarmNotifier(),)
+        )
+
+    def _evaluate_assigned_alarms(self):
+        try:
+            alarms = self._assigned_alarms()
+            LOG.info(_('initiating evaluation cycle on %d alarms') %
+                     len(alarms))
+            for alarm in alarms:
+                self._evaluate_alarm(alarm)
+        except Exception:
+            LOG.exception(_('alarm evaluation cycle failed'))
+
+    def _evaluate_alarm(self, alarm):
+        """Evaluate the alarms assigned to this evaluator."""
+        if alarm.type not in self.evaluators:
+            LOG.debug(_('skipping alarm %s: type unsupported') %
+                      alarm.alarm_id)
+            return
+
+        LOG.debug(_('evaluating alarm %s') % alarm.alarm_id)
+        try:
+            self.evaluators[alarm.type].obj.evaluate(alarm)
+        except Exception:
+            LOG.exception(_('Failed to evaluate alarm %s'), alarm.alarm_id)
+
+    @abc.abstractmethod
+    def _assigned_alarms(self):
+        pass
+
+
+class AlarmEvaluationService(AlarmService, os_service.Service):
+
+    PARTITIONING_GROUP_NAME = "alarm_evaluator"
+
+    def __init__(self):
+        super(AlarmEvaluationService, self).__init__()
+        self.partition_coordinator = coordination.PartitionCoordinator()
+
+    def start(self):
+        super(AlarmEvaluationService, self).start()
+        self.storage_conn = storage.get_connection_from_config(cfg.CONF)
+        self.partition_coordinator.start()
+        self.partition_coordinator.join_group(self.PARTITIONING_GROUP_NAME)
+
+        # allow time for coordination if necessary
+        delay_start = self.partition_coordinator.is_active()
+
+        if self.evaluators:
+            interval = cfg.CONF.evaluation_interval
+            self.tg.add_timer(
+                interval,
+                self._evaluate_assigned_alarms,
+                initial_delay=interval if delay_start else None)
+        if self.partition_coordinator.is_active():
+            heartbeat_interval = min(cfg.CONF.coordination.heartbeat,
+                                     cfg.CONF.evaluation_interval / 4)
+            self.tg.add_timer(heartbeat_interval,
+                              self.partition_coordinator.heartbeat)
+        # Add a dummy thread to have wait() working
+        self.tg.add_timer(604800, lambda: None)
+
+    def _assigned_alarms(self):
+        all_alarms = self._storage_conn.get_alarms(enabled=True)
+        return self.partition_coordinator.extract_my_subset(
+            self.PARTITIONING_GROUP_NAME, all_alarms)

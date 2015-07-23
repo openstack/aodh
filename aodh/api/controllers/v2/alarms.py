@@ -47,7 +47,7 @@ from aodh.api import rbac
 from aodh.i18n import _
 from aodh import keystone_client
 from aodh import messaging
-from aodh import service
+from aodh import notifier
 from aodh.storage import models
 from aodh import utils
 
@@ -184,7 +184,7 @@ ALARMS_RULES = extension.ExtensionManager("aodh.alarm.rule")
 LOG.debug("alarm rules plugin loaded: %s" % ",".join(ALARMS_RULES.names()))
 
 ACTIONS_SCHEMA = extension.ExtensionManager(
-    service.AlarmNotifierService.NOTIFIER_EXTENSIONS_NAMESPACE).names()
+    notifier.AlarmNotifierService.NOTIFIER_EXTENSIONS_NAMESPACE).names()
 
 
 class Alarm(base.Base):
