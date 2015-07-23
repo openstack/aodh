@@ -53,7 +53,7 @@ class Connection(base.Connection):
 
     @staticmethod
     def delete_alarm(alarm_id):
-        """Delete an alarm."""
+        """Delete an alarm and its history data."""
 
     @staticmethod
     def clear_expired_alarm_history_data(alarm_history_ttl):
