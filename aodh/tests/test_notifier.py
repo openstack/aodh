@@ -46,7 +46,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         super(TestAlarmNotifier, self).setUp()
         self.CONF = self.useFixture(fixture_config.Config()).conf
         self.setup_messaging(self.CONF)
-        self.service = notifier.AlarmNotifierService()
+        self.service = notifier.AlarmNotifierService(self.CONF)
         self.useFixture(mockpatch.Patch(
             'oslo_context.context.generate_request_id',
             self._fake_generate_request_id))

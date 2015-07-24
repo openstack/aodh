@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 #
 # Copyright 2014 OpenStack Foundation
+# Copyright 2015 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -24,7 +25,7 @@ CONF = cfg.CONF
 
 def notifier():
     service.prepare_service()
-    os_service.launch(CONF, service.AlarmNotifierService()).wait()
+    os_service.launch(CONF, service.AlarmNotifierService(CONF)).wait()
 
 
 def evaluator():

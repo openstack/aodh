@@ -16,7 +16,6 @@
 import abc
 import logging
 
-from oslo_config import cfg
 from oslo_service import service as os_service
 from oslo_utils import netutils
 import six
@@ -51,11 +50,11 @@ class AlarmNotifier(object):
 class AlarmNotifierService(os_service.Service):
     NOTIFIER_EXTENSIONS_NAMESPACE = "aodh.notifier"
 
-    def __init__(self):
+    def __init__(self, conf):
         super(AlarmNotifierService, self).__init__()
-        transport = messaging.get_transport(cfg.CONF)
+        transport = messaging.get_transport(conf)
         self.rpc_server = messaging.get_rpc_server(
-            cfg.CONF, transport, cfg.CONF.notifier_rpc_topic, self)
+            conf, transport, conf.notifier_rpc_topic, self)
 
         self.notifiers = extension.ExtensionManager(
             self.NOTIFIER_EXTENSIONS_NAMESPACE,
