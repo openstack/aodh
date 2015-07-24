@@ -59,18 +59,18 @@ class PartitionCoordinator(object):
     empty iterable in this case.
     """
 
-    def __init__(self, my_id=None):
+    def __init__(self, backend_url, my_id=None):
+        self.backend_url = backend_url
         self._coordinator = None
         self._groups = set()
         self._my_id = my_id or str(uuid.uuid4())
         self._started = False
 
     def start(self):
-        backend_url = cfg.CONF.coordination.backend_url
-        if backend_url:
+        if self.backend_url:
             try:
                 self._coordinator = tooz.coordination.get_coordinator(
-                    backend_url, self._my_id)
+                    self.backend_url, self._my_id)
                 self._coordinator.start()
                 self._started = True
                 LOG.info(_LI('Coordination backend started successfully.'))

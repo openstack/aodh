@@ -227,7 +227,8 @@ class AlarmEvaluationService(AlarmService, os_service.Service):
 
     def __init__(self, conf):
         super(AlarmEvaluationService, self).__init__(conf)
-        self.partition_coordinator = coordination.PartitionCoordinator()
+        self.partition_coordinator = coordination.PartitionCoordinator(
+            conf.coordination.backend_url)
 
     def start(self):
         super(AlarmEvaluationService, self).start()

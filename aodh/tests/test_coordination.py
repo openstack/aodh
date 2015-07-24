@@ -141,7 +141,8 @@ class TestPartitioning(base.BaseTestCase):
         with mock.patch('tooz.coordination.get_coordinator',
                         lambda _, member_id:
                         coordinator_cls(member_id, shared_storage)):
-            pc = coordination.PartitionCoordinator(agent_id)
+            pc = coordination.PartitionCoordinator(
+                self.CONF.coordination.backend_url, agent_id)
             pc.start()
             return pc
 
