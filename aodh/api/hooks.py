@@ -15,8 +15,6 @@
 
 import threading
 
-from oslo_config import cfg
-
 from pecan import hooks
 
 
@@ -26,9 +24,11 @@ class ConfigHook(hooks.PecanHook):
     That allows controllers to get it.
     """
 
-    @staticmethod
-    def before(state):
-        state.request.cfg = cfg.CONF
+    def __init__(self, conf):
+        self.conf = conf
+
+    def before(self, state):
+        state.request.cfg = self.conf
 
 
 class DBHook(hooks.PecanHook):

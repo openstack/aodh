@@ -1,5 +1,6 @@
 #
 # Copyright 2012 New Dream Network, LLC (DreamHost)
+# Copyright 2015 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -62,7 +63,7 @@ def get_pecan_config():
 
 def setup_app(pecan_config=None):
     # FIXME: Replace DBHook with a hooks.TransactionHook
-    app_hooks = [hooks.ConfigHook(),
+    app_hooks = [hooks.ConfigHook(cfg.CONF),
                  hooks.DBHook(
                      storage.get_connection_from_config(cfg.CONF)),
                  hooks.TranslationHook()]
