@@ -31,6 +31,10 @@ LOG = logging.getLogger(__name__)
 class AlarmNotifier(object):
     """Base class for alarm notifier plugins."""
 
+    @staticmethod
+    def __init__(conf):
+        pass
+
     @abc.abstractmethod
     def notify(self, action, alarm_id, alarm_name, severity, previous,
                current, reason, reason_data):
@@ -58,7 +62,8 @@ class AlarmNotifierService(os_service.Service):
 
         self.notifiers = extension.ExtensionManager(
             self.NOTIFIER_EXTENSIONS_NAMESPACE,
-            invoke_on_load=True)
+            invoke_on_load=True,
+            invoke_args=(conf,))
 
     def start(self):
         super(AlarmNotifierService, self).start()

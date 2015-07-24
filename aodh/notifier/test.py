@@ -1,5 +1,5 @@
 #
-# Copyright 2013 eNovance
+# Copyright 2013-2015 eNovance
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -20,7 +20,8 @@ from aodh import notifier
 class TestAlarmNotifier(notifier.AlarmNotifier):
     "Test alarm notifier."""
 
-    def __init__(self):
+    def __init__(self, conf):
+        super(TestAlarmNotifier, self).__init__(conf)
         self.notifications = []
 
     def notify(self, action, alarm_id, alarm_name, severity,

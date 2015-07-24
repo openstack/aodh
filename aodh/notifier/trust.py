@@ -14,7 +14,6 @@
 # under the License.
 """Rest alarm notifier with trusted authentication."""
 
-from oslo_config import cfg
 from six.moves.urllib import parse
 
 from aodh import keystone_client
@@ -31,12 +30,11 @@ class TrustRestAlarmNotifier(rest.RestAlarmNotifier):
     The URL must be in the form trust+http://trust-id@host/action.
     """
 
-    @staticmethod
-    def notify(action, alarm_id, alarm_name, severity, previous, current,
+    def notify(self, action, alarm_id, alarm_name, severity, previous, current,
                reason, reason_data):
         trust_id = action.username
 
-        client = keystone_client.get_v3_client(cfg.CONF, trust_id)
+        client = keystone_client.get_v3_client(self.conf, trust_id)
 
         # Remove the fake user
         netloc = action.netloc.split("@")[1]
@@ -47,6 +45,6 @@ class TrustRestAlarmNotifier(rest.RestAlarmNotifier):
                                    action.fragment)
 
         headers = {'X-Auth-Token': client.auth_token}
-        rest.RestAlarmNotifier.notify(
+        super(TrustRestAlarmNotifier, self).notify(
             action, alarm_id, alarm_name, severity, previous, current, reason,
             reason_data, headers)

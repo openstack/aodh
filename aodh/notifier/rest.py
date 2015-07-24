@@ -58,8 +58,11 @@ cfg.CONF.register_opts(OPTS)
 class RestAlarmNotifier(notifier.AlarmNotifier):
     """Rest alarm notifier."""
 
-    @staticmethod
-    def notify(action, alarm_id, alarm_name, severity, previous,
+    def __init__(self, conf):
+        super(RestAlarmNotifier, self).__init__(conf)
+        self.conf = conf
+
+    def notify(self, action, alarm_id, alarm_name, severity, previous,
                current, reason, reason_data, headers=None):
         headers = headers or {}
         if not headers.get('x-openstack-request-id'):
@@ -82,14 +85,14 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
                   'headers': headers}
 
         if action.scheme == 'https':
-            default_verify = int(cfg.CONF.rest_notifier_ssl_verify)
+            default_verify = int(self.conf.rest_notifier_ssl_verify)
             options = urlparse.parse_qs(action.query)
             verify = bool(int(options.get('aodh-alarm-ssl-verify',
                                           [default_verify])[-1]))
             kwargs['verify'] = verify
 
-            cert = cfg.CONF.rest_notifier_certificate_file
-            key = cfg.CONF.rest_notifier_certificate_key
+            cert = self.conf.rest_notifier_certificate_file
+            key = self.conf.rest_notifier_certificate_key
             if cert:
                 kwargs['cert'] = (cert, key) if key else cert
 
@@ -97,7 +100,7 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
         # library. However, there's no interval between retries in urllib3
         # implementation. It will be better to put some interval between
         # retries (future work).
-        max_retries = cfg.CONF.rest_notifier_max_retries
+        max_retries = self.conf.rest_notifier_max_retries
         session = requests.Session()
         session.mount(action.geturl(),
                       requests.adapters.HTTPAdapter(max_retries=max_retries))
