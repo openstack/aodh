@@ -12,12 +12,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""class for tests in aodh/evaluator/__init__.py
-"""
 import datetime
 
 import mock
-from oslo_config import cfg
 from oslo_utils import timeutils
 from oslotest import base
 
@@ -41,7 +38,7 @@ class TestEvaluatorBaseClass(base.BaseTestCase):
             def evaluate(self, alarm):
                 pass
 
-        ev = EvaluatorSub(cfg.CONF, notifier)
+        ev = EvaluatorSub(mock.MagicMock(), notifier)
         ev.storage_conn = mock.MagicMock()
         ev._record_change = mock.MagicMock()
         ev._refresh(mock.MagicMock(), mock.MagicMock(),

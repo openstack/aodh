@@ -13,16 +13,17 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import mock
-from oslo_config import cfg
+from oslo_config import fixture
 from oslotest import base
 
 
 class TestEvaluatorBase(base.BaseTestCase):
     def setUp(self):
         super(TestEvaluatorBase, self).setUp()
+        self.conf = self.useFixture(fixture.Config()).conf
         self.api_client = mock.Mock()
         self.notifier = mock.MagicMock()
-        self.evaluator = self.EVALUATOR(cfg.CONF, self.notifier)
+        self.evaluator = self.EVALUATOR(self.conf, self.notifier)
         self.storage_conn = mock.MagicMock()
         self.evaluator.storage_conn = self.storage_conn
         self.prepare_alarms()

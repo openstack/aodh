@@ -20,7 +20,6 @@ import uuid
 from ceilometerclient import exc
 from ceilometerclient.v2 import statistics
 import mock
-from oslo_config import cfg
 from oslo_utils import timeutils
 import pytz
 from six import moves
@@ -360,13 +359,13 @@ class TestEvaluate(base.TestEvaluatorBase):
     def test_threshold_endpoint_types(self):
         endpoint_types = ["internalURL", "publicURL"]
         for endpoint_type in endpoint_types:
-            cfg.CONF.set_override('os_endpoint_type',
-                                  endpoint_type,
-                                  group='service_credentials')
+            self.conf.set_override('os_endpoint_type',
+                                   endpoint_type,
+                                   group='service_credentials')
             with mock.patch('ceilometerclient.client.get_client') as client:
                 self.evaluator.api_client = None
                 self._evaluate_all_alarms()
-                conf = cfg.CONF.service_credentials
+                conf = self.conf.service_credentials
                 expected = [mock.call(2,
                                       os_auth_url=conf.os_auth_url,
                                       os_region_name=conf.os_region_name,
@@ -375,7 +374,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                                       os_username=conf.os_username,
                                       os_cacert=conf.os_cacert,
                                       os_endpoint_type=conf.os_endpoint_type,
-                                      timeout=cfg.CONF.http_timeout,
+                                      timeout=self.conf.http_timeout,
                                       insecure=conf.insecure)]
                 actual = client.call_args_list
                 self.assertEqual(expected, actual)
