@@ -26,13 +26,22 @@ import six
 
 
 class EngineTest(base.BaseTestCase):
+    def setUp(self):
+        super(EngineTest, self).setUp()
+        self.CONF = self.useFixture(fixture_config.Config()).conf
+
     def test_get_connection(self):
-        engine = storage.get_connection('log://localhost')
+        self.CONF.set_override('connection', 'log://localhost',
+                               group='database')
+        engine = storage.get_connection_from_config(self.CONF)
         self.assertIsInstance(engine, impl_log.Connection)
 
     def test_get_connection_no_such_engine(self):
+        self.CONF.set_override('connection', 'no-such-engine://localhost',
+                               group='database')
+        self.CONF.set_override('max_retries', 0, 'database')
         try:
-            storage.get_connection('no-such-engine://localhost')
+            storage.get_connection_from_config(self.CONF)
         except RuntimeError as err:
             self.assertIn('no-such-engine', six.text_type(err))
 

@@ -39,8 +39,8 @@ except ImportError:
 
 class MongoDbManager(fixtures.Fixture):
 
-    def __init__(self, url):
-        self._url = url
+    def __init__(self, conf):
+        self.conf = conf
 
     def setUp(self):
         super(MongoDbManager, self).setUp()
@@ -48,67 +48,63 @@ class MongoDbManager(fixtures.Fixture):
             warnings.filterwarnings(
                 action='ignore',
                 message='.*you must provide a username and password.*')
+            self.conf.set_override("connection",
+                                   '%(url)s_%(db)s' % {
+                                       'url': self.conf.database.connection,
+                                       'db': uuid.uuid4().hex,
+                                   }, "database")
             try:
-                self.alarm_connection = storage.get_connection(
-                    self.url)
+                self.alarm_connection = storage.get_connection_from_config(
+                    self.conf)
             except storage.StorageBadVersion as e:
                 raise testcase.TestSkipped(six.text_type(e))
 
-    @property
-    def url(self):
-        return '%(url)s_%(db)s' % {
-            'url': self._url,
-            'db': uuid.uuid4().hex
-        }
-
 
 class SQLManager(fixtures.Fixture):
+    def __init__(self, conf):
+        self.conf = conf
+        db_name = 'aodh_%s' % uuid.uuid4().hex
+        self._engine = sqlalchemy.create_engine(conf.database.connection)
+        self._conn = self._engine.connect()
+        self._create_db(self._conn, db_name)
+        self.url = conf.database.connection.replace(
+            self.url_dbname_placeholder, db_name)
+        self.conf.set_override("connection", self.url, "database")
+        self._conn.close()
+        self._engine.dispose()
+
     def setUp(self):
         super(SQLManager, self).setUp()
-        self.alarm_connection = storage.get_connection(
-            self.url)
-
-    @property
-    def url(self):
-        return self._url.replace('template1', self._db_name)
+        self.alarm_connection = storage.get_connection_from_config(self.conf)
 
 
 class PgSQLManager(SQLManager):
 
-    def __init__(self, url):
-        self._url = url
-        self._db_name = 'aodh_%s' % uuid.uuid4().hex
-        self._engine = sqlalchemy.create_engine(self._url)
-        self._conn = self._engine.connect()
-        self._conn.connection.set_isolation_level(0)
-        self._conn.execute(
-            'CREATE DATABASE %s WITH TEMPLATE template0;' % self._db_name)
-        self._conn.connection.set_isolation_level(1)
-        self._conn.close()
-        self._engine.dispose()
+    url_dbname_placeholder = 'template1'
+
+    @staticmethod
+    def _create_db(conn, db_name):
+        conn.connection.set_isolation_level(0)
+        conn.execute('CREATE DATABASE %s WITH TEMPLATE template0;' % db_name)
+        conn.connection.set_isolation_level(1)
 
 
 class MySQLManager(SQLManager):
 
-    def __init__(self, url):
-        self._url = url
-        self._db_name = 'aodh_%s' % uuid.uuid4().hex
-        self._engine = sqlalchemy.create_engine(
-            self._url.replace('template1', ''))
-        self._conn = self._engine.connect()
-        self._conn.execute('CREATE DATABASE %s;' % self._db_name)
-        self._conn.close()
-        self._engine.dispose()
+    url_dbname_placeholder = 'test'
+
+    @staticmethod
+    def _create_db(conn, db_name):
+        conn.execute('CREATE DATABASE %s;' % db_name)
 
 
 class HBaseManager(fixtures.Fixture):
-    def __init__(self, url):
-        self._url = url
+    def __init__(self, conf):
+        self.conf = conf
 
     def setUp(self):
         super(HBaseManager, self).setUp()
-        self.alarm_connection = storage.get_connection(
-            self.url)
+        self.alarm_connection = storage.get_connection_from_config(self.conf)
         # Unique prefix for each test to keep data is distinguished because
         # all test data is stored in one table
         data_prefix = str(uuid.uuid4().hex)
@@ -139,13 +135,12 @@ class HBaseManager(fixtures.Fixture):
 
 class SQLiteManager(fixtures.Fixture):
 
-    def __init__(self, url):
-        self.url = url
+    def __init__(self, conf):
+        self.conf = conf
 
     def setUp(self):
         super(SQLiteManager, self).setUp()
-        self.alarm_connection = storage.get_connection(
-            self.url)
+        self.alarm_connection = storage.get_connection_from_config(self.conf)
 
 
 class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
@@ -179,9 +174,10 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
         import aodh.service  # noqa
         self.CONF = self.useFixture(fixture_config.Config()).conf
         self.CONF([], project='aodh', validate_default_values=True)
+        self.CONF.set_override('connection', self.db_url, group="database")
 
         try:
-            self.db_manager = self._get_driver_manager(engine)(self.db_url)
+            self.db_manager = self._get_driver_manager(engine)(self.CONF)
         except ValueError as exc:
             self.skipTest("missing driver manager: %s" % exc)
         self.useFixture(self.db_manager)
@@ -189,15 +185,16 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
         self.alarm_conn = self.db_manager.alarm_connection
         self.alarm_conn.upgrade()
 
-        self.useFixture(mockpatch.Patch('aodh.storage.get_connection',
-                                        side_effect=self._get_connection))
+        self.useFixture(mockpatch.Patch(
+            'aodh.storage.get_connection_from_config',
+            side_effect=self._get_connection))
 
     def tearDown(self):
         self.alarm_conn.clear()
         self.alarm_conn = None
         super(TestBase, self).tearDown()
 
-    def _get_connection(self, url):
+    def _get_connection(self, conf):
         return self.alarm_conn
 
     def _get_driver_manager(self, engine):
