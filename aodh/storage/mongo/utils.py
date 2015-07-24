@@ -67,7 +67,7 @@ class ConnectionPool(object):
     def __init__(self):
         self._pool = {}
 
-    def connect(self, url):
+    def connect(self, url, replica_set=None):
         connection_options = pymongo.uri_parser.parse_uri(url)
         del connection_options['database']
         del connection_options['username']
@@ -83,23 +83,18 @@ class ConnectionPool(object):
         log_data = {'db': splitted_url.scheme,
                     'nodelist': connection_options['nodelist']}
         LOG.info(_('Connecting to %(db)s on %(nodelist)s') % log_data)
-        client = self._mongo_connect(url)
-        self._pool[pool_key] = weakref.ref(client)
-        return client
-
-    @staticmethod
-    def _mongo_connect(url):
         try:
             client = MongoProxy(
                 pymongo.MongoClient(
-                    url, replicaSet=cfg.CONF.database.mongodb_replica_set
+                    url, replicaSet=replica_set,
                 )
             )
-            return client
         except pymongo.errors.ConnectionFailure as e:
             LOG.warn(_('Unable to connect to the database server: '
                        '%(errmsg)s.') % {'errmsg': e})
             raise
+        self._pool[pool_key] = weakref.ref(client)
+        return client
 
 
 class QueryTransformer(object):

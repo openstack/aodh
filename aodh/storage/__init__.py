@@ -45,7 +45,7 @@ OPTS = [
                help=("Number of seconds that alarm histories are kept "
                      "in the database for (<= 0 means forever).")),
     cfg.StrOpt('mongodb_replica_set',
-               default='',
+               default=None,
                help='The name of the replica set which is used to connect to '
                     'MongoDB database. If it is set, MongoReplicaSetClient '
                     'will be used instead of MongoClient.'),
