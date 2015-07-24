@@ -1,9 +1,8 @@
 #!/bin/bash -x
 set -e
+
 # Use a mongodb backend by default
-
-
-if [ -z $AODH_TEST_BACKEND ]; then
+if [ -z "$AODH_TEST_BACKEND" ]; then
     AODH_TEST_BACKEND="mongodb"
 fi
 echo $AODH_TEST_BACKEND
