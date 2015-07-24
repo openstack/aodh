@@ -15,6 +15,7 @@
 
 from oslo_config import cfg
 from oslo_serialization import jsonutils
+import pecan
 import requests
 import wsme
 from wsme import types as wtypes
@@ -63,8 +64,8 @@ class AlarmGnocchiThresholdRule(base.AlarmRule):
     # @cachetools.ttl_cache(maxsize=1, ttl=600)
     @staticmethod
     def _get_aggregation_methods():
-        ks_client = keystone_client.get_client(cfg.CONF)
-        gnocchi_url = cfg.CONF.gnocchi_url
+        ks_client = keystone_client.get_client(pecan.request.cfg)
+        gnocchi_url = pecan.request.cfg.gnocchi_url
         headers = {'Content-Type': "application/json",
                    'X-Auth-Token': ks_client.auth_token}
         try:
@@ -103,8 +104,8 @@ class MetricOfResourceRule(AlarmGnocchiThresholdRule):
               cls).validate_alarm(alarm)
 
         rule = alarm.gnocchi_resources_threshold_rule
-        ks_client = keystone_client.get_client(cfg.CONF)
-        gnocchi_url = cfg.CONF.gnocchi_url
+        ks_client = keystone_client.get_client(pecan.request.cfg)
+        gnocchi_url = pecan.request.cfg.gnocchi_url
         headers = {'Content-Type': "application/json",
                    'X-Auth-Token': ks_client.auth_token}
         try:
@@ -161,10 +162,10 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
                         query]})
 
         # Delegate the query validation to gnocchi
-        ks_client = keystone_client.get_client(cfg.CONF)
+        ks_client = keystone_client.get_client(pecan.request.cfg)
         request = {
             'url': "%s/v1/aggregation/resource/%s/metric/%s" % (
-                cfg.CONF.gnocchi_url,
+                pecan.request.cfg.gnocchi_url,
                 rule.resource_type,
                 rule.metric),
             'headers': {'Content-Type': "application/json",

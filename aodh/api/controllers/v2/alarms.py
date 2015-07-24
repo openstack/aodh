@@ -100,14 +100,14 @@ def is_over_quota(conn, project_id, user_id):
     over_quota = False
 
     # Start by checking for user quota
-    user_alarm_quota = cfg.CONF.alarm.user_alarm_quota
+    user_alarm_quota = pecan.request.cfg.alarm.user_alarm_quota
     if user_alarm_quota is not None:
         user_alarms = list(conn.get_alarms(user=user_id))
         over_quota = len(user_alarms) >= user_alarm_quota
 
     # If the user quota isn't reached, we check for the project quota
     if not over_quota:
-        project_alarm_quota = cfg.CONF.alarm.project_alarm_quota
+        project_alarm_quota = pecan.request.cfg.alarm.project_alarm_quota
         if project_alarm_quota is not None:
             project_alarms = list(conn.get_alarms(project=project_id))
             over_quota = len(project_alarms) >= project_alarm_quota
@@ -312,7 +312,7 @@ class Alarm(base.Base):
 
     @staticmethod
     def check_alarm_actions(alarm):
-        max_actions = cfg.CONF.alarm.alarm_max_actions
+        max_actions = pecan.request.cfg.alarm.alarm_max_actions
         for state in state_kind:
             actions_name = state.replace(" ", "_") + '_actions'
             actions = getattr(alarm, actions_name)
@@ -403,7 +403,7 @@ class Alarm(base.Base):
                             # We have a trust action without a trust ID,
                             # create it
                             trust_id = keystone_client.create_trust_id(
-                                cfg.CONF,
+                                pecan.request.cfg,
                                 trustor_user_id, trustor_project_id, roles,
                                 auth_plugin)
                             netloc = '%s:delete@%s' % (trust_id, url.netloc)
@@ -418,7 +418,7 @@ class Alarm(base.Base):
                     if (self._is_trust_url(url) and url.password and
                             action not in getattr(self, key)):
                         keystone_client.delete_trust_id(
-                            cfg.CONF,
+                            pecan.request.cfg,
                             url.username, auth_plugin)
 
     def delete_actions(self):
@@ -427,7 +427,7 @@ class Alarm(base.Base):
                                       self.insufficient_data_actions):
             url = netutils.urlsplit(action)
             if self._is_trust_url(url) and url.password:
-                keystone_client.delete_trust_id(cfg.CONF,
+                keystone_client.delete_trust_id(pecan.request.cfg,
                                                 url.username, auth_plugin)
 
 
@@ -481,7 +481,7 @@ class AlarmChange(base.Base):
 def _send_notification(event, payload):
     notification = event.replace(" ", "_")
     notification = "alarm.%s" % notification
-    transport = messaging.get_transport(cfg.CONF)
+    transport = messaging.get_transport(pecan.request.cfg)
     notifier = messaging.get_notifier(transport, publisher_id="aodh.api")
     # FIXME(sileht): perhaps we need to copy some infos from the
     # pecan request headers like nova does
@@ -510,7 +510,7 @@ class AlarmController(rest.RestController):
         return alarms[0]
 
     def _record_change(self, data, now, on_behalf_of=None, type=None):
-        if not cfg.CONF.record_history:
+        if not pecan.request.cfg.record_history:
             return
         type = type or models.AlarmChange.RULE_CHANGE
         scrubbed_data = utils.stringify_timestamps(data)
@@ -684,7 +684,7 @@ class AlarmsController(rest.RestController):
 
     @staticmethod
     def _record_creation(conn, data, alarm_id, now):
-        if not cfg.CONF.record_history:
+        if not pecan.request.cfg.record_history:
             return
         type = models.AlarmChange.CREATION
         scrubbed_data = utils.stringify_timestamps(data)
