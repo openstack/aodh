@@ -15,7 +15,6 @@
 from __future__ import absolute_import
 import datetime
 
-from oslo_config import cfg
 from oslo_db.sqlalchemy import session as db_session
 from oslo_log import log
 from oslo_utils import timeutils
@@ -52,12 +51,12 @@ class Connection(base.Connection):
         AVAILABLE_STORAGE_CAPABILITIES,
     )
 
-    def __init__(self, url):
+    def __init__(self, conf, url):
         # Set max_retries to 0, since oslo.db in certain cases may attempt
         # to retry making the db connection retried max_retries ^ 2 times
         # in failure case and db reconnection has already been implemented
         # in storage.__init__.get_connection_from_config function
-        options = dict(cfg.CONF.database.items())
+        options = dict(conf.database.items())
         options['max_retries'] = 0
         self._engine_facade = db_session.EngineFacade(url, **options)
 

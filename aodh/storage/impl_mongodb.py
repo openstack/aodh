@@ -39,9 +39,9 @@ class Connection(pymongo_base.Connection):
 
     CONNECTION_POOL = pymongo_utils.ConnectionPool()
 
-    def __init__(self, url):
-
-        # NOTE(jd) Use our own connection pooling on top of the Pymongo one.
+    def __init__(self, conf, url):
+        self.conf = conf
+        # NOTE(jd) Use our own connection pooling on top of the Pymongo one./
         # We need that otherwise we overflow the MongoDB instance with new
         # connection since we instantiate a Pymongo client each time someone
         # requires a new storage connection.
@@ -90,7 +90,7 @@ class Connection(pymongo_base.Connection):
     def upgrade(self):
         super(Connection, self).upgrade()
         # Establish indexes
-        ttl = cfg.CONF.database.alarm_history_time_to_live
+        ttl = self.conf.database.alarm_history_time_to_live
         self.update_ttl(
             ttl, 'alarm_history_ttl', 'timestamp', self.db.alarm_history)
 

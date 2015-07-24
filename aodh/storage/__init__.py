@@ -107,7 +107,7 @@ def get_connection(url):
     LOG.debug('looking for %(name)r driver in %(namespace)r',
               {'name': engine_name, 'namespace': _NAMESPACE})
     mgr = driver.DriverManager(_NAMESPACE, engine_name)
-    return mgr.driver(url)
+    return mgr.driver(cfg.CONF, url)
 
 
 class SampleFilter(object):

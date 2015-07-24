@@ -33,7 +33,7 @@ class Connection(pymongo_base.Connection):
 
     CONNECTION_POOL = pymongo_utils.ConnectionPool()
 
-    def __init__(self, url):
+    def __init__(self, conf, url):
 
         # Since we are using pymongo, even though we are connecting to DB2
         # we still have to make sure that the scheme which used to distinguish

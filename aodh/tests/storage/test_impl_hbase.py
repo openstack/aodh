@@ -51,7 +51,7 @@ class ConnectionTest(tests_db.TestBase,
 
         with mock.patch.object(impl_hbase.Connection, '_get_connection_pool',
                                side_effect=get_connection_pool):
-            conn = impl_hbase.Connection('hbase://test_hbase:9090')
+            conn = impl_hbase.Connection(self.CONF, 'hbase://test_hbase:9090')
         self.assertIsInstance(conn.conn_pool, TestConn)
 
 

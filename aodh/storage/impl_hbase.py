@@ -73,9 +73,6 @@ class Connection(hbase_base.Connection, base.Connection):
     ALARM_TABLE = "alarm"
     ALARM_HISTORY_TABLE = "alarm_h"
 
-    def __init__(self, url):
-        super(Connection, self).__init__(url)
-
     def upgrade(self):
         tables = [self.ALARM_HISTORY_TABLE, self.ALARM_TABLE]
         column_families = {'f': dict()}

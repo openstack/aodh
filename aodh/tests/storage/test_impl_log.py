@@ -12,8 +12,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Tests for aodh/storage/impl_log.py
-"""
+from oslo_config import cfg
 from oslotest import base
 
 from aodh.storage import impl_log
@@ -22,4 +21,4 @@ from aodh.storage import impl_log
 class ConnectionTest(base.BaseTestCase):
     @staticmethod
     def test_get_connection():
-        impl_log.Connection(None)
+        impl_log.Connection(cfg.CONF, None)
