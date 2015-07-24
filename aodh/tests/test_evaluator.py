@@ -40,7 +40,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         )
 
         self.storage_conn = mock.MagicMock()
-        self.svc = evaluator.AlarmEvaluationService()
+        self.svc = evaluator.AlarmEvaluationService(self.CONF)
         self.svc.tg = mock.Mock()
         self.svc.partition_coordinator = mock.MagicMock()
         p_coord = self.svc.partition_coordinator

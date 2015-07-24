@@ -174,22 +174,23 @@ class Evaluator(object):
 class AlarmService(object):
     EVALUATOR_EXTENSIONS_NAMESPACE = "aodh.evaluator"
 
-    def __init__(self):
+    def __init__(self, conf):
         super(AlarmService, self).__init__()
+        self.conf = conf
         self.storage_conn = None
         self._load_evaluators()
 
     @property
     def _storage_conn(self):
         if not self.storage_conn:
-            self.storage_conn = storage.get_connection_from_config(cfg.CONF)
+            self.storage_conn = storage.get_connection_from_config(self.conf)
         return self.storage_conn
 
     def _load_evaluators(self):
         self.evaluators = extension.ExtensionManager(
             namespace=self.EVALUATOR_EXTENSIONS_NAMESPACE,
             invoke_on_load=True,
-            invoke_args=(cfg.CONF, rpc.RPCAlarmNotifier(),)
+            invoke_args=(self.conf, rpc.RPCAlarmNotifier(),)
         )
 
     def _evaluate_assigned_alarms(self):
@@ -224,13 +225,13 @@ class AlarmEvaluationService(AlarmService, os_service.Service):
 
     PARTITIONING_GROUP_NAME = "alarm_evaluator"
 
-    def __init__(self):
-        super(AlarmEvaluationService, self).__init__()
+    def __init__(self, conf):
+        super(AlarmEvaluationService, self).__init__(conf)
         self.partition_coordinator = coordination.PartitionCoordinator()
 
     def start(self):
         super(AlarmEvaluationService, self).start()
-        self.storage_conn = storage.get_connection_from_config(cfg.CONF)
+        self.storage_conn = storage.get_connection_from_config(self.conf)
         self.partition_coordinator.start()
         self.partition_coordinator.join_group(self.PARTITIONING_GROUP_NAME)
 
@@ -238,14 +239,14 @@ class AlarmEvaluationService(AlarmService, os_service.Service):
         delay_start = self.partition_coordinator.is_active()
 
         if self.evaluators:
-            interval = cfg.CONF.evaluation_interval
+            interval = self.conf.evaluation_interval
             self.tg.add_timer(
                 interval,
                 self._evaluate_assigned_alarms,
                 initial_delay=interval if delay_start else None)
         if self.partition_coordinator.is_active():
-            heartbeat_interval = min(cfg.CONF.coordination.heartbeat,
-                                     cfg.CONF.evaluation_interval / 4)
+            heartbeat_interval = min(self.conf.coordination.heartbeat,
+                                     self.conf.evaluation_interval / 4)
             self.tg.add_timer(heartbeat_interval,
                               self.partition_coordinator.heartbeat)
         # Add a dummy thread to have wait() working

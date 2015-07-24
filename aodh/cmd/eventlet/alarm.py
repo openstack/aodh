@@ -30,4 +30,4 @@ def notifier():
 
 def evaluator():
     service.prepare_service()
-    os_service.launch(CONF, service.AlarmEvaluationService()).wait()
+    os_service.launch(CONF, service.AlarmEvaluationService(CONF)).wait()
