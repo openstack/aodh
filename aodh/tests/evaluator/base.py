@@ -12,9 +12,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Base class for tests in aodh/evaluator/
-"""
 import mock
+from oslo_config import cfg
 from oslotest import base
 
 
@@ -23,7 +22,7 @@ class TestEvaluatorBase(base.BaseTestCase):
         super(TestEvaluatorBase, self).setUp()
         self.api_client = mock.Mock()
         self.notifier = mock.MagicMock()
-        self.evaluator = self.EVALUATOR(self.notifier)
+        self.evaluator = self.EVALUATOR(cfg.CONF, self.notifier)
         self.storage_conn = mock.MagicMock()
         self.evaluator.storage_conn = self.storage_conn
         self.prepare_alarms()

@@ -36,8 +36,8 @@ cfg.CONF.import_opt('http_timeout', 'aodh.service')
 
 class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
 
-    def __init__(self, notifier):
-        super(threshold.ThresholdEvaluator, self).__init__(notifier)
+    def __init__(self, conf, notifier):
+        super(threshold.ThresholdEvaluator, self).__init__(conf, notifier)
         self.gnocchi_url = cfg.CONF.gnocchi_url
         self._ks_client = None
 

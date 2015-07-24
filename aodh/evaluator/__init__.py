@@ -61,18 +61,19 @@ cfg.CONF.register_opts(OPTS)
 class Evaluator(object):
     """Base class for alarm rule evaluator plugins."""
 
-    def __init__(self, notifier):
+    def __init__(self, conf, notifier):
+        self.conf = conf
         self.notifier = notifier
         self.storage_conn = None
 
     @property
     def _storage_conn(self):
         if not self.storage_conn:
-            self.storage_conn = storage.get_connection_from_config(cfg.CONF)
+            self.storage_conn = storage.get_connection_from_config(self.conf)
         return self.storage_conn
 
     def _record_change(self, alarm):
-        if not cfg.CONF.record_history:
+        if not self.conf.record_history:
             return
         type = models.AlarmChange.STATE_TRANSITION
         detail = json.dumps({'state': alarm.state})
@@ -96,7 +97,7 @@ class Evaluator(object):
         except aodh.NotImplementedError:
             pass
         notification = "alarm.state_transition"
-        transport = messaging.get_transport(cfg.CONF)
+        transport = messaging.get_transport(self.conf)
         notifier = messaging.get_notifier(transport,
                                           publisher_id="aodh.evaluator")
         notifier.info(context.RequestContext(), notification, payload)
@@ -188,7 +189,7 @@ class AlarmService(object):
         self.evaluators = extension.ExtensionManager(
             namespace=self.EVALUATOR_EXTENSIONS_NAMESPACE,
             invoke_on_load=True,
-            invoke_args=(rpc.RPCAlarmNotifier(),)
+            invoke_args=(cfg.CONF, rpc.RPCAlarmNotifier(),)
         )
 
     def _evaluate_assigned_alarms(self):

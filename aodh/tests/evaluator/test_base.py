@@ -17,6 +17,7 @@
 import datetime
 
 import mock
+from oslo_config import cfg
 from oslo_utils import timeutils
 from oslotest import base
 
@@ -40,7 +41,7 @@ class TestEvaluatorBaseClass(base.BaseTestCase):
             def evaluate(self, alarm):
                 pass
 
-        ev = EvaluatorSub(notifier)
+        ev = EvaluatorSub(cfg.CONF, notifier)
         ev.storage_conn = mock.MagicMock()
         ev._record_change = mock.MagicMock()
         ev._refresh(mock.MagicMock(), mock.MagicMock(),

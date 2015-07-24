@@ -47,8 +47,8 @@ class ThresholdEvaluator(evaluator.Evaluator):
     # for reporting/ingestion lag
     look_back = 1
 
-    def __init__(self, notifier):
-        super(ThresholdEvaluator, self).__init__(notifier)
+    def __init__(self, conf, notifier):
+        super(ThresholdEvaluator, self).__init__(conf, notifier)
         self.api_client = None
 
     @property
