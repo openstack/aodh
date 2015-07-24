@@ -1,6 +1,7 @@
 #
 # Copyright 2012 New Dream Network, LLC (DreamHost)
 # Copyright 2014 Hewlett-Packard Company
+# Copyright 2015 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,34 +17,19 @@
 
 """Access Control Lists (ACL's) control access the API server."""
 
-from oslo_config import cfg
-from oslo_policy import policy
 import pecan
 
-_ENFORCER = None
 
-CONF = cfg.CONF
-
-
-def _has_rule(name):
-    return name in _ENFORCER.rules.keys()
-
-
-def enforce(policy_name, request):
+def enforce(policy_name, headers, enforcer):
     """Return the user and project the request should be limited to.
 
-    :param request: HTTP request
     :param policy_name: the policy name to validate authz against.
+    :param headers: HTTP headers dictionary
+    :param enforcer: policy enforcer
 
 
     """
-    global _ENFORCER
-    if not _ENFORCER:
-        _ENFORCER = policy.Enforcer(CONF)
-        _ENFORCER.load_rules()
-
     rule_method = "telemetry:" + policy_name
-    headers = request.headers
 
     policy_dict = dict()
     policy_dict['roles'] = headers.get('X-Roles', "").split(",")
@@ -52,27 +38,24 @@ def enforce(policy_name, request):
 
     # maintain backward compat with Juno and previous by allowing the action if
     # there is no rule defined for it
-    if ((_has_rule('default') or _has_rule(rule_method)) and
-            not _ENFORCER.enforce(rule_method, {}, policy_dict)):
+    rules = enforcer.rules.keys()
+    if (('default' in rules or rule_method in rules) and
+            not enforcer.enforce(rule_method, {}, policy_dict)):
         pecan.core.abort(status_code=403, detail='RBAC Authorization Failed')
 
 
 # TODO(fabiog): these methods are still used because the scoping part is really
 # convoluted and difficult to separate out.
 
-def get_limited_to(headers):
+def get_limited_to(headers, enforcer):
     """Return the user and project the request should be limited to.
 
     :param headers: HTTP headers dictionary
+    :param enforcer: policy enforcer
     :return: A tuple of (user, project), set to None if there's no limit on
     one of these.
 
     """
-    global _ENFORCER
-    if not _ENFORCER:
-        _ENFORCER = policy.Enforcer(CONF)
-        _ENFORCER.load_rules()
-
     policy_dict = dict()
     policy_dict['roles'] = headers.get('X-Roles', "").split(",")
     policy_dict['target.user_id'] = (headers.get('X-User-Id'))
@@ -80,21 +63,21 @@ def get_limited_to(headers):
 
     # maintain backward compat with Juno and previous by using context_is_admin
     # rule if the segregation rule (added in Kilo) is not defined
-    rule_name = 'segregation' if _has_rule(
-        'segregation') else 'context_is_admin'
-    if not _ENFORCER.enforce(rule_name,
-                             {},
-                             policy_dict):
+    rules = enforcer.rules.keys()
+    rule_name = 'segregation' if 'segregation' in rules else 'context_is_admin'
+    if not enforcer.enforce(rule_name,
+                            {},
+                            policy_dict):
         return headers.get('X-User-Id'), headers.get('X-Project-Id')
 
     return None, None
 
 
-def get_limited_to_project(headers):
+def get_limited_to_project(headers, enforcer):
     """Return the project the request should be limited to.
 
     :param headers: HTTP headers dictionary
     :return: A project, or None if there's no limit on it.
 
     """
-    return get_limited_to(headers)[1]
+    return get_limited_to(headers, enforcer)[1]

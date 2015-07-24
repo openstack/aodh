@@ -332,7 +332,8 @@ class Alarm(base.Base):
                                             "maximum": max_actions}
                 raise base.ClientSideError(error)
 
-            limited = rbac.get_limited_to_project(pecan.request.headers)
+            limited = rbac.get_limited_to_project(pecan.request.headers,
+                                                  pecan.request.enforcer)
 
             for action in actions:
                 try:
@@ -507,7 +508,8 @@ class AlarmController(rest.RestController):
 
     def _alarm(self):
         self.conn = pecan.request.alarm_storage_conn
-        auth_project = rbac.get_limited_to_project(pecan.request.headers)
+        auth_project = rbac.get_limited_to_project(pecan.request.headers,
+                                                   pecan.request.enforcer)
         alarms = list(self.conn.get_alarms(alarm_id=self._id,
                                            project=auth_project))
         if not alarms:
@@ -545,7 +547,8 @@ class AlarmController(rest.RestController):
     def get(self):
         """Return this alarm."""
 
-        rbac.enforce('get_alarm', pecan.request)
+        rbac.enforce('get_alarm', pecan.request.headers,
+                     pecan.request.enforcer)
 
         return Alarm.from_db_model(self._alarm())
 
@@ -556,7 +559,8 @@ class AlarmController(rest.RestController):
         :param data: an alarm within the request body.
         """
 
-        rbac.enforce('change_alarm', pecan.request)
+        rbac.enforce('change_alarm', pecan.request.headers,
+                     pecan.request.enforcer)
 
         # Ensure alarm exists
         alarm_in = self._alarm()
@@ -565,7 +569,8 @@ class AlarmController(rest.RestController):
 
         data.alarm_id = self._id
 
-        user, project = rbac.get_limited_to(pecan.request.headers)
+        user, project = rbac.get_limited_to(pecan.request.headers,
+                                            pecan.request.enforcer)
         if user:
             data.user_id = user
         elif data.user_id == wtypes.Unset:
@@ -613,7 +618,8 @@ class AlarmController(rest.RestController):
     def delete(self):
         """Delete this alarm."""
 
-        rbac.enforce('delete_alarm', pecan.request)
+        rbac.enforce('delete_alarm', pecan.request.headers,
+                     pecan.request.enforcer)
 
         # ensure alarm exists before deleting
         alarm = self._alarm()
@@ -632,13 +638,15 @@ class AlarmController(rest.RestController):
         :param q: Filter rules for the changes to be described.
         """
 
-        rbac.enforce('alarm_history', pecan.request)
+        rbac.enforce('alarm_history', pecan.request.headers,
+                     pecan.request.enforcer)
 
         q = q or []
         # allow history to be returned for deleted alarms, but scope changes
         # returned to those carried out on behalf of the auth'd tenant, to
         # avoid inappropriate cross-tenant visibility of alarm history
-        auth_project = rbac.get_limited_to_project(pecan.request.headers)
+        auth_project = rbac.get_limited_to_project(pecan.request.headers,
+                                                   pecan.request.enforcer)
         conn = pecan.request.alarm_storage_conn
         kwargs = v2_utils.query_to_kwargs(
             q, conn.get_alarm_changes, ['on_behalf_of', 'alarm_id'])
@@ -654,7 +662,8 @@ class AlarmController(rest.RestController):
         :param state: an alarm state within the request body.
         """
 
-        rbac.enforce('change_alarm_state', pecan.request)
+        rbac.enforce('change_alarm_state', pecan.request.headers,
+                     pecan.request.enforcer)
 
         # note(sileht): body are not validated by wsme
         # Workaround for https://bugs.launchpad.net/wsme/+bug/1227229
@@ -674,7 +683,8 @@ class AlarmController(rest.RestController):
     def get_state(self):
         """Get the state of this alarm."""
 
-        rbac.enforce('get_alarm_state', pecan.request)
+        rbac.enforce('get_alarm_state', pecan.request.headers,
+                     pecan.request.enforcer)
 
         alarm = self._alarm()
         return alarm.state
@@ -720,13 +730,15 @@ class AlarmsController(rest.RestController):
 
         :param data: an alarm within the request body.
         """
-        rbac.enforce('create_alarm', pecan.request)
+        rbac.enforce('create_alarm', pecan.request.headers,
+                     pecan.request.enforcer)
 
         conn = pecan.request.alarm_storage_conn
         now = timeutils.utcnow()
 
         data.alarm_id = str(uuid.uuid4())
-        user_limit, project_limit = rbac.get_limited_to(pecan.request.headers)
+        user_limit, project_limit = rbac.get_limited_to(pecan.request.headers,
+                                                        pecan.request.enforcer)
 
         def _set_ownership(aspect, owner_limitation, header):
             attr = '%s_id' % aspect
@@ -782,7 +794,8 @@ class AlarmsController(rest.RestController):
         :param q: Filter rules for the alarms to be returned.
         """
 
-        rbac.enforce('get_alarms', pecan.request)
+        rbac.enforce('get_alarms', pecan.request.headers,
+                     pecan.request.enforcer)
 
         q = q or []
         # Timestamp is not supported field for Simple Alarm queries

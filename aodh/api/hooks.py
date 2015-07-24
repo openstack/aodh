@@ -15,20 +15,23 @@
 
 import threading
 
+from oslo_policy import policy
 from pecan import hooks
 
 
 class ConfigHook(hooks.PecanHook):
-    """Attach the configuration object to the request.
+    """Attach the configuration and policy enforcer object to the request.
 
     That allows controllers to get it.
     """
 
     def __init__(self, conf):
         self.conf = conf
+        self.enforcer = policy.Enforcer(conf)
 
     def before(self, state):
         state.request.cfg = self.conf
+        state.request.enforcer = self.enforcer
 
 
 class DBHook(hooks.PecanHook):

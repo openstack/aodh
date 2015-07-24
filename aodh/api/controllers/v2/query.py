@@ -264,7 +264,8 @@ class ValidatedComplexQuery(object):
         If the tenant is not admin insert an extra
         "and <visibility_field>=<tenant's project_id>" clause to the query.
         """
-        authorized_project = rbac.get_limited_to_project(pecan.request.headers)
+        authorized_project = rbac.get_limited_to_project(
+            pecan.request.headers, pecan.request.enforcer)
         is_admin = authorized_project is None
         if not is_admin:
             self._restrict_to_project(authorized_project, visibility_field)
@@ -336,7 +337,8 @@ class QueryAlarmHistoryController(rest.RestController):
         :param body: Query rules for the alarm history to be returned.
         """
 
-        rbac.enforce('query_alarm_history', pecan.request)
+        rbac.enforce('query_alarm_history', pecan.request.headers,
+                     pecan.request.enforcer)
 
         query = ValidatedComplexQuery(body,
                                       models.AlarmChange)
@@ -359,7 +361,8 @@ class QueryAlarmsController(rest.RestController):
         :param body: Query rules for the alarms to be returned.
         """
 
-        rbac.enforce('query_alarm', pecan.request)
+        rbac.enforce('query_alarm', pecan.request.headers,
+                     pecan.request.enforcer)
 
         query = ValidatedComplexQuery(body,
                                       models.Alarm)

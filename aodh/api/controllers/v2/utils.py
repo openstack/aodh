@@ -42,7 +42,8 @@ def get_auth_project(on_behalf_of=None):
     # hence for null auth_project (indicating admin-ness) we check if
     # the creating tenant differs from the tenant on whose behalf the
     # alarm is being created
-    auth_project = rbac.get_limited_to_project(pecan.request.headers)
+    auth_project = rbac.get_limited_to_project(pecan.request.headers,
+                                               pecan.request.enforcer)
     created_by = pecan.request.headers.get('X-Project-Id')
     is_admin = auth_project is None
 
@@ -78,7 +79,8 @@ def sanitize_query(query, db_func, on_behalf_of=None):
 def _verify_query_segregation(query, auth_project=None):
     """Ensure non-admin queries are not constrained to another project."""
     auth_project = (auth_project or
-                    rbac.get_limited_to_project(pecan.request.headers))
+                    rbac.get_limited_to_project(pecan.request.headers,
+                                                pecan.request.enforcer))
 
     if not auth_project:
         return
