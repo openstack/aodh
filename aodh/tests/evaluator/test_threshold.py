@@ -14,6 +14,7 @@
 # under the License.
 """Tests for aodh/evaluator/threshold.py
 """
+import copy
 import datetime
 import json
 import uuid
@@ -365,6 +366,24 @@ class TestEvaluate(base.TestEvaluatorBase):
                         for alarm, reason, reason_data
                         in zip(self.alarms, reasons, reason_datas)]
             self.assertEqual(expected, self.notifier.notify.call_args_list)
+
+    def test_evaluation_keep_alarm_attributes_constant(self):
+        self._set_all_alarms('ok')
+        original_alarms = copy.deepcopy(self.alarms)
+        with mock.patch('ceilometerclient.client.get_client',
+                        return_value=self.api_client):
+            avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
+                    for v in moves.xrange(1, 6)]
+            maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
+                    for v in moves.xrange(4)]
+            self.api_client.statistics.list.side_effect = [avgs, maxs]
+            self._evaluate_all_alarms()
+            self._assert_all_alarms('alarm')
+            primitive_alarms = [a.as_dict() for a in self.alarms]
+            for alarm in original_alarms:
+                alarm.state = 'alarm'
+            primitive_original_alarms = [a.as_dict() for a in original_alarms]
+            self.assertEqual(primitive_original_alarms, primitive_alarms)
 
     def test_equivocal_from_unknown(self):
         self._set_all_alarms('insufficient data')

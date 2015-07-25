@@ -13,6 +13,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import datetime
 import operator
 import six
@@ -119,7 +120,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
         """Retrieve statistics over the current window."""
         after = dict(field='timestamp', op='ge', value=start)
         before = dict(field='timestamp', op='le', value=end)
-        query = alarm.rule['query']
+        query = copy.copy(alarm.rule['query'])
         query.extend([before, after])
         LOG.debug(_('stats query %s') % query)
         try:
