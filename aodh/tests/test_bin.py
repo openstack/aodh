@@ -166,3 +166,38 @@ class BinApiTestCase(base.BaseTestCase):
         if six.PY3:
             content = content.decode('utf-8')
         self.assertEqual([], json.loads(content))
+
+
+class BinEvaluatorTestCase(base.BaseTestCase):
+    def setUp(self):
+        super(BinEvaluatorTestCase, self).setUp()
+        content = ("[DEFAULT]\n"
+                   "rpc_backend=fake\n"
+                   "[database]\n"
+                   "connection=log://localhost\n")
+        if six.PY3:
+            content = content.encode('utf-8')
+        self.tempfile = fileutils.write_to_tempfile(content=content,
+                                                    prefix='aodh',
+                                                    suffix='.conf')
+        self.subp = None
+
+    def tearDown(self):
+        super(BinEvaluatorTestCase, self).tearDown()
+        if self.subp:
+            self.subp.kill()
+        os.remove(self.tempfile)
+
+    def test_starting_evaluator(self):
+        self.subp = subprocess.Popen(['aodh-evaluator',
+                                      "--config-file=%s" % self.tempfile],
+                                     stderr=subprocess.PIPE)
+        self.assertIsNone(self.subp.poll())
+
+
+class BinNotifierTestCase(BinEvaluatorTestCase):
+    def test_starting_notifier(self):
+        self.subp = subprocess.Popen(['aodh-notifier',
+                                      "--config-file=%s" % self.tempfile],
+                                     stderr=subprocess.PIPE)
+        self.assertIsNone(self.subp.poll())
