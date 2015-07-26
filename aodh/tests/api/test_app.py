@@ -35,7 +35,8 @@ class TestApp(base.BaseTestCase):
         self.CONF.set_override('api_paste_config', 'non-existent-file')
         with mock.patch.object(self.CONF, 'find_file') as ff:
             ff.return_value = None
-            self.assertRaises(cfg.ConfigFilesNotFoundError, app.load_app)
+            self.assertRaises(cfg.ConfigFilesNotFoundError,
+                              app.load_app, self.CONF)
 
     @mock.patch('aodh.storage.get_connection_from_config',
                 mock.MagicMock())
@@ -46,7 +47,7 @@ class TestApp(base.BaseTestCase):
             if p_debug is not None:
                 self.CONF.set_override('pecan_debug', p_debug, group='api')
             self.CONF.set_override('api_workers', workers)
-            app.setup_app()
+            app.setup_app(conf=self.CONF)
             args, kwargs = mocked.call_args
             self.assertEqual(expected, kwargs.get('debug'))
 

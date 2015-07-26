@@ -23,7 +23,6 @@ from paste import deploy
 import pecan
 from werkzeug import serving
 
-from aodh.api import config as api_config
 from aodh.api import hooks
 from aodh.api import middleware
 from aodh.i18n import _
@@ -54,34 +53,35 @@ API_OPTS = [
 CONF.register_opts(OPTS)
 CONF.register_opts(API_OPTS, group='api')
 
+PECAN_CONFIG = {
+    'app': {
+        'root': 'aodh.api.controllers.root.RootController',
+        'modules': ['aodh.api'],
+    },
+}
 
-def get_pecan_config():
-    # Set up the pecan configuration
-    filename = api_config.__file__.replace('.pyc', '.py')
-    return pecan.configuration.conf_from_file(filename)
 
-
-def setup_app(pecan_config=None):
+def setup_app(pecan_config=PECAN_CONFIG, conf=None):
+    if conf is None:
+        # NOTE(jd) That sucks but pecan forces us to use kwargs :(
+        raise RuntimeError("Config is actually mandatory")
     # FIXME: Replace DBHook with a hooks.TransactionHook
-    app_hooks = [hooks.ConfigHook(cfg.CONF),
+    app_hooks = [hooks.ConfigHook(conf),
                  hooks.DBHook(
-                     storage.get_connection_from_config(cfg.CONF)),
+                     storage.get_connection_from_config(conf)),
                  hooks.TranslationHook()]
-
-    if not pecan_config:
-        pecan_config = get_pecan_config()
 
     pecan.configuration.set_config(dict(pecan_config), overwrite=True)
 
     # NOTE(sileht): pecan debug won't work in multi-process environment
-    pecan_debug = CONF.api.pecan_debug
-    if cfg.CONF.api_workers != 1 and pecan_debug:
+    pecan_debug = conf.api.pecan_debug
+    if conf.api_workers != 1 and pecan_debug:
         pecan_debug = False
         LOG.warning(_LW('pecan_debug cannot be enabled, if workers is > 1, '
                         'the value is overrided with False'))
 
     app = pecan.make_app(
-        pecan_config.app.root,
+        pecan_config['app']['root'],
         debug=pecan_debug,
         hooks=app_hooks,
         wrap_app=middleware.ParsableErrorMiddleware,
@@ -91,29 +91,29 @@ def setup_app(pecan_config=None):
     return app
 
 
-def load_app():
+def load_app(conf):
     # Build the WSGI app
     cfg_file = None
-    cfg_path = cfg.CONF.api_paste_config
+    cfg_path = conf.api_paste_config
     if not os.path.isabs(cfg_path):
-        cfg_file = CONF.find_file(cfg_path)
+        cfg_file = conf.find_file(cfg_path)
     elif os.path.exists(cfg_path):
         cfg_file = cfg_path
 
     if not cfg_file:
-        raise cfg.ConfigFilesNotFoundError([cfg.CONF.api_paste_config])
+        raise cfg.ConfigFilesNotFoundError([conf.api_paste_config])
     LOG.info("Full WSGI config used: %s" % cfg_file)
     return deploy.loadapp("config:" + cfg_file)
 
 
-def build_server():
-    app = load_app()
+def build_server(conf):
+    app = load_app(conf)
     # Create the WSGI server and start it
-    host, port = cfg.CONF.api.host, cfg.CONF.api.port
+    host, port = conf.api.host, conf.api.port
 
     LOG.info(_('Starting server in PID %s') % os.getpid())
     LOG.info(_("Configuration:"))
-    cfg.CONF.log_opt_values(LOG, logging.INFO)
+    conf.log_opt_values(LOG, logging.INFO)
 
     if host == '0.0.0.0':
         LOG.info(_(
@@ -123,12 +123,12 @@ def build_server():
         LOG.info(_("serving on http://%(host)s:%(port)s") % (
                  {'host': host, 'port': port}))
 
-    serving.run_simple(cfg.CONF.api.host, cfg.CONF.api.port,
-                       app, processes=cfg.CONF.api_workers)
+    serving.run_simple(host, port,
+                       app, processes=conf.api_workers)
 
 
 def _app():
-    return setup_app(get_pecan_config())
+    return setup_app(conf=cfg.CONF)
 
 
 def app_factory(global_config, **local_conf):

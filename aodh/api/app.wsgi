@@ -1,6 +1,7 @@
 # -*- mode: python -*-
 #
 # Copyright 2013 New Dream Network, LLC (DreamHost)
+# Copyright 2015 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -17,9 +18,11 @@
 
 See http://pecan.readthedocs.org/en/latest/deployment.html for details.
 """
-from aodh import service
+from oslo_config import cfg
+
 from aodh.api import app
+from aodh import service
 
 # Initialize the oslo configuration library and logging
 service.prepare_service([])
-application = app.load_app()
+application = app.load_app(cfg.CONF)

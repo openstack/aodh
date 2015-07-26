@@ -60,7 +60,7 @@ class FunctionalTest(db_test_base.TestBase):
             },
         }
 
-        return pecan.testing.load_test_app(self.config)
+        return pecan.testing.load_test_app(self.config, conf=self.CONF)
 
     def tearDown(self):
         super(FunctionalTest, self).tearDown()

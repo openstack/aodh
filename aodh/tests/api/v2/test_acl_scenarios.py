@@ -92,7 +92,7 @@ class TestAPIACL(v2.FunctionalTest,
         self.CONF.set_override("cache", "fake.cache", group=acl.OPT_GROUP_NAME)
         file_name = self.path_get('etc/aodh/api_paste.ini')
         self.CONF.set_override("api_paste_config", file_name)
-        return webtest.TestApp(app.load_app())
+        return webtest.TestApp(app.load_app(conf=self.CONF))
 
     def test_non_authenticated(self):
         response = self.get_json('/meters', expect_errors=True)

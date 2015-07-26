@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 #
 # Copyright 2014 OpenStack Foundation
+# Copyright 2015 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -14,10 +15,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_config import cfg
+
 from aodh.api import app
 from aodh import service
 
 
 def main():
     service.prepare_service()
-    app.build_server()
+    app.build_server(cfg.CONF)
