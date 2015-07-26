@@ -50,29 +50,23 @@ class ThresholdEvaluator(evaluator.Evaluator):
 
     def __init__(self, conf, notifier):
         super(ThresholdEvaluator, self).__init__(conf, notifier)
-        self.api_client = None
+        auth_config = conf.service_credentials
+        self._client = ceiloclient.get_client(
+            2,
+            os_auth_url=auth_config.os_auth_url,
+            os_region_name=auth_config.os_region_name,
+            os_tenant_name=auth_config.os_tenant_name,
+            os_password=auth_config.os_password,
+            os_username=auth_config.os_username,
+            os_cacert=auth_config.os_cacert,
+            os_endpoint_type=auth_config.os_endpoint_type,
+            insecure=auth_config.insecure,
+            timeout=conf.http_timeout,
+            os_user_domain_id=auth_config.os_user_domain_id,
+            os_project_name=auth_config.os_project_name,
+            os_project_domain_id=auth_config.os_project_domain_id,
 
-    @property
-    def _client(self):
-        """Construct or reuse an authenticated API client."""
-        if not self.api_client:
-            auth_config = cfg.CONF.service_credentials
-            creds = dict(
-                os_auth_url=auth_config.os_auth_url,
-                os_region_name=auth_config.os_region_name,
-                os_tenant_name=auth_config.os_tenant_name,
-                os_password=auth_config.os_password,
-                os_username=auth_config.os_username,
-                os_cacert=auth_config.os_cacert,
-                os_endpoint_type=auth_config.os_endpoint_type,
-                insecure=auth_config.insecure,
-                timeout=cfg.CONF.http_timeout,
-                os_user_domain_id=auth_config.os_user_domain_id,
-                os_project_name=auth_config.os_project_name,
-                os_project_domain_id=auth_config.os_project_domain_id,
-            )
-            self.api_client = ceiloclient.get_client(2, **creds)
-        return self.api_client
+        )
 
     @classmethod
     def _bound_duration(cls, alarm):

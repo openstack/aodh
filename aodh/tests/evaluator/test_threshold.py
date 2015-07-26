@@ -113,118 +113,112 @@ class TestEvaluate(base.TestEvaluatorBase):
         for alarm in self.alarms:
             alarm.rule[field] = value
 
+    def setUp(self):
+        super(TestEvaluate, self).setUp()
+        self.evaluator._client = self.api_client
+
     def test_retry_transient_api_failure(self):
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            broken = exc.CommunicationError(message='broken')
-            avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] - v)
-                    for v in moves.xrange(5)]
-            maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] + v)
-                    for v in moves.xrange(1, 5)]
-            self.api_client.statistics.list.side_effect = [broken,
-                                                           broken,
-                                                           avgs,
-                                                           maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('insufficient data')
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('ok')
+        broken = exc.CommunicationError(message='broken')
+        avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] - v)
+                for v in moves.xrange(5)]
+        maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] + v)
+                for v in moves.xrange(1, 5)]
+        self.api_client.statistics.list.side_effect = [broken,
+                                                       broken,
+                                                       avgs,
+                                                       maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('insufficient data')
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
 
     def test_simple_insufficient(self):
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.statistics.list.return_value = []
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('insufficient data')
-            expected = [mock.call(alarm) for alarm in self.alarms]
-            update_calls = self.storage_conn.update_alarm.call_args_list
-            self.assertEqual(expected, update_calls)
-            expected = [mock.call(
-                alarm,
-                'ok',
-                ('%d datapoints are unknown'
-                 % alarm.rule['evaluation_periods']),
-                self._reason_data('unknown',
-                                  alarm.rule['evaluation_periods'],
-                                  None))
-                for alarm in self.alarms]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        self.api_client.statistics.list.return_value = []
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('insufficient data')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        expected = [mock.call(
+            alarm,
+            'ok',
+            ('%d datapoints are unknown'
+             % alarm.rule['evaluation_periods']),
+            self._reason_data('unknown',
+                              alarm.rule['evaluation_periods'],
+                              None))
+            for alarm in self.alarms]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_less_insufficient_data(self):
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] - v)
-                    for v in moves.xrange(4)]
-            maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
-                    for v in moves.xrange(1, 4)]
-            self.api_client.statistics.list.side_effect = [avgs, maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('insufficient data')
-            expected = [mock.call(alarm) for alarm in self.alarms]
-            update_calls = self.storage_conn.update_alarm.call_args_list
-            self.assertEqual(update_calls, expected)
-            expected = [mock.call(
-                alarm,
-                'ok',
-                ('%d datapoints are unknown'
-                 % alarm.rule['evaluation_periods']),
-                self._reason_data('unknown',
-                                  alarm.rule['evaluation_periods'],
-                                  alarm.rule['threshold'] - 3))
-                for alarm in self.alarms]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] - v)
+                for v in moves.xrange(4)]
+        maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
+                for v in moves.xrange(1, 4)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('insufficient data')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(update_calls, expected)
+        expected = [mock.call(
+            alarm,
+            'ok',
+            ('%d datapoints are unknown'
+             % alarm.rule['evaluation_periods']),
+            self._reason_data('unknown',
+                              alarm.rule['evaluation_periods'],
+                              alarm.rule['threshold'] - 3))
+            for alarm in self.alarms]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_simple_alarm_trip(self):
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
-                    for v in moves.xrange(1, 6)]
-            maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
-                    for v in moves.xrange(4)]
-            self.api_client.statistics.list.side_effect = [avgs, maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('alarm')
-            expected = [mock.call(alarm) for alarm in self.alarms]
-            update_calls = self.storage_conn.update_alarm.call_args_list
-            self.assertEqual(expected, update_calls)
-            reasons = ['Transition to alarm due to 5 samples outside'
-                       ' threshold, most recent: %s' % avgs[-1].avg,
-                       'Transition to alarm due to 4 samples outside'
-                       ' threshold, most recent: %s' % maxs[-1].max]
-            reason_datas = [self._reason_data('outside', 5, avgs[-1].avg),
-                            self._reason_data('outside', 4, maxs[-1].max)]
-            expected = [mock.call(alarm, 'ok', reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
+                for v in moves.xrange(1, 6)]
+        maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
+                for v in moves.xrange(4)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('alarm')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reasons = ['Transition to alarm due to 5 samples outside'
+                   ' threshold, most recent: %s' % avgs[-1].avg,
+                   'Transition to alarm due to 4 samples outside'
+                   ' threshold, most recent: %s' % maxs[-1].max]
+        reason_datas = [self._reason_data('outside', 5, avgs[-1].avg),
+                        self._reason_data('outside', 4, maxs[-1].max)]
+        expected = [mock.call(alarm, 'ok', reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_simple_alarm_clear(self):
         self._set_all_alarms('alarm')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] - v)
-                    for v in moves.xrange(5)]
-            maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] + v)
-                    for v in moves.xrange(1, 5)]
-            self.api_client.statistics.list.side_effect = [avgs, maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('ok')
-            expected = [mock.call(alarm) for alarm in self.alarms]
-            update_calls = self.storage_conn.update_alarm.call_args_list
-            self.assertEqual(expected, update_calls)
-            reasons = ['Transition to ok due to 5 samples inside'
-                       ' threshold, most recent: %s' % avgs[-1].avg,
-                       'Transition to ok due to 4 samples inside'
-                       ' threshold, most recent: %s' % maxs[-1].max]
-            reason_datas = [self._reason_data('inside', 5, avgs[-1].avg),
-                            self._reason_data('inside', 4, maxs[-1].max)]
-            expected = [mock.call(alarm, 'alarm', reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] - v)
+                for v in moves.xrange(5)]
+        maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] + v)
+                for v in moves.xrange(1, 5)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reasons = ['Transition to ok due to 5 samples inside'
+                   ' threshold, most recent: %s' % avgs[-1].avg,
+                   'Transition to ok due to 4 samples inside'
+                   ' threshold, most recent: %s' % maxs[-1].max]
+        reason_datas = [self._reason_data('inside', 5, avgs[-1].avg),
+                        self._reason_data('inside', 4, maxs[-1].max)]
+        expected = [mock.call(alarm, 'alarm', reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def _construct_payloads(self):
         payloads = []
@@ -281,91 +275,83 @@ class TestEvaluate(base.TestEvaluatorBase):
 
     def test_equivocal_from_known_state(self):
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
-                    for v in moves.xrange(5)]
-            maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
-                    for v in moves.xrange(-1, 3)]
-            self.api_client.statistics.list.side_effect = [avgs, maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('ok')
-            self.assertEqual(
-                [],
-                self.storage_conn.update_alarm.call_args_list)
-            self.assertEqual([], self.notifier.notify.call_args_list)
+        avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
+                for v in moves.xrange(5)]
+        maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
+                for v in moves.xrange(-1, 3)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        self.assertEqual(
+            [],
+            self.storage_conn.update_alarm.call_args_list)
+        self.assertEqual([], self.notifier.notify.call_args_list)
 
     def test_equivocal_from_known_state_and_repeat_actions(self):
         self._set_all_alarms('ok')
         self.alarms[1].repeat_actions = True
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            avgs = [self._get_stat('avg',
-                                   self.alarms[0].rule['threshold'] + v)
-                    for v in moves.xrange(5)]
-            maxs = [self._get_stat('max',
-                                   self.alarms[1].rule['threshold'] - v)
-                    for v in moves.xrange(-1, 3)]
-            self.api_client.statistics.list.side_effect = [avgs, maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('ok')
-            self.assertEqual([],
-                             self.storage_conn.update_alarm.call_args_list)
-            reason = ('Remaining as ok due to 4 samples inside'
-                      ' threshold, most recent: 8.0')
-            reason_datas = self._reason_data('inside', 4, 8.0)
-            expected = [mock.call(self.alarms[1], 'ok', reason, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        avgs = [self._get_stat('avg',
+                               self.alarms[0].rule['threshold'] + v)
+                for v in moves.xrange(5)]
+        maxs = [self._get_stat('max',
+                               self.alarms[1].rule['threshold'] - v)
+                for v in moves.xrange(-1, 3)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        self.assertEqual([],
+                         self.storage_conn.update_alarm.call_args_list)
+        reason = ('Remaining as ok due to 4 samples inside'
+                  ' threshold, most recent: 8.0')
+        reason_datas = self._reason_data('inside', 4, 8.0)
+        expected = [mock.call(self.alarms[1], 'ok', reason, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_unequivocal_from_known_state_and_repeat_actions(self):
         self._set_all_alarms('alarm')
         self.alarms[1].repeat_actions = True
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            avgs = [self._get_stat('avg',
-                                   self.alarms[0].rule['threshold'] + v)
-                    for v in moves.xrange(1, 6)]
-            maxs = [self._get_stat('max',
-                                   self.alarms[1].rule['threshold'] - v)
-                    for v in moves.xrange(4)]
-            self.api_client.statistics.list.side_effect = [avgs, maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('alarm')
-            self.assertEqual([],
-                             self.storage_conn.update_alarm.call_args_list)
-            reason = ('Remaining as alarm due to 4 samples outside'
-                      ' threshold, most recent: 7.0')
-            reason_datas = self._reason_data('outside', 4, 7.0)
-            expected = [mock.call(self.alarms[1], 'alarm',
-                                  reason, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        avgs = [self._get_stat('avg',
+                               self.alarms[0].rule['threshold'] + v)
+                for v in moves.xrange(1, 6)]
+        maxs = [self._get_stat('max',
+                               self.alarms[1].rule['threshold'] - v)
+                for v in moves.xrange(4)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('alarm')
+        self.assertEqual([],
+                         self.storage_conn.update_alarm.call_args_list)
+        reason = ('Remaining as alarm due to 4 samples outside'
+                  ' threshold, most recent: 7.0')
+        reason_datas = self._reason_data('outside', 4, 7.0)
+        expected = [mock.call(self.alarms[1], 'alarm',
+                              reason, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_state_change_and_repeat_actions(self):
         self._set_all_alarms('ok')
         self.alarms[0].repeat_actions = True
         self.alarms[1].repeat_actions = True
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
-                    for v in moves.xrange(1, 6)]
-            maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
-                    for v in moves.xrange(4)]
-            self.api_client.statistics.list.side_effect = [avgs, maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('alarm')
-            expected = [mock.call(alarm) for alarm in self.alarms]
-            update_calls = self.storage_conn.update_alarm.call_args_list
-            self.assertEqual(expected, update_calls)
-            reasons = ['Transition to alarm due to 5 samples outside'
-                       ' threshold, most recent: %s' % avgs[-1].avg,
-                       'Transition to alarm due to 4 samples outside'
-                       ' threshold, most recent: %s' % maxs[-1].max]
-            reason_datas = [self._reason_data('outside', 5, avgs[-1].avg),
-                            self._reason_data('outside', 4, maxs[-1].max)]
-            expected = [mock.call(alarm, 'ok', reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
+                for v in moves.xrange(1, 6)]
+        maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
+                for v in moves.xrange(4)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('alarm')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reasons = ['Transition to alarm due to 5 samples outside'
+                   ' threshold, most recent: %s' % avgs[-1].avg,
+                   'Transition to alarm due to 4 samples outside'
+                   ' threshold, most recent: %s' % maxs[-1].max]
+        reason_datas = [self._reason_data('outside', 5, avgs[-1].avg),
+                        self._reason_data('outside', 4, maxs[-1].max)]
+        expected = [mock.call(alarm, 'ok', reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_evaluation_keep_alarm_attributes_constant(self):
         self._set_all_alarms('ok')
@@ -387,29 +373,27 @@ class TestEvaluate(base.TestEvaluatorBase):
 
     def test_equivocal_from_unknown(self):
         self._set_all_alarms('insufficient data')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
-                    for v in moves.xrange(1, 6)]
-            maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
-                    for v in moves.xrange(4)]
-            self.api_client.statistics.list.side_effect = [avgs, maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('alarm')
-            expected = [mock.call(alarm) for alarm in self.alarms]
-            update_calls = self.storage_conn.update_alarm.call_args_list
-            self.assertEqual(expected, update_calls)
-            reasons = ['Transition to alarm due to 5 samples outside'
-                       ' threshold, most recent: %s' % avgs[-1].avg,
-                       'Transition to alarm due to 4 samples outside'
-                       ' threshold, most recent: %s' % maxs[-1].max]
-            reason_datas = [self._reason_data('outside', 5, avgs[-1].avg),
-                            self._reason_data('outside', 4, maxs[-1].max)]
-            expected = [mock.call(alarm, 'insufficient data',
-                                  reason, reason_data)
-                        for alarm, reason, reason_data
-                        in zip(self.alarms, reasons, reason_datas)]
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+        avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
+                for v in moves.xrange(1, 6)]
+        maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
+                for v in moves.xrange(4)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('alarm')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reasons = ['Transition to alarm due to 5 samples outside'
+                   ' threshold, most recent: %s' % avgs[-1].avg,
+                   'Transition to alarm due to 4 samples outside'
+                   ' threshold, most recent: %s' % maxs[-1].max]
+        reason_datas = [self._reason_data('outside', 5, avgs[-1].avg),
+                        self._reason_data('outside', 4, maxs[-1].max)]
+        expected = [mock.call(alarm, 'insufficient data',
+                              reason, reason_data)
+                    for alarm, reason, reason_data
+                    in zip(self.alarms, reasons, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def _do_test_bound_duration(self, start, exclude_outliers=None):
         alarm = self.alarms[0]
@@ -430,67 +414,38 @@ class TestEvaluate(base.TestEvaluatorBase):
     def test_bound_duration_outlier_exclusion_set(self):
         self._do_test_bound_duration('2012-07-02T10:35:00', True)
 
-    def test_threshold_endpoint_types(self):
-        endpoint_types = ["internalURL", "publicURL"]
-        for endpoint_type in endpoint_types:
-            self.conf.set_override('os_endpoint_type',
-                                   endpoint_type,
-                                   group='service_credentials')
-            with mock.patch('ceilometerclient.client.get_client') as client:
-                self.evaluator.api_client = None
-                self._evaluate_all_alarms()
-                conf = self.conf.service_credentials
-                expected = [mock.call(
-                    2,
-                    os_auth_url=conf.os_auth_url,
-                    os_region_name=conf.os_region_name,
-                    os_tenant_name=conf.os_tenant_name,
-                    os_password=conf.os_password,
-                    os_username=conf.os_username,
-                    os_cacert=conf.os_cacert,
-                    os_endpoint_type=conf.os_endpoint_type,
-                    timeout=self.conf.http_timeout,
-                    insecure=conf.insecure,
-                    os_user_domain_id=conf.os_user_domain_id,
-                    os_project_name=conf.os_project_name,
-                    os_project_domain_id=conf.os_project_domain_id)]
-                actual = client.call_args_list
-                self.assertEqual(expected, actual)
-
     def _do_test_simple_alarm_trip_outlier_exclusion(self, exclude_outliers):
         self._set_all_rules('exclude_outliers', exclude_outliers)
         self._set_all_alarms('ok')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            # most recent datapoints inside threshold but with
-            # anomalously low sample count
-            threshold = self.alarms[0].rule['threshold']
-            avgs = [self._get_stat('avg',
-                                   threshold + (v if v < 10 else -v),
-                                   count=20 if v < 10 else 1)
-                    for v in moves.xrange(1, 11)]
-            threshold = self.alarms[1].rule['threshold']
-            maxs = [self._get_stat('max',
-                                   threshold - (v if v < 7 else -v),
-                                   count=20 if v < 7 else 1)
-                    for v in moves.xrange(8)]
-            self.api_client.statistics.list.side_effect = [avgs, maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('alarm' if exclude_outliers else 'ok')
-            if exclude_outliers:
-                expected = [mock.call(alarm) for alarm in self.alarms]
-                update_calls = self.storage_conn.update_alarm.call_args_list
-                self.assertEqual(expected, update_calls)
-                reasons = ['Transition to alarm due to 5 samples outside'
-                           ' threshold, most recent: %s' % avgs[-2].avg,
-                           'Transition to alarm due to 4 samples outside'
-                           ' threshold, most recent: %s' % maxs[-2].max]
-                reason_datas = [self._reason_data('outside', 5, avgs[-2].avg),
-                                self._reason_data('outside', 4, maxs[-2].max)]
-                expected = [mock.call(alarm, 'ok', reason, reason_data)
-                            for alarm, reason, reason_data
-                            in zip(self.alarms, reasons, reason_datas)]
-                self.assertEqual(expected, self.notifier.notify.call_args_list)
+        # most recent datapoints inside threshold but with
+        # anomalously low sample count
+        threshold = self.alarms[0].rule['threshold']
+        avgs = [self._get_stat('avg',
+                               threshold + (v if v < 10 else -v),
+                               count=20 if v < 10 else 1)
+                for v in moves.xrange(1, 11)]
+        threshold = self.alarms[1].rule['threshold']
+        maxs = [self._get_stat('max',
+                               threshold - (v if v < 7 else -v),
+                               count=20 if v < 7 else 1)
+                for v in moves.xrange(8)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('alarm' if exclude_outliers else 'ok')
+        if exclude_outliers:
+            expected = [mock.call(alarm) for alarm in self.alarms]
+            update_calls = self.storage_conn.update_alarm.call_args_list
+            self.assertEqual(expected, update_calls)
+            reasons = ['Transition to alarm due to 5 samples outside'
+                       ' threshold, most recent: %s' % avgs[-2].avg,
+                       'Transition to alarm due to 4 samples outside'
+                       ' threshold, most recent: %s' % maxs[-2].max]
+            reason_datas = [self._reason_data('outside', 5, avgs[-2].avg),
+                            self._reason_data('outside', 4, maxs[-2].max)]
+            expected = [mock.call(alarm, 'ok', reason, reason_data)
+                        for alarm, reason, reason_data
+                        in zip(self.alarms, reasons, reason_datas)]
+            self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_simple_alarm_trip_with_outlier_exclusion(self):
         self. _do_test_simple_alarm_trip_outlier_exclusion(True)
@@ -501,37 +456,35 @@ class TestEvaluate(base.TestEvaluatorBase):
     def _do_test_simple_alarm_clear_outlier_exclusion(self, exclude_outliers):
         self._set_all_rules('exclude_outliers', exclude_outliers)
         self._set_all_alarms('alarm')
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            # most recent datapoints outside threshold but with
-            # anomalously low sample count
-            threshold = self.alarms[0].rule['threshold']
-            avgs = [self._get_stat('avg',
-                                   threshold - (v if v < 9 else -v),
-                                   count=20 if v < 9 else 1)
-                    for v in moves.xrange(10)]
-            threshold = self.alarms[1].rule['threshold']
-            maxs = [self._get_stat('max',
-                                   threshold + (v if v < 8 else -v),
-                                   count=20 if v < 8 else 1)
-                    for v in moves.xrange(1, 9)]
-            self.api_client.statistics.list.side_effect = [avgs, maxs]
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('ok' if exclude_outliers else 'alarm')
-            if exclude_outliers:
-                expected = [mock.call(alarm) for alarm in self.alarms]
-                update_calls = self.storage_conn.update_alarm.call_args_list
-                self.assertEqual(expected, update_calls)
-                reasons = ['Transition to ok due to 5 samples inside'
-                           ' threshold, most recent: %s' % avgs[-2].avg,
-                           'Transition to ok due to 4 samples inside'
-                           ' threshold, most recent: %s' % maxs[-2].max]
-                reason_datas = [self._reason_data('inside', 5, avgs[-2].avg),
-                                self._reason_data('inside', 4, maxs[-2].max)]
-                expected = [mock.call(alarm, 'alarm', reason, reason_data)
-                            for alarm, reason, reason_data
-                            in zip(self.alarms, reasons, reason_datas)]
-                self.assertEqual(expected, self.notifier.notify.call_args_list)
+        # most recent datapoints outside threshold but with
+        # anomalously low sample count
+        threshold = self.alarms[0].rule['threshold']
+        avgs = [self._get_stat('avg',
+                               threshold - (v if v < 9 else -v),
+                               count=20 if v < 9 else 1)
+                for v in moves.xrange(10)]
+        threshold = self.alarms[1].rule['threshold']
+        maxs = [self._get_stat('max',
+                               threshold + (v if v < 8 else -v),
+                               count=20 if v < 8 else 1)
+                for v in moves.xrange(1, 9)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok' if exclude_outliers else 'alarm')
+        if exclude_outliers:
+            expected = [mock.call(alarm) for alarm in self.alarms]
+            update_calls = self.storage_conn.update_alarm.call_args_list
+            self.assertEqual(expected, update_calls)
+            reasons = ['Transition to ok due to 5 samples inside'
+                       ' threshold, most recent: %s' % avgs[-2].avg,
+                       'Transition to ok due to 4 samples inside'
+                       ' threshold, most recent: %s' % maxs[-2].max]
+            reason_datas = [self._reason_data('inside', 5, avgs[-2].avg),
+                            self._reason_data('inside', 4, maxs[-2].max)]
+            expected = [mock.call(alarm, 'alarm', reason, reason_data)
+                        for alarm, reason, reason_data
+                        in zip(self.alarms, reasons, reason_datas)]
+            self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_simple_alarm_clear_with_outlier_exclusion(self):
         self. _do_test_simple_alarm_clear_outlier_exclusion(True)
@@ -589,13 +542,11 @@ class TestEvaluate(base.TestEvaluatorBase):
         dt = datetime.datetime(2014, 1, 1, 15, 0, 0,
                                tzinfo=pytz.timezone('Europe/Ljubljana'))
         mock_utcnow.return_value = dt.astimezone(pytz.UTC)
-        with mock.patch('ceilometerclient.client.get_client',
-                        return_value=self.api_client):
-            self.api_client.statistics.list.return_value = []
-            self._evaluate_all_alarms()
-            self._assert_all_alarms('ok')
-            update_calls = self.storage_conn.update_alarm.call_args_list
-            self.assertEqual([], update_calls,
-                             "Alarm should not change state if the current "
-                             " time is outside its time constraint.")
-            self.assertEqual([], self.notifier.notify.call_args_list)
+        self.api_client.statistics.list.return_value = []
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual([], update_calls,
+                         "Alarm should not change state if the current "
+                         " time is outside its time constraint.")
+        self.assertEqual([], self.notifier.notify.call_args_list)
