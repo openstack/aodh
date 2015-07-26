@@ -49,12 +49,11 @@ class FunctionalTest(db_test_base.TestBase):
                                group='oslo_policy')
         self.app = self._make_app()
 
-    def _make_app(self, enable_acl=False):
+    def _make_app(self):
         self.config = {
             'app': {
                 'root': 'aodh.api.controllers.root.RootController',
                 'modules': ['aodh.api'],
-                'enable_acl': enable_acl,
             },
             'wsme': {
                 'debug': True,
