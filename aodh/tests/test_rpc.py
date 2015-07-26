@@ -50,7 +50,7 @@ class TestRPCAlarmNotifier(tests_base.BaseTestCase):
         self.setup_messaging(self.CONF)
 
         self.notifier_server = FakeNotifier(self.CONF, self.transport)
-        self.notifier = rpc.RPCAlarmNotifier()
+        self.notifier = rpc.RPCAlarmNotifier(self.CONF)
         self.alarms = [
             alarms.Alarm(None, info={
                 'name': 'instance_running_hot',

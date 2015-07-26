@@ -198,7 +198,7 @@ class AlarmService(object):
         self.evaluators = extension.ExtensionManager(
             namespace=self.EVALUATOR_EXTENSIONS_NAMESPACE,
             invoke_on_load=True,
-            invoke_args=(self.conf, rpc.RPCAlarmNotifier(),)
+            invoke_args=(self.conf, rpc.RPCAlarmNotifier(self.conf),)
         )
 
     def _evaluate_assigned_alarms(self):
