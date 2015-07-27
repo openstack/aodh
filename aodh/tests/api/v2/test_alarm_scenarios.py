@@ -1546,7 +1546,7 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(['http://no.where'], alarms[0].alarm_actions)
 
     def test_post_alarm_with_too_many_actions(self):
-        self.CONF.set_override('alarm_max_actions', 1, group='alarm')
+        self.CONF.set_override('alarm_max_actions', 1)
         body = {
             'name': 'alarm-with-many-actions',
             'type': 'combination',
@@ -2676,31 +2676,31 @@ class TestAlarmsQuotas(TestAlarmsBase):
         self.assertEqual(1, len(alarms))
 
     def test_alarms_quotas(self):
-        self.CONF.set_override('user_alarm_quota', 1, group='alarm')
-        self.CONF.set_override('project_alarm_quota', 1, group='alarm')
+        self.CONF.set_override('user_alarm_quota', 1)
+        self.CONF.set_override('project_alarm_quota', 1)
         self._test_alarm_quota()
 
     def test_project_alarms_quotas(self):
-        self.CONF.set_override('project_alarm_quota', 1, group='alarm')
+        self.CONF.set_override('project_alarm_quota', 1)
         self._test_alarm_quota()
 
     def test_user_alarms_quotas(self):
-        self.CONF.set_override('user_alarm_quota', 1, group='alarm')
+        self.CONF.set_override('user_alarm_quota', 1)
         self._test_alarm_quota()
 
     def test_larger_limit_project_alarms_quotas(self):
-        self.CONF.set_override('user_alarm_quota', 1, group='alarm')
-        self.CONF.set_override('project_alarm_quota', 2, group='alarm')
+        self.CONF.set_override('user_alarm_quota', 1)
+        self.CONF.set_override('project_alarm_quota', 2)
         self._test_alarm_quota()
 
     def test_larger_limit_user_alarms_quotas(self):
-        self.CONF.set_override('user_alarm_quota', 2, group='alarm')
-        self.CONF.set_override('project_alarm_quota', 1, group='alarm')
+        self.CONF.set_override('user_alarm_quota', 2)
+        self.CONF.set_override('project_alarm_quota', 1)
         self._test_alarm_quota()
 
     def test_larger_limit_user_alarm_quotas_multitenant_user(self):
-        self.CONF.set_override('user_alarm_quota', 2, group='alarm')
-        self.CONF.set_override('project_alarm_quota', 1, group='alarm')
+        self.CONF.set_override('user_alarm_quota', 2)
+        self.CONF.set_override('project_alarm_quota', 1)
 
         def _test(field, value):
             query = [{

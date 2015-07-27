@@ -57,19 +57,22 @@ LOG = log.getLogger(__name__)
 ALARM_API_OPTS = [
     cfg.IntOpt('user_alarm_quota',
                default=None,
+               deprecated_group="alarm",
                help='Maximum number of alarms defined for a user.'
                ),
     cfg.IntOpt('project_alarm_quota',
                default=None,
+               deprecated_group="alarm",
                help='Maximum number of alarms defined for a project.'
                ),
     cfg.IntOpt('alarm_max_actions',
                default=-1,
+               deprecated_group="alarm",
                help='Maximum count of actions for each state of an alarm, '
                     'non-positive number means no limit.'),
 ]
 
-cfg.CONF.register_opts(ALARM_API_OPTS, group='alarm')
+cfg.CONF.register_opts(ALARM_API_OPTS)
 cfg.CONF.import_opt('record_history', 'aodh.evaluator')
 
 state_kind = ["ok", "alarm", "insufficient data"]
@@ -100,14 +103,14 @@ def is_over_quota(conn, project_id, user_id):
     over_quota = False
 
     # Start by checking for user quota
-    user_alarm_quota = pecan.request.cfg.alarm.user_alarm_quota
+    user_alarm_quota = pecan.request.cfg.user_alarm_quota
     if user_alarm_quota is not None:
         user_alarms = list(conn.get_alarms(user=user_id))
         over_quota = len(user_alarms) >= user_alarm_quota
 
     # If the user quota isn't reached, we check for the project quota
     if not over_quota:
-        project_alarm_quota = pecan.request.cfg.alarm.project_alarm_quota
+        project_alarm_quota = pecan.request.cfg.project_alarm_quota
         if project_alarm_quota is not None:
             project_alarms = list(conn.get_alarms(project=project_id))
             over_quota = len(project_alarms) >= project_alarm_quota
@@ -312,7 +315,7 @@ class Alarm(base.Base):
 
     @staticmethod
     def check_alarm_actions(alarm):
-        max_actions = pecan.request.cfg.alarm.alarm_max_actions
+        max_actions = pecan.request.cfg.alarm_max_actions
         for state in state_kind:
             actions_name = state.replace(" ", "_") + '_actions'
             actions = getattr(alarm, actions_name)
