@@ -18,6 +18,8 @@
 from oslo_config import cfg
 from oslo_service import service as os_service
 
+from aodh import evaluator as evaluator_svc
+from aodh import notifier as notifier_svc
 from aodh import service
 
 CONF = cfg.CONF
@@ -25,9 +27,9 @@ CONF = cfg.CONF
 
 def notifier():
     service.prepare_service()
-    os_service.launch(CONF, service.AlarmNotifierService(CONF)).wait()
+    os_service.launch(CONF, notifier_svc.AlarmNotifierService(CONF)).wait()
 
 
 def evaluator():
     service.prepare_service()
-    os_service.launch(CONF, service.AlarmEvaluationService(CONF)).wait()
+    os_service.launch(CONF, evaluator_svc.AlarmEvaluationService(CONF)).wait()
