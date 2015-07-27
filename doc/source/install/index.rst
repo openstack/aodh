@@ -24,4 +24,5 @@
 
    development
    manual
+   storage
    mod_wsgi

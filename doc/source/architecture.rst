@@ -51,3 +51,21 @@ database setup (using a separate database from the one used for metering)
 will be critical in all cases of production deployment.
 
 .. _Autoscaling with Heat and Ceilometer: http://techs.enovance.com/5991/autoscaling-with-heat-and-ceilometer
+
+Alarm Rules
+===========
+
+.. list-plugins:: aodh.alarm.rule
+   :detailed:
+
+Alarm Evaluators
+================
+
+.. list-plugins:: aodh.evaluator
+   :detailed:
+
+Alarm Notifiers
+===============
+
+.. list-plugins:: aodh.notifier
+   :detailed:

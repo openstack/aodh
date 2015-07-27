@@ -46,7 +46,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinxcontrib.pecanwsme.rest',
     'oslosphinx',
-    'sphinxcontrib.docbookrestapi.setup'
+    'sphinxcontrib.docbookrestapi.setup',
+    'stevedore.sphinxext',
 ]
 
 wsme_protocols = ['restjson', 'restxml']
