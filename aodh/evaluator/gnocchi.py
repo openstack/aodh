@@ -37,7 +37,7 @@ class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
 
     def __init__(self, conf, notifier):
         super(threshold.ThresholdEvaluator, self).__init__(conf, notifier)
-        self.gnocchi_url = cfg.CONF.gnocchi_url
+        self.gnocchi_url = conf.gnocchi_url
 
     def _get_headers(self, content_type="application/json"):
         return {
