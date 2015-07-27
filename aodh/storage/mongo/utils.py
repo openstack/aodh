@@ -65,7 +65,7 @@ class ConnectionPool(object):
     def __init__(self):
         self._pool = {}
 
-    def connect(self, url, replica_set=None):
+    def connect(self, url, max_retries, retry_interval, replica_set=None):
         connection_options = pymongo.uri_parser.parse_uri(url)
         del connection_options['database']
         del connection_options['username']
@@ -85,7 +85,9 @@ class ConnectionPool(object):
             client = MongoProxy(
                 pymongo.MongoClient(
                     url, replicaSet=replica_set,
-                )
+                ),
+                max_retries,
+                retry_interval,
             )
         except pymongo.errors.ConnectionFailure as e:
             LOG.warn(_('Unable to connect to the database server: '
@@ -218,7 +220,6 @@ class QueryTransformer(object):
 
         return self._handle_simple_op(operator_node, nodes)
 
-
 MONGO_METHODS = set([typ for typ in dir(pymongo.collection.Collection)
                      if not typ.startswith('_')])
 MONGO_METHODS.update(set([typ for typ in dir(pymongo.MongoClient)
@@ -237,8 +238,10 @@ def _safe_mongo_call(max_retries, retry_interval):
 
 
 class MongoProxy(object):
-    def __init__(self, conn):
+    def __init__(self, conn, max_retries, retry_interval):
         self.conn = conn
+        self.max_retries = max_retries
+        self.retry_interval = retry_interval
 
     def __getitem__(self, item):
         """Create and return proxy around the method in the connection.
@@ -251,7 +254,9 @@ class MongoProxy(object):
         # We need this modifying method to return a CursorProxy object so that
         # we can handle the Cursor next function to catch the AutoReconnect
         # exception.
-        return CursorProxy(self.conn.find(*args, **kwargs))
+        return CursorProxy(self.conn.find(*args, **kwargs),
+                           self.max_retries,
+                           self.retry_interval)
 
     def __getattr__(self, item):
         """Wrap MongoDB connection.
@@ -264,22 +269,22 @@ class MongoProxy(object):
             return getattr(self.conn, item)
         if item in MONGO_METHODS:
             return _safe_mongo_call(
-                cfg.CONF.database.max_retries,
-                cfg.CONF.database.retry_interval,
+                self.max_retries,
+                self.retry_interval,
             )(getattr(self.conn, item))
-        return MongoProxy(getattr(self.conn, item))
+        return MongoProxy(getattr(self.conn, item),
+                          self.max_retries,
+                          self.retry_interval)
 
     def __call__(self, *args, **kwargs):
         return self.conn(*args, **kwargs)
 
 
 class CursorProxy(pymongo.cursor.Cursor):
-    def __init__(self, cursor):
+    def __init__(self, cursor, max_retries, retry_interval):
         self.cursor = cursor
         self.next = _safe_mongo_call(
-            cfg.CONF.database.max_retries,
-            cfg.CONF.database.retry_interval,
-        )(self._next)
+            max_retries, retry_interval)(self._next)
 
     def __getitem__(self, item):
         return self.cursor[item]

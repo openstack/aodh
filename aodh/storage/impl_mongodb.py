@@ -46,7 +46,10 @@ class Connection(pymongo_base.Connection):
         # connection since we instantiate a Pymongo client each time someone
         # requires a new storage connection.
         self.conn = self.CONNECTION_POOL.connect(
-            url, conf.database.mongodb_replica_set)
+            url,
+            conf.database.max_retries,
+            conf.database.retry_interval,
+            conf.database.mongodb_replica_set)
 
         # Require MongoDB 2.4 to use $setOnInsert
         if self.conn.server_info()['versionArray'] < [2, 4]:

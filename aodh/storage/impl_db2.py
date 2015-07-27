@@ -40,7 +40,10 @@ class Connection(pymongo_base.Connection):
         # db2 driver from mongodb driver be replaced so that pymongo will not
         # produce an exception on the scheme.
         url = url.replace('db2:', 'mongodb:', 1)
-        self.conn = self.CONNECTION_POOL.connect(url)
+        self.conn = self.CONNECTION_POOL.connect(
+            url,
+            conf.database.max_retries,
+            conf.database.retry_interval)
 
         # Require MongoDB 2.2 to use aggregate(), since we are using mongodb
         # as backend for test, the following code is necessary to make sure
