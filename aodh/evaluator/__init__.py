@@ -67,6 +67,7 @@ class Evaluator(object):
         self.notifier = notifier
         self.storage_conn = None
         self._ks_client = None
+        self._alarm_change_notifier = None
 
     @property
     def ks_client(self):
@@ -101,11 +102,13 @@ class Evaluator(object):
             self._storage_conn.record_alarm_change(payload)
         except aodh.NotImplementedError:
             pass
+        if not self._alarm_change_notifier:
+            transport = messaging.get_transport(self.conf)
+            self._alarm_change_notifier = messaging.get_notifier(
+                transport, publisher_id="aodh.evaluator")
         notification = "alarm.state_transition"
-        transport = messaging.get_transport(self.conf)
-        notifier = messaging.get_notifier(transport,
-                                          publisher_id="aodh.evaluator")
-        notifier.info(context.RequestContext(), notification, payload)
+        self._alarm_change_notifier.info(context.RequestContext(),
+                                         notification, payload)
 
     def _refresh(self, alarm, state, reason, reason_data):
         """Refresh alarm state."""
