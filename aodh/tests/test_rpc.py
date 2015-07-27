@@ -23,6 +23,7 @@ import six
 
 from aodh import messaging
 from aodh import rpc
+from aodh import service
 from aodh.storage import models
 from aodh.tests import base as tests_base
 
@@ -46,7 +47,8 @@ class FakeNotifier(object):
 class TestRPCAlarmNotifier(tests_base.BaseTestCase):
     def setUp(self):
         super(TestRPCAlarmNotifier, self).setUp()
-        self.CONF = self.useFixture(fixture_config.Config()).conf
+        conf = service.prepare_service([])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
 
         self.notifier_server = FakeNotifier(self.CONF, self.transport)

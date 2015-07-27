@@ -1,5 +1,6 @@
 #
 # Copyright 2012 New Dream Network, LLC (DreamHost)
+# Copyright 2015 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,16 +16,12 @@
 """Base classes for API tests.
 """
 
-from oslo_config import cfg
 from oslo_config import fixture as fixture_config
-from oslo_policy import opts
 import pecan
 import pecan.testing
 
+from aodh import service
 from aodh.tests import db as db_test_base
-
-OPT_GROUP_NAME = 'keystone_authtoken'
-cfg.CONF.import_group(OPT_GROUP_NAME, "keystonemiddleware.auth_token")
 
 
 class FunctionalTest(db_test_base.TestBase):
@@ -38,12 +35,11 @@ class FunctionalTest(db_test_base.TestBase):
 
     def setUp(self):
         super(FunctionalTest, self).setUp()
-        self.CONF = self.useFixture(fixture_config.Config()).conf
+        conf = service.prepare_service([])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
-        opts.set_defaults(self.CONF)
 
-        self.CONF.set_override("auth_version", "v2.0",
-                               group=OPT_GROUP_NAME)
+        self.CONF.set_override("auth_version", "v2.0", 'keystone_authtoken')
         self.CONF.set_override("policy_file",
                                self.path_get('etc/aodh/policy.json'),
                                group='oslo_policy')

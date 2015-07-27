@@ -52,8 +52,6 @@ OPTS = [
 
 ]
 
-cfg.CONF.register_opts(OPTS)
-
 
 class RestAlarmNotifier(notifier.AlarmNotifier):
     """Rest alarm notifier."""

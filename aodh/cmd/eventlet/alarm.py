@@ -15,21 +15,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
 from oslo_service import service as os_service
 
 from aodh import evaluator as evaluator_svc
 from aodh import notifier as notifier_svc
 from aodh import service
 
-CONF = cfg.CONF
-
 
 def notifier():
-    service.prepare_service()
-    os_service.launch(CONF, notifier_svc.AlarmNotifierService(CONF)).wait()
+    conf = service.prepare_service()
+    os_service.launch(conf, notifier_svc.AlarmNotifierService(conf)).wait()
 
 
 def evaluator():
-    service.prepare_service()
-    os_service.launch(CONF, evaluator_svc.AlarmEvaluationService(CONF)).wait()
+    conf = service.prepare_service()
+    os_service.launch(conf, evaluator_svc.AlarmEvaluationService(conf)).wait()

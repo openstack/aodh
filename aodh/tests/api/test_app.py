@@ -1,7 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2014 IBM Corp.
-# All Rights Reserved.
+# Copyright 2014 IBM Corp. All Rights Reserved.
+# Copyright 2015 Red Hat, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -18,9 +18,9 @@
 import mock
 from oslo_config import cfg
 from oslo_config import fixture as fixture_config
-from oslo_log import log
 
 from aodh.api import app
+from aodh import service
 from aodh.tests import base
 
 
@@ -28,8 +28,8 @@ class TestApp(base.BaseTestCase):
 
     def setUp(self):
         super(TestApp, self).setUp()
-        self.CONF = self.useFixture(fixture_config.Config()).conf
-        log.register_options(cfg.CONF)
+        conf = service.prepare_service([])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_api_paste_file_not_exist(self):
         self.CONF.set_override('api_paste_config', 'non-existent-file')

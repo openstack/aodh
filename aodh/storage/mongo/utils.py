@@ -18,7 +18,6 @@
 
 import weakref
 
-from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import netutils
 import pymongo
@@ -27,11 +26,6 @@ import retrying
 from aodh.i18n import _
 
 LOG = log.getLogger(__name__)
-
-# FIXME(dhellmann): Configuration options are not part of the Oslo
-# library APIs, and should not be used like this.
-cfg.CONF.import_opt('max_retries', 'oslo_db.options', group="database")
-cfg.CONF.import_opt('retry_interval', 'oslo_db.options', group="database")
 
 
 def make_timestamp_range(start, end,

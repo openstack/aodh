@@ -16,13 +16,17 @@
 # under the License.
 import os
 import socket
-import sys
 
+from keystonemiddleware import opts as ks_opts
 from oslo_config import cfg
+from oslo_db import options as db_options
 import oslo_i18n
 from oslo_log import log
+from oslo_messaging import opts as msg_opts
+from oslo_policy import opts as policy_opts
 
 from aodh import messaging
+from aodh import opts
 
 
 OPTS = [
@@ -48,7 +52,6 @@ OPTS = [
                deprecated_opts=[cfg.DeprecatedOpt(
                    'threshold_evaluation_interval', group='alarm')]),
 ]
-cfg.CONF.register_opts(OPTS)
 
 
 CLI_OPTS = [
@@ -99,17 +102,30 @@ CLI_OPTS = [
                default=os.environ.get('OS_PROJECT_NAME', 'admin'),
                help='The user project name'),
 ]
-cfg.CONF.register_cli_opts(CLI_OPTS, group="service_credentials")
 
 
 def prepare_service(argv=None):
+    conf = cfg.ConfigOpts()
     oslo_i18n.enable_lazy()
-    log.register_options(cfg.CONF)
-    log_levels = (cfg.CONF.default_log_levels +
+    log.register_options(conf)
+    log_levels = (conf.default_log_levels +
                   ['stevedore=INFO', 'keystoneclient=INFO'])
     log.set_defaults(default_log_levels=log_levels)
-    if argv is None:
-        argv = sys.argv
-    cfg.CONF(argv[1:], project='aodh', validate_default_values=True)
-    log.setup(cfg.CONF, 'aodh')
+    db_options.set_defaults(conf)
+    policy_opts.set_defaults(conf)
+    for group, options in ks_opts.list_auth_token_opts():
+        conf.register_opts(list(options), group=group)
+    # FIXME(jd) We can use that with oslo.messaging>2.0.0:
+    # msg_opts.set_defaults(conf)
+    for group, options in msg_opts.list_opts():
+        conf.register_opts(list(options),
+                           group=None if group == "DEFAULT" else group)
+    # Register our own Aodh options
+    for group, options in opts.list_opts():
+        conf.register_opts(list(options),
+                           group=None if group == "DEFAULT" else group)
+
+    conf(argv, project='aodh', validate_default_values=True)
+    log.setup(conf, 'aodh')
     messaging.setup()
+    return conf

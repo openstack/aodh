@@ -1,5 +1,6 @@
 #
 # Copyright 2012 New Dream Network, LLC (DreamHost)
+# Copyright 2015 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -18,11 +19,11 @@ import datetime
 import hashlib
 import json
 
+import mock
 from oslo_utils import timeutils
 import webtest
 
 from aodh.api import app
-from aodh.tests import api as acl
 from aodh.tests.api import v2
 from aodh.tests import db as tests_db
 
@@ -89,10 +90,14 @@ class TestAPIACL(v2.FunctionalTest,
                                                 **params)
 
     def _make_app(self):
-        self.CONF.set_override("cache", "fake.cache", group=acl.OPT_GROUP_NAME)
+        self.CONF.set_override("cache", "fake.cache", 'keystone_authtoken')
         file_name = self.path_get('etc/aodh/api_paste.ini')
         self.CONF.set_override("api_paste_config", file_name)
-        return webtest.TestApp(app.load_app(conf=self.CONF))
+        # We need the other call to prepare_service in app.py to return the
+        # same tweaked conf object.
+        with mock.patch('aodh.service.prepare_service') as ps:
+            ps.return_value = self.CONF
+            return webtest.TestApp(app.load_app(conf=self.CONF))
 
     def test_non_authenticated(self):
         response = self.get_json('/meters', expect_errors=True)

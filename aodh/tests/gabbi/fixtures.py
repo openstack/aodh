@@ -20,6 +20,7 @@ from unittest import case
 import uuid
 
 from gabbi import fixture
+import mock
 from oslo_config import fixture as fixture_config
 from oslo_policy import opts
 
@@ -51,8 +52,18 @@ class ConfigFixture(fixture.GabbiFixture):
         if db_url is None:
             raise case.SkipTest('No database connection configured')
 
-        service.prepare_service([])
-        conf = fixture_config.Config().conf
+        conf = service.prepare_service([])
+        # NOTE(jd): prepare_service() is called twice: first by load_app() for
+        # Pecan, then Pecan calls pastedeploy, which starts the app, which has
+        # no way to pass the conf object so that Paste apps calls again
+        # prepare_service. In real life, that's not a problem, but here we want
+        # to be sure that the second time the same conf object is returned
+        # since we tweaked it. To that, once we called prepare_service() we
+        # mock it so it returns the same conf object.
+        self.prepare_service = service.prepare_service
+        service.prepare_service = mock.Mock()
+        service.prepare_service.return_value = conf
+        conf = fixture_config.Config(conf).conf
         self.conf = conf
         opts.set_defaults(self.conf)
         conf.set_override('policy_file',
@@ -69,3 +80,4 @@ class ConfigFixture(fixture.GabbiFixture):
         if self.conf:
             storage.get_connection_from_config(self.conf).clear()
             self.conf.reset()
+        service.prepare_service = self.prepare_service

@@ -1,5 +1,5 @@
 #
-# Copyright 2013 Red Hat, Inc
+# Copyright 2013-2015 Red Hat, Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -19,7 +19,6 @@ import operator
 import six
 
 from ceilometerclient import client as ceiloclient
-from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
 
@@ -28,9 +27,6 @@ from aodh.evaluator import utils
 from aodh.i18n import _, _LW
 
 LOG = log.getLogger(__name__)
-
-cfg.CONF.import_opt('http_timeout', 'aodh.service')
-cfg.CONF.import_group('service_credentials', 'aodh.service')
 
 COMPARATORS = {
     'gt': operator.gt,

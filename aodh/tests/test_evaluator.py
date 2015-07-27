@@ -19,13 +19,15 @@ from oslo_config import fixture as fixture_config
 from stevedore import extension
 
 from aodh import evaluator
+from aodh import service
 from aodh.tests import base as tests_base
 
 
 class TestAlarmEvaluationService(tests_base.BaseTestCase):
     def setUp(self):
         super(TestAlarmEvaluationService, self).setUp()
-        self.CONF = self.useFixture(fixture_config.Config()).conf
+        conf = service.prepare_service([])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
 
         self.threshold_eval = mock.Mock()

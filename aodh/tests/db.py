@@ -1,6 +1,7 @@
 #
 # Copyright 2012 New Dream Network, LLC (DreamHost)
 # Copyright 2013 eNovance
+# Copyright 2015 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -28,6 +29,7 @@ import sqlalchemy
 import testscenarios.testcase
 from testtools import testcase
 
+from aodh import service
 from aodh import storage
 from aodh.tests import base as test_base
 try:
@@ -139,12 +141,8 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
             raise testcase.TestSkipped(
                 'Test is not applicable for %s' % engine)
 
-        # FIXME(jd) we need this to be sure ALL options are registered
-        # This module could be otherwise imported later by something else and
-        # fail because all options are not registered
-        import aodh.service  # noqa
-        self.CONF = self.useFixture(fixture_config.Config()).conf
-        self.CONF([], project='aodh', validate_default_values=True)
+        conf = service.prepare_service([])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.CONF.set_override('connection', self.db_url, group="database")
 
         try:

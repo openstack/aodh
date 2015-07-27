@@ -29,9 +29,6 @@ OPTS = [
                help='URL to Gnocchi.'),
 ]
 
-cfg.CONF.register_opts(OPTS)
-cfg.CONF.import_opt('http_timeout', 'aodh.service')
-
 
 class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
 

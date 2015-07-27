@@ -13,10 +13,12 @@
 # under the License.
 import itertools
 
+from oslo_config import cfg
+
 import aodh.api
-import aodh.api.app
 import aodh.api.controllers.v2.alarms
 import aodh.coordination
+import aodh.evaluator
 import aodh.evaluator.gnocchi
 import aodh.notifier.rest
 import aodh.rpc
@@ -27,16 +29,33 @@ import aodh.storage
 def list_opts():
     return [
         ('DEFAULT',
-         itertools.chain(aodh.api.app.OPTS,
-                         aodh.evaluator.gnocchi.OPTS,
-                         aodh.notifier.rest.OPTS,
-                         aodh.service.OPTS,
-                         aodh.rpc.OPTS,
-                         aodh.storage.OLD_OPTS,
-                         aodh.api.controllers.v2.alarms.ALARM_API_OPTS)),
+         itertools.chain(
+             [
+                 cfg.StrOpt(
+                     'api_paste_config',
+                     default="api_paste.ini",
+                     help="Configuration file for WSGI definition of API."),
+                 cfg.IntOpt(
+                     'api_workers', default=1,
+                     min=1,
+                     help='Number of workers for aodh API server.'),
+             ],
+             aodh.evaluator.OPTS,
+             aodh.evaluator.gnocchi.OPTS,
+             aodh.notifier.rest.OPTS,
+             aodh.service.OPTS,
+             aodh.rpc.OPTS,
+             aodh.storage.OLD_OPTS,
+             aodh.api.controllers.v2.alarms.ALARM_API_OPTS,
+             aodh.storage.CLI_OPTS)),
         ('api',
-         itertools.chain(aodh.api.OPTS,
-                         aodh.api.app.API_OPTS,)),
+         itertools.chain(
+             aodh.api.OPTS,
+             [
+                 cfg.BoolOpt('pecan_debug',
+                             default=False,
+                             help='Toggle Pecan Debug Middleware.'),
+             ])),
         ('coordination', aodh.coordination.OPTS),
         ('database', aodh.storage.OPTS),
         ('service_credentials', aodh.service.CLI_OPTS),

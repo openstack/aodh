@@ -55,8 +55,6 @@ OPTS = [
                 ),
 ]
 
-cfg.CONF.register_opts(OPTS)
-
 
 @six.add_metaclass(abc.ABCMeta)
 class Evaluator(object):

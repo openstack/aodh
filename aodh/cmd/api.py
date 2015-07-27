@@ -15,12 +15,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
-
 from aodh.api import app
 from aodh import service
 
 
 def main():
-    service.prepare_service()
-    app.build_server(cfg.CONF)
+    conf = service.prepare_service()
+    app.build_server(conf)

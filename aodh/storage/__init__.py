@@ -16,7 +16,6 @@
 """
 
 from oslo_config import cfg
-from oslo_db import options as db_options
 from oslo_log import log
 import retrying
 import six.moves.urllib.parse as urlparse
@@ -36,9 +35,6 @@ OLD_OPTS = [
                ),
 ]
 
-cfg.CONF.register_opts(OLD_OPTS)
-
-
 OPTS = [
     cfg.IntOpt('alarm_history_time_to_live',
                default=-1,
@@ -56,8 +52,6 @@ OPTS = [
                     "as compute node's resource id is <hostname>_<nodename>."),
 ]
 
-cfg.CONF.register_opts(OPTS, group='database')
-
 CLI_OPTS = [
     cfg.BoolOpt('sql-expire-samples-only',
                 default=False,
@@ -66,10 +60,6 @@ CLI_OPTS = [
                      " resource and meter definition data will remain.",
                 ),
 ]
-
-cfg.CONF.register_cli_opts(CLI_OPTS)
-
-db_options.set_defaults(cfg.CONF)
 
 
 class StorageUnknownWriteError(Exception):

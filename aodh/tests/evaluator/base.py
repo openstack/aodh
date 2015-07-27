@@ -1,5 +1,6 @@
 #
 # Copyright 2013 eNovance <licensing@enovance.com>
+# Copyright 2015 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,11 +17,14 @@ import mock
 from oslo_config import fixture
 from oslotest import base
 
+from aodh import service
+
 
 class TestEvaluatorBase(base.BaseTestCase):
     def setUp(self):
         super(TestEvaluatorBase, self).setUp()
-        self.conf = self.useFixture(fixture.Config()).conf
+        conf = service.prepare_service([])
+        self.conf = self.useFixture(fixture.Config(conf)).conf
         self.api_client = mock.Mock()
         self.notifier = mock.MagicMock()
         self.evaluator = self.EVALUATOR(self.conf, self.notifier)

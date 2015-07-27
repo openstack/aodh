@@ -20,6 +20,7 @@ from oslo_config import fixture as fixture_config
 import tooz.coordination
 
 from aodh import coordination
+from aodh import service
 from aodh.tests import base
 from aodh import utils
 
@@ -128,7 +129,8 @@ class TestPartitioning(base.BaseTestCase):
 
     def setUp(self):
         super(TestPartitioning, self).setUp()
-        self.CONF = self.useFixture(fixture_config.Config()).conf
+        conf = service.prepare_service([])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.str_handler = MockLoggingHandler()
         coordination.LOG.logger.addHandler(self.str_handler)
         self.shared_storage = {}

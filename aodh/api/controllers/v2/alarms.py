@@ -72,9 +72,6 @@ ALARM_API_OPTS = [
                     'non-positive number means no limit.'),
 ]
 
-cfg.CONF.register_opts(ALARM_API_OPTS)
-cfg.CONF.import_opt('record_history', 'aodh.evaluator')
-
 state_kind = ["ok", "alarm", "insufficient data"]
 state_kind_enum = wtypes.Enum(str, *state_kind)
 severity_kind = ["low", "moderate", "critical"]

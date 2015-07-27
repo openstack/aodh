@@ -16,8 +16,6 @@
 
 import logging
 
-from oslo_config import cfg
-
 from aodh.i18n import _LI
 from aodh import service
 from aodh import storage
@@ -27,18 +25,18 @@ LOG = logging.getLogger(__name__)
 
 
 def dbsync():
-    service.prepare_service()
-    storage.get_connection_from_config(cfg.CONF).upgrade()
+    conf = service.prepare_service()
+    storage.get_connection_from_config(conf).upgrade()
 
 
 def expirer():
-    service.prepare_service()
+    conf = service.prepare_service()
 
-    if cfg.CONF.database.alarm_history_time_to_live > 0:
+    if conf.database.alarm_history_time_to_live > 0:
         LOG.debug("Clearing expired alarm history data")
-        storage_conn = storage.get_connection_from_config(cfg.CONF)
+        storage_conn = storage.get_connection_from_config(conf)
         storage_conn.clear_expired_alarm_history_data(
-            cfg.CONF.database.alarm_history_time_to_live)
+            conf.database.alarm_history_time_to_live)
     else:
         LOG.info(_LI("Nothing to clean, database alarm history time to live "
                      "is disabled"))

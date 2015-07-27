@@ -1,7 +1,7 @@
 #
 # Copyright 2012 New Dream Network, LLC (DreamHost)
 # Copyright 2013 eNovance
-# Copyright 2014 Red Hat, Inc
+# Copyright 2014-2015 Red Hat, Inc
 #
 # Authors: Doug Hellmann <doug.hellmann@dreamhost.com>
 #          Julien Danjou <julien@danjou.info>
@@ -20,16 +20,12 @@
 # under the License.
 """MongoDB storage backend"""
 
-from oslo_config import cfg
 from oslo_log import log
 import pymongo
 
 from aodh import storage
 from aodh.storage.mongo import utils as pymongo_utils
 from aodh.storage import pymongo_base
-
-cfg.CONF.import_opt('alarm_history_time_to_live', 'aodh.storage',
-                    group="database")
 
 LOG = log.getLogger(__name__)
 

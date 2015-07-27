@@ -19,6 +19,7 @@ from oslo_config import fixture as fixture_config
 from oslotest import base
 import retrying
 
+from aodh import service
 from aodh import storage
 from aodh.storage import impl_log
 
@@ -28,7 +29,8 @@ import six
 class EngineTest(base.BaseTestCase):
     def setUp(self):
         super(EngineTest, self).setUp()
-        self.CONF = self.useFixture(fixture_config.Config()).conf
+        conf = service.prepare_service([])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_get_connection(self):
         self.CONF.set_override('connection', 'log://localhost',
@@ -49,7 +51,8 @@ class EngineTest(base.BaseTestCase):
 class ConnectionRetryTest(base.BaseTestCase):
     def setUp(self):
         super(ConnectionRetryTest, self).setUp()
-        self.CONF = self.useFixture(fixture_config.Config()).conf
+        conf = service.prepare_service([])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_retries(self):
         with mock.patch.object(retrying.time, 'sleep') as retry_sleep:
@@ -66,7 +69,8 @@ class ConnectionRetryTest(base.BaseTestCase):
 class ConnectionConfigTest(base.BaseTestCase):
     def setUp(self):
         super(ConnectionConfigTest, self).setUp()
-        self.CONF = self.useFixture(fixture_config.Config()).conf
+        conf = service.prepare_service([])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_only_default_url(self):
         self.CONF.set_override("connection", "log://", group="database")

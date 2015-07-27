@@ -27,31 +27,10 @@ from aodh.api import hooks
 from aodh.api import middleware
 from aodh.i18n import _
 from aodh.i18n import _LW
+from aodh import service
 from aodh import storage
 
-
 LOG = log.getLogger(__name__)
-
-CONF = cfg.CONF
-
-OPTS = [
-    cfg.StrOpt('api_paste_config',
-               default="api_paste.ini",
-               help="Configuration file for WSGI definition of API."
-               ),
-    cfg.IntOpt('api_workers', default=1,
-               min=1,
-               help='Number of workers for aodh API server.'),
-]
-
-API_OPTS = [
-    cfg.BoolOpt('pecan_debug',
-                default=False,
-                help='Toggle Pecan Debug Middleware.'),
-]
-
-CONF.register_opts(OPTS)
-CONF.register_opts(API_OPTS, group='api')
 
 PECAN_CONFIG = {
     'app': {
@@ -128,7 +107,8 @@ def build_server(conf):
 
 
 def _app():
-    return setup_app(conf=cfg.CONF)
+    conf = service.prepare_service()
+    return setup_app(conf=conf)
 
 
 def app_factory(global_config, **local_conf):

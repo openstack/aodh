@@ -22,6 +22,7 @@ import requests
 import six.moves.urllib.parse as urlparse
 
 from aodh import notifier
+from aodh import service
 from aodh.tests import base as tests_base
 
 
@@ -44,7 +45,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
     def setUp(self):
         super(TestAlarmNotifier, self).setUp()
-        self.CONF = self.useFixture(fixture_config.Config()).conf
+        conf = service.prepare_service([])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
         self.service = notifier.AlarmNotifierService(self.CONF)
         self.useFixture(mockpatch.Patch(

@@ -27,9 +27,3 @@ OPTS = [
                help='The listen IP for the aodh API server.',
                ),
 ]
-
-CONF = cfg.CONF
-opt_group = cfg.OptGroup(name='api',
-                         title='Options for the aodh-api service')
-CONF.register_group(opt_group)
-CONF.register_opts(OPTS, opt_group)

@@ -13,7 +13,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
 from oslo_serialization import jsonutils
 import pecan
 import requests
@@ -23,9 +22,6 @@ from wsme import types as wtypes
 from aodh.api.controllers.v2 import base
 from aodh.api.controllers.v2 import utils as v2_utils
 from aodh import keystone_client
-
-
-cfg.CONF.import_opt('gnocchi_url', 'aodh.evaluator.gnocchi')
 
 
 class GnocchiUnavailable(Exception):

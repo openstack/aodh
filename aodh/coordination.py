@@ -42,7 +42,6 @@ OPTS = [
                       'membership has changed')
 
 ]
-cfg.CONF.register_opts(OPTS, group='coordination')
 
 
 class PartitionCoordinator(object):

@@ -18,11 +18,10 @@
 
 See http://pecan.readthedocs.org/en/latest/deployment.html for details.
 """
-from oslo_config import cfg
-
 from aodh.api import app
 from aodh import service
 
+
 # Initialize the oslo configuration library and logging
-service.prepare_service([])
-application = app.load_app(cfg.CONF)
+conf = service.prepare_service([])
+application = app.load_app(conf)
