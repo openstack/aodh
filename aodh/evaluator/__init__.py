@@ -34,6 +34,7 @@ import uuid
 import aodh
 from aodh import coordination
 from aodh.i18n import _
+from aodh import keystone_client
 from aodh import messaging
 from aodh import rpc
 from aodh import storage
@@ -65,6 +66,13 @@ class Evaluator(object):
         self.conf = conf
         self.notifier = notifier
         self.storage_conn = None
+        self._ks_client = None
+
+    @property
+    def ks_client(self):
+        if self._ks_client is None:
+            self._ks_client = keystone_client.get_client(self.conf)
+        return self._ks_client
 
     @property
     def _storage_conn(self):
@@ -77,10 +85,7 @@ class Evaluator(object):
             return
         type = models.AlarmChange.STATE_TRANSITION
         detail = json.dumps({'state': alarm.state})
-        # TODO(liusheng) the user_id and project_id should be
-        # specify than None?
-        user_id = None
-        project_id = None
+        user_id, project_id = self.ks_client.user_id, self.ks_client.project_id
         on_behalf_of = alarm.project_id
         now = timeutils.utcnow()
         payload = dict(event_id=str(uuid.uuid4()),

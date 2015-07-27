@@ -45,12 +45,6 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
     EVALUATOR = gnocchi.GnocchiThresholdEvaluator
 
     def setUp(self):
-        ks_client = mock.Mock(auth_token='fake_token')
-        ks_client.users.find.return_value = 'gnocchi'
-        self.useFixture(mockpatch.Patch(
-            'keystoneclient.v2_0.client.Client',
-            return_value=ks_client))
-
         super(TestGnocchiThresholdEvaluate, self).setUp()
 
         self.useFixture(mockpatch.Patch('ceilometerclient.client.get_client',

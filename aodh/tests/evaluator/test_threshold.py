@@ -15,6 +15,7 @@
 """Tests for aodh/evaluator/threshold.py
 """
 import datetime
+import json
 import uuid
 
 from ceilometerclient import exc
@@ -25,6 +26,7 @@ import pytz
 from six import moves
 
 from aodh.evaluator import threshold
+from aodh import messaging
 from aodh.storage import models
 from aodh.tests import constants
 from aodh.tests.evaluator import base
@@ -222,6 +224,59 @@ class TestEvaluate(base.TestEvaluatorBase):
                         for alarm, reason, reason_data
                         in zip(self.alarms, reasons, reason_datas)]
             self.assertEqual(expected, self.notifier.notify.call_args_list)
+
+    def _construct_payloads(self):
+        payloads = []
+        for alarm in self.alarms:
+            type = models.AlarmChange.STATE_TRANSITION
+            detail = json.dumps({'state': alarm.state})
+            on_behalf_of = alarm.project_id
+            payload = dict(
+                event_id='fake_event_id_%s' % self.alarms.index(alarm),
+                alarm_id=alarm.alarm_id,
+                type=type,
+                detail=detail,
+                user_id='fake_user_id',
+                project_id='fake_project_id',
+                on_behalf_of=on_behalf_of,
+                timestamp=datetime.datetime(2015, 7, 26, 3, 33, 21, 876795))
+            payloads.append(payload)
+        return payloads
+
+    @mock.patch.object(uuid, 'uuid4')
+    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch.object(messaging, 'get_notifier')
+    def test_alarm_change_record(self, get_notifier, utcnow, mock_uuid):
+        # the context.RequestContext() method need to generate uuid,
+        # so we need to provide 'fake_uuid_0' and 'fake_uuid_1' for that.
+        mock_uuid.side_effect = ['fake_event_id_0', 'fake_uuid_0',
+                                 'fake_event_id_1', 'fake_uuid_1']
+        change_notifier = mock.MagicMock()
+        get_notifier.return_value = change_notifier
+        utcnow.return_value = datetime.datetime(2015, 7, 26, 3, 33, 21, 876795)
+        self._set_all_alarms('ok')
+        with mock.patch('ceilometerclient.client.get_client',
+                        return_value=self.api_client):
+            avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
+                    for v in moves.xrange(1, 6)]
+            maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
+                    for v in moves.xrange(4)]
+            self.api_client.statistics.list.side_effect = [avgs, maxs]
+            self._evaluate_all_alarms()
+            self._assert_all_alarms('alarm')
+            expected = [mock.call(alarm) for alarm in self.alarms]
+            update_calls = self.storage_conn.update_alarm.call_args_list
+            self.assertEqual(expected, update_calls)
+            payloads = self._construct_payloads()
+            expected_payloads = [mock.call(p) for p in payloads]
+            change_records = \
+                self.storage_conn.record_alarm_change.call_args_list
+            self.assertEqual(expected_payloads, change_records)
+            notify_calls = change_notifier.info.call_args_list
+            notification = "alarm.state_transition"
+            expected_payloads = [mock.call(mock.ANY, notification, p)
+                                 for p in payloads]
+            self.assertEqual(expected_payloads, notify_calls)
 
     def test_equivocal_from_known_state(self):
         self._set_all_alarms('ok')

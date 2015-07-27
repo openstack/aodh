@@ -26,6 +26,9 @@ class TestEvaluatorBase(base.BaseTestCase):
         self.evaluator = self.EVALUATOR(self.conf, self.notifier)
         self.storage_conn = mock.MagicMock()
         self.evaluator.storage_conn = self.storage_conn
+        self.evaluator._ks_client = mock.Mock(user_id='fake_user_id',
+                                              project_id='fake_project_id',
+                                              auth_token='fake_token')
         self.prepare_alarms()
 
     @staticmethod
