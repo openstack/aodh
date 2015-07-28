@@ -1,5 +1,6 @@
 #
 # Copyright 2012 New Dream Network, LLC (DreamHost)
+# Copyright 2015 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -56,12 +57,20 @@ class ConnectionRetryTest(base.BaseTestCase):
 
     def test_retries(self):
         with mock.patch.object(retrying.time, 'sleep') as retry_sleep:
-            try:
-                self.CONF.set_override("connection", "no-such-engine://",
-                                       group="database")
-                storage.get_connection_from_config(self.CONF)
-            except RuntimeError as err:
-                self.assertIn('no-such-engine', six.text_type(err))
+            with mock.patch.object(
+                    storage.impl_log.Connection, '__init__') as log_init:
+
+                class ConnectionError(Exception):
+                    pass
+
+                def x(a, b):
+                    raise ConnectionError
+
+                log_init.side_effect = x
+                self.CONF.set_override("connection", "log://", "database")
+                self.assertRaises(ConnectionError,
+                                  storage.get_connection_from_config,
+                                  self.CONF)
                 self.assertEqual(9, retry_sleep.call_count)
                 retry_sleep.assert_called_with(10.0)
 

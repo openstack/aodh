@@ -77,21 +77,21 @@ class StorageBadAggregate(Exception):
 
 def get_connection_from_config(conf):
     retries = conf.database.max_retries
+    url = conf.database.connection
+    connection_scheme = urlparse.urlparse(url).scheme
+    # SQLAlchemy connections specify may specify a 'dialect' or
+    # 'dialect+driver'. Handle the case where driver is specified.
+    engine_name = connection_scheme.split('+')[0]
+    # NOTE: translation not applied bug #1446983
+    LOG.debug('looking for %(name)r driver in %(namespace)r',
+              {'name': engine_name, 'namespace': _NAMESPACE})
+    mgr = driver.DriverManager(_NAMESPACE, engine_name)
 
     # Convert retry_interval secs to msecs for retry decorator
     @retrying.retry(wait_fixed=conf.database.retry_interval * 1000,
                     stop_max_attempt_number=retries if retries >= 0 else None)
     def _get_connection():
         """Return an open connection to the database."""
-        url = conf.database.connection
-        connection_scheme = urlparse.urlparse(url).scheme
-        # SQLAlchemy connections specify may specify a 'dialect' or
-        # 'dialect+driver'. Handle the case where driver is specified.
-        engine_name = connection_scheme.split('+')[0]
-        # NOTE: translation not applied bug #1446983
-        LOG.debug('looking for %(name)r driver in %(namespace)r',
-                  {'name': engine_name, 'namespace': _NAMESPACE})
-        mgr = driver.DriverManager(_NAMESPACE, engine_name)
         return mgr.driver(conf, url)
 
     return _get_connection()
