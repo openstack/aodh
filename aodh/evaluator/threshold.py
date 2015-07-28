@@ -66,6 +66,9 @@ class ThresholdEvaluator(evaluator.Evaluator):
                 os_endpoint_type=auth_config.os_endpoint_type,
                 insecure=auth_config.insecure,
                 timeout=cfg.CONF.http_timeout,
+                os_user_domain_id=auth_config.os_user_domain_id,
+                os_project_name=auth_config.os_project_name,
+                os_project_domain_id=auth_config.os_project_domain_id,
             )
             self.api_client = ceiloclient.get_client(2, **creds)
         return self.api_client

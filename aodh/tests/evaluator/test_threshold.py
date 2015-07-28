@@ -421,16 +421,20 @@ class TestEvaluate(base.TestEvaluatorBase):
                 self.evaluator.api_client = None
                 self._evaluate_all_alarms()
                 conf = self.conf.service_credentials
-                expected = [mock.call(2,
-                                      os_auth_url=conf.os_auth_url,
-                                      os_region_name=conf.os_region_name,
-                                      os_tenant_name=conf.os_tenant_name,
-                                      os_password=conf.os_password,
-                                      os_username=conf.os_username,
-                                      os_cacert=conf.os_cacert,
-                                      os_endpoint_type=conf.os_endpoint_type,
-                                      timeout=self.conf.http_timeout,
-                                      insecure=conf.insecure)]
+                expected = [mock.call(
+                    2,
+                    os_auth_url=conf.os_auth_url,
+                    os_region_name=conf.os_region_name,
+                    os_tenant_name=conf.os_tenant_name,
+                    os_password=conf.os_password,
+                    os_username=conf.os_username,
+                    os_cacert=conf.os_cacert,
+                    os_endpoint_type=conf.os_endpoint_type,
+                    timeout=self.conf.http_timeout,
+                    insecure=conf.insecure,
+                    os_user_domain_id=conf.os_user_domain_id,
+                    os_project_name=conf.os_project_name,
+                    os_project_domain_id=conf.os_project_domain_id)]
                 actual = client.call_args_list
                 self.assertEqual(expected, actual)
 
