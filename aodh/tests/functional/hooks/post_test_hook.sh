@@ -26,22 +26,32 @@ function generate_testr_results {
     fi
 }
 
-export AODH_DIR="$BASE/new/aodh"
-
-# Go to the aodh dir
-cd $AODH_DIR
-
-sudo chown -R jenkins:stack $AODH_DIR
+# If we're running in the gate find our keystone endpoint to give to
+# gabbi tests and do a chown. Otherwise the existing environment
+# should provide URL and TOKEN.
+if [ -f $BASE/new/devstack ]; then
+    export AODH_DIR="$BASE/new/aodh"
+    JENKINS_USER=jenkins
+    sudo chown -R jenkins:stack $AODH_DIR
+    source $BASE/new/devstack/openrc admin admin
+    openstack endpoint list
+    export AODH_SERVICE_URL=$(openstack endpoint show alarming -c publicurl -f value)
+    export AODH_SERVICE_TOKEN=$(openstack token issue -c id -f value)
+    # Go to the aodh dir
+    cd $AODH_DIR
+fi
 
 # Run tests
 echo "Running aodh functional test suite"
 set +e
 
-# NOTE(ityaptin) Expected a script param which contains a backend name
-AODH_TEST_BACKEND="$1" sudo -E -H -u jenkins tox -efunctional
+# NOTE(ityaptin) Expect a script param which contains at least one backend name
+AODH_TEST_BACKEND="${1:?test backend required}" sudo -E -H -u ${JENKINS_USER:-${USER}} tox -efunctional
 EXIT_CODE=$?
 set -e
 
 # Collect and parse result
-generate_testr_results
+if [ -n "$AODH_DIR" ]; then
+    generate_testr_results
+fi
 exit $EXIT_CODE
