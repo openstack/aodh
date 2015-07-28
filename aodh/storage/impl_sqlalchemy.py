@@ -14,7 +14,11 @@
 
 from __future__ import absolute_import
 import datetime
+import os.path
 
+from alembic import command
+from alembic import config
+from alembic import migration
 from oslo_db.sqlalchemy import session as db_session
 from oslo_log import log
 from oslo_utils import timeutils
@@ -58,11 +62,33 @@ class Connection(base.Connection):
         # in storage.__init__.get_connection_from_config function
         options = dict(conf.database.items())
         options['max_retries'] = 0
+        self.conf = conf
         self._engine_facade = db_session.EngineFacade(url, **options)
 
-    def upgrade(self):
-        engine = self._engine_facade.get_engine()
-        models.Base.metadata.create_all(engine)
+    def disconnect(self):
+        self._engine_facade.get_engine().dispose()
+
+    def _get_alembic_config(self):
+        cfg = config.Config(
+            "%s/sqlalchemy/alembic/alembic.ini" % os.path.dirname(__file__))
+        cfg.set_main_option('sqlalchemy.url',
+                            self.conf.database.connection)
+        return cfg
+
+    def upgrade(self, nocreate=False):
+        cfg = self._get_alembic_config()
+        cfg.conf = self.conf
+        if nocreate:
+            command.upgrade(cfg, "head")
+        else:
+            engine = self._engine_facade.get_engine()
+            ctxt = migration.MigrationContext.configure(engine.connect())
+            current_version = ctxt.get_current_revision()
+            if current_version is None:
+                models.Base.metadata.create_all(engine)
+                command.stamp(cfg, "head")
+            else:
+                command.upgrade(cfg, "head")
 
     def clear(self):
         engine = self._engine_facade.get_engine()
