@@ -6,182 +6,22 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 0.0.1.dev3955\n"
+"Project-Id-Version: aodh 0.0.1.dev3988\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-07-23 06:18+0000\n"
+"POT-Creation-Date: 2015-07-29 06:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 1.3\n"
+"Generated-By: Babel 2.0\n"
 
 #: aodh/rpc.py:50
 #, python-format
 msgid ""
 "alarm %(alarm_id)s has no action configured for state transition from "
 "%(previous)s to state %(state)s, skipping the notification."
-msgstr ""
-
-#: aodh/service.py:116
-#, python-format
-msgid "%(worker_name)s value of %(workers)s is invalid, must be greater than 0"
-msgstr ""
-
-#: aodh/service.py:161
-#, python-format
-msgid "initiating evaluation cycle on %d alarms"
-msgstr ""
-
-#: aodh/service.py:166
-msgid "alarm evaluation cycle failed"
-msgstr ""
-
-#: aodh/service.py:171
-#, python-format
-msgid "skipping alarm %s: type unsupported"
-msgstr ""
-
-#: aodh/service.py:175
-#, python-format
-msgid "evaluating alarm %s"
-msgstr ""
-
-#: aodh/service.py:179
-#, python-format
-msgid "Failed to evaluate alarm %s"
-msgstr ""
-
-#: aodh/service.py:252
-#, python-format
-msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
-msgstr ""
-
-#: aodh/service.py:261
-#, python-format
-msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
-msgstr ""
-
-#: aodh/service.py:267
-#, python-format
-msgid "Notifying alarm %(id)s with action %(act)s"
-msgstr ""
-
-#: aodh/service.py:272
-#, python-format
-msgid "Unable to notify alarm %s"
-msgstr ""
-
-#: aodh/service.py:293
-msgid "Unable to notify for an alarm with no action"
-msgstr ""
-
-#: aodh/alarm/evaluator/__init__.py:105
-#, python-format
-msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
-msgstr ""
-
-#: aodh/alarm/evaluator/__init__.py:117
-msgid "alarm state update failed"
-msgstr ""
-
-#: aodh/alarm/evaluator/combination.py:36
-msgid "alarm retrieval failed"
-msgstr ""
-
-#: aodh/alarm/evaluator/combination.py:57
-#, python-format
-msgid "Alarms %(alarm_ids)s are in unknown state"
-msgstr ""
-
-#: aodh/alarm/evaluator/combination.py:79
-#, python-format
-msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
-msgstr ""
-
-#: aodh/alarm/evaluator/combination.py:83
-#, python-format
-msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
-msgstr ""
-
-#: aodh/alarm/evaluator/combination.py:104
-#: aodh/alarm/evaluator/threshold.py:209
-#, python-format
-msgid "Attempted to evaluate alarm %s, but it is not within its time constraint."
-msgstr ""
-
-#: aodh/alarm/evaluator/gnocchi.py:84 aodh/alarm/evaluator/threshold.py:121
-#, python-format
-msgid "stats query %s"
-msgstr ""
-
-#: aodh/alarm/evaluator/gnocchi.py:88 aodh/alarm/evaluator/threshold.py:127
-msgid "alarm stats retrieval failed"
-msgstr ""
-
-#: aodh/alarm/evaluator/gnocchi.py:91
-#, python-format
-msgid "alarm stats retrieval failed: %s"
-msgstr ""
-
-#: aodh/alarm/evaluator/threshold.py:85
-#, python-format
-msgid "query stats from %(start)s to %(now)s"
-msgstr ""
-
-#: aodh/alarm/evaluator/threshold.py:92
-#, python-format
-msgid "sanitize stats %s"
-msgstr ""
-
-#: aodh/alarm/evaluator/threshold.py:101
-#, python-format
-msgid "excluded weak datapoints with sample counts %s"
-msgstr ""
-
-#: aodh/alarm/evaluator/threshold.py:112
-#, python-format
-msgid "pruned statistics to %d"
-msgstr ""
-
-#: aodh/alarm/evaluator/threshold.py:144
-#, python-format
-msgid "%d datapoints are unknown"
-msgstr ""
-
-#: aodh/alarm/evaluator/threshold.py:168
-#, python-format
-msgid ""
-"Transition to %(state)s due to %(count)d samples %(disposition)s "
-"threshold, most recent: %(most_recent)s"
-msgstr ""
-
-#: aodh/alarm/evaluator/threshold.py:172
-#, python-format
-msgid ""
-"Remaining as %(state)s due to %(count)d samples %(disposition)s "
-"threshold, most recent: %(most_recent)s"
-msgstr ""
-
-#: aodh/alarm/evaluator/threshold.py:221
-#, python-format
-msgid "comparing value %(value)s against threshold %(limit)s"
-msgstr ""
-
-#: aodh/alarm/notifier/log.py:31
-#, python-format
-msgid ""
-"Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s priority from"
-" %(previous)s to %(current)s with action %(action)s because %(reason)s."
-msgstr ""
-
-#: aodh/alarm/notifier/rest.py:64
-#, python-format
-msgid ""
-"Notifying alarm %(alarm_name)s %(alarm_id)s with severity %(severity)s "
-"from %(previous)s to %(current)s with action %(action)s because "
-"%(reason)s. request-id: %(request_id)s "
 msgstr ""
 
 #: aodh/api/app.py:114
@@ -257,30 +97,30 @@ msgstr ""
 msgid "You are not authorized to create action: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:581
+#: aodh/api/controllers/v2/alarms.py:584
 #, python-format
 msgid "Alarm with name=%s exists"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:593
+#: aodh/api/controllers/v2/alarms.py:596
 #, python-format
 msgid "Error while putting alarm: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:594 aodh/api/controllers/v2/alarms.py:763
+#: aodh/api/controllers/v2/alarms.py:597 aodh/api/controllers/v2/alarms.py:766
 msgid "Alarm incorrect"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:654
+#: aodh/api/controllers/v2/alarms.py:657
 msgid "state invalid"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:756
+#: aodh/api/controllers/v2/alarms.py:759
 #, python-format
 msgid "Alarm with name='%s' exists"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:762
+#: aodh/api/controllers/v2/alarms.py:765
 #, python-format
 msgid "Error while posting alarm: %s"
 msgstr ""
@@ -369,15 +209,169 @@ msgid ""
 "%(threshold)s over %(period)s seconds"
 msgstr ""
 
-#: aodh/storage/impl_hbase.py:87
+#: aodh/evaluator/__init__.py:119
+#, python-format
+msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
+msgstr ""
+
+#: aodh/evaluator/__init__.py:131
+msgid "alarm state update failed"
+msgstr ""
+
+#: aodh/evaluator/__init__.py:207
+#, python-format
+msgid "initiating evaluation cycle on %d alarms"
+msgstr ""
+
+#: aodh/evaluator/__init__.py:212
+msgid "alarm evaluation cycle failed"
+msgstr ""
+
+#: aodh/evaluator/__init__.py:217
+#, python-format
+msgid "skipping alarm %s: type unsupported"
+msgstr ""
+
+#: aodh/evaluator/__init__.py:221
+#, python-format
+msgid "evaluating alarm %s"
+msgstr ""
+
+#: aodh/evaluator/__init__.py:225
+#, python-format
+msgid "Failed to evaluate alarm %s"
+msgstr ""
+
+#: aodh/evaluator/combination.py:36
+msgid "alarm retrieval failed"
+msgstr ""
+
+#: aodh/evaluator/combination.py:57
+#, python-format
+msgid "Alarms %(alarm_ids)s are in unknown state"
+msgstr ""
+
+#: aodh/evaluator/combination.py:79
+#, python-format
+msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr ""
+
+#: aodh/evaluator/combination.py:83
+#, python-format
+msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr ""
+
+#: aodh/evaluator/combination.py:104 aodh/evaluator/threshold.py:212
+#, python-format
+msgid "Attempted to evaluate alarm %s, but it is not within its time constraint."
+msgstr ""
+
+#: aodh/evaluator/gnocchi.py:76 aodh/evaluator/threshold.py:124
+#, python-format
+msgid "stats query %s"
+msgstr ""
+
+#: aodh/evaluator/gnocchi.py:80 aodh/evaluator/threshold.py:130
+msgid "alarm stats retrieval failed"
+msgstr ""
+
+#: aodh/evaluator/gnocchi.py:83
+#, python-format
+msgid "alarm stats retrieval failed: %s"
+msgstr ""
+
+#: aodh/evaluator/threshold.py:88
+#, python-format
+msgid "query stats from %(start)s to %(now)s"
+msgstr ""
+
+#: aodh/evaluator/threshold.py:95
+#, python-format
+msgid "sanitize stats %s"
+msgstr ""
+
+#: aodh/evaluator/threshold.py:104
+#, python-format
+msgid "excluded weak datapoints with sample counts %s"
+msgstr ""
+
+#: aodh/evaluator/threshold.py:115
+#, python-format
+msgid "pruned statistics to %d"
+msgstr ""
+
+#: aodh/evaluator/threshold.py:147
+#, python-format
+msgid "%d datapoints are unknown"
+msgstr ""
+
+#: aodh/evaluator/threshold.py:171
+#, python-format
+msgid ""
+"Transition to %(state)s due to %(count)d samples %(disposition)s "
+"threshold, most recent: %(most_recent)s"
+msgstr ""
+
+#: aodh/evaluator/threshold.py:175
+#, python-format
+msgid ""
+"Remaining as %(state)s due to %(count)d samples %(disposition)s "
+"threshold, most recent: %(most_recent)s"
+msgstr ""
+
+#: aodh/evaluator/threshold.py:224
+#, python-format
+msgid "comparing value %(value)s against threshold %(limit)s"
+msgstr ""
+
+#: aodh/notifier/__init__.py:84
+#, python-format
+msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
+msgstr ""
+
+#: aodh/notifier/__init__.py:93
+#, python-format
+msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
+msgstr ""
+
+#: aodh/notifier/__init__.py:99
+#, python-format
+msgid "Notifying alarm %(id)s with action %(act)s"
+msgstr ""
+
+#: aodh/notifier/__init__.py:104
+#, python-format
+msgid "Unable to notify alarm %s"
+msgstr ""
+
+#: aodh/notifier/__init__.py:125
+msgid "Unable to notify for an alarm with no action"
+msgstr ""
+
+#: aodh/notifier/log.py:31
+#, python-format
+msgid ""
+"Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s priority from"
+" %(previous)s to %(current)s with action %(action)s because %(reason)s."
+msgstr ""
+
+#: aodh/notifier/rest.py:71
+#, python-format
+msgid ""
+"Notifying alarm %(alarm_name)s %(alarm_id)s with severity %(severity)s "
+"from %(previous)s to %(current)s with action %(action)s because "
+"%(reason)s. request-id: %(request_id)s "
+msgstr ""
+
+#: aodh/storage/impl_hbase.py:84
 msgid "Dropping HBase schema..."
 msgstr ""
 
-#: aodh/storage/impl_hbase.py:94
+#: aodh/storage/impl_hbase.py:91
 msgid "Cannot disable table but ignoring error"
 msgstr ""
 
-#: aodh/storage/impl_hbase.py:98
+#: aodh/storage/impl_hbase.py:95
 msgid "Cannot delete table but ignoring error"
 msgstr ""
 
