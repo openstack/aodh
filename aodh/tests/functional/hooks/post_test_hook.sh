@@ -14,6 +14,8 @@
 
 # This script is executed inside post_test_hook function in devstack gate.
 
+set -e
+
 function generate_testr_results {
     if [ -f .testrepository/0 ]; then
         sudo .tox/functional/bin/testr last --subunit > $WORKSPACE/testrepository.subunit
@@ -34,8 +36,8 @@ if [ -f $BASE/new/devstack ]; then
     JENKINS_USER=jenkins
     sudo chown -R jenkins:stack $AODH_DIR
     source $BASE/new/devstack/openrc admin admin
-    openstack endpoint list
-    export AODH_SERVICE_URL=$(openstack endpoint show alarming -c publicurl -f value)
+    openstack catalog list
+    export AODH_SERVICE_URL=$(openstack catalog show alarming -c endpoints -f value | awk '/publicURL/{print $2}')
     export AODH_SERVICE_TOKEN=$(openstack token issue -c id -f value)
     # Go to the aodh dir
     cd $AODH_DIR
