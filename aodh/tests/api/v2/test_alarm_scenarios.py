@@ -645,7 +645,7 @@ class TestAlarms(TestAlarmsBase):
         alarms = list(self.alarm_conn.get_alarms())
         self.assertEqual(7, len(alarms))
 
-    def test_post_null_threshold_rule(self):
+    def test_post_null_rule(self):
         json = {
             'name': 'added_alarm_invalid_threshold_rule',
             'type': 'threshold',
@@ -657,26 +657,6 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(
             "threshold_rule must be set for threshold type alarm",
             resp.json['error_message']['faultstring'])
-
-    def test_post_invalid_alarm_statistic(self):
-        json = {
-            'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'comparison_operator': 'gt',
-                'threshold': 2.0,
-                'statistic': 'magic',
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        expected_err_msg = ("Invalid input for field/attribute"
-                            " statistic. Value: 'magic'.")
-        self.assertIn(expected_err_msg,
-                      resp.json['error_message']['faultstring'])
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(7, len(alarms))
 
     def test_post_invalid_alarm_input_state(self):
         json = {
@@ -714,27 +694,6 @@ class TestAlarms(TestAlarmsBase):
                               status=400, headers=self.auth_headers)
         expected_err_msg = ("Invalid input for field/attribute severity."
                             " Value: 'bad_value'.")
-        self.assertIn(expected_err_msg,
-                      resp.json['error_message']['faultstring'])
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(7, len(alarms))
-
-    def test_post_invalid_alarm_input_comparison_operator(self):
-        json = {
-            'name': 'alarm2',
-            'state': 'ok',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'comparison_operator': 'bad_co',
-                'threshold': 50.0
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        expected_err_msg = ("Invalid input for field/attribute"
-                            " comparison_operator."
-                            " Value: 'bad_co'.")
         self.assertIn(expected_err_msg,
                       resp.json['error_message']['faultstring'])
         alarms = list(self.alarm_conn.get_alarms())
@@ -825,89 +784,6 @@ class TestAlarms(TestAlarmsBase):
         alarms = list(self.alarm_conn.get_alarms())
         self.assertEqual(7, len(alarms))
 
-    def test_post_invalid_alarm_query(self):
-        json = {
-            'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.invalid',
-                           'field': 'gt',
-                           'value': 'value'}],
-                'comparison_operator': 'gt',
-                'threshold': 2.0,
-                'statistic': 'avg',
-            }
-        }
-        self.post_json('/alarms', params=json, expect_errors=True, status=400,
-                       headers=self.auth_headers)
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(7, len(alarms))
-
-    def test_post_invalid_alarm_query_field_type(self):
-        json = {
-            'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.valid',
-                           'op': 'eq',
-                           'value': 'value',
-                           'type': 'blob'}],
-                'comparison_operator': 'gt',
-                'threshold': 2.0,
-                'statistic': 'avg',
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        expected_error_message = 'The data type blob is not supported.'
-        resp_string = jsonutils.loads(resp.body)
-        fault_string = resp_string['error_message']['faultstring']
-        self.assertTrue(fault_string.startswith(expected_error_message))
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(7, len(alarms))
-
-    def test_post_invalid_alarm_query_non_field(self):
-        json = {
-            'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'q.field': 'metadata.valid',
-                           'value': 'value'}],
-                'threshold': 2.0,
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        expected_error_message = ("Invalid input for field/attribute field. "
-                                  "Value: 'None'. Mandatory field missing.")
-        fault_string = resp.json['error_message']['faultstring']
-        self.assertEqual(expected_error_message, fault_string)
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(7, len(alarms))
-
-    def test_post_invalid_alarm_query_non_value(self):
-        json = {
-            'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.valid',
-                           'q.value': 'value'}],
-                'threshold': 2.0,
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        expected_error_message = ("Invalid input for field/attribute value. "
-                                  "Value: 'None'. Mandatory field missing.")
-        fault_string = resp.json['error_message']['faultstring']
-        self.assertEqual(expected_error_message, fault_string)
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(7, len(alarms))
-
     def test_post_invalid_alarm_have_multiple_rules(self):
         json = {
             'name': 'added_alarm',
@@ -936,31 +812,6 @@ class TestAlarms(TestAlarmsBase):
         for expected_string in ['threshold_rule', 'combination_rule',
                                 'cannot be set at the same time']:
             self.assertIn(expected_string, error_faultstring)
-
-    def test_post_invalid_alarm_timestamp_in_threshold_rule(self):
-        date_time = datetime.datetime(2012, 7, 2, 10, 41)
-        isotime = date_time.isoformat()
-
-        json = {
-            'name': 'invalid_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'timestamp',
-                           'op': 'gt',
-                           'value': isotime}],
-                'comparison_operator': 'gt',
-                'threshold': 2.0,
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(7, len(alarms))
-        self.assertEqual(
-            'Unknown argument: "timestamp": '
-            'not valid for this resource',
-            resp.json['error_message']['faultstring'])
 
     def _do_post_alarm_invalid_action(self, ok_actions=None,
                                       alarm_actions=None,
@@ -1029,28 +880,11 @@ class TestAlarms(TestAlarmsBase):
         to_check = {
             'enabled': True,
             'name': 'added_alarm_defaults',
-            'state': 'insufficient data',
-            'description': ('Alarm when ameter is eq a avg of '
-                            '300.0 over 60 seconds'),
-            'type': 'threshold',
             'ok_actions': [],
             'alarm_actions': [],
             'insufficient_data_actions': [],
             'repeat_actions': False,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'project_id',
-                           'op': 'eq',
-                           'value': self.auth_headers['X-Project-Id']}],
-                'threshold': 300.0,
-                'comparison_operator': 'eq',
-                'statistic': 'avg',
-                'evaluation_periods': 1,
-                'period': 60,
-            }
-
         }
-        self._add_default_threshold_rule(to_check)
 
         json = {
             'name': 'added_alarm_defaults',
@@ -1067,12 +901,8 @@ class TestAlarms(TestAlarmsBase):
         for alarm in alarms:
             if alarm.name == 'added_alarm_defaults':
                 for key in to_check:
-                    if key.endswith('_rule'):
-                        storage_key = 'rule'
-                    else:
-                        storage_key = key
                     self.assertEqual(to_check[key],
-                                     getattr(alarm, storage_key))
+                                     getattr(alarm, key))
                 break
         else:
             self.fail("Alarm not found")
@@ -1561,7 +1391,7 @@ class TestAlarms(TestAlarmsBase):
     def test_post_combination_alarm_as_admin_success_owner_set(self):
         self._do_post_combination_alarm_as_admin_success(True)
 
-    def test_post_combination_alarm_with_threshold_rule(self):
+    def test_post_alarm_with_mismatch_between_type_and_rule(self):
         """Test the creation of an combination alarm with threshold rule."""
         json = {
             'enabled': False,
@@ -1590,30 +1420,6 @@ class TestAlarms(TestAlarmsBase):
                               headers=self.auth_headers)
         self.assertEqual(
             "combination_rule must be set for combination type alarm",
-            resp.json['error_message']['faultstring'])
-
-    def test_post_threshold_alarm_with_combination_rule(self):
-        """Test the creation of an threshold alarm with combination rule."""
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'type': 'threshold',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'combination_rule': {
-                'alarm_ids': ['a',
-                              'b'],
-                'operator': 'and',
-            }
-        }
-        resp = self.post_json('/alarms', params=json,
-                              expect_errors=True, status=400,
-                              headers=self.auth_headers)
-        self.assertEqual(
-            "threshold_rule must be set for threshold type alarm",
             resp.json['error_message']['faultstring'])
 
     def _do_post_combination_alarm_as_admin_success(self, owner_is_set):
@@ -2938,3 +2744,202 @@ class TestAlarmsQuotas(TestAlarmsBase):
 
         alarms = self.get_json('/alarms')
         self.assertEqual(2, len(alarms))
+
+
+class TestAlarmsRuleThreshold(TestAlarmsBase):
+
+    def test_post_invalid_alarm_statistic(self):
+        json = {
+            'name': 'added_alarm',
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'comparison_operator': 'gt',
+                'threshold': 2.0,
+                'statistic': 'magic',
+            }
+        }
+        resp = self.post_json('/alarms', params=json, expect_errors=True,
+                              status=400, headers=self.auth_headers)
+        expected_err_msg = ("Invalid input for field/attribute"
+                            " statistic. Value: 'magic'.")
+        self.assertIn(expected_err_msg,
+                      resp.json['error_message']['faultstring'])
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(0, len(alarms))
+
+    def test_post_invalid_alarm_input_comparison_operator(self):
+        json = {
+            'name': 'alarm2',
+            'state': 'ok',
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'comparison_operator': 'bad_co',
+                'threshold': 50.0
+            }
+        }
+        resp = self.post_json('/alarms', params=json, expect_errors=True,
+                              status=400, headers=self.auth_headers)
+        expected_err_msg = ("Invalid input for field/attribute"
+                            " comparison_operator."
+                            " Value: 'bad_co'.")
+        self.assertIn(expected_err_msg,
+                      resp.json['error_message']['faultstring'])
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(0, len(alarms))
+
+    def test_post_invalid_alarm_query(self):
+        json = {
+            'name': 'added_alarm',
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'metadata.invalid',
+                           'field': 'gt',
+                           'value': 'value'}],
+                'comparison_operator': 'gt',
+                'threshold': 2.0,
+                'statistic': 'avg',
+            }
+        }
+        self.post_json('/alarms', params=json, expect_errors=True, status=400,
+                       headers=self.auth_headers)
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(0, len(alarms))
+
+    def test_post_invalid_alarm_query_field_type(self):
+        json = {
+            'name': 'added_alarm',
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'metadata.valid',
+                           'op': 'eq',
+                           'value': 'value',
+                           'type': 'blob'}],
+                'comparison_operator': 'gt',
+                'threshold': 2.0,
+                'statistic': 'avg',
+            }
+        }
+        resp = self.post_json('/alarms', params=json, expect_errors=True,
+                              status=400, headers=self.auth_headers)
+        expected_error_message = 'The data type blob is not supported.'
+        resp_string = jsonutils.loads(resp.body)
+        fault_string = resp_string['error_message']['faultstring']
+        self.assertTrue(fault_string.startswith(expected_error_message))
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(0, len(alarms))
+
+    def test_post_invalid_alarm_query_non_field(self):
+        json = {
+            'name': 'added_alarm',
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'q.field': 'metadata.valid',
+                           'value': 'value'}],
+                'threshold': 2.0,
+            }
+        }
+        resp = self.post_json('/alarms', params=json, expect_errors=True,
+                              status=400, headers=self.auth_headers)
+        expected_error_message = ("Invalid input for field/attribute field. "
+                                  "Value: 'None'. Mandatory field missing.")
+        fault_string = resp.json['error_message']['faultstring']
+        self.assertEqual(expected_error_message, fault_string)
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(0, len(alarms))
+
+    def test_post_invalid_alarm_query_non_value(self):
+        json = {
+            'name': 'added_alarm',
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'metadata.valid',
+                           'q.value': 'value'}],
+                'threshold': 2.0,
+            }
+        }
+        resp = self.post_json('/alarms', params=json, expect_errors=True,
+                              status=400, headers=self.auth_headers)
+        expected_error_message = ("Invalid input for field/attribute value. "
+                                  "Value: 'None'. Mandatory field missing.")
+        fault_string = resp.json['error_message']['faultstring']
+        self.assertEqual(expected_error_message, fault_string)
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(0, len(alarms))
+
+    def test_post_invalid_alarm_timestamp_in_threshold_rule(self):
+        date_time = datetime.datetime(2012, 7, 2, 10, 41)
+        isotime = date_time.isoformat()
+
+        json = {
+            'name': 'invalid_alarm',
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'timestamp',
+                           'op': 'gt',
+                           'value': isotime}],
+                'comparison_operator': 'gt',
+                'threshold': 2.0,
+            }
+        }
+        resp = self.post_json('/alarms', params=json, expect_errors=True,
+                              status=400, headers=self.auth_headers)
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(0, len(alarms))
+        self.assertEqual(
+            'Unknown argument: "timestamp": '
+            'not valid for this resource',
+            resp.json['error_message']['faultstring'])
+
+    def test_post_threshold_rule_defaults(self):
+        to_check = {
+            'name': 'added_alarm_defaults',
+            'state': 'insufficient data',
+            'description': ('Alarm when ameter is eq a avg of '
+                            '300.0 over 60 seconds'),
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'project_id',
+                           'op': 'eq',
+                           'value': self.auth_headers['X-Project-Id']}],
+                'threshold': 300.0,
+                'comparison_operator': 'eq',
+                'statistic': 'avg',
+                'evaluation_periods': 1,
+                'period': 60,
+            }
+
+        }
+        self._add_default_threshold_rule(to_check)
+
+        json = {
+            'name': 'added_alarm_defaults',
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'threshold': 300.0
+            }
+        }
+        self.post_json('/alarms', params=json, status=201,
+                       headers=self.auth_headers)
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(1, len(alarms))
+        for alarm in alarms:
+            if alarm.name == 'added_alarm_defaults':
+                for key in to_check:
+                    if key.endswith('_rule'):
+                        storage_key = 'rule'
+                    else:
+                        storage_key = key
+                    self.assertEqual(to_check[key],
+                                     getattr(alarm, storage_key))
+                break
+        else:
+            self.fail("Alarm not found")
