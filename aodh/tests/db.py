@@ -17,7 +17,6 @@
 """Base classes for API tests."""
 import os
 import uuid
-import warnings
 
 import fixtures
 import mock
@@ -40,24 +39,10 @@ except ImportError:
 class MongoDbManager(fixtures.Fixture):
 
     def __init__(self, conf):
-        self.conf = conf
-
-    def setUp(self):
-        super(MongoDbManager, self).setUp()
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                action='ignore',
-                message='.*you must provide a username and password.*')
-            self.conf.set_override("connection",
-                                   '%(url)s_%(db)s' % {
-                                       'url': self.conf.database.connection,
-                                       'db': uuid.uuid4().hex,
-                                   }, "database")
-            try:
-                self.alarm_connection = storage.get_connection_from_config(
-                    self.conf)
-            except storage.StorageBadVersion as e:
-                raise testcase.TestSkipped(six.text_type(e))
+        self.url = '%(url)s_%(db)s' % {
+            'url': conf.database.connection,
+            'db': uuid.uuid4().hex,
+        }
 
 
 class SQLManager(fixtures.Fixture):
@@ -67,15 +52,10 @@ class SQLManager(fixtures.Fixture):
         self._engine = sqlalchemy.create_engine(conf.database.connection)
         self._conn = self._engine.connect()
         self._create_db(self._conn, db_name)
-        self.url = conf.database.connection.replace(
-            self.url_dbname_placeholder, db_name)
-        self.conf.set_override("connection", self.url, "database")
         self._conn.close()
         self._engine.dispose()
-
-    def setUp(self):
-        super(SQLManager, self).setUp()
-        self.alarm_connection = storage.get_connection_from_config(self.conf)
+        self.url = conf.database.connection.replace(
+            self.url_dbname_placeholder, db_name)
 
 
 class PgSQLManager(SQLManager):
@@ -100,11 +80,13 @@ class MySQLManager(SQLManager):
 
 class HBaseManager(fixtures.Fixture):
     def __init__(self, conf):
-        self.conf = conf
+        self.url = '%s?table_prefix=%s' % (
+            conf.database.connection,
+            os.getenv("AODH_TEST_HBASE_TABLE_PREFIX", "test")
+        )
 
     def setUp(self):
         super(HBaseManager, self).setUp()
-        self.alarm_connection = storage.get_connection_from_config(self.conf)
         # Unique prefix for each test to keep data is distinguished because
         # all test data is stored in one table
         data_prefix = str(uuid.uuid4().hex)
@@ -125,22 +107,11 @@ class HBaseManager(fixtures.Fixture):
         mock.patch("happybase.Connection.create_table",
                    new=mock.MagicMock()).start()
 
-    @property
-    def url(self):
-        return '%s?table_prefix=%s' % (
-            self._url,
-            os.getenv("AODH_TEST_HBASE_TABLE_PREFIX", "test")
-        )
-
 
 class SQLiteManager(fixtures.Fixture):
 
     def __init__(self, conf):
-        self.conf = conf
-
-    def setUp(self):
-        super(SQLiteManager, self).setUp()
-        self.alarm_connection = storage.get_connection_from_config(self.conf)
+        self.url = "sqlite://"
 
 
 class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
@@ -182,7 +153,10 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
             self.skipTest("missing driver manager: %s" % exc)
         self.useFixture(self.db_manager)
 
-        self.alarm_conn = self.db_manager.alarm_connection
+        self.CONF.set_override('connection', self.db_manager.url,
+                               group="database")
+
+        self.alarm_conn = storage.get_connection_from_config(self.CONF)
         self.alarm_conn.upgrade()
 
         self.useFixture(mockpatch.Patch(
