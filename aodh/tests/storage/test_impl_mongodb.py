@@ -30,11 +30,12 @@ from aodh.tests import db as tests_db
 class MongoDBConnection(tests_db.TestBase,
                         tests_db.MixinTestsWithBackendScenarios):
     def test_connection_pooling(self):
-        test_conn = impl_mongodb.Connection(self.CONF, self.db_manager.url)
+        test_conn = impl_mongodb.Connection(self.CONF,
+                                            self.CONF.database.connection)
         self.assertEqual(self.alarm_conn.conn, test_conn.conn)
 
     def test_replica_set(self):
-        url = self.db_manager._url + '?replicaSet=foobar'
+        url = self.CONF.database.connection + '?replicaSet=foobar'
         conn = impl_mongodb.Connection(self.CONF, url)
         self.assertTrue(conn.conn)
 
