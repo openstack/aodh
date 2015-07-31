@@ -14,13 +14,12 @@
 
 # This script is executed inside gate_hook function in devstack gate.
 
-# A space separated lists of storage backends.
-STORAGE_DRIVERS="$1"
-
 ENABLED_SERVICES="key,aodi-api,aodh-notifier,aodh-evaluator"
 ENABLED_SERVICES+="ceilometer-acompute,ceilometer-acentral,ceilometer-anotification,"
 ENABLED_SERVICES+="ceilometer-collector,ceilometer-api,"
 
+# The backend is passed in by the job as the first and only argument
+export AODH_BACKEND="${1}"
 export DEVSTACK_GATE_INSTALL_TESTONLY=1
 export DEVSTACK_GATE_NO_SERVICES=1
 export DEVSTACK_GATE_TEMPEST=0
@@ -28,11 +27,13 @@ export DEVSTACK_GATE_EXERCISES=0
 export KEEP_LOCALRC=1
 
 # default to mysql
-case $STORAGE_DRIVER in
-    *postgresql*)
+case $AODH_BACKEND in
+    postgresql)
         export DEVSTACK_GATE_POSTGRES=1
         ;;
 esac
+
+DEVSTACK_LOCAL_CONFIG+=$'\n'"export AODH_BACKEND=${AODH_BACKEND}"
 
 export ENABLED_SERVICES
 

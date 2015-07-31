@@ -24,10 +24,10 @@ check_for_cmd pg_config
 PGSQL_DATA=`mktemp -d /tmp/AODH-PGSQL-XXXXX`
 PGSQL_PATH=`pg_config --bindir`
 PGSQL_PORT=9823
-${PGSQL_PATH}/initdb -E UTF8 ${PGSQL_DATA}
+${PGSQL_PATH}/pg_ctl initdb -D ${PGSQL_DATA}
 trap "clean_exit_pgsql ${PGSQL_PATH} ${PGSQL_DATA} ${PGSQL_PORT}" EXIT
 
-LANGUAGE=C ${PGSQL_PATH}/pg_ctl -w -D ${PGSQL_DATA} -o "-F -k ${PGSQL_DATA} -p ${PGSQL_PORT}" start
+LANGUAGE=C ${PGSQL_PATH}/pg_ctl -w -D ${PGSQL_DATA} -o "-k ${PGSQL_DATA} -p ${PGSQL_PORT}" start
 export AODH_TEST_PGSQL_URL="postgresql:///?host=${PGSQL_DATA}&port=${PGSQL_PORT}&dbname=template1"
 
 # Yield execution to venv command
