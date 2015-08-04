@@ -32,6 +32,8 @@ class PreciseTimestampTest(base.BaseTestCase):
         def _type_descriptor_mock(desc):
             if type(desc) == DECIMAL:
                 return NUMERIC(precision=desc.precision, scale=desc.scale)
+            else:
+                return desc
         dialect = mock.MagicMock()
         dialect.name = name
         dialect.type_descriptor = _type_descriptor_mock

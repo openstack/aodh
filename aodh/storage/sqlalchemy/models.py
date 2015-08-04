@@ -53,7 +53,7 @@ class PreciseTimestamp(TypeDecorator):
             return dialect.type_descriptor(DECIMAL(precision=20,
                                                    scale=6,
                                                    asdecimal=True))
-        return self.impl
+        return dialect.type_descriptor(self.impl)
 
     @staticmethod
     def process_bind_param(value, dialect):
@@ -62,6 +62,11 @@ class PreciseTimestamp(TypeDecorator):
         elif dialect.name == 'mysql':
             return utils.dt_to_decimal(value)
         return value
+
+    def compare_against_backend(self, dialect, conn_type):
+        if dialect.name == 'mysql':
+            return issubclass(type(conn_type), DECIMAL)
+        return issubclass(type(conn_type), type(self.impl))
 
     @staticmethod
     def process_result_value(value, dialect):
