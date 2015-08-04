@@ -8,10 +8,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  Aodh\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-07-29 06:41+0000\n"
-"PO-Revision-Date: 2015-07-24 13:18+0000\n"
+"POT-Creation-Date: 2015-08-04 06:33+0000\n"
+"PO-Revision-Date: 2015-07-31 18:10+0000\n"
 "Last-Translator: openstackjenkins <jenkins@openstack.org>\n"
-"Language-Team: Russian (http://www.transifex.com/projects/p/aodh/language/"
+"Language-Team: Russian (http://www.transifex.com/openstack/aodh/language/"
 "ru/)\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
@@ -265,22 +265,6 @@ msgstr ""
 #, python-format
 msgid "Unable to parse action %s"
 msgstr "Невозможно разобрать действий %s"
-
-#, python-format
-msgid ""
-"Unable to reconnect to the primary mongodb after %(retries)d retries. Giving "
-"up."
-msgstr ""
-"Невозможно подключиться к первичной mongodb,  после попыток подключиться  "
-"%(retries)d. Сдаваться."
-
-#, python-format
-msgid ""
-"Unable to reconnect to the primary mongodb: %(errmsg)s. Trying again in "
-"%(retry_interval)d seconds."
-msgstr ""
-"Невозможно подключиться к первичной  mongodb: %(errmsg)s. Попытайтесь снова, "
-"через несколько секунд  %(retry_interval)d"
 
 #, python-format
 msgid ""

@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 0.0.1.dev3988\n"
+"Project-Id-Version: aodh 0.0.1.dev4019\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-07-29 06:41+0000\n"
+"POT-Creation-Date: 2015-08-04 06:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,28 +17,28 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.0\n"
 
-#: aodh/rpc.py:50
+#: aodh/rpc.py:48
 #, python-format
 msgid ""
 "alarm %(alarm_id)s has no action configured for state transition from "
 "%(previous)s to state %(state)s, skipping the notification."
 msgstr ""
 
-#: aodh/api/app.py:114
+#: aodh/api/app.py:93
 #, python-format
 msgid "Starting server in PID %s"
 msgstr ""
 
-#: aodh/api/app.py:115
+#: aodh/api/app.py:94
 msgid "Configuration:"
 msgstr ""
 
-#: aodh/api/app.py:119
+#: aodh/api/app.py:98
 #, python-format
 msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
 msgstr ""
 
-#: aodh/api/app.py:123
+#: aodh/api/app.py:102
 #, python-format
 msgid "serving on http://%(host)s:%(port)s"
 msgstr ""
@@ -82,45 +82,45 @@ msgstr ""
 msgid "%(name)s count exceeds maximum value %(maximum)d"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:341
+#: aodh/api/controllers/v2/alarms.py:342
 #, python-format
 msgid "Unable to parse action %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:344
+#: aodh/api/controllers/v2/alarms.py:345
 #, python-format
 msgid "Unsupported action %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:347
+#: aodh/api/controllers/v2/alarms.py:348
 #, python-format
 msgid "You are not authorized to create action: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:584
+#: aodh/api/controllers/v2/alarms.py:594
 #, python-format
 msgid "Alarm with name=%s exists"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:596
+#: aodh/api/controllers/v2/alarms.py:606
 #, python-format
 msgid "Error while putting alarm: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:597 aodh/api/controllers/v2/alarms.py:766
+#: aodh/api/controllers/v2/alarms.py:607 aodh/api/controllers/v2/alarms.py:783
 msgid "Alarm incorrect"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:657
+#: aodh/api/controllers/v2/alarms.py:671
 msgid "state invalid"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:759
+#: aodh/api/controllers/v2/alarms.py:776
 #, python-format
 msgid "Alarm with name='%s' exists"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:765
+#: aodh/api/controllers/v2/alarms.py:782
 #, python-format
 msgid "Error while posting alarm: %s"
 msgstr ""
@@ -178,12 +178,12 @@ msgstr ""
 msgid "Limit should be positive"
 msgstr ""
 
-#: aodh/api/controllers/v2/query.py:319
+#: aodh/api/controllers/v2/query.py:320
 #, python-format
 msgid "String %s is not a valid isotime"
 msgstr ""
 
-#: aodh/api/controllers/v2/query.py:320
+#: aodh/api/controllers/v2/query.py:321
 #, python-format
 msgid "Failed to parse the timestamp value %s"
 msgstr ""
@@ -209,35 +209,35 @@ msgid ""
 "%(threshold)s over %(period)s seconds"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:119
+#: aodh/evaluator/__init__.py:117
 #, python-format
 msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:131
+#: aodh/evaluator/__init__.py:129
 msgid "alarm state update failed"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:207
+#: aodh/evaluator/__init__.py:205
 #, python-format
 msgid "initiating evaluation cycle on %d alarms"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:212
+#: aodh/evaluator/__init__.py:210
 msgid "alarm evaluation cycle failed"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:217
+#: aodh/evaluator/__init__.py:215
 #, python-format
 msgid "skipping alarm %s: type unsupported"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:221
+#: aodh/evaluator/__init__.py:219
 #, python-format
 msgid "evaluating alarm %s"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:225
+#: aodh/evaluator/__init__.py:223
 #, python-format
 msgid "Failed to evaluate alarm %s"
 msgstr ""
@@ -261,65 +261,65 @@ msgstr ""
 msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr ""
 
-#: aodh/evaluator/combination.py:104 aodh/evaluator/threshold.py:212
+#: aodh/evaluator/combination.py:104 aodh/evaluator/threshold.py:203
 #, python-format
 msgid "Attempted to evaluate alarm %s, but it is not within its time constraint."
 msgstr ""
 
-#: aodh/evaluator/gnocchi.py:76 aodh/evaluator/threshold.py:124
+#: aodh/evaluator/gnocchi.py:73 aodh/evaluator/threshold.py:115
 #, python-format
 msgid "stats query %s"
 msgstr ""
 
-#: aodh/evaluator/gnocchi.py:80 aodh/evaluator/threshold.py:130
+#: aodh/evaluator/gnocchi.py:77 aodh/evaluator/threshold.py:121
 msgid "alarm stats retrieval failed"
 msgstr ""
 
-#: aodh/evaluator/gnocchi.py:83
+#: aodh/evaluator/gnocchi.py:80
 #, python-format
 msgid "alarm stats retrieval failed: %s"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:88
+#: aodh/evaluator/threshold.py:79
 #, python-format
 msgid "query stats from %(start)s to %(now)s"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:95
+#: aodh/evaluator/threshold.py:86
 #, python-format
 msgid "sanitize stats %s"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:104
+#: aodh/evaluator/threshold.py:95
 #, python-format
 msgid "excluded weak datapoints with sample counts %s"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:115
+#: aodh/evaluator/threshold.py:106
 #, python-format
 msgid "pruned statistics to %d"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:147
+#: aodh/evaluator/threshold.py:138
 #, python-format
 msgid "%d datapoints are unknown"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:171
+#: aodh/evaluator/threshold.py:162
 #, python-format
 msgid ""
 "Transition to %(state)s due to %(count)d samples %(disposition)s "
 "threshold, most recent: %(most_recent)s"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:175
+#: aodh/evaluator/threshold.py:166
 #, python-format
 msgid ""
 "Remaining as %(state)s due to %(count)d samples %(disposition)s "
 "threshold, most recent: %(most_recent)s"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:224
+#: aodh/evaluator/threshold.py:215
 #, python-format
 msgid "comparing value %(value)s against threshold %(limit)s"
 msgstr ""
@@ -355,7 +355,7 @@ msgid ""
 " %(previous)s to %(current)s with action %(action)s because %(reason)s."
 msgstr ""
 
-#: aodh/notifier/rest.py:71
+#: aodh/notifier/rest.py:69
 #, python-format
 msgid ""
 "Notifying alarm %(alarm_name)s %(alarm_id)s with severity %(severity)s "
@@ -401,27 +401,13 @@ msgstr ""
 msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
 msgstr ""
 
-#: aodh/storage/mongo/utils.py:85
+#: aodh/storage/mongo/utils.py:77
 #, python-format
 msgid "Connecting to %(db)s on %(nodelist)s"
 msgstr ""
 
-#: aodh/storage/mongo/utils.py:100
+#: aodh/storage/mongo/utils.py:87
 #, python-format
 msgid "Unable to connect to the database server: %(errmsg)s."
-msgstr ""
-
-#: aodh/storage/mongo/utils.py:239
-#, python-format
-msgid ""
-"Unable to reconnect to the primary mongodb after %(retries)d retries. "
-"Giving up."
-msgstr ""
-
-#: aodh/storage/mongo/utils.py:243
-#, python-format
-msgid ""
-"Unable to reconnect to the primary mongodb: %(errmsg)s. Trying again in "
-"%(retry_interval)d seconds."
 msgstr ""
 
