@@ -17,7 +17,6 @@
 import os
 import socket
 
-from keystonemiddleware import opts as ks_opts
 from oslo_config import cfg
 from oslo_db import options as db_options
 import oslo_i18n
@@ -105,8 +104,6 @@ def prepare_service(argv=None):
     log.set_defaults(default_log_levels=log_levels)
     db_options.set_defaults(conf)
     policy_opts.set_defaults(conf)
-    for group, options in ks_opts.list_auth_token_opts():
-        conf.register_opts(list(options), group=group)
     from aodh import opts
     # Register our own Aodh options
     for group, options in opts.list_opts():

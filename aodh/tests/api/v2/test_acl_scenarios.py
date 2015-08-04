@@ -15,82 +15,18 @@
 # under the License.
 """Test ACL."""
 
-import datetime
-import hashlib
-import json
-
 import mock
-from oslo_utils import timeutils
 import webtest
 
 from aodh.api import app
 from aodh.tests.api import v2
 from aodh.tests import db as tests_db
 
-VALID_TOKEN = '4562138218392831'
-VALID_TOKEN2 = '4562138218392832'
-
-
-class FakeMemcache(object):
-
-    TOKEN_HASH = hashlib.sha256(VALID_TOKEN.encode('utf-8')).hexdigest()
-    TOKEN2_HASH = hashlib.sha256(VALID_TOKEN2.encode('utf-8')).hexdigest()
-
-    def get(self, key):
-        if (key == "tokens/%s" % VALID_TOKEN or
-                key == "tokens/%s" % self.TOKEN_HASH):
-            dt = timeutils.utcnow() + datetime.timedelta(minutes=5)
-            return json.dumps(({'access': {
-                'token': {'id': VALID_TOKEN,
-                          'expires': timeutils.isotime(dt)},
-                'user': {
-                    'id': 'user_id1',
-                    'name': 'user_name1',
-                    'tenantId': '123i2910',
-                    'tenantName': 'mytenant',
-                    'roles': [
-                        {'name': 'admin'},
-                    ]},
-            }}, timeutils.isotime(dt)))
-        if (key == "tokens/%s" % VALID_TOKEN2 or
-                key == "tokens/%s" % self.TOKEN2_HASH):
-            dt = timeutils.utcnow() + datetime.timedelta(minutes=5)
-            return json.dumps(({'access': {
-                'token': {'id': VALID_TOKEN2,
-                          'expires': timeutils.isotime(dt)},
-                'user': {
-                    'id': 'user_id2',
-                    'name': 'user-good',
-                    'tenantId': 'project-good',
-                    'tenantName': 'goodies',
-                    'roles': [
-                        {'name': 'Member'},
-                    ]},
-            }}, timeutils.isotime(dt)))
-
-    @staticmethod
-    def set(key, value, **kwargs):
-        pass
-
 
 class TestAPIACL(v2.FunctionalTest,
                  tests_db.MixinTestsWithBackendScenarios):
 
-    def setUp(self):
-        super(TestAPIACL, self).setUp()
-        self.environ = {'fake.cache': FakeMemcache()}
-
-    def get_json(self, path, expect_errors=False, headers=None,
-                 q=None, **params):
-        return super(TestAPIACL, self).get_json(path,
-                                                expect_errors=expect_errors,
-                                                headers=headers,
-                                                q=q or [],
-                                                extra_environ=self.environ,
-                                                **params)
-
     def _make_app(self):
-        self.CONF.set_override("cache", "fake.cache", 'keystone_authtoken')
         file_name = self.path_get('etc/aodh/api_paste.ini')
         self.CONF.set_override("paste_config", file_name, "api")
         # We need the other call to prepare_service in app.py to return the
