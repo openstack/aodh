@@ -123,7 +123,10 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
     "The name of the metric"
 
     query = wsme.wsattr(wtypes.text, mandatory=True)
-    "The query to filter the metric"
+    ('The query to filter the metric, Don\'t forget to filter out '
+     'deleted resources (example: {"and": [{"=": {"ended_at": null}}, ...]}), '
+     'Otherwise Gnocchi will try to create the aggregate against obsolete '
+     'resources')
 
     resource_type = wsme.wsattr(wtypes.text, mandatory=True)
     "The resource type"
