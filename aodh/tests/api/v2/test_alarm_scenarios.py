@@ -2968,3 +2968,73 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
         json['gnocchi_aggregation_by_resources_threshold_rule']['query'] = (
             expected_query)
         self._verify_alarm(json, alarms[0])
+
+
+class TestAlarmsEvent(TestAlarmsBase):
+
+    def test_list_alarms(self):
+        alarm = models.Alarm(name='event.alarm.1',
+                             type='event',
+                             enabled=True,
+                             alarm_id='h',
+                             description='h',
+                             state='insufficient data',
+                             severity='moderate',
+                             state_timestamp=constants.MIN_DATETIME,
+                             timestamp=constants.MIN_DATETIME,
+                             ok_actions=[],
+                             insufficient_data_actions=[],
+                             alarm_actions=[],
+                             repeat_actions=False,
+                             user_id=self.auth_headers['X-User-Id'],
+                             project_id=self.auth_headers['X-Project-Id'],
+                             time_constraints=[],
+                             rule=dict(event_type='event.test',
+                                       query=[]),
+                             )
+        self.alarm_conn.update_alarm(alarm)
+
+        data = self.get_json('/alarms')
+        self.assertEqual(1, len(data))
+        self.assertEqual(set(['event.alarm.1']),
+                         set(r['name'] for r in data))
+        self.assertEqual(set(['event.test']),
+                         set(r['event_rule']['event_type']
+                             for r in data if 'event_rule' in r))
+
+    def test_post_event_alarm_defaults(self):
+        to_check = {
+            'enabled': True,
+            'name': 'added_alarm_defaults',
+            'state': 'insufficient data',
+            'description': 'Alarm when * event occurred.',
+            'type': 'event',
+            'ok_actions': [],
+            'alarm_actions': [],
+            'insufficient_data_actions': [],
+            'repeat_actions': False,
+            'rule': {
+                'event_type': '*',
+                'query': [],
+            }
+        }
+
+        json = {
+            'name': 'added_alarm_defaults',
+            'type': 'event',
+            'event_rule': {
+                'event_type': '*',
+                'query': []
+            }
+        }
+        self.post_json('/alarms', params=json, status=201,
+                       headers=self.auth_headers)
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(1, len(alarms))
+        for alarm in alarms:
+            if alarm.name == 'added_alarm_defaults':
+                for key in to_check:
+                    self.assertEqual(to_check[key], getattr(alarm, key))
+                break
+        else:
+            self.fail("Alarm not found")
