@@ -60,6 +60,14 @@ class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
             req['url'] += "/aggregation/resource/%s/metric/%s" % (
                 alarm.rule['resource_type'], alarm.rule['metric'])
             req['data'] = alarm.rule['query']
+            # FIXME(sileht): In case of a heat autoscaling stack decide to
+            # delete an instance, the gnocchi metrics associated to this
+            # instance will be no more updated and when the alarm will ask
+            # for the aggregation, gnocchi will raise a 'No overlap' exception.
+            # So temporary set 'percent_of_overlap' to 0 to disable the
+            # gnocchi checks about missing points. For more detail see:
+            #   https://bugs.launchpad.net/gnocchi/+bug/1479429
+            req['params']['percent_of_overlap'] = 0
 
         elif alarm.type == 'gnocchi_aggregation_by_metrics_threshold':
             req['url'] += "/aggregation/metric"

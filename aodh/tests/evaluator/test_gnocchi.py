@@ -227,7 +227,8 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
             mock.call(url='http://localhost:8041/v1/aggregation/resource/'
                       'instance/metric/cpu_util',
                       params={'aggregation': 'mean',
-                              'start': start_alarm3, 'end': end},
+                              'start': start_alarm3, 'end': end,
+                              'percent_of_overlap': 0},
                       data='{"=": {"server_group": "my_autoscaling_group"}}',
                       headers=expected_headers),
             ],
