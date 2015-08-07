@@ -66,7 +66,7 @@ class PreciseTimestamp(TypeDecorator):
     def compare_against_backend(self, dialect, conn_type):
         if dialect.name == 'mysql':
             return issubclass(type(conn_type), DECIMAL)
-        return issubclass(type(conn_type), type(self.impl))
+        return issubclass(type(conn_type), DateTime)
 
     @staticmethod
     def process_result_value(value, dialect):

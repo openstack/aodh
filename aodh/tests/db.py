@@ -185,12 +185,13 @@ def run_with(*drivers):
         if isinstance(test, type) and issubclass(test, TestBase):
             # Decorate all test methods
             for attr in dir(test):
-                value = getattr(test, attr)
-                if callable(value) and attr.startswith('test_'):
-                    if six.PY3:
-                        value._run_with = drivers
-                    else:
-                        value.__func__._run_with = drivers
+                if attr.startswith('test_'):
+                    value = getattr(test, attr)
+                    if callable(value):
+                        if six.PY3:
+                            value._run_with = drivers
+                        else:
+                            value.__func__._run_with = drivers
         else:
             test._run_with = drivers
         return test
