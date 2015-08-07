@@ -44,6 +44,12 @@ OPTS = [
                help="The max length of resources id in DB2 nosql, "
                     "the value should be larger than len(hostname) * 2 "
                     "as compute node's resource id is <hostname>_<nodename>."),
+    cfg.StrOpt('alarm_connection',
+               secret=True,
+               default=None,
+               deprecated_for_removal=True,
+               help='The connection string used to connect '
+               'to the alarm database - rather use ${database.connection}'),
 ]
 
 CLI_OPTS = [
@@ -71,7 +77,10 @@ class StorageBadAggregate(Exception):
 
 def get_connection_from_config(conf):
     retries = conf.database.max_retries
-    url = conf.database.connection
+    if conf.database.alarm_connection is None:
+        url = conf.database.connection
+    else:
+        url = conf.database.alarm_connection
     connection_scheme = urlparse.urlparse(url).scheme
     # SQLAlchemy connections specify may specify a 'dialect' or
     # 'dialect+driver'. Handle the case where driver is specified.
