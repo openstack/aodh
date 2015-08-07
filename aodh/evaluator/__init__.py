@@ -259,6 +259,10 @@ class AlarmEvaluationService(AlarmService, os_service.Service):
         self.tg.add_timer(604800, lambda: None)
 
     def _assigned_alarms(self):
-        all_alarms = self._storage_conn.get_alarms(enabled=True)
+        # NOTE(r-mibu): The 'event' type alarms will be evaluated by the
+        # event-driven alarm evaluator, so this periodical evaluator skips
+        # those alarms.
+        all_alarms = self._storage_conn.get_alarms(enabled=True,
+                                                   exclude=dict(type='event'))
         return self.partition_coordinator.extract_my_subset(
             self.PARTITIONING_GROUP_NAME, all_alarms)

@@ -135,3 +135,13 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
             self.svc.start()
             self.svc._evaluate_assigned_alarms()
             self.threshold_eval.evaluate.assert_called_once_with(alarms[1])
+
+    def test_check_alarm_query_constraints(self):
+        self.storage_conn.get_alarms.return_value = []
+        with mock.patch('aodh.storage.get_connection_from_config',
+                        return_value=self.storage_conn):
+            self.svc.start()
+            self.svc._evaluate_assigned_alarms()
+            expected = [({'enabled': True, 'exclude': {'type': 'event'}},)]
+            self.assertEqual(expected,
+                             self.storage_conn.get_alarms.call_args_list)
