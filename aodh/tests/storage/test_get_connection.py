@@ -56,7 +56,9 @@ class ConnectionRetryTest(base.BaseTestCase):
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_retries(self):
-        with mock.patch.object(retrying.time, 'sleep') as retry_sleep:
+        max_retries = 5
+        with mock.patch.object(
+                retrying.Retrying, 'should_reject') as retry_reject:
             with mock.patch.object(
                     storage.impl_log.Connection, '__init__') as log_init:
 
@@ -68,11 +70,12 @@ class ConnectionRetryTest(base.BaseTestCase):
 
                 log_init.side_effect = x
                 self.CONF.set_override("connection", "log://", "database")
+                self.CONF.set_override("retry_interval", 0.00001, "database")
+                self.CONF.set_override("max_retries", max_retries, "database")
                 self.assertRaises(ConnectionError,
                                   storage.get_connection_from_config,
                                   self.CONF)
-                self.assertEqual(9, retry_sleep.call_count)
-                retry_sleep.assert_called_with(10.0)
+                self.assertEqual(max_retries, retry_reject.call_count)
 
 
 class ConnectionConfigTest(base.BaseTestCase):
