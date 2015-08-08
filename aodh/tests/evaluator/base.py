@@ -35,7 +35,6 @@ class TestEvaluatorBase(base.BaseTestCase):
                                               auth_token='fake_token')
         self.prepare_alarms()
 
-    @staticmethod
     def prepare_alarms(self):
         self.alarms = []
 
