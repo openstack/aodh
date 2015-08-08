@@ -28,12 +28,6 @@ _NAMESPACE = 'aodh.storage'
 
 LOG = log.getLogger(__name__)
 
-OLD_OPTS = [
-    cfg.StrOpt('database_connection',
-               secret=True,
-               help='DEPRECATED - Database connection string.',
-               ),
-]
 
 OPTS = [
     cfg.IntOpt('alarm_history_time_to_live',
