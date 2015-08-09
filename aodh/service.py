@@ -26,7 +26,6 @@ from oslo_messaging import opts as msg_opts
 from oslo_policy import opts as policy_opts
 
 from aodh import messaging
-from aodh import opts
 
 
 OPTS = [
@@ -120,6 +119,8 @@ def prepare_service(argv=None):
     for group, options in msg_opts.list_opts():
         conf.register_opts(list(options),
                            group=None if group == "DEFAULT" else group)
+
+    from aodh import opts
     # Register our own Aodh options
     for group, options in opts.list_opts():
         conf.register_opts(list(options),
