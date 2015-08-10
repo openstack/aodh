@@ -51,7 +51,9 @@ class SQLManager(fixtures.Fixture):
     def __init__(self, conf):
         self.conf = conf
         db_name = 'aodh_%s' % uuid.uuid4().hex
-        self._engine = sqlalchemy.create_engine(conf.database.connection)
+        self._engine = sqlalchemy.create_engine(
+            conf.database.connection.replace(self.url_dbname_placeholder,
+                                             self.url_dbname_createstring))
         self._conn = self._engine.connect()
         self._create_db(self._conn, db_name)
         self._conn.close()
@@ -63,6 +65,7 @@ class SQLManager(fixtures.Fixture):
 class PgSQLManager(SQLManager):
 
     url_dbname_placeholder = 'template1'
+    url_dbname_createstring = url_dbname_placeholder
 
     @staticmethod
     def _create_db(conn, db_name):
@@ -74,6 +77,7 @@ class PgSQLManager(SQLManager):
 class MySQLManager(SQLManager):
 
     url_dbname_placeholder = 'test'
+    url_dbname_createstring = ''
 
     @staticmethod
     def _create_db(conn, db_name):
@@ -121,6 +125,7 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
     DRIVER_MANAGERS = {
         'mongodb': MongoDbManager,
         'mysql': MySQLManager,
+        'mysql+pymysql': MySQLManager,
         'postgresql': PgSQLManager,
         'db2': MongoDbManager,
         'sqlite': SQLiteManager,
