@@ -22,7 +22,6 @@ from oslo_config import cfg
 from oslo_db import options as db_options
 import oslo_i18n
 from oslo_log import log
-from oslo_messaging import opts as msg_opts
 from oslo_policy import opts as policy_opts
 
 from aodh import messaging
@@ -114,12 +113,6 @@ def prepare_service(argv=None):
     policy_opts.set_defaults(conf)
     for group, options in ks_opts.list_auth_token_opts():
         conf.register_opts(list(options), group=group)
-    # FIXME(jd) We can use that with oslo.messaging>2.0.0:
-    # msg_opts.set_defaults(conf)
-    for group, options in msg_opts.list_opts():
-        conf.register_opts(list(options),
-                           group=None if group == "DEFAULT" else group)
-
     from aodh import opts
     # Register our own Aodh options
     for group, options in opts.list_opts():
