@@ -47,8 +47,6 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
     def setUp(self):
         super(TestGnocchiThresholdEvaluate, self).setUp()
 
-        self.useFixture(mockpatch.Patch('ceilometerclient.client.get_client',
-                                        return_value=self.api_client))
         self.requests = self.useFixture(mockpatch.Patch(
             'aodh.evaluator.gnocchi.requests')).mock
 

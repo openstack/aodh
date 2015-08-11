@@ -16,6 +16,7 @@
 import mock
 from oslo_config import fixture
 from oslotest import base
+from oslotest import mockpatch
 
 from aodh import service
 
@@ -26,6 +27,8 @@ class TestEvaluatorBase(base.BaseTestCase):
         conf = service.prepare_service([])
         self.conf = self.useFixture(fixture.Config(conf)).conf
         self.api_client = mock.Mock()
+        self.useFixture(mockpatch.Patch('ceilometerclient.client.get_client',
+                                        return_value=self.api_client))
         self.notifier = mock.MagicMock()
         self.evaluator = self.EVALUATOR(self.conf, self.notifier)
         self.storage_conn = mock.MagicMock()

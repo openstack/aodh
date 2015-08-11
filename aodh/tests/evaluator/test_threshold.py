@@ -113,10 +113,6 @@ class TestEvaluate(base.TestEvaluatorBase):
         for alarm in self.alarms:
             alarm.rule[field] = value
 
-    def setUp(self):
-        super(TestEvaluate, self).setUp()
-        self.evaluator._client = self.api_client
-
     def test_retry_transient_api_failure(self):
         broken = exc.CommunicationError(message='broken')
         avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] - v)
