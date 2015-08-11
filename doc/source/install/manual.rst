@@ -48,11 +48,12 @@ MongoDB
     [database]
     connection = mongodb://username:password@host:27017/aodh
 
-   If MongoDB is configured in replica set mode, add param in aodh.conf
-   to use MongoReplicaSetClient::
+   If MongoDB is configured in replica set mode, add `?replicaSet=` in your
+   connection URL::
 
     [database]
-    mongodb_replica_set = replica_name
+    connection = mongodb://username:password@host:27017/aodh?replicaSet=foobar
+
 
 SQLalchemy-supported DBs
 ------------------------

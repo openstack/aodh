@@ -44,8 +44,7 @@ class Connection(pymongo_base.Connection):
         self.conn = self.CONNECTION_POOL.connect(
             url,
             conf.database.max_retries,
-            conf.database.retry_interval,
-            conf.database.mongodb_replica_set)
+            conf.database.retry_interval)
 
         # Require MongoDB 2.4 to use $setOnInsert
         if self.conn.server_info()['versionArray'] < [2, 4]:

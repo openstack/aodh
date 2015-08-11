@@ -59,7 +59,7 @@ class ConnectionPool(object):
     def __init__(self):
         self._pool = {}
 
-    def connect(self, url, max_retries, retry_interval, replica_set=None):
+    def connect(self, url, max_retries, retry_interval):
         connection_options = pymongo.uri_parser.parse_uri(url)
         del connection_options['database']
         del connection_options['username']
@@ -77,9 +77,7 @@ class ConnectionPool(object):
         LOG.info(_('Connecting to %(db)s on %(nodelist)s') % log_data)
         try:
             client = MongoProxy(
-                pymongo.MongoClient(
-                    url, replicaSet=replica_set,
-                ),
+                pymongo.MongoClient(url),
                 max_retries,
                 retry_interval,
             )
