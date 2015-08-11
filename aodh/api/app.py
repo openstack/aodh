@@ -54,7 +54,7 @@ def setup_app(pecan_config=PECAN_CONFIG, conf=None):
 
     # NOTE(sileht): pecan debug won't work in multi-process environment
     pecan_debug = conf.api.pecan_debug
-    if conf.api_workers != 1 and pecan_debug:
+    if conf.api.workers != 1 and pecan_debug:
         pecan_debug = False
         LOG.warning(_LW('pecan_debug cannot be enabled, if workers is > 1, '
                         'the value is overrided with False'))
@@ -73,14 +73,14 @@ def setup_app(pecan_config=PECAN_CONFIG, conf=None):
 def load_app(conf):
     # Build the WSGI app
     cfg_file = None
-    cfg_path = conf.api_paste_config
+    cfg_path = conf.api.paste_config
     if not os.path.isabs(cfg_path):
         cfg_file = conf.find_file(cfg_path)
     elif os.path.exists(cfg_path):
         cfg_file = cfg_path
 
     if not cfg_file:
-        raise cfg.ConfigFilesNotFoundError([conf.api_paste_config])
+        raise cfg.ConfigFilesNotFoundError([conf.api.paste_config])
     LOG.info("Full WSGI config used: %s" % cfg_file)
     return deploy.loadapp("config:" + cfg_file)
 
@@ -103,7 +103,7 @@ def build_server(conf):
                  {'host': host, 'port': port}))
 
     serving.run_simple(host, port,
-                       app, processes=conf.api_workers)
+                       app, processes=conf.api.workers)
 
 
 def _app():

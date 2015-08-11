@@ -30,16 +30,6 @@ def list_opts():
     return [
         ('DEFAULT',
          itertools.chain(
-             [
-                 cfg.StrOpt(
-                     'api_paste_config',
-                     default="api_paste.ini",
-                     help="Configuration file for WSGI definition of API."),
-                 cfg.IntOpt(
-                     'api_workers', default=1,
-                     min=1,
-                     help='Number of workers for aodh API server.'),
-             ],
              aodh.evaluator.OPTS,
              aodh.evaluator.gnocchi.OPTS,
              aodh.notifier.rest.OPTS,
@@ -51,6 +41,18 @@ def list_opts():
          itertools.chain(
              aodh.api.OPTS,
              [
+                 cfg.StrOpt(
+                     'paste_config',
+                     deprecated_name='api_paste_config',
+                     deprecated_group='DEFAULT',
+                     default="api_paste.ini",
+                     help="Configuration file for WSGI definition of API."),
+                 cfg.IntOpt(
+                     'workers', default=1,
+                     deprecated_name='api_workers',
+                     deprecated_group='DEFAULT',
+                     min=1,
+                     help='Number of workers for aodh API server.'),
                  cfg.BoolOpt('pecan_debug',
                              default=False,
                              help='Toggle Pecan Debug Middleware.'),
