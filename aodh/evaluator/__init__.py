@@ -212,11 +212,10 @@ class AlarmService(object):
     def _evaluate_alarm(self, alarm):
         """Evaluate the alarms assigned to this evaluator."""
         if alarm.type not in self.evaluators:
-            LOG.debug(_('skipping alarm %s: type unsupported') %
-                      alarm.alarm_id)
+            LOG.debug('skipping alarm %s: type unsupported', alarm.alarm_id)
             return
 
-        LOG.debug(_('evaluating alarm %s') % alarm.alarm_id)
+        LOG.debug('evaluating alarm %s', alarm.alarm_id)
         try:
             self.evaluators[alarm.type].obj.evaluate(alarm)
         except Exception:

@@ -17,7 +17,6 @@ import operator
 from oslo_log import log
 
 import aodh
-from aodh.i18n import _
 from aodh.storage import base
 from aodh.storage.hbase import base as hbase_base
 from aodh.storage.hbase import migration as hbase_migration
@@ -81,18 +80,18 @@ class Connection(hbase_base.Connection, base.Connection):
             hbase_migration.migrate_tables(conn, tables)
 
     def clear(self):
-        LOG.debug(_('Dropping HBase schema...'))
+        LOG.debug('Dropping HBase schema...')
         with self.conn_pool.connection() as conn:
             for table in [self.ALARM_TABLE,
                           self.ALARM_HISTORY_TABLE]:
                 try:
                     conn.disable_table(table)
                 except Exception:
-                    LOG.debug(_('Cannot disable table but ignoring error'))
+                    LOG.debug('Cannot disable table but ignoring error')
                 try:
                     conn.delete_table(table)
                 except Exception:
-                    LOG.debug(_('Cannot delete table but ignoring error'))
+                    LOG.debug('Cannot delete table but ignoring error')
 
     def update_alarm(self, alarm):
         """Create an alarm.

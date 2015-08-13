@@ -47,5 +47,23 @@ def check_oslo_namespace_imports(logical_line, physical_line, filename):
         yield(0, msg)
 
 
+def no_translate_debug_logs(logical_line, filename):
+    """Check for 'LOG.debug(_('
+
+    As per our translation policy,
+    https://wiki.openstack.org/wiki/LoggingStandards#Log_Translation
+    we shouldn't translate debug level logs.
+
+    * This check assumes that 'LOG' is a logger.
+    * Use filename so we can start enforcing this in specific folders instead
+      of needing to do so all at once.
+
+    N319
+    """
+    if logical_line.startswith("LOG.debug(_("):
+        yield(0, "N319 Don't translate debug level logs")
+
+
 def factory(register):
     register(check_oslo_namespace_imports)
+    register(no_translate_debug_logs)

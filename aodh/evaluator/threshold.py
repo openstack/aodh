@@ -76,14 +76,14 @@ class ThresholdEvaluator(evaluator.Evaluator):
         window = ((alarm.rule.get('period', None) or alarm.rule['granularity'])
                   * (alarm.rule['evaluation_periods'] + look_back))
         start = now - datetime.timedelta(seconds=window)
-        LOG.debug(_('query stats from %(start)s to '
-                    '%(now)s') % {'start': start, 'now': now})
+        LOG.debug('query stats from %(start)s to '
+                  '%(now)s', {'start': start, 'now': now})
         return start.isoformat(), now.isoformat()
 
     @staticmethod
     def _sanitize(alarm, statistics):
         """Sanitize statistics."""
-        LOG.debug(_('sanitize stats %s') % statistics)
+        LOG.debug('sanitize stats %s', statistics)
         if alarm.rule.get('exclude_outliers'):
             key = operator.attrgetter('count')
             mean = utils.mean(statistics, key)
@@ -92,7 +92,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
             upper = mean + 2 * stddev
             inliers, outliers = utils.anomalies(statistics, key, lower, upper)
             if outliers:
-                LOG.debug(_('excluded weak datapoints with sample counts %s'),
+                LOG.debug('excluded weak datapoints with sample counts %s',
                           [s.count for s in outliers])
                 statistics = inliers
             else:
@@ -103,7 +103,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
         statistics = statistics[-alarm.rule['evaluation_periods']:]
         result_statistics = [getattr(stat, alarm.rule['statistic'])
                              for stat in statistics]
-        LOG.debug(_('pruned statistics to %d') % len(statistics))
+        LOG.debug('pruned statistics to %d', len(statistics))
         return result_statistics
 
     def _statistics(self, alarm, start, end):
@@ -112,7 +112,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
         before = dict(field='timestamp', op='le', value=end)
         query = copy.copy(alarm.rule['query'])
         query.extend([before, after])
-        LOG.debug(_('stats query %s') % query)
+        LOG.debug('stats query %s', query)
         try:
             return self._client.statistics.list(
                 meter_name=alarm.rule['meter_name'], q=query,
@@ -200,8 +200,8 @@ class ThresholdEvaluator(evaluator.Evaluator):
 
     def evaluate(self, alarm):
         if not self.within_time_constraint(alarm):
-            LOG.debug(_('Attempted to evaluate alarm %s, but it is not '
-                        'within its time constraint.') % alarm.alarm_id)
+            LOG.debug('Attempted to evaluate alarm %s, but it is not '
+                      'within its time constraint.', alarm.alarm_id)
             return
 
         start, end = self._bound_duration(alarm)
@@ -212,9 +212,8 @@ class ThresholdEvaluator(evaluator.Evaluator):
             def _compare(value):
                 op = COMPARATORS[alarm.rule['comparison_operator']]
                 limit = alarm.rule['threshold']
-                LOG.debug(_('comparing value %(value)s against threshold'
-                            ' %(limit)s') %
-                          {'value': value, 'limit': limit})
+                LOG.debug('comparing value %(value)s against threshold'
+                          ' %(limit)s', {'value': value, 'limit': limit})
                 return op(value, limit)
 
             self._transition(alarm,
