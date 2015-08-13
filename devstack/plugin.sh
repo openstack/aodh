@@ -188,7 +188,7 @@ function configure_aodh {
     iniset $AODH_CONF service_credentials os_password $SERVICE_PASSWORD
     iniset $AODH_CONF service_credentials os_tenant_name $SERVICE_TENANT_NAME
     iniset $AODH_CONF service_credentials os_region_name $REGION_NAME
-    iniset $AODH_CONF service_credentials os_auth_url $KEYSTONE_SERVICE_URI/v2.0
+    iniset $AODH_CONF service_credentials os_auth_url $KEYSTONE_SERVICE_URI
 
     # TODO(chdent): Until
     # https://bugs.launchpad.net/keystonemiddleware/+bug/1482078
