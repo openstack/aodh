@@ -169,10 +169,10 @@ class TestAlarmsBase(v2.FunctionalTest,
         self.assertEqual(1, len(match), 'alarm %s not found' % id)
         return match[0]
 
-    def _update_alarm(self, alarm, updated_data, auth_headers=None):
-        data = self._get_alarm(alarm['alarm_id'])
+    def _update_alarm(self, id, updated_data, auth_headers=None):
+        data = self._get_alarm(id)
         data.update(updated_data)
-        self.put_json('/alarms/%s' % alarm['alarm_id'],
+        self.put_json('/alarms/%s' % id,
                       params=data,
                       headers=auth_headers or self.auth_headers)
 
@@ -1650,10 +1650,9 @@ class TestAlarms(TestAlarmsBase):
             PayloadMatcher(), mock.ANY)
 
     def test_alarm_sends_notification(self):
-        alarm = self._get_alarm('a')
         with mock.patch.object(messaging, 'get_notifier') as get_notifier:
             notifier = get_notifier.return_value
-            self._update_alarm(alarm, dict(name='new_name'))
+            self._update_alarm('a', dict(name='new_name'))
             get_notifier.assert_called_once_with(mock.ANY,
                                                  publisher_id='aodh.api')
         calls = notifier.info.call_args_list
@@ -1728,14 +1727,13 @@ class TestAlarmsHistory(TestAlarmsBase):
 
     def test_record_alarm_history_config(self):
         self.CONF.set_override('record_history', False)
-        alarm = self._get_alarm('a')
         history = self._get_alarm_history('a')
         self.assertEqual([], history)
-        self._update_alarm(alarm, dict(name='renamed'))
+        self._update_alarm('a', dict(name='renamed'))
         history = self._get_alarm_history('a')
         self.assertEqual([], history)
         self.CONF.set_override('record_history', True)
-        self._update_alarm(alarm, dict(name='foobar'))
+        self._update_alarm('a', dict(name='foobar'))
         history = self._get_alarm_history('a')
         self.assertEqual(1, len(history))
 
@@ -1745,7 +1743,7 @@ class TestAlarmsHistory(TestAlarmsBase):
         self.assertEqual([], history)
         self.assertEqual('critical', alarm['severity'])
 
-        self._update_alarm(alarm, dict(severity='low'))
+        self._update_alarm('a', dict(severity='low'))
         new_alarm = self._get_alarm('a')
         history = self._get_alarm_history('a')
         self.assertEqual(1, len(history))
@@ -1801,7 +1799,7 @@ class TestAlarmsHistory(TestAlarmsBase):
         alarm = self._get_alarm('a')
         history = self._get_alarm_history('a')
         self.assertEqual([], history)
-        self._update_alarm(alarm, data, auth)
+        self._update_alarm('a', data, auth)
         history = self._get_alarm_history('a')
         self.assertEqual(1, len(history))
         project_id = auth['X-Project-Id'] if auth else alarm['project_id']
@@ -1856,7 +1854,7 @@ class TestAlarmsHistory(TestAlarmsBase):
                       'X-User-Id': admin_user,
                       'X-Project-Id': admin_project}
         data = dict(state='alarm')
-        self._update_alarm(alarm, data, auth_headers=admin_auth)
+        self._update_alarm(alarm['alarm_id'], data, auth_headers=admin_auth)
 
         self._add_default_threshold_rule(new_alarm)
         new_alarm['rule'] = new_alarm['threshold_rule']
@@ -1904,10 +1902,9 @@ class TestAlarmsHistory(TestAlarmsBase):
         self.assertEqual([], history)
 
     def test_delete_alarm_history_after_deletion(self):
-        alarm = self._get_alarm('a')
         history = self._get_alarm_history('a')
         self.assertEqual([], history)
-        self._update_alarm(alarm, dict(name='renamed'))
+        self._update_alarm('a', dict(name='renamed'))
         history = self._get_alarm_history('a')
         self.assertEqual(1, len(history))
         self.delete('/alarms/%s' % 'a',
@@ -1917,9 +1914,8 @@ class TestAlarmsHistory(TestAlarmsBase):
         self.assertEqual(0, len(history))
 
     def test_get_alarm_history_ordered_by_recentness(self):
-        alarm = self._get_alarm('a')
         for i in moves.xrange(10):
-            self._update_alarm(alarm, dict(name='%s' % i))
+            self._update_alarm('a', dict(name='%s' % i))
         history = self._get_alarm_history('a')
         self.assertEqual(10, len(history), 'hist: %s' % history)
         self._assert_is_subset(dict(alarm_id='a',
@@ -1934,7 +1930,7 @@ class TestAlarmsHistory(TestAlarmsBase):
 
     def test_get_alarm_history_constrained_by_timestamp(self):
         alarm = self._get_alarm('a')
-        self._update_alarm(alarm, dict(name='renamed'))
+        self._update_alarm('a', dict(name='renamed'))
         after = datetime.datetime.utcnow().isoformat()
         query = dict(field='timestamp', op='gt', value=after)
         history = self._get_alarm_history('a', query=query)
@@ -1953,7 +1949,7 @@ class TestAlarmsHistory(TestAlarmsBase):
 
     def test_get_alarm_history_constrained_by_type(self):
         alarm = self._get_alarm('a')
-        self._update_alarm(alarm, dict(name='renamed2'))
+        self._update_alarm('a', dict(name='renamed2'))
         query = dict(field='type', op='eq', value='rule change')
         history = self._get_alarm_history('a', query=query)
         self.assertEqual(1, len(history))
@@ -1993,8 +1989,7 @@ class TestAlarmsHistory(TestAlarmsBase):
                          resp.json['error_message']['faultstring'])
 
     def test_get_alarm_history_constrained_by_severity(self):
-        alarm = self._get_alarm('a')
-        self._update_alarm(alarm, dict(severity='low'))
+        self._update_alarm('a', dict(severity='low'))
         query = dict(field='severity', op='eq', value='low')
         history = self._get_alarm_history('a', query=query)
         self.assertEqual(1, len(history))
