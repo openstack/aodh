@@ -96,8 +96,8 @@ class AlarmNotifierService(os_service.Service):
             return
 
         try:
-            LOG.debug(_("Notifying alarm %(id)s with action %(act)s") % (
-                      {'id': alarm_id, 'act': action}))
+            LOG.debug("Notifying alarm %(id)s with action %(act)s",
+                      {'id': alarm_id, 'act': action})
             notifier.notify(action, alarm_id, alarm_name, severity,
                             previous, current, reason, reason_data)
         except Exception:

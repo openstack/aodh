@@ -78,7 +78,7 @@ class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
                 alarm.rule['resource_type'],
                 alarm.rule['resource_id'], alarm.rule['metric'])
 
-        LOG.debug(_('stats query %s') % req['url'])
+        LOG.debug('stats query %s', req['url'])
         try:
             r = getattr(requests, method)(**req)
         except Exception:
