@@ -325,7 +325,7 @@ class TestQueryToKwArgs(tests_base.BaseTestCase):
             wsme.exc.UnknownArgument,
             utils.query_to_kwargs, q,
             alarm_storage_base.Connection.get_alarms)
-        valid_keys = ['alarm_id', 'enabled', 'meter', 'name',
+        valid_keys = ['alarm_id', 'enabled', 'exclude', 'meter', 'name',
                       'project', 'severity', 'state', 'type', 'user']
         msg = ("unrecognized field in query: %s, "
                "valid keys: %s") % (q, valid_keys)

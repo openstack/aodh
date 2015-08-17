@@ -37,7 +37,7 @@ class Connection(base.Connection):
     @staticmethod
     def get_alarms(name=None, user=None, state=None, meter=None,
                    project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None):
+                   alarm_type=None, severity=None, exclude=None):
         """Yields a lists of alarms that match filters."""
         return []
 

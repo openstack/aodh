@@ -187,6 +187,8 @@ class MTable(object):
         """
         op = args[0]
         value = args[1]
+        if value.startswith('binary:'):
+            value = value[len('binary:'):]
         if value.startswith('regexstring:'):
             value = value[len('regexstring:'):]
         r = {}

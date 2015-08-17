@@ -75,7 +75,7 @@ class Connection(object):
     @staticmethod
     def get_alarms(name=None, user=None, state=None, meter=None,
                    project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None):
+                   alarm_type=None, severity=None, exclude=None):
         """Yields a lists of alarms that match filters.
 
         :param name: Optional name for alarm.
@@ -86,7 +86,8 @@ class Connection(object):
         :param enabled: Optional boolean to list disable alarm.
         :param alarm_id: Optional alarm_id to return one alarm.
         :param alarm_type: Optional alarm type.
-        :parmr severity: Optional alarm severity
+        :param severity: Optional alarm severity.
+        :param exclude: Optional dict for inequality constraint.
         """
         raise aodh.NotImplementedError('Alarms not implemented')
 

@@ -20,6 +20,7 @@
 
 from oslo_log import log
 import pymongo
+import six
 
 from aodh.storage import base
 from aodh.storage import models
@@ -87,7 +88,7 @@ class Connection(base.Connection):
 
     def get_alarms(self, name=None, user=None, state=None, meter=None,
                    project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None):
+                   alarm_type=None, severity=None, exclude=None):
         """Yields a lists of alarms that match filters.
 
         :param name: Optional name for alarm.
@@ -99,6 +100,7 @@ class Connection(base.Connection):
         :param alarm_id: Optional alarm_id to return one alarm.
         :param alarm_type: Optional alarm type.
         :param severity: Optional alarm severity.
+        :param exclude: Optional dict for inequality constraint.
         """
         q = {}
         if user is not None:
@@ -119,6 +121,9 @@ class Connection(base.Connection):
             q['type'] = alarm_type
         if severity is not None:
             q['severity'] = severity
+        if exclude is not None:
+            for key, value in six.iteritems(exclude):
+                q[key] = {'$ne': value}
 
         return self._retrieve_alarms(q,
                                      [("timestamp",

@@ -22,6 +22,7 @@ from alembic import migration
 from oslo_db.sqlalchemy import session as db_session
 from oslo_log import log
 from oslo_utils import timeutils
+import six
 from sqlalchemy import desc
 
 from aodh.i18n import _LI
@@ -141,7 +142,7 @@ class Connection(base.Connection):
 
     def get_alarms(self, name=None, user=None, state=None, meter=None,
                    project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None):
+                   alarm_type=None, severity=None, exclude=None):
         """Yields a lists of alarms that match filters.
 
         :param name: Optional name for alarm.
@@ -152,7 +153,8 @@ class Connection(base.Connection):
         :param enabled: Optional boolean to list disable alarm.
         :param alarm_id: Optional alarm_id to return one alarm.
         :param alarm_type: Optional alarm type.
-        :param severity: Optional alarm severity
+        :param severity: Optional alarm severity.
+        :param exclude: Optional dict for inequality constraint.
         """
 
         session = self._engine_facade.get_session()
@@ -173,6 +175,9 @@ class Connection(base.Connection):
             query = query.filter(models.Alarm.type == alarm_type)
         if severity is not None:
             query = query.filter(models.Alarm.severity == severity)
+        if exclude is not None:
+            for key, value in six.iteritems(exclude):
+                query = query.filter(getattr(models.Alarm, key) != value)
 
         query = query.order_by(desc(models.Alarm.timestamp))
         alarms = self._retrieve_alarms(query)
