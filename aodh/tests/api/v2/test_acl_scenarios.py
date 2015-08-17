@@ -92,7 +92,7 @@ class TestAPIACL(v2.FunctionalTest,
     def _make_app(self):
         self.CONF.set_override("cache", "fake.cache", 'keystone_authtoken')
         file_name = self.path_get('etc/aodh/api_paste.ini')
-        self.CONF.set_override("api_paste_config", file_name)
+        self.CONF.set_override("paste_config", file_name, "api")
         # We need the other call to prepare_service in app.py to return the
         # same tweaked conf object.
         with mock.patch('aodh.service.prepare_service') as ps:

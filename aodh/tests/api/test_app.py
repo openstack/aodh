@@ -32,7 +32,7 @@ class TestApp(base.BaseTestCase):
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_api_paste_file_not_exist(self):
-        self.CONF.set_override('api_paste_config', 'non-existent-file')
+        self.CONF.set_override('paste_config', 'non-existent-file', "api")
         with mock.patch.object(self.CONF, 'find_file') as ff:
             ff.return_value = None
             self.assertRaises(cfg.ConfigFilesNotFoundError,
@@ -46,7 +46,7 @@ class TestApp(base.BaseTestCase):
             self.CONF.set_override('debug', g_debug)
             if p_debug is not None:
                 self.CONF.set_override('pecan_debug', p_debug, group='api')
-            self.CONF.set_override('api_workers', workers)
+            self.CONF.set_override('workers', workers, 'api')
             app.setup_app(conf=self.CONF)
             args, kwargs = mocked.call_args
             self.assertEqual(expected, kwargs.get('debug'))
