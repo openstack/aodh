@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  Aodh\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-08-04 06:33+0000\n"
-"PO-Revision-Date: 2015-07-31 18:10+0000\n"
+"POT-Creation-Date: 2015-08-19 06:21+0000\n"
+"PO-Revision-Date: 2015-08-17 12:00+0000\n"
 "Last-Translator: openstackjenkins <jenkins@openstack.org>\n"
 "Language-Team: Russian (http://www.transifex.com/openstack/aodh/language/"
 "ru/)\n"
@@ -89,23 +89,10 @@ msgid "Alarms %(alarm_ids)s are in unknown state"
 msgstr "Сигнализация %(alarm_ids)s в не корректном состоянии"
 
 #, python-format
-msgid ""
-"Attempted to evaluate alarm %s, but it is not within its time constraint."
-msgstr ""
-"В попытке оценки сигнала тревоги %s, мы не входили в его временное "
-"ограничение."
-
-#, python-format
 msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
 msgstr ""
 "Не удается создать таблицу %(table_name)s, она уже существует. Игнорирование "
 "ошибки"
-
-msgid "Cannot delete table but ignoring error"
-msgstr "Не возможно удалить таблицу, игнорируя ошибку"
-
-msgid "Cannot disable table but ignoring error"
-msgstr "Невозможно отключить таблицу, игнорируя ошибку"
 
 #, python-format
 msgid "Cannot specify alarm %s itself in combination rule"
@@ -121,12 +108,6 @@ msgstr "Конфигурация: "
 #, python-format
 msgid "Connecting to %(db)s on %(nodelist)s"
 msgstr "Подключение к %(db)s  на %(nodelist)s"
-
-msgid "Creating a new in-memory HBase Connection object"
-msgstr "Создание нового памяти в HBase Connection object"
-
-msgid "Dropping HBase schema..."
-msgstr "Удаление HBase схемы ..."
 
 #, python-format
 msgid "Error parsing HTTP response: %s"
@@ -177,13 +158,6 @@ msgstr ""
 "сигналом тревоги %(alarm_name)s %(alarm_id)s не работает  %(severity)s "
 "потому что %(previous)s причина %(current)s  в действиях %(action)s "
 "%(reason)s   Запрос-ID:  %(request_id)s"
-
-#, python-format
-msgid "Notifying alarm %(id)s with action %(act)s"
-msgstr "Сигнал тревоги %(id)s во время его действии %(act)s"
-
-msgid "Opening in-memory HBase connection"
-msgstr "Открыть связь к  памяти в HBase"
 
 #, python-format
 msgid "Order-by expression not valid: %s"
@@ -282,14 +256,6 @@ msgid "You are not authorized to create action: %s"
 msgstr "Вы не авторизованы, чтобы деиствовать: %s"
 
 #, python-format
-msgid ""
-"alarm %(alarm_id)s has no action configured for state transition from "
-"%(previous)s to state %(state)s, skipping the notification."
-msgstr ""
-"сигнализация %(alarm_id)s не работает, настройка для перехода от оповещения "
-"%(previous)s к оповещению%(state)s, пропускает предупреждать."
-
-#, python-format
 msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
 msgstr ""
 "Сигнализация %(id)s приводится в действие %(state)s потому что %(reason)s"
@@ -311,40 +277,12 @@ msgid "alarm stats retrieval failed: %s"
 msgstr "Статистика сигнал оповещения не получен: %s"
 
 #, python-format
-msgid "comparing value %(value)s against threshold %(limit)s"
-msgstr "входящий сигнал %(value)s снова срабатывает  %(limit)s"
-
-#, python-format
-msgid "connecting to HBase on %(host)s:%(port)s"
-msgstr "подключения к HBase на %(host)s:%(port)s"
-
-#, python-format
 msgid "duplicate actions are found: %s, remove duplicate ones"
 msgstr "дублирующие действия найдены в: %s, удалить дубликаты из них"
 
 #, python-format
-msgid "evaluating alarm %s"
-msgstr "Оценка цикла %s"
-
-#, python-format
-msgid "excluded weak datapoints with sample counts %s"
-msgstr "Выявления слабых пунктов с испытания %s"
-
-#, python-format
 msgid "initiating evaluation cycle on %d alarms"
 msgstr "приступим к оценке цикла  %d alarms"
-
-#, python-format
-msgid "pruned statistics to %d"
-msgstr "куски статистики проверок %d"
-
-#, python-format
-msgid "query stats from %(start)s to %(now)s"
-msgstr "Статистика запросов от начало %(start)s по настоящее время %(now)s"
-
-#, python-format
-msgid "sanitize stats %s"
-msgstr "положение самопроверки на неполадки  %s"
 
 #, python-format
 msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
@@ -354,19 +292,11 @@ msgstr "услуга на 0.0.0.0:%(sport)s, указывает на http://127.
 msgid "serving on http://%(host)s:%(port)s"
 msgstr "указатели на http://%(host)s:%(port)s"
 
-#, python-format
-msgid "skipping alarm %s: type unsupported"
-msgstr "упущения предупреждения %s не поддерживается системой"
-
 msgid "state invalid"
 msgstr "Неправильное состояние"
 
 msgid "state_timestamp should be datetime object"
 msgstr "В state_timestamp должен быть указан дата  объекта"
-
-#, python-format
-msgid "stats query %s"
-msgstr "запрос статистики  %s"
 
 msgid "timestamp should be datetime object"
 msgstr "должна быть указана дата вывода объекта"

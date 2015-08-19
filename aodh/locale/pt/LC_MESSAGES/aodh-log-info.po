@@ -1,0 +1,45 @@
+# Translations template for aodh.
+# Copyright (C) 2015 ORGANIZATION
+# This file is distributed under the same license as the aodh project.
+#
+# Translators:
+# AnaFonseca <anafonseca.mobile@gmail.com>, 2015
+msgid ""
+msgstr ""
+"Project-Id-Version: Aodh\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-08-19 06:21+0000\n"
+"PO-Revision-Date: 2015-08-17 14:23+0000\n"
+"Last-Translator: AnaFonseca <anafonseca.mobile@gmail.com>\n"
+"Language-Team: Portuguese (http://www.transifex.com/openstack/aodh/language/"
+"pt/)\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.0\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#, python-format
+msgid "%d alarm histories are removed from database"
+msgstr "%d históricos de alarme foram removidas da base de dados"
+
+msgid "Coordination backend started successfully."
+msgstr "Coordenação de backend iniciada com sucesso."
+
+#, python-format
+msgid "Dropping alarm history data with TTL %d"
+msgstr "Cessar histórico do alarme com TTL %d"
+
+#, python-format
+msgid "Joined partitioning group %s"
+msgstr "Entrou na partição do grupo %s"
+
+#, python-format
+msgid "Left partitioning group %s"
+msgstr "Saiu da partição do grupo %s"
+
+msgid "Nothing to clean, database alarm history time to live is disabled"
+msgstr ""
+"Nada a limpar, o histórico do alarme TTL, time to live, da base de dados "
+"está desativado."
