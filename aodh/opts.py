@@ -20,6 +20,7 @@ import aodh.api.controllers.v2.alarms
 import aodh.coordination
 import aodh.evaluator
 import aodh.evaluator.gnocchi
+import aodh.event
 import aodh.notifier.rest
 import aodh.rpc
 import aodh.service
@@ -32,6 +33,7 @@ def list_opts():
          itertools.chain(
              aodh.evaluator.OPTS,
              aodh.evaluator.gnocchi.OPTS,
+             aodh.event.OPTS,
              aodh.notifier.rest.OPTS,
              aodh.service.OPTS,
              aodh.rpc.OPTS,
