@@ -1,0 +1,31 @@
+# Translations template for aodh.
+# Copyright (C) 2015 ORGANIZATION
+# This file is distributed under the same license as the aodh project.
+#
+# Translators:
+# AnaFonseca <anafonseca.mobile@gmail.com>, 2015
+msgid ""
+msgstr ""
+"Project-Id-Version: Aodh\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-08-19 06:21+0000\n"
+"PO-Revision-Date: 2015-08-17 14:14+0000\n"
+"Last-Translator: AnaFonseca <anafonseca.mobile@gmail.com>\n"
+"Language-Team: Portuguese (http://www.transifex.com/openstack/aodh/language/"
+"pt/)\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.0\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Error connecting to coordination backend."
+msgstr "Erro ao ligar-se à coordenação de backend."
+
+msgid "Error getting group membership info from coordination backend."
+msgstr ""
+"Erro ao procurar informação de associação a grupo na coordenação de backend."
+
+msgid "Error sending a heartbeat to coordination backend."
+msgstr "Erro ao enviar pulsação à coordenação de backend."

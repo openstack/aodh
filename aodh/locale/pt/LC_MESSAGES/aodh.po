@@ -1,0 +1,298 @@
+# Portuguese translations for aodh.
+# Copyright (C) 2015 ORGANIZATION
+# This file is distributed under the same license as the aodh project.
+#
+# Translators:
+# AnaFonseca <anafonseca.mobile@gmail.com>, 2015
+msgid ""
+msgstr ""
+"Project-Id-Version:  Aodh\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-08-19 06:21+0000\n"
+"PO-Revision-Date: 2015-08-17 15:30+0000\n"
+"Last-Translator: AnaFonseca <anafonseca.mobile@gmail.com>\n"
+"Language-Team: Portuguese (http://www.transifex.com/openstack/aodh/language/"
+"pt/)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.0\n"
+
+#, python-format
+msgid "%(entity)s %(id)s Not Found"
+msgstr "%(entity)s %(id)s Não Encontrado"
+
+#, python-format
+msgid "%(name)s count exceeds maximum value %(maximum)d"
+msgstr "a contagem %(name)s excede o valor máximo %(maximum)d"
+
+#, python-format
+msgid "%(rule)s must be set for %(type)s type alarm"
+msgstr "%(rule)s devem ser definidas para o tipo de aviso %(type)s"
+
+#, python-format
+msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
+msgstr "%(rule1)s e %(rule2)s não podem ser programadas ao mesmo tempo"
+
+#, python-format
+msgid "%d datapoints are unknown"
+msgstr "endereços de grupo %d desconhecidos"
+
+#, python-format
+msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
+msgstr ""
+"A ação %(scheme)s para o alarme %(alarm_id)s é desconhecida, impossível "
+"notificar."
+
+#, python-format
+msgid "Alarm %(alarm_id)s not found in project %(project)s"
+msgstr "Alarme %(alarm_id)s não encontrado no projeto %(project)s"
+
+#, python-format
+msgid "Alarm %s not found"
+msgstr "Alarme %s não encontrado"
+
+msgid "Alarm combination rule should contain at least two different alarm ids."
+msgstr ""
+"A regra de combinação de avisos deve conter pelo menos duas ids de alarme "
+"diferentes."
+
+msgid "Alarm incorrect"
+msgstr "Alarme incorreto"
+
+#, python-format
+msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
+msgstr "Aviso de quota excedida para o utilizador %(u)s no projeto %(p)s"
+
+#, python-format
+msgid ""
+"Alarm when %(meter_name)s is %(comparison_operator)s a %(statistic)s of "
+"%(threshold)s over %(period)s seconds"
+msgstr ""
+"Alarme quando %(meter_name)s é %(comparison_operator)s uma %(statistic)s de "
+"%(threshold)s em %(period)s segundos"
+
+#, python-format
+msgid "Alarm when %s event occurred."
+msgstr "Alarme quando evento %s ocorreu."
+
+#, python-format
+msgid "Alarm with name=%s exists"
+msgstr "O aviso com o nome=%s já existe"
+
+#, python-format
+msgid "Alarm with name='%s' exists"
+msgstr "Alarme com o nome='%s' já existe"
+
+#, python-format
+msgid "Alarms %(alarm_ids)s are in unknown state"
+msgstr "Os alarmes %(alarm_ids)s encontram-se em estado desconhecido"
+
+#, python-format
+msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
+msgstr "Não é possível criar a tabela %(table_name)s - já existe. Ignorar erro"
+
+#, python-format
+msgid "Cannot specify alarm %s itself in combination rule"
+msgstr "Não é possivel especificar o próprio alarme %s na combinação de regras"
+
+#, python-format
+msgid "Combined state of alarms %s"
+msgstr "Estado combinado dos avisos %s"
+
+msgid "Configuration:"
+msgstr "Configuração:"
+
+#, python-format
+msgid "Connecting to %(db)s on %(nodelist)s"
+msgstr "Ligar a %(db)s em %(nodelist)s"
+
+#, python-format
+msgid "Error parsing HTTP response: %s"
+msgstr "Erro ao analisar resposta HTTP: %s"
+
+#, python-format
+msgid "Error while posting alarm: %s"
+msgstr "Erro ao postar o alarme: %s"
+
+#, python-format
+msgid "Error while putting alarm: %s"
+msgstr "Erro ao pôr o alarme: %s"
+
+#, python-format
+msgid "Failed to evaluate alarm %s"
+msgstr "Falha ao avaliar avisos %s"
+
+#, python-format
+msgid "Failed to parse the timestamp value %s"
+msgstr "Erro ao analisar o valor data/hora %s"
+
+#, python-format
+msgid "Filter expression not valid: %s"
+msgstr "Expressão filtro inválida: %s"
+
+msgid "Limit should be positive"
+msgstr "O limite deve ser positivo"
+
+#, python-format
+msgid "Not Authorized to access %(aspect)s %(id)s"
+msgstr "Não Autorizado o acesso a %(aspect)s %(id)s"
+
+#, python-format
+msgid ""
+"Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s priority from "
+"%(previous)s to %(current)s with action %(action)s because %(reason)s."
+msgstr ""
+"Notificar alarme %(alarm_name)s %(alarm_id)s de %(severity)s prioridade de "
+"%(previous)s a %(current)s com a ação %(action)s devido a %(reason)s."
+
+#, python-format
+msgid ""
+"Notifying alarm %(alarm_name)s %(alarm_id)s with severity %(severity)s from "
+"%(previous)s to %(current)s with action %(action)s because %(reason)s. "
+"request-id: %(request_id)s "
+msgstr ""
+"Notificar alarme %(alarm_name)s %(alarm_id)s de gravidade  %(severity)s de "
+"%(previous)s a %(current)s com a ação %(action)s devido a %(reason)s. "
+"request-id: %(request_id)s "
+
+#, python-format
+msgid "Order-by expression not valid: %s"
+msgstr "Expressão ordenar por inválida: %s"
+
+#, python-format
+msgid ""
+"Remaining as %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"Mantendo-se como %(state)s devido a %(count)d amostras %(disposition)s no "
+"limite, mais recentes: %(most_recent)s"
+
+#, python-format
+msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr ""
+"Mantendo-se em %(state)s devido aos alarmes %(alarm_ids)s em estado %(state)s"
+
+#, python-format
+msgid "Starting server in PID %s"
+msgstr "Iniciar servidor em PID %s"
+
+#, python-format
+msgid "String %s is not a valid isotime"
+msgstr "A string %s não é um tempo ISO válido"
+
+#, python-format
+msgid ""
+"The data type %(type)s is not supported. The supported data type list is: "
+"%(supported)s"
+msgstr ""
+"O tipo de dados %(type)s não é suportado. A lista do tipo de dados "
+"suportados é: %(supported)s"
+
+msgid "Time constraint names must be unique for a given alarm."
+msgstr ""
+"Os nomes das restrições de tempo deve ser únicos para um determinado aviso."
+
+#, python-format
+msgid "Timezone %s is not valid"
+msgstr "Fuso horário %s inválido"
+
+#, python-format
+msgid ""
+"Transition to %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"Transição para  %(state)s devido a %(count)d amostras %(disposition)s no "
+"limite, mais recentes: %(most_recent)s"
+
+#, python-format
+msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr ""
+"Transição para %(state)s devido aos alarmes %(alarm_ids)s em estado %(state)s"
+
+#, python-format
+msgid "Unable to connect to the database server: %(errmsg)s."
+msgstr "Não é possível ligar ao servidor da base de dados: %(errmsg)s."
+
+#, python-format
+msgid ""
+"Unable to convert the value %(value)s to the expected data type %(type)s."
+msgstr ""
+"Incapaz de converter o valor %(value)s para o tipo de dados esperados "
+"%(type)s."
+
+#, python-format
+msgid "Unable to notify alarm %s"
+msgstr "Incampaz de notificar o alarme %s"
+
+msgid "Unable to notify for an alarm with no action"
+msgstr "Incapaz de notificar um alarme sem ação"
+
+#, python-format
+msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
+msgstr "Incapaz de analisar a ação %(action)s para o alarme %(alarm_id)s"
+
+#, python-format
+msgid "Unable to parse action %s"
+msgstr "Incapaz de analisar a ação %s"
+
+#, python-format
+msgid ""
+"Unexpected exception converting %(value)s to the expected data type %(type)s."
+msgstr ""
+"Exceção inesperada ao converter %(value)s para o tipo de dados esperado "
+"%(type)s."
+
+#, python-format
+msgid "Unsupported action %s"
+msgstr "Ação não suportada %s"
+
+#, python-format
+msgid "You are not authorized to create action: %s"
+msgstr "Não tem permissão para criar a ação: %s"
+
+#, python-format
+msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
+msgstr "alarme %(id)s a passar a %(state)s devido a %(reason)s"
+
+msgid "alarm evaluation cycle failed"
+msgstr "o ciclo de avaliação do alarme falhou"
+
+msgid "alarm retrieval failed"
+msgstr "a extração do alarme falhou"
+
+msgid "alarm state update failed"
+msgstr "a atualização do estado do alarme falhou"
+
+msgid "alarm stats retrieval failed"
+msgstr "a extração da estatística do alarme falhou"
+
+#, python-format
+msgid "alarm stats retrieval failed: %s"
+msgstr "a extração da estatística do alarme falhou: %s"
+
+#, python-format
+msgid "duplicate actions are found: %s, remove duplicate ones"
+msgstr "encontradas ações duplicadas: %s, remover as duplicadas"
+
+#, python-format
+msgid "initiating evaluation cycle on %d alarms"
+msgstr "iniciando ciclo de avaliação em alarme %d"
+
+#, python-format
+msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
+msgstr "ativo em 0.0.0.0:%(sport)s, ver em http://127.0.0.1:%(vport)s"
+
+#, python-format
+msgid "serving on http://%(host)s:%(port)s"
+msgstr "ativo em http://%(host)s:%(port)s"
+
+msgid "state invalid"
+msgstr "estato inválido"
+
+msgid "state_timestamp should be datetime object"
+msgstr "state_timestamp deve ser um objeto data/hora"
+
+msgid "timestamp should be datetime object"
+msgstr "o timestamp deve ser um objeto data/hora"

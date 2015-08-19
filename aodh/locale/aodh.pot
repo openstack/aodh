@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 0.0.1.dev4019\n"
+"Project-Id-Version: aodh 0.0.1.dev4074\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-08-04 06:33+0000\n"
+"POT-Creation-Date: 2015-08-19 06:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,13 +16,6 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.0\n"
-
-#: aodh/rpc.py:48
-#, python-format
-msgid ""
-"alarm %(alarm_id)s has no action configured for state transition from "
-"%(previous)s to state %(state)s, skipping the notification."
-msgstr ""
 
 #: aodh/api/app.py:93
 #, python-format
@@ -43,7 +36,7 @@ msgstr ""
 msgid "serving on http://%(host)s:%(port)s"
 msgstr ""
 
-#: aodh/api/middleware.py:109
+#: aodh/api/middleware.py:102
 #, python-format
 msgid "Error parsing HTTP response: %s"
 msgstr ""
@@ -97,21 +90,21 @@ msgstr ""
 msgid "You are not authorized to create action: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:594
+#: aodh/api/controllers/v2/alarms.py:596
 #, python-format
 msgid "Alarm with name=%s exists"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:606
+#: aodh/api/controllers/v2/alarms.py:608
 #, python-format
 msgid "Error while putting alarm: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:607 aodh/api/controllers/v2/alarms.py:783
+#: aodh/api/controllers/v2/alarms.py:609 aodh/api/controllers/v2/alarms.py:783
 msgid "Alarm incorrect"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:671
+#: aodh/api/controllers/v2/alarms.py:669
 msgid "state invalid"
 msgstr ""
 
@@ -202,6 +195,11 @@ msgstr ""
 msgid "Cannot specify alarm %s itself in combination rule"
 msgstr ""
 
+#: aodh/api/controllers/v2/alarm_rules/event.py:48
+#, python-format
+msgid "Alarm when %s event occurred."
+msgstr ""
+
 #: aodh/api/controllers/v2/alarm_rules/threshold.py:93
 #, python-format
 msgid ""
@@ -227,17 +225,7 @@ msgstr ""
 msgid "alarm evaluation cycle failed"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:215
-#, python-format
-msgid "skipping alarm %s: type unsupported"
-msgstr ""
-
-#: aodh/evaluator/__init__.py:219
-#, python-format
-msgid "evaluating alarm %s"
-msgstr ""
-
-#: aodh/evaluator/__init__.py:223
+#: aodh/evaluator/__init__.py:222
 #, python-format
 msgid "Failed to evaluate alarm %s"
 msgstr ""
@@ -261,43 +249,13 @@ msgstr ""
 msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr ""
 
-#: aodh/evaluator/combination.py:104 aodh/evaluator/threshold.py:203
-#, python-format
-msgid "Attempted to evaluate alarm %s, but it is not within its time constraint."
-msgstr ""
-
-#: aodh/evaluator/gnocchi.py:73 aodh/evaluator/threshold.py:115
-#, python-format
-msgid "stats query %s"
-msgstr ""
-
-#: aodh/evaluator/gnocchi.py:77 aodh/evaluator/threshold.py:121
+#: aodh/evaluator/gnocchi.py:85 aodh/evaluator/threshold.py:121
 msgid "alarm stats retrieval failed"
 msgstr ""
 
-#: aodh/evaluator/gnocchi.py:80
+#: aodh/evaluator/gnocchi.py:88
 #, python-format
 msgid "alarm stats retrieval failed: %s"
-msgstr ""
-
-#: aodh/evaluator/threshold.py:79
-#, python-format
-msgid "query stats from %(start)s to %(now)s"
-msgstr ""
-
-#: aodh/evaluator/threshold.py:86
-#, python-format
-msgid "sanitize stats %s"
-msgstr ""
-
-#: aodh/evaluator/threshold.py:95
-#, python-format
-msgid "excluded weak datapoints with sample counts %s"
-msgstr ""
-
-#: aodh/evaluator/threshold.py:106
-#, python-format
-msgid "pruned statistics to %d"
 msgstr ""
 
 #: aodh/evaluator/threshold.py:138
@@ -319,11 +277,6 @@ msgid ""
 "threshold, most recent: %(most_recent)s"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:215
-#, python-format
-msgid "comparing value %(value)s against threshold %(limit)s"
-msgstr ""
-
 #: aodh/notifier/__init__.py:84
 #, python-format
 msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
@@ -332,11 +285,6 @@ msgstr ""
 #: aodh/notifier/__init__.py:93
 #, python-format
 msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
-msgstr ""
-
-#: aodh/notifier/__init__.py:99
-#, python-format
-msgid "Notifying alarm %(id)s with action %(act)s"
 msgstr ""
 
 #: aodh/notifier/__init__.py:104
@@ -363,18 +311,6 @@ msgid ""
 "%(reason)s. request-id: %(request_id)s "
 msgstr ""
 
-#: aodh/storage/impl_hbase.py:84
-msgid "Dropping HBase schema..."
-msgstr ""
-
-#: aodh/storage/impl_hbase.py:91
-msgid "Cannot disable table but ignoring error"
-msgstr ""
-
-#: aodh/storage/impl_hbase.py:95
-msgid "Cannot delete table but ignoring error"
-msgstr ""
-
 #: aodh/storage/models.py:70
 msgid "timestamp should be datetime object"
 msgstr ""
@@ -383,20 +319,7 @@ msgstr ""
 msgid "state_timestamp should be datetime object"
 msgstr ""
 
-#: aodh/storage/hbase/base.py:45
-msgid "Creating a new in-memory HBase Connection object"
-msgstr ""
-
-#: aodh/storage/hbase/base.py:62
-#, python-format
-msgid "connecting to HBase on %(host)s:%(port)s"
-msgstr ""
-
-#: aodh/storage/hbase/inmemory.py:268
-msgid "Opening in-memory HBase connection"
-msgstr ""
-
-#: aodh/storage/hbase/utils.py:225
+#: aodh/storage/hbase/utils.py:230
 #, python-format
 msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
 msgstr ""
@@ -406,7 +329,7 @@ msgstr ""
 msgid "Connecting to %(db)s on %(nodelist)s"
 msgstr ""
 
-#: aodh/storage/mongo/utils.py:87
+#: aodh/storage/mongo/utils.py:85
 #, python-format
 msgid "Unable to connect to the database server: %(errmsg)s."
 msgstr ""
