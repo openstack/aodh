@@ -49,7 +49,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
         auth_config = conf.service_credentials
         self._client = ceiloclient.get_client(
             2,
-            os_auth_url=auth_config.os_auth_url,
+            os_auth_url=auth_config.os_auth_url.replace('/v2.0', '/'),
             os_region_name=auth_config.os_region_name,
             os_tenant_name=auth_config.os_tenant_name,
             os_password=auth_config.os_password,
