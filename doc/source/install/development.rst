@@ -45,7 +45,9 @@ Configuring devstack
       [[local|localrc]]
 
       # Enable the aodh alarming services
-      enable_service aodh-evaluator,aodh-notifier
+      enable_plugin aodh https://git.openstack.org/openstack/aodh master
+      enable_service aodh-evaluator,aodh-notifier,aodh-api
+      disable_service ceilometer-alarm-notifier,ceilometer-alarm-evaluator
 
    The first group of daemons are necessary for core aodh functionality:
    polling, event listening, and data collection.
