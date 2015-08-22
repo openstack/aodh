@@ -17,7 +17,9 @@ import copy
 import fnmatch
 import operator
 
+from oslo_config import cfg
 from oslo_log import log
+from oslo_utils import timeutils
 
 from aodh import evaluator
 from aodh.i18n import _, _LE
@@ -33,8 +35,19 @@ COMPARATORS = {
     'ne': operator.ne,
 }
 
+OPTS = [
+    cfg.IntOpt('event_alarm_cache_ttl',
+               default=60,
+               help='TTL of event alarm caches, in seconds. '
+                    'Set to 0 to disable caching.'),
+]
+
 
 class EventAlarmEvaluator(evaluator.Evaluator):
+
+    def __init__(self, conf, notifier):
+        super(EventAlarmEvaluator, self).__init__(conf, notifier)
+        self.caches = {}
 
     def evaluate_events(self, events):
         """Evaluate the events by referring related alarms."""
@@ -52,10 +65,7 @@ class EventAlarmEvaluator(evaluator.Evaluator):
                 continue
 
             project = self._get_project(event)
-            # TODO(r-mibu): cache alarms to reduce DB accesses
-            alarms = self._storage_conn.get_alarms(enabled=True,
-                                                   alarm_type='event',
-                                                   project=project)
+            alarms = self._get_project_alarms(project)
             LOG.debug('Found %(num)d alarms related to the event '
                       '(message_id=%(id)s)',
                       {'num': len(alarms), 'id': event['message_id']})
@@ -97,6 +107,26 @@ class EventAlarmEvaluator(evaluator.Evaluator):
             if trait[0] in (u'tenant_id', u'project_id'):
                 return trait[2]
         return ''
+
+    def _get_project_alarms(self, project):
+        if self.conf.event_alarm_cache_ttl and project in self.caches:
+            if timeutils.is_older_than(self.caches[project]['updated'],
+                                       self.conf.event_alarm_cache_ttl):
+                del self.caches[project]
+            else:
+                return self.caches[project]['alarms']
+
+        alarms = self._storage_conn.get_alarms(enabled=True,
+                                               alarm_type='event',
+                                               project=project)
+
+        if self.conf.event_alarm_cache_ttl:
+            self.caches[project] = {
+                'alarms': alarms,
+                'updated': timeutils.utcnow()
+            }
+
+        return alarms
 
     @staticmethod
     def _sanitize(event):
@@ -163,6 +193,18 @@ class EventAlarmEvaluator(evaluator.Evaluator):
                   {'message': event['message_id'], 'alarm': alarm.alarm_id})
         reason_data = {'type': 'event', 'event': event}
         self._refresh(alarm, state, reason, reason_data)
+
+    def _refresh(self, alarm, state, reason, reason_data):
+        super(EventAlarmEvaluator, self)._refresh(alarm, state,
+                                                  reason, reason_data)
+
+        project = alarm.project_id
+        if self.conf.event_alarm_cache_ttl and project in self.caches:
+            for index, a in enumerate(self.caches[project]['alarms']):
+                if a.alarm_id == alarm.alarm_id:
+                    alarm.state = state
+                    self.caches[project]['alarms'][index] = alarm
+                    break
 
     # NOTE(r-mibu): This method won't be used, but we have to define here in
     # order to overwrite the abstract method in the super class.

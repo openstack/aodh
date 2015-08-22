@@ -12,9 +12,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+import datetime
 import uuid
 
 import mock
+from oslo_utils import timeutils
 
 from aodh import evaluator
 from aodh.evaluator import event as event_evaluator
@@ -55,7 +58,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
                 'traits': kwargs.get('traits', [])}
 
     def _do_test_event_alarm(self, alarms, events,
-                             expect_project_in_query=None,
+                             expect_db_queries=None,
                              expect_alarm_states=None,
                              expect_alarm_updates=None,
                              expect_notifications=None):
@@ -63,10 +66,11 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
 
         self.evaluator.evaluate_events(events)
 
-        if expect_project_in_query is not None:
-            self.assertEqual([mock.call(enabled=True,
-                                        alarm_type='event',
-                                        project=expect_project_in_query)],
+        if expect_db_queries is not None:
+            expected = [mock.call(enabled=True,
+                                  alarm_type='event',
+                                  project=p) for p in expect_db_queries]
+            self.assertEqual(expected,
                              self.storage_conn.get_alarms.call_args_list)
         if expect_alarm_states is not None:
             for expected, alarm in zip(expect_alarm_states, alarms):
@@ -91,7 +95,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
         alarm = self._alarm(project='project1')
         event = self._event(traits=[['project_id', 1, 'project1']])
         self._do_test_event_alarm([alarm], [event],
-                                  expect_project_in_query='project1',
+                                  expect_db_queries=['project1'],
                                   expect_alarm_states=[evaluator.ALARM],
                                   expect_alarm_updates=[alarm],
                                   expect_notifications=[dict(alarm=alarm,
@@ -101,7 +105,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
         alarm = self._alarm(project='project1')
         event = self._event(traits=[['tenant_id', 1, 'project1']])
         self._do_test_event_alarm([alarm], [event],
-                                  expect_project_in_query='project1',
+                                  expect_db_queries=['project1'],
                                   expect_alarm_states=[evaluator.ALARM],
                                   expect_alarm_updates=[alarm],
                                   expect_notifications=[dict(alarm=alarm,
@@ -111,7 +115,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
         alarm = self._alarm(project='')
         event = self._event()
         self._do_test_event_alarm([alarm], [event],
-                                  expect_project_in_query='',
+                                  expect_db_queries=[''],
                                   expect_alarm_states=[evaluator.ALARM],
                                   expect_alarm_updates=[alarm],
                                   expect_notifications=[dict(alarm=alarm,
@@ -214,3 +218,61 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
                                   expect_alarm_states=[evaluator.UNKNOWN],
                                   expect_alarm_updates=[],
                                   expect_notifications=[])
+
+    def test_event_alarm_cache_hit(self):
+        alarm = self._alarm(project='project2', event_type='none')
+        events = [
+            self._event(traits=[['project_id', 1, 'project2']]),
+            self._event(traits=[['project_id', 1, 'project2']]),
+        ]
+        self._do_test_event_alarm([alarm], events,
+                                  expect_db_queries=['project2'])
+
+    def test_event_alarm_cache_updated_after_fired(self):
+        alarm = self._alarm(project='project2', event_type='type1',
+                            repeat=False)
+        events = [
+            self._event(event_type='type1',
+                        traits=[['project_id', 1, 'project2']]),
+            self._event(event_type='type1',
+                        traits=[['project_id', 1, 'project2']]),
+        ]
+        self._do_test_event_alarm([alarm], events,
+                                  expect_db_queries=['project2'],
+                                  expect_alarm_states=[evaluator.ALARM],
+                                  expect_alarm_updates=[alarm],
+                                  expect_notifications=[dict(alarm=alarm,
+                                                             event=events[0])])
+
+    def test_event_alarm_caching_disabled(self):
+        alarm = self._alarm(project='project2', event_type='none')
+        events = [
+            self._event(traits=[['project_id', 1, 'project2']]),
+            self._event(traits=[['project_id', 1, 'project2']]),
+        ]
+        self.evaluator.conf.event_alarm_cache_ttl = 0
+        self._do_test_event_alarm([alarm], events,
+                                  expect_db_queries=['project2', 'project2'])
+
+    @mock.patch.object(timeutils, 'utcnow')
+    def test_event_alarm_cache_expired(self, mock_utcnow):
+        alarm = self._alarm(project='project2', event_type='none')
+        events = [
+            self._event(traits=[['project_id', 1, 'project2']]),
+            self._event(traits=[['project_id', 1, 'project2']]),
+        ]
+        mock_utcnow.side_effect = [
+            datetime.datetime(2015, 1, 1, 0, 0, 0),
+            datetime.datetime(2015, 1, 1, 1, 0, 0),
+            datetime.datetime(2015, 1, 1, 1, 1, 0),
+        ]
+        self._do_test_event_alarm([alarm], events,
+                                  expect_db_queries=['project2', 'project2'])
+
+    def test_event_alarm_cache_miss(self):
+        events = [
+            self._event(traits=[['project_id', 1, 'project2']]),
+            self._event(traits=[['project_id', 1, 'project3']]),
+        ]
+        self._do_test_event_alarm([], events,
+                                  expect_db_queries=['project2', 'project3'])
