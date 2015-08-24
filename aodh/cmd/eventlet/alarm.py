@@ -18,6 +18,7 @@
 from oslo_service import service as os_service
 
 from aodh import evaluator as evaluator_svc
+from aodh import event as event_svc
 from aodh import notifier as notifier_svc
 from aodh import service
 
@@ -30,3 +31,8 @@ def notifier():
 def evaluator():
     conf = service.prepare_service()
     os_service.launch(conf, evaluator_svc.AlarmEvaluationService(conf)).wait()
+
+
+def listener():
+    conf = service.prepare_service()
+    os_service.launch(conf, event_svc.EventAlarmEvaluationService(conf)).wait()
