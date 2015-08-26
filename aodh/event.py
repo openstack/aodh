@@ -53,9 +53,9 @@ class EventAlarmEvaluationService(service.Service):
     def start(self):
         super(EventAlarmEvaluationService, self).start()
         self.listener = messaging.get_notification_listener(
-            messaging.get_transport(),
-            oslo_messaging.Target(topic=self.conf.event_alarm_topic),
-            EventAlarmEndpoint(self.evaluator))
+            messaging.get_transport(self.conf),
+            [oslo_messaging.Target(topic=self.conf.event_alarm_topic)],
+            [EventAlarmEndpoint(self.evaluator)])
         self.listener.start()
         # Add a dummy thread to have wait() working
         self.tg.add_timer(604800, lambda: None)

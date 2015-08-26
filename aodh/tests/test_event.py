@@ -16,6 +16,7 @@
 import mock
 
 from oslo_config import fixture as fixture_config
+from oslo_messaging import server
 
 from aodh import event
 from aodh import service
@@ -35,7 +36,13 @@ class TestEventAlarmEvaluationService(tests_base.BaseTestCase):
                         return_value=self.storage_conn):
             self.service = event.EventAlarmEvaluationService(self.CONF)
 
-    def test_start_service(self):
+    def test_start_and_stop_service(self):
+        self.service.start()
+        self.assertIsInstance(self.service.listener,
+                              server.MessageHandlingServer)
+        self.service.stop()
+
+    def test_listener_start_called(self):
         listener = mock.Mock()
         with mock.patch('aodh.messaging.get_notification_listener',
                         return_value=listener):
