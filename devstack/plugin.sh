@@ -273,6 +273,7 @@ function start_aodh {
 
     run_process aodh-notifier "$AODH_BIN_DIR/aodh-notifier --config-file $AODH_CONF"
     run_process aodh-evaluator "$AODH_BIN_DIR/aodh-evaluator --config-file $AODH_CONF"
+    run_process aodh-listener "$AODH_BIN_DIR/aodh-listener --config-file $AODH_CONF"
 }
 
 # stop_aodh() - Stop running processes
@@ -282,7 +283,7 @@ function stop_aodh {
         restart_apache_server
     fi
     # Kill the aodh screen windows
-    for serv in aodh-api aodh-notifier aodh-evaluator; do
+    for serv in aodh-api aodh-notifier aodh-evaluator aodh-listener; do
         stop_process $serv
     done
 }
