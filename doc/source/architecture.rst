@@ -69,3 +69,9 @@ Alarm Notifiers
 
 .. list-plugins:: aodh.notifier
    :detailed:
+
+Alarm Storage
+===============
+
+.. list-plugins:: aodh.storage
+   :detailed:
