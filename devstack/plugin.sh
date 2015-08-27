@@ -166,8 +166,6 @@ function _aodh_configure_storage_backend {
 
 # Configure Aodh
 function configure_aodh {
-    sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR $AODH_API_LOG_DIR
-
     iniset_rpc_backend aodh $AODH_CONF
 
     iniset $AODH_CONF DEFAULT notification_topics "$AODH_NOTIFICATION_TOPICS"
@@ -239,6 +237,7 @@ function install_aodh {
     _aodh_prepare_storage_backend
     install_aodhclient
     setup_develop $AODH_DIR
+    sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR $AODH_API_LOG_DIR
 }
 
 # install_aodhclient() - Collect source and prepare
