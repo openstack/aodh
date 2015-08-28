@@ -22,9 +22,9 @@
 # The number of processes and threads is an example only and should
 # be adjusted according to local requirements.
 
-Listen 8402
+Listen 8042
 
-<VirtualHost *:8402>
+<VirtualHost *:8042>
     WSGIDaemonProcess aodh-api processes=2 threads=10 user=SOMEUSER display-name=%{GROUP}
     WSGIProcessGroup aodh-api
     WSGIScriptAlias / /var/www/aodh/app
