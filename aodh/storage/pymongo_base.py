@@ -15,7 +15,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Common functions for MongoDB and DB2 backends
+"""Common functions for MongoDB backend
 """
 
 from oslo_log import log
@@ -44,7 +44,7 @@ AVAILABLE_STORAGE_CAPABILITIES = {
 
 
 class Connection(base.Connection):
-    """Base Alarm Connection class for MongoDB and DB2 drivers."""
+    """Base Alarm Connection class for MongoDB driver."""
     CAPABILITIES = utils.update_nested(base.Connection.CAPABILITIES,
                                        COMMON_AVAILABLE_CAPABILITIES)
 
