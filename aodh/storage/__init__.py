@@ -43,17 +43,8 @@ OPTS = [
 ]
 
 
-class StorageUnknownWriteError(Exception):
-    """Error raised when an unknown error occurs while recording."""
-
-
 class StorageBadVersion(Exception):
     """Error raised when the storage backend version is not good enough."""
-
-
-class StorageBadAggregate(Exception):
-    """Error raised when an aggregate is unacceptable to storage backend."""
-    code = 400
 
 
 def get_connection_from_config(conf):
