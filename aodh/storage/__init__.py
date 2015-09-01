@@ -42,15 +42,6 @@ OPTS = [
                'to the alarm database - rather use ${database.connection}'),
 ]
 
-CLI_OPTS = [
-    cfg.BoolOpt('sql-expire-samples-only',
-                default=False,
-                help="Indicates if expirer expires only samples. If set true,"
-                     " expired samples will be deleted, but residual"
-                     " resource and meter definition data will remain.",
-                ),
-]
-
 
 class StorageUnknownWriteError(Exception):
     """Error raised when an unknown error occurs while recording."""
