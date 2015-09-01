@@ -2929,7 +2929,8 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
                          'resource/instance/metric/ameter'),
                     headers={'Content-Type': 'application/json',
                              'X-Auth-Token': mock.ANY},
-                    params={'aggregation': 'count'},
+                    params={'aggregation': 'count',
+                            'percent_of_overlap': 0},
                     data=expected_query)],
                     fake_post.mock_calls),
 
