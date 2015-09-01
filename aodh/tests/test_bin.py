@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2012 eNovance <licensing@enovance.com>
+# Copyright 2012-2015 eNovance <licensing@enovance.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -14,15 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import json
 import os
 import random
-import socket
 import subprocess
 import time
 
-import httplib2
 from oslo_utils import fileutils
+import requests
 import six
 
 from aodh.tests import base
@@ -100,7 +98,6 @@ class BinApiTestCase(base.BaseTestCase):
 
         # create aodh.conf file
         self.api_port = random.randint(10000, 11000)
-        self.http = httplib2.Http(proxy_info=None)
         self.pipeline_cfg_file = self.path_get('etc/aodh/pipeline.yaml')
         self.policy_file = self.path_get('etc/aodh/policy.json')
 
@@ -118,13 +115,13 @@ class BinApiTestCase(base.BaseTestCase):
 
         for x in range(10):
             try:
-                r, c = self.http.request(url, 'GET')
-            except socket.error:
+                r = requests.get(url)
+            except requests.exceptions.ConnectionError:
                 time.sleep(.5)
                 self.assertIsNone(self.subp.poll())
             else:
-                return r, c
-        return None, None
+                return r
+        return None
 
     def run_api(self, content, err_pipe=None):
         if six.PY3:
@@ -161,11 +158,9 @@ class BinApiTestCase(base.BaseTestCase):
 
         self.subp = self.run_api(content)
 
-        response, content = self.get_response('v2/alarms')
-        self.assertEqual(200, response.status)
-        if six.PY3:
-            content = content.decode('utf-8')
-        self.assertEqual([], json.loads(content))
+        response = self.get_response('v2/alarms')
+        self.assertEqual(200, response.status_code)
+        self.assertEqual([], response.json())
 
 
 class BinEvaluatorTestCase(base.BaseTestCase):
