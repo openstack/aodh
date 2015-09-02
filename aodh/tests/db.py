@@ -127,7 +127,6 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
         'mysql': MySQLManager,
         'mysql+pymysql': MySQLManager,
         'postgresql': PgSQLManager,
-        'db2': MongoDbManager,
         'sqlite': SQLiteManager,
     }
     if mocks is not None:
@@ -210,7 +209,7 @@ class MixinTestsWithBackendScenarios(object):
         ('sqlite', {'db_url': 'sqlite://'}),
     ]
 
-    for db in ('MONGODB', 'MYSQL', 'PGSQL', 'HBASE', 'DB2', 'ES'):
+    for db in ('MONGODB', 'MYSQL', 'PGSQL', 'HBASE'):
         if os.environ.get('AODH_TEST_%s_URL' % db):
             scenarios.append(
                 (db.lower(), {'db_url': os.environ.get(
@@ -222,10 +221,3 @@ class MixinTestsWithBackendScenarios(object):
     if 'hbase' not in scenarios_db:
         scenarios.append(
             ('hbase', {'db_url': 'hbase://__test__'}))
-
-    # Insert default value for db2 test
-    if 'mongodb' in scenarios_db and 'db2' not in scenarios_db:
-        scenarios.append(
-            ('db2', {'db_url': os.environ.get('AODH_TEST_MONGODB_URL',
-                                              '').replace('mongodb://',
-                                                          'db2://')}))

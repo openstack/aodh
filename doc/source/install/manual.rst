@@ -29,9 +29,8 @@ services. You may use one of the listed database backends below to store
 Aodh data.
 
 .. note::
-   Please notice, MongoDB (and some other backends like DB2 and HBase)
-   require pymongo_ to be installed on the system. The required minimum
-   version of pymongo is 2.4.
+   Please notice, MongoDB requires pymongo_ to be installed on the system. The
+   required minimum version of pymongo is 2.4.
 ..
 
 
@@ -104,17 +103,6 @@ HBase
 
     [database]
     connection = hbase://hbase-thrift-host:9090
-
-DB2
----
-
-   DB2 installation should follow fresh IBM DB2 NoSQL installation docs.
-
-   To use DB2 as the storage backend, change the 'database' section in
-   aodh.conf as follows::
-
-    [database]
-    connection = db2://username:password@host:27017/aodh
 
 
 .. _HappyBase: http://happybase.readthedocs.org/en/latest/index.html#

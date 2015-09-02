@@ -253,7 +253,7 @@ class AlarmTest(AlarmTestBase,
             self.assertNotEqual(victim.name, s.name)
 
 
-@tests_db.run_with('sqlite', 'mysql', 'pgsql', 'hbase', 'db2')
+@tests_db.run_with('sqlite', 'mysql', 'pgsql', 'hbase')
 class AlarmHistoryTest(AlarmTestBase,
                        tests_db.MixinTestsWithBackendScenarios):
 
