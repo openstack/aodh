@@ -39,8 +39,7 @@ def list_opts():
              aodh.notifier.rest.OPTS,
              aodh.service.OPTS,
              aodh.rpc.OPTS,
-             aodh.api.controllers.v2.alarms.ALARM_API_OPTS,
-             aodh.storage.CLI_OPTS)),
+             aodh.api.controllers.v2.alarms.ALARM_API_OPTS)),
         ('api',
          itertools.chain(
              aodh.api.OPTS,
