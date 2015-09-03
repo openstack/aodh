@@ -20,6 +20,7 @@ import operator
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
+import six
 
 from aodh import evaluator
 from aodh.i18n import _, _LE
@@ -65,13 +66,13 @@ class EventAlarmEvaluator(evaluator.Evaluator):
                 continue
 
             project = self._get_project(event)
-            for alarm in self._get_project_alarms(project):
+            for id, alarm in six.iteritems(self._get_project_alarms(project)):
                 try:
                     self._evaluate_alarm(alarm, event)
                 except Exception:
                     LOG.exception(_LE('Failed to evaluate alarm (id=%(a)s) '
                                       'triggered by event = %(e)s.'),
-                                  {'a': alarm.alarm_id, 'e': event})
+                                  {'a': id, 'e': event})
 
         LOG.debug('Finished event alarm evaluation.')
 
@@ -111,9 +112,12 @@ class EventAlarmEvaluator(evaluator.Evaluator):
             else:
                 return self.caches[project]['alarms']
 
-        alarms = self._storage_conn.get_alarms(enabled=True,
-                                               alarm_type='event',
-                                               project=project)
+        # TODO(r-mibu): Implement "changes-since" at the storage API and make
+        # this function update only alarms changed from the last access.
+        alarms = {a.alarm_id: a for a in
+                  self._storage_conn.get_alarms(enabled=True,
+                                                alarm_type='event',
+                                                project=project)}
 
         if self.conf.event_alarm_cache_ttl:
             self.caches[project] = {
@@ -195,11 +199,7 @@ class EventAlarmEvaluator(evaluator.Evaluator):
 
         project = alarm.project_id
         if self.conf.event_alarm_cache_ttl and project in self.caches:
-            for index, a in enumerate(self.caches[project]['alarms']):
-                if a.alarm_id == alarm.alarm_id:
-                    alarm.state = state
-                    self.caches[project]['alarms'][index] = alarm
-                    break
+            self.caches[project]['alarms'][alarm.alarm_id].state = state
 
     # NOTE(r-mibu): This method won't be used, but we have to define here in
     # order to overwrite the abstract method in the super class.
