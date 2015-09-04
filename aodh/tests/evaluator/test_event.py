@@ -123,8 +123,8 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
 
     def test_continue_following_evaluation_after_exception(self):
         alarms = [
-            self._alarm(),
-            self._alarm(),
+            self._alarm(id=1),
+            self._alarm(id=2),
         ]
         event = self._event()
         original = event_evaluator.EventAlarmEvaluator._sanitize(event)
