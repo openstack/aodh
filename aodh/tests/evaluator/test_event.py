@@ -13,7 +13,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import datetime
+import six
 import uuid
 
 import mock
@@ -57,12 +59,40 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
                 'event_type': kwargs.get('event_type', 'type0'),
                 'traits': kwargs.get('traits', [])}
 
+    def _setup_alarm_storage(self, alarms):
+        self._stored_alarms = {a.alarm_id: copy.deepcopy(a) for a in alarms}
+        self._update_history = []
+
+        def get_alarms(**kwargs):
+            return (a for a in six.itervalues(self._stored_alarms))
+
+        def update_alarm(alarm):
+            self._stored_alarms[alarm.alarm_id] = copy.deepcopy(alarm)
+            self._update_history.append(dict(alarm_id=alarm.alarm_id,
+                                             state=alarm.state))
+
+        self.storage_conn.get_alarms.side_effect = get_alarms
+        self.storage_conn.update_alarm.side_effect = update_alarm
+
+    def _setup_alarm_notifier(self):
+        self._notification_history = []
+
+        def notify(alarm, previous, reason, data):
+            self._notification_history.append(dict(alarm_id=alarm.alarm_id,
+                                                   state=alarm.state,
+                                                   previous=previous,
+                                                   reason=reason,
+                                                   data=data))
+
+        self.notifier.notify.side_effect = notify
+
     def _do_test_event_alarm(self, alarms, events,
                              expect_db_queries=None,
                              expect_alarm_states=None,
                              expect_alarm_updates=None,
                              expect_notifications=None):
-        self.storage_conn.get_alarms.return_value = alarms
+        self._setup_alarm_storage(alarms)
+        self._setup_alarm_notifier()
 
         self.evaluator.evaluate_events(events)
 
@@ -72,15 +102,23 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
                                   project=p) for p in expect_db_queries]
             self.assertEqual(expected,
                              self.storage_conn.get_alarms.call_args_list)
+
         if expect_alarm_states is not None:
-            for expected, alarm in zip(expect_alarm_states, alarms):
-                self.assertEqual(expected, alarm.state)
+            for alarm_id, state in six.iteritems(expect_alarm_states):
+                self.assertEqual(state, self._stored_alarms[alarm_id].state)
+
         if expect_alarm_updates is not None:
-            self.assertEqual([mock.call(a) for a in expect_alarm_updates],
-                             self.storage_conn.update_alarm.call_args_list)
+            self.assertEqual(len(expect_alarm_updates),
+                             len(self._update_history))
+            for alarm, h in zip(expect_alarm_updates, self._update_history):
+                expected = dict(alarm_id=alarm.alarm_id,
+                                state=evaluator.ALARM)
+                self.assertEqual(expected, h)
+
         if expect_notifications is not None:
-            expected = []
-            for n in expect_notifications:
+            self.assertEqual(len(expect_notifications),
+                             len(self._notification_history))
+            for n, h in zip(expect_notifications, self._notification_history):
                 alarm = n['alarm']
                 event = n['event']
                 previous = n.get('previous', evaluator.UNKNOWN)
@@ -88,38 +126,42 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
                           '(id=%(a)s)' %
                           {'e': event['message_id'], 'a': alarm.alarm_id})
                 data = {'type': 'event', 'event': event}
-                expected.append(mock.call(alarm, previous, reason, data))
-            self.assertEqual(expected, self.notifier.notify.call_args_list)
+                expected = dict(alarm_id=alarm.alarm_id,
+                                state=evaluator.ALARM,
+                                previous=previous,
+                                reason=reason,
+                                data=data)
+                self.assertEqual(expected, h)
 
     def test_fire_alarm_in_the_same_project_id(self):
         alarm = self._alarm(project='project1')
         event = self._event(traits=[['project_id', 1, 'project1']])
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_db_queries=['project1'],
-                                  expect_alarm_states=[evaluator.ALARM],
-                                  expect_alarm_updates=[alarm],
-                                  expect_notifications=[dict(alarm=alarm,
-                                                             event=event)])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_db_queries=['project1'],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[alarm],
+            expect_notifications=[dict(alarm=alarm, event=event)])
 
     def test_fire_alarm_in_the_same_tenant_id(self):
         alarm = self._alarm(project='project1')
         event = self._event(traits=[['tenant_id', 1, 'project1']])
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_db_queries=['project1'],
-                                  expect_alarm_states=[evaluator.ALARM],
-                                  expect_alarm_updates=[alarm],
-                                  expect_notifications=[dict(alarm=alarm,
-                                                             event=event)])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_db_queries=['project1'],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[alarm],
+            expect_notifications=[dict(alarm=alarm, event=event)])
 
     def test_fire_alarm_in_project_none(self):
         alarm = self._alarm(project='')
         event = self._event()
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_db_queries=[''],
-                                  expect_alarm_states=[evaluator.ALARM],
-                                  expect_alarm_updates=[alarm],
-                                  expect_notifications=[dict(alarm=alarm,
-                                                             event=event)])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_db_queries=[''],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[alarm],
+            expect_notifications=[dict(alarm=alarm, event=event)])
 
     def test_continue_following_evaluation_after_exception(self):
         alarms = [
@@ -131,93 +173,98 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
         with mock.patch.object(event_evaluator.EventAlarmEvaluator,
                                '_sanitize',
                                side_effect=[Exception('boom'), original]):
-            self._do_test_event_alarm(alarms, [event],
-                                      expect_alarm_states=[evaluator.UNKNOWN,
-                                                           evaluator.ALARM],
-                                      expect_alarm_updates=[alarms[1]],
-                                      expect_notifications=[
-                                          dict(alarm=alarms[1], event=event)])
+            self._do_test_event_alarm(
+                alarms, [event],
+                expect_alarm_states={alarms[0].alarm_id: evaluator.UNKNOWN,
+                                     alarms[1].alarm_id: evaluator.ALARM},
+                expect_alarm_updates=[alarms[1]],
+                expect_notifications=[dict(alarm=alarms[1], event=event)])
 
     def test_skip_event_missing_event_type(self):
         alarm = self._alarm()
         event = {'message_id': str(uuid.uuid4()), 'traits': []}
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_alarm_states=[evaluator.UNKNOWN],
-                                  expect_alarm_updates=[],
-                                  expect_notifications=[])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},
+            expect_alarm_updates=[],
+            expect_notifications=[])
 
     def test_skip_event_missing_message_id(self):
         alarm = self._alarm()
         event = {'event_type': 'type1', 'traits': []}
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_alarm_states=[evaluator.UNKNOWN],
-                                  expect_alarm_updates=[],
-                                  expect_notifications=[])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},
+            expect_alarm_updates=[],
+            expect_notifications=[])
 
     def test_continue_alarming_when_repeat_actions_enabled(self):
         alarm = self._alarm(repeat=True, state=evaluator.ALARM)
         event = self._event()
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_alarm_states=[evaluator.ALARM],
-                                  expect_alarm_updates=[],
-                                  expect_notifications=[
-                                      dict(alarm=alarm,
-                                           event=event,
-                                           previous=evaluator.ALARM)])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[],
+            expect_notifications=[dict(alarm=alarm, event=event,
+                                       previous=evaluator.ALARM)])
 
     def test_do_not_continue_alarming_when_repeat_actions_disabled(self):
         alarm = self._alarm(repeat=False, state=evaluator.ALARM)
         event = self._event()
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_alarm_states=[evaluator.ALARM],
-                                  expect_alarm_updates=[],
-                                  expect_notifications=[])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[],
+            expect_notifications=[])
 
     def test_skip_uninterested_event_type(self):
         alarm = self._alarm(event_type='compute.instance.exists')
         event = self._event(event_type='compute.instance.update')
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_alarm_states=[evaluator.UNKNOWN],
-                                  expect_alarm_updates=[],
-                                  expect_notifications=[])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},
+            expect_alarm_updates=[],
+            expect_notifications=[])
 
     def test_fire_alarm_event_type_pattern_matched(self):
         alarm = self._alarm(event_type='compute.instance.*')
         event = self._event(event_type='compute.instance.update')
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_alarm_states=[evaluator.ALARM],
-                                  expect_alarm_updates=[alarm],
-                                  expect_notifications=[dict(alarm=alarm,
-                                                             event=event)])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[alarm],
+            expect_notifications=[dict(alarm=alarm, event=event)])
 
     def test_skip_event_type_pattern_unmatched(self):
         alarm = self._alarm(event_type='compute.instance.*')
         event = self._event(event_type='dummy.compute.instance')
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_alarm_states=[evaluator.UNKNOWN],
-                                  expect_alarm_updates=[],
-                                  expect_notifications=[])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},
+            expect_alarm_updates=[],
+            expect_notifications=[])
 
     def test_fire_alarm_query_matched(self):
         alarm = self._alarm(query=[dict(field="traits.state",
                                         value="stopped",
                                         op="eq")])
         event = self._event(traits=[['state', 1, 'stopped']])
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_alarm_states=[evaluator.ALARM],
-                                  expect_alarm_updates=[alarm],
-                                  expect_notifications=[dict(alarm=alarm,
-                                                             event=event)])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[alarm],
+            expect_notifications=[dict(alarm=alarm, event=event)])
 
     def test_skip_query_unmatched(self):
         alarm = self._alarm(query=[dict(field="traits.state",
                                         value="stopped",
                                         op="eq")])
         event = self._event(traits=[['state', 1, 'active']])
-        self._do_test_event_alarm([alarm], [event],
-                                  expect_alarm_states=[evaluator.UNKNOWN],
-                                  expect_alarm_updates=[],
-                                  expect_notifications=[])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},
+            expect_alarm_updates=[],
+            expect_notifications=[])
 
     def test_event_alarm_cache_hit(self):
         alarm = self._alarm(project='project2', event_type='none')
@@ -237,12 +284,12 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
             self._event(event_type='type1',
                         traits=[['project_id', 1, 'project2']]),
         ]
-        self._do_test_event_alarm([alarm], events,
-                                  expect_db_queries=['project2'],
-                                  expect_alarm_states=[evaluator.ALARM],
-                                  expect_alarm_updates=[alarm],
-                                  expect_notifications=[dict(alarm=alarm,
-                                                             event=events[0])])
+        self._do_test_event_alarm(
+            [alarm], events,
+            expect_db_queries=['project2'],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[alarm],
+            expect_notifications=[dict(alarm=alarm, event=events[0])])
 
     def test_event_alarm_caching_disabled(self):
         alarm = self._alarm(project='project2', event_type='none')
