@@ -65,12 +65,7 @@ class EventAlarmEvaluator(evaluator.Evaluator):
                 continue
 
             project = self._get_project(event)
-            alarms = self._get_project_alarms(project)
-            LOG.debug('Found %(num)d alarms related to the event '
-                      '(message_id=%(id)s)',
-                      {'num': len(alarms), 'id': event['message_id']})
-
-            for alarm in alarms:
+            for alarm in self._get_project_alarms(project):
                 try:
                     self._evaluate_alarm(alarm, event)
                 except Exception:
