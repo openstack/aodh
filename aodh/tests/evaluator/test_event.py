@@ -169,10 +169,17 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
             self._alarm(id=2),
         ]
         event = self._event()
-        original = event_evaluator.EventAlarmEvaluator._sanitize(event)
+
+        original = self.evaluator._fire_alarm
+
         with mock.patch.object(event_evaluator.EventAlarmEvaluator,
-                               '_sanitize',
-                               side_effect=[Exception('boom'), original]):
+                               '_fire_alarm') as _fire_alarm:
+            def _side_effect(*args, **kwargs):
+                _fire_alarm.side_effect = original
+                return Exception('boom')
+
+            _fire_alarm.side_effect = _side_effect
+
             self._do_test_event_alarm(
                 alarms, [event],
                 expect_alarm_states={alarms[0].alarm_id: evaluator.UNKNOWN,
