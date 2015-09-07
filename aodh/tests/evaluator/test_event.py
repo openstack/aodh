@@ -251,7 +251,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
             expect_alarm_updates=[],
             expect_notifications=[])
 
-    def test_fire_alarm_query_matched(self):
+    def test_fire_alarm_query_matched_string(self):
         alarm = self._alarm(query=[dict(field="traits.state",
                                         value="stopped",
                                         op="eq")])
@@ -262,11 +262,97 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
             expect_alarm_updates=[alarm],
             expect_notifications=[dict(alarm=alarm, event=event)])
 
-    def test_skip_query_unmatched(self):
+    def test_skip_query_unmatched_string(self):
         alarm = self._alarm(query=[dict(field="traits.state",
                                         value="stopped",
                                         op="eq")])
         event = self._event(traits=[['state', 1, 'active']])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},
+            expect_alarm_updates=[],
+            expect_notifications=[])
+
+    def test_fire_alarm_query_matched_integer(self):
+        alarm = self._alarm(query=[dict(field="traits.instance_type_id",
+                                        type="integer",
+                                        value="5",
+                                        op="eq")])
+        event = self._event(traits=[['instance_type_id', 2, 5]])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[alarm],
+            expect_notifications=[dict(alarm=alarm, event=event)])
+
+    def test_skip_query_unmatched_integer(self):
+        alarm = self._alarm(query=[dict(field="traits.instance_type_id",
+                                        type="integer",
+                                        value="5",
+                                        op="eq")])
+        event = self._event(traits=[['instance_type_id', 2, 6]])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},
+            expect_alarm_updates=[],
+            expect_notifications=[])
+
+    def test_fire_alarm_query_matched_float(self):
+        alarm = self._alarm(query=[dict(field="traits.io_read_kbs",
+                                        type="float",
+                                        value="123.456",
+                                        op="eq")])
+        event = self._event(traits=[['io_read_kbs', 3, 123.456]])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[alarm],
+            expect_notifications=[dict(alarm=alarm, event=event)])
+
+    def test_skip_query_unmatched_float(self):
+        alarm = self._alarm(query=[dict(field="traits.io_read_kbs",
+                                        type="float",
+                                        value="123.456",
+                                        op="eq")])
+        event = self._event(traits=[['io_read_kbs', 3, 456.123]])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},
+            expect_alarm_updates=[],
+            expect_notifications=[])
+
+    def test_fire_alarm_query_matched_datetime(self):
+        alarm = self._alarm(query=[dict(field="traits.created_at",
+                                        type="datetime",
+                                        value="2015-09-01T18:52:27.214309",
+                                        op="eq")])
+        event = self._event(traits=[['created_at', 4,
+                                     '2015-09-01T18:52:27.214309']])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
+            expect_alarm_updates=[alarm],
+            expect_notifications=[dict(alarm=alarm, event=event)])
+
+    def test_skip_query_unmatched_datetime(self):
+        alarm = self._alarm(query=[dict(field="traits.created_at",
+                                        type="datetime",
+                                        value="2015-09-01T18:52:27.214309",
+                                        op="eq")])
+        event = self._event(traits=[['created_at', 4,
+                                     '2015-09-02T18:52:27.214309']])
+        self._do_test_event_alarm(
+            [alarm], [event],
+            expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},
+            expect_alarm_updates=[],
+            expect_notifications=[])
+
+    def test_skip_alarm_due_to_uncompareable_trait(self):
+        alarm = self._alarm(query=[dict(field="traits.created_at",
+                                        type="datetime",
+                                        value="2015-09-01T18:52:27.214309",
+                                        op="eq")])
+        event = self._event(traits=[['created_at', 3, 123.456]])
         self._do_test_event_alarm(
             [alarm], [event],
             expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},
