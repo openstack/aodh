@@ -112,6 +112,42 @@ class Event(object):
         return v
 
 
+class Alarm(object):
+    """Wrapped alarm object to hold converted values for this evaluator."""
+
+    TRAIT_TYPES = {
+        'none': 0,
+        'string': 1,
+        'integer': 2,
+        'float': 3,
+        'datetime': 4,
+    }
+
+    def __init__(self, alarm):
+        self.obj = alarm
+        self.id = alarm.alarm_id
+        self._parse_query()
+
+    def _parse_query(self):
+        self.query = []
+        for q in self.obj.rule.get('query', []):
+            if not q['field'].startswith('traits.'):
+                self.query.append(q)
+                continue
+            type_num = self.TRAIT_TYPES[q.get('type') or 'string']
+            field = q['field']
+            value = _sanitize_trait_value(q.get('value'), type_num)
+            op = COMPARATORS[q.get('op', 'eq')]
+            self.query.append({'field': field, 'value': value, 'op': op})
+
+    def fired_and_no_repeat(self):
+        return (not self.obj.repeat_actions and
+                self.obj.state == evaluator.ALARM)
+
+    def event_type_to_watch(self, event_type):
+        return fnmatch.fnmatch(event_type, self.obj.rule['event_type'])
+
+
 class EventAlarmEvaluator(evaluator.Evaluator):
 
     def __init__(self, conf, notifier):
@@ -155,7 +191,7 @@ class EventAlarmEvaluator(evaluator.Evaluator):
 
         # TODO(r-mibu): Implement "changes-since" at the storage API and make
         # this function update only alarms changed from the last access.
-        alarms = {a.alarm_id: a for a in
+        alarms = {a.alarm_id: Alarm(a) for a in
                   self._storage_conn.get_alarms(enabled=True,
                                                 alarm_type='event',
                                                 project=project)}
@@ -181,28 +217,25 @@ class EventAlarmEvaluator(evaluator.Evaluator):
         """
 
         LOG.debug('Evaluating alarm (id=%(a)s) triggered by event '
-                  '(message_id=%(e)s).',
-                  {'a': alarm.alarm_id, 'e': event.id})
+                  '(message_id=%(e)s).', {'a': alarm.id, 'e': event.id})
 
-        if not alarm.repeat_actions and alarm.state == evaluator.ALARM:
+        if alarm.fired_and_no_repeat():
             LOG.debug('Skip evaluation of the alarm id=%s which have already '
-                      'fired.', alarm.alarm_id)
+                      'fired.', alarm.id)
             return
 
-        event_pattern = alarm.rule['event_type']
-        if not fnmatch.fnmatch(event.obj['event_type'], event_pattern):
-            LOG.debug('Aborting evaluation of the alarm (id=%s) due to '
-                      'uninterested event_type.', alarm.alarm_id)
+        if not alarm.event_type_to_watch(event.obj['event_type']):
+            LOG.debug('Aborting evaluation of the alarm (id=%s) since '
+                      'event_type is not matched.', alarm.id)
             return
 
         def _compare(condition):
-            op = COMPARATORS[condition.get('op', 'eq')]
             v = event.get_value(condition['field'])
             LOG.debug('Comparing value=%(v)s against condition=%(c)s .',
                       {'v': v, 'c': condition})
-            return op(v, condition['value'])
+            return condition['op'](v, condition['value'])
 
-        for condition in alarm.rule['query']:
+        for condition in alarm.query:
             if not _compare(condition):
                 LOG.debug('Aborting evaluation of the alarm due to '
                           'unmet condition=%s .', condition)
@@ -216,9 +249,9 @@ class EventAlarmEvaluator(evaluator.Evaluator):
         state = evaluator.ALARM
         reason = (_('Event (message_id=%(message)s) hit the query of alarm '
                     '(id=%(alarm)s)') %
-                  {'message': event.id, 'alarm': alarm.alarm_id})
+                  {'message': event.id, 'alarm': alarm.id})
         reason_data = {'type': 'event', 'event': event.obj}
-        self._refresh(alarm, state, reason, reason_data)
+        self._refresh(alarm.obj, state, reason, reason_data)
 
     def _refresh(self, alarm, state, reason, reason_data):
         super(EventAlarmEvaluator, self)._refresh(alarm, state,
@@ -226,7 +259,7 @@ class EventAlarmEvaluator(evaluator.Evaluator):
 
         project = alarm.project_id
         if self.conf.event_alarm_cache_ttl and project in self.caches:
-            self.caches[project]['alarms'][alarm.alarm_id].state = state
+            self.caches[project]['alarms'][alarm.alarm_id].obj.state = state
 
     # NOTE(r-mibu): This method won't be used, but we have to define here in
     # order to overwrite the abstract method in the super class.
