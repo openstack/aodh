@@ -170,7 +170,7 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
             'headers': {'Content-Type': "application/json",
                         'X-Auth-Token': ks_client.auth_token},
             'params': {'aggregation': rule.aggregation_method,
-                       'percent_of_overlap': 0},
+                       'needed_overlap': 0},
             'data': rule.query,
         }
 

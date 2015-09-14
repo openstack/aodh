@@ -226,7 +226,7 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
                       'instance/metric/cpu_util',
                       params={'aggregation': 'mean',
                               'start': start_alarm3, 'end': end,
-                              'percent_of_overlap': 0},
+                              'needed_overlap': 0},
                       data='{"=": {"server_group": "my_autoscaling_group"}}',
                       headers=expected_headers),
             ],

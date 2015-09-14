@@ -2930,7 +2930,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
                     headers={'Content-Type': 'application/json',
                              'X-Auth-Token': mock.ANY},
                     params={'aggregation': 'count',
-                            'percent_of_overlap': 0},
+                            'needed_overlap': 0},
                     data=expected_query)],
                     fake_post.mock_calls),
 
