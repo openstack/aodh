@@ -189,14 +189,7 @@ function configure_aodh {
     iniset $AODH_CONF service_credentials os_region_name $REGION_NAME
     iniset $AODH_CONF service_credentials os_auth_url $KEYSTONE_SERVICE_URI/v2.0
 
-    # TODO(chdent): Until
-    # https://bugs.launchpad.net/keystonemiddleware/+bug/1482078
-    # and
-    # https://bugs.launchpad.net/keystonemiddleware/+bug/1406218
-    # are resolved the easiest way to deal with the auth_token
-    # middleware when using a non-global conf is to put it in the
-    # paste file.
-    configure_auth_token_middleware $AODH_CONF_DIR/api_paste.ini aodh $AODH_AUTH_CACHE_DIR filter:authtoken
+    configure_auth_token_middleware $AODH_CONF aodh $AODH_AUTH_CACHE_DIR 
 
     iniset $AODH_CONF notification store_events $AODH_EVENTS
 

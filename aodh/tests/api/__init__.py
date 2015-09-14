@@ -39,7 +39,6 @@ class FunctionalTest(db_test_base.TestBase):
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
 
-        self.CONF.set_override("auth_version", "v2.0", 'keystone_authtoken')
         self.CONF.set_override("policy_file",
                                self.path_get('etc/aodh/policy.json'),
                                group='oslo_policy')
