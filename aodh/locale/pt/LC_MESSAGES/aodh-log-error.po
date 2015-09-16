@@ -4,12 +4,13 @@
 #
 # Translators:
 # AnaFonseca <anafonseca.mobile@gmail.com>, 2015
+# OpenStack Infra <zanata@openstack.org>, 2015. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: Aodh\n"
+"Project-Id-Version: aodh 1.0.1.dev12\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-08-19 06:21+0000\n"
-"PO-Revision-Date: 2015-08-17 14:14+0000\n"
+"POT-Creation-Date: 2015-09-16 16:40+0000\n"
+"PO-Revision-Date: 2015-08-17 02:14+0000\n"
 "Last-Translator: AnaFonseca <anafonseca.mobile@gmail.com>\n"
 "Language-Team: Portuguese (http://www.transifex.com/openstack/aodh/language/"
 "pt/)\n"
@@ -19,6 +20,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Zanata 3.7.1\n"
 
 msgid "Error connecting to coordination backend."
 msgstr "Erro ao ligar-se à coordenação de backend."

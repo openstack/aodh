@@ -4,11 +4,12 @@
 #
 # Translators:
 # R. Paula Sánchez <r.sanchez.carrero@gmail.com>, 2015
+# OpenStack Infra <zanata@openstack.org>, 2015. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: Aodh\n"
+"Project-Id-Version: aodh 1.0.1.dev12\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-08-04 06:33+0000\n"
+"POT-Creation-Date: 2015-09-16 16:40+0000\n"
 "PO-Revision-Date: 2015-08-03 11:04+0000\n"
 "Last-Translator: R. Paula Sánchez <r.sanchez.carrero@gmail.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/openstack/aodh/language/"
@@ -19,6 +20,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Zanata 3.7.1\n"
 
 #, python-format
 msgid "Expecting %(expected)d datapoints but only get %(actual)d"
