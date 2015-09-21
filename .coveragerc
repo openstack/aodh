@@ -4,5 +4,5 @@ source = aodh
 omit = aodh/tests/*, aodh/openstack/common/*
 
 [report]
-ignore-errors = True
+ignore_errors = True
 
