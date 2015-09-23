@@ -1750,6 +1750,23 @@ class TestAlarmsHistory(TestAlarmsBase):
                          history[0]['detail'])
         self.assertEqual('low', new_alarm['severity'])
 
+    def test_record_alarm_history_statistic(self):
+        alarm = self._get_alarm('a')
+        history = self._get_alarm_history('a')
+        self.assertEqual([], history)
+        self.assertEqual('avg', alarm['threshold_rule']['statistic'])
+
+        rule = alarm['threshold_rule'].copy()
+        rule['statistic'] = 'min'
+        data = dict(threshold_rule=rule)
+        self._update_alarm('a', data)
+        new_alarm = self._get_alarm('a')
+        history = self._get_alarm_history('a')
+        self.assertEqual(1, len(history))
+        self.assertEqual("min", jsonutils.loads(history[0]['detail'])
+                         ['rule']["statistic"])
+        self.assertEqual('min', new_alarm['threshold_rule']['statistic'])
+
     def test_get_recorded_alarm_history_on_create(self):
         new_alarm = {
             'name': 'new_alarm',
