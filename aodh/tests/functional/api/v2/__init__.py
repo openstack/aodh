@@ -1,4 +1,6 @@
 #
+# Copyright 2012 New Dream Network, LLC (DreamHost)
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -11,13 +13,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-""" This test is written to avoid failing running the functional test job
-caused by `subunit-trace -f` with empty testr output
-in ./tools/pretty-tox.sh"""
-
-from oslotest import base
+from aodh.tests.functional import api
 
 
-class TestEmpty(base.BaseTestCase):
-    def test_empty(self):
-        pass
+class FunctionalTest(api.FunctionalTest):
+    PATH_PREFIX = '/v2'

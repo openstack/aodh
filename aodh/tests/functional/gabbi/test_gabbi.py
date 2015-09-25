@@ -23,7 +23,7 @@ import os
 from gabbi import driver
 
 from aodh.api import app
-from aodh.tests.gabbi import fixtures as fixture_module
+from aodh.tests.functional.gabbi import fixtures as fixture_module
 
 
 TESTS_DIR = 'gabbits'

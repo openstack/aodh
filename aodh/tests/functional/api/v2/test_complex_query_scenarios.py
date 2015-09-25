@@ -23,8 +23,8 @@ import datetime
 from oslo_utils import timeutils
 
 from aodh.storage import models
-from aodh.tests.api import v2 as tests_api
-from aodh.tests import db as tests_db
+from aodh.tests.functional.api import v2 as tests_api
+from aodh.tests.functional import db as tests_db
 
 
 admin_header = {"X-Roles": "admin",

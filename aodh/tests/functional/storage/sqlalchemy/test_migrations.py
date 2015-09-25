@@ -20,7 +20,7 @@ import six
 
 from aodh.storage.sqlalchemy import models
 from aodh.tests import base
-from aodh.tests import db as tests_db
+from aodh.tests.functional import db as tests_db
 
 
 class ABCSkip(base.SkipNotImplementedMeta, abc.ABCMeta):

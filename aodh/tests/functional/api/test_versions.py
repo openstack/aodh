@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from aodh.tests import api
+from aodh.tests.functional import api
 
 V2_MEDIA_TYPES = [
     {
