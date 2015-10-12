@@ -13,7 +13,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""A test module to exercise the Gnocchi API with gabbi."""
+"""
+A test module to exercise the Gnocchi API with gabbi.
+
+This is designed to run against a real running web server (started by
+devstack).
+"""
 
 import os
 

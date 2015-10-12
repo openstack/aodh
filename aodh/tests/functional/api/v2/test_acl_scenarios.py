@@ -19,8 +19,8 @@ import mock
 import webtest
 
 from aodh.api import app
-from aodh.tests.api import v2
-from aodh.tests import db as tests_db
+from aodh.tests.functional.api import v2
+from aodh.tests.functional import db as tests_db
 
 
 class TestAPIACL(v2.FunctionalTest,

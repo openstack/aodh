@@ -30,7 +30,7 @@ except ImportError:
 
 from aodh.storage import impl_hbase
 from aodh.tests import base as test_base
-from aodh.tests import db as tests_db
+from aodh.tests.functional import db as tests_db
 
 
 class ConnectionTest(tests_db.TestBase,

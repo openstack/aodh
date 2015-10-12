@@ -22,7 +22,7 @@ from oslo_utils import timeutils
 
 from aodh.storage import models as alarm_models
 from aodh.tests import constants
-from aodh.tests import db as tests_db
+from aodh.tests.functional import db as tests_db
 
 
 class DBTestBase(tests_db.TestBase):

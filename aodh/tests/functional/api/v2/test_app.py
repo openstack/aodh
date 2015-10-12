@@ -22,7 +22,7 @@ import six
 import wsme
 
 from aodh import i18n
-from aodh.tests.api import v2
+from aodh.tests.functional.api import v2
 
 
 class TestApiMiddleware(v2.FunctionalTest):

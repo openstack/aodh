@@ -27,9 +27,9 @@ import six.moves.urllib.parse as urlparse
 
 from aodh import messaging
 from aodh.storage import models
-from aodh.tests.api import v2
 from aodh.tests import constants
-from aodh.tests import db as tests_db
+from aodh.tests.functional.api import v2
+from aodh.tests.functional import db as tests_db
 
 
 def default_alarms(auth_headers):

@@ -23,7 +23,7 @@
 
 from aodh.storage import impl_mongodb
 from aodh.tests import base as test_base
-from aodh.tests import db as tests_db
+from aodh.tests.functional import db as tests_db
 
 
 @tests_db.run_with('mongodb')

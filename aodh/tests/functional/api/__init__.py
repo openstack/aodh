@@ -21,7 +21,7 @@ import pecan
 import pecan.testing
 
 from aodh import service
-from aodh.tests import db as db_test_base
+from aodh.tests.functional import db as db_test_base
 
 
 class FunctionalTest(db_test_base.TestBase):

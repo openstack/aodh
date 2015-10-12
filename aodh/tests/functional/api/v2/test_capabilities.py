@@ -17,8 +17,8 @@
 
 import testscenarios
 
-from aodh.tests.api import v2 as tests_api
-from aodh.tests import db as tests_db
+from aodh.tests.functional.api import v2 as tests_api
+from aodh.tests.functional import db as tests_db
 
 load_tests = testscenarios.load_tests_apply_scenarios
 
