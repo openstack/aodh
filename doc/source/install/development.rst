@@ -52,4 +52,4 @@ Configuring devstack
    The first group of daemons are necessary for core aodh functionality:
    polling, event listening, and data collection.
 
-.. _devstack: http://www.devstack.org/
+.. _devstack: http://docs.openstack.org/developer/devstack
