@@ -32,7 +32,7 @@ function aodh_service_url {
 }
 
 
-# _install_mongdb - Install mongodb and pyton lib.
+# _install_mongdb - Install mongodb and python lib.
 function _aodh_install_mongodb {
     # Server package is the same on all
     local packages=mongodb-server
