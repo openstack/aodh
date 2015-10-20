@@ -155,7 +155,6 @@ function cleanup_aodh {
 function _aodh_configure_storage_backend {
     if [ "$AODH_BACKEND" = 'mysql' ] || [ "$AODH_BACKEND" = 'postgresql' ] ; then
         iniset $AODH_CONF database connection $(database_connection_url aodh)
-        iniset $AODH_CONF DEFAULT collector_workers $API_WORKERS
     elif [ "$AODH_BACKEND" = 'mongodb' ] ; then
         iniset $AODH_CONF database connection mongodb://localhost:27017/aodh
         cleanup_aodh
@@ -189,7 +188,7 @@ function configure_aodh {
     iniset $AODH_CONF service_credentials os_region_name $REGION_NAME
     iniset $AODH_CONF service_credentials os_auth_url $KEYSTONE_SERVICE_URI/v2.0
 
-    configure_auth_token_middleware $AODH_CONF aodh $AODH_AUTH_CACHE_DIR 
+    configure_auth_token_middleware $AODH_CONF aodh $AODH_AUTH_CACHE_DIR
 
     iniset $AODH_CONF notification store_events $AODH_EVENTS
 
