@@ -46,7 +46,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinxcontrib.pecanwsme.rest',
     'oslosphinx',
-    'sphinxcontrib.docbookrestapi.setup',
     'stevedore.sphinxext',
 ]
 
