@@ -182,7 +182,7 @@ function configure_aodh {
 
     cp $AODH_DIR/etc/aodh/api_paste.ini $AODH_CONF_DIR
 
-    # The alarm evaluator needs these options to call aodh APIs
+    # The alarm evaluator needs these options to call gnocchi/ceilometer APIs
     iniset $AODH_CONF service_credentials os_username aodh
     iniset $AODH_CONF service_credentials os_password $SERVICE_PASSWORD
     iniset $AODH_CONF service_credentials os_tenant_name $SERVICE_TENANT_NAME
