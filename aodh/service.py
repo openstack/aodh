@@ -32,10 +32,6 @@ OPTS = [
                help='Name of this node, which must be valid in an AMQP '
                'key. Can be an opaque identifier. For ZeroMQ only, must '
                'be a valid host name, FQDN, or IP address.'),
-    cfg.IntOpt('notification_workers',
-               default=1,
-               help='Number of workers for notification service. A single '
-               'notification agent is enabled by default.'),
     cfg.IntOpt('http_timeout',
                default=600,
                help='Timeout seconds for HTTP requests. Set it to None to '
