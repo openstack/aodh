@@ -52,7 +52,7 @@ class ConfigFixture(fixture.GabbiFixture):
         if db_url is None:
             raise case.SkipTest('No database connection configured')
 
-        conf = service.prepare_service([])
+        conf = service.prepare_service(argv=[], config_files=[])
         # NOTE(jd): prepare_service() is called twice: first by load_app() for
         # Pecan, then Pecan calls pastedeploy, which starts the app, which has
         # no way to pass the conf object so that Paste apps calls again

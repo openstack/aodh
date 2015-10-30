@@ -91,7 +91,7 @@ CLI_OPTS = [
 ]
 
 
-def prepare_service(argv=None):
+def prepare_service(argv=None, config_files=None):
     conf = cfg.ConfigOpts()
     oslo_i18n.enable_lazy()
     log.register_options(conf)
@@ -106,7 +106,8 @@ def prepare_service(argv=None):
         conf.register_opts(list(options),
                            group=None if group == "DEFAULT" else group)
 
-    conf(argv, project='aodh', validate_default_values=True)
+    conf(argv, project='aodh', validate_default_values=True,
+         default_config_files=config_files)
     log.setup(conf, 'aodh')
     messaging.setup()
     return conf

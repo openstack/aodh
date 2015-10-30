@@ -28,7 +28,7 @@ class TestApp(base.BaseTestCase):
 
     def setUp(self):
         super(TestApp, self).setUp()
-        conf = service.prepare_service([])
+        conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_api_paste_file_not_exist(self):

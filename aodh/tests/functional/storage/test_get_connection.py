@@ -30,7 +30,7 @@ import six
 class EngineTest(base.BaseTestCase):
     def setUp(self):
         super(EngineTest, self).setUp()
-        conf = service.prepare_service([])
+        conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_get_connection(self):
@@ -52,7 +52,7 @@ class EngineTest(base.BaseTestCase):
 class ConnectionRetryTest(base.BaseTestCase):
     def setUp(self):
         super(ConnectionRetryTest, self).setUp()
-        conf = service.prepare_service([])
+        conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_retries(self):
@@ -81,7 +81,7 @@ class ConnectionRetryTest(base.BaseTestCase):
 class ConnectionConfigTest(base.BaseTestCase):
     def setUp(self):
         super(ConnectionConfigTest, self).setUp()
-        conf = service.prepare_service([])
+        conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_only_default_url(self):

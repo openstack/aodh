@@ -145,7 +145,7 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
             raise testcase.TestSkipped(
                 'Test is not applicable for %s' % engine)
 
-        conf = service.prepare_service([])
+        conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.CONF.set_override('connection', self.db_url, group="database")
 
