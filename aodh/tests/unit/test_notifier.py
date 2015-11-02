@@ -96,10 +96,6 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       'condition': {'threshold': 42}})
 
     @staticmethod
-    def _fake_spawn_n(func, *args, **kwargs):
-        func(*args, **kwargs)
-
-    @staticmethod
     def _notification(action):
         notification = {}
         notification.update(NOTIFICATION)
@@ -115,15 +111,14 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
     def test_notify_alarm_rest_action_ok(self):
         action = 'http://host/action'
 
-        with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
-            with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
-                                          self._notification(action))
-                poster.assert_called_with(action, data=mock.ANY,
-                                          headers=mock.ANY)
-                args, kwargs = poster.call_args
-                self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
-                self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+        with mock.patch.object(requests.Session, 'post') as poster:
+            self.service.notify_alarm(context.get_admin_context(),
+                                      self._notification(action))
+            poster.assert_called_with(action, data=mock.ANY,
+                                      headers=mock.ANY)
+            args, kwargs = poster.call_args
+            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_client_cert(self):
         action = 'https://host/action'
@@ -131,16 +126,15 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
         self.CONF.set_override("rest_notifier_certificate_file", certificate)
 
-        with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
-            with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
-                                          self._notification(action))
-                poster.assert_called_with(action, data=mock.ANY,
-                                          headers=mock.ANY,
-                                          cert=certificate, verify=True)
-                args, kwargs = poster.call_args
-                self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
-                self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+        with mock.patch.object(requests.Session, 'post') as poster:
+            self.service.notify_alarm(context.get_admin_context(),
+                                      self._notification(action))
+            poster.assert_called_with(action, data=mock.ANY,
+                                      headers=mock.ANY,
+                                      cert=certificate, verify=True)
+            args, kwargs = poster.call_args
+            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_client_cert_and_key(self):
         action = 'https://host/action'
@@ -150,62 +144,58 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.CONF.set_override("rest_notifier_certificate_file", certificate)
         self.CONF.set_override("rest_notifier_certificate_key", key)
 
-        with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
-            with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
-                                          self._notification(action))
-                poster.assert_called_with(action, data=mock.ANY,
-                                          headers=mock.ANY,
-                                          cert=(certificate, key), verify=True)
-                args, kwargs = poster.call_args
-                self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
-                self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+        with mock.patch.object(requests.Session, 'post') as poster:
+            self.service.notify_alarm(context.get_admin_context(),
+                                      self._notification(action))
+            poster.assert_called_with(action, data=mock.ANY,
+                                      headers=mock.ANY,
+                                      cert=(certificate, key), verify=True)
+            args, kwargs = poster.call_args
+            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_verify_disable_by_cfg(self):
         action = 'https://host/action'
 
         self.CONF.set_override("rest_notifier_ssl_verify", False)
 
-        with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
-            with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
-                                          self._notification(action))
-                poster.assert_called_with(action, data=mock.ANY,
-                                          headers=mock.ANY,
-                                          verify=False)
-                args, kwargs = poster.call_args
-                self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
-                self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+        with mock.patch.object(requests.Session, 'post') as poster:
+            self.service.notify_alarm(context.get_admin_context(),
+                                      self._notification(action))
+            poster.assert_called_with(action, data=mock.ANY,
+                                      headers=mock.ANY,
+                                      verify=False)
+            args, kwargs = poster.call_args
+            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_verify_disable(self):
         action = 'https://host/action?aodh-alarm-ssl-verify=0'
 
-        with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
-            with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
-                                          self._notification(action))
-                poster.assert_called_with(action, data=mock.ANY,
-                                          headers=mock.ANY,
-                                          verify=False)
-                args, kwargs = poster.call_args
-                self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
-                self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+        with mock.patch.object(requests.Session, 'post') as poster:
+            self.service.notify_alarm(context.get_admin_context(),
+                                      self._notification(action))
+            poster.assert_called_with(action, data=mock.ANY,
+                                      headers=mock.ANY,
+                                      verify=False)
+            args, kwargs = poster.call_args
+            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_verify_enable_by_user(self):
         action = 'https://host/action?aodh-alarm-ssl-verify=1'
 
         self.CONF.set_override("rest_notifier_ssl_verify", False)
 
-        with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
-            with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
-                                          self._notification(action))
-                poster.assert_called_with(action, data=mock.ANY,
-                                          headers=mock.ANY,
-                                          verify=True)
-                args, kwargs = poster.call_args
-                self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
-                self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+        with mock.patch.object(requests.Session, 'post') as poster:
+            self.service.notify_alarm(context.get_admin_context(),
+                                      self._notification(action))
+            poster.assert_called_with(action, data=mock.ANY,
+                                      headers=mock.ANY,
+                                      verify=True)
+            args, kwargs = poster.call_args
+            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     @staticmethod
     def _fake_urlsplit(*args, **kwargs):
@@ -249,14 +239,13 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.useFixture(mockpatch.Patch('keystoneclient.v3.client.Client',
                                         lambda **kwargs: client))
 
-        with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
-            with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
-                                          self._notification(action))
-                headers = {'X-Auth-Token': 'token_1234'}
-                headers.update(self.HTTP_HEADERS)
-                poster.assert_called_with(
-                    url, data=mock.ANY, headers=mock.ANY)
-                args, kwargs = poster.call_args
-                self.assertEqual(headers, kwargs['headers'])
-                self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+        with mock.patch.object(requests.Session, 'post') as poster:
+            self.service.notify_alarm(context.get_admin_context(),
+                                      self._notification(action))
+            headers = {'X-Auth-Token': 'token_1234'}
+            headers.update(self.HTTP_HEADERS)
+            poster.assert_called_with(
+                url, data=mock.ANY, headers=mock.ANY)
+            args, kwargs = poster.call_args
+            self.assertEqual(headers, kwargs['headers'])
+            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
