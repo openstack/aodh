@@ -33,8 +33,7 @@ from aodh.tests import base as test_base
 from aodh.tests.functional import db as tests_db
 
 
-class ConnectionTest(tests_db.TestBase,
-                     tests_db.MixinTestsWithBackendScenarios):
+class ConnectionTest(tests_db.TestBase):
 
     @tests_db.run_with('hbase')
     def test_hbase_connection(self):

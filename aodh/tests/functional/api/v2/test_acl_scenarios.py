@@ -20,11 +20,9 @@ import webtest
 
 from aodh.api import app
 from aodh.tests.functional.api import v2
-from aodh.tests.functional import db as tests_db
 
 
-class TestAPIACL(v2.FunctionalTest,
-                 tests_db.MixinTestsWithBackendScenarios):
+class TestAPIACL(v2.FunctionalTest):
 
     def _make_app(self):
         file_name = self.path_get('etc/aodh/api_paste.ini')

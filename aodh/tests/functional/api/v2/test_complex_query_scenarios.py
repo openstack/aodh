@@ -24,7 +24,6 @@ from oslo_utils import timeutils
 
 from aodh.storage import models
 from aodh.tests.functional.api import v2 as tests_api
-from aodh.tests.functional import db as tests_db
 
 
 admin_header = {"X-Roles": "admin",
@@ -35,8 +34,7 @@ non_admin_header = {"X-Roles": "Member",
                     "project-id1"}
 
 
-class TestQueryAlarmsController(tests_api.FunctionalTest,
-                                tests_db.MixinTestsWithBackendScenarios):
+class TestQueryAlarmsController(tests_api.FunctionalTest):
 
     def setUp(self):
         super(TestQueryAlarmsController, self).setUp()
@@ -202,8 +200,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest,
         self.assertIn(b"Limit should be positive", data.body)
 
 
-class TestQueryAlarmsHistoryController(
-        tests_api.FunctionalTest, tests_db.MixinTestsWithBackendScenarios):
+class TestQueryAlarmsHistoryController(tests_api.FunctionalTest):
 
     def setUp(self):
         super(TestQueryAlarmsHistoryController, self).setUp()
