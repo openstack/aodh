@@ -30,7 +30,7 @@ import pytz
 from aodh.evaluator import combination
 from aodh.storage import models
 from aodh.tests import constants
-from aodh.tests.evaluator import base
+from aodh.tests.unit.evaluator import base
 
 
 class TestEvaluate(base.TestEvaluatorBase):
