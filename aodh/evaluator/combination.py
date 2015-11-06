@@ -20,7 +20,7 @@ from oslo_log import log
 from six import moves
 
 from aodh import evaluator
-from aodh.i18n import _
+from aodh.i18n import _, _LE
 
 LOG = log.getLogger(__name__)
 
@@ -31,11 +31,14 @@ class CombinationEvaluator(evaluator.Evaluator):
 
     def _get_alarm_state(self, alarm_id):
         try:
-            alarm = self._storage_conn.get_alarms(alarm_id=alarm_id)
+            alarms = self._storage_conn.get_alarms(alarm_id=alarm_id)
         except Exception:
-            LOG.exception(_('alarm retrieval failed'))
+            LOG.exception(_LE('alarm %s retrieval failed'), alarm_id)
             return None
-        return alarm.state
+        if not alarms:
+            LOG.error(_LE("alarm %s doesn't exists anymore"), alarm_id)
+            return None
+        return list(alarms)[0].state
 
     def _sufficient_states(self, alarm, states):
         """Check for the sufficiency of the data for evaluation.
@@ -107,6 +110,7 @@ class CombinationEvaluator(evaluator.Evaluator):
 
         states = zip(alarm.rule['alarm_ids'],
                      moves.map(self._get_alarm_state, alarm.rule['alarm_ids']))
+
         # states is consumed more than once, we need a list
         states = list(states)
 
