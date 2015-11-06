@@ -85,8 +85,8 @@ class TestEvaluate(base.TestEvaluatorBase):
         ]
 
     @staticmethod
-    def _get_alarm(state):
-        return alarms.Alarm(None, {'state': state})
+    def _get_alarms(state):
+        return [alarms.Alarm(None, {'state': state})]
 
     @staticmethod
     def _reason_data(alarm_ids):
@@ -117,10 +117,10 @@ class TestEvaluate(base.TestEvaluatorBase):
             broken,
             broken,
             broken,
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
         ]
         self._evaluate_all_alarms()
         self._assert_all_alarms('insufficient data')
@@ -148,10 +148,10 @@ class TestEvaluate(base.TestEvaluatorBase):
     def test_to_ok_with_all_ok(self):
         self._set_all_alarms('insufficient data')
         self.storage_conn.get_alarms.side_effect = [
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
         ]
         self._evaluate_all_alarms()
         expected = [mock.call(alarm) for alarm in self.alarms]
@@ -170,10 +170,10 @@ class TestEvaluate(base.TestEvaluatorBase):
     def test_to_ok_with_one_alarm(self):
         self._set_all_alarms('alarm')
         self.storage_conn.get_alarms.side_effect = [
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('alarm'),
-            self._get_alarm('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('alarm'),
+            self._get_alarms('ok'),
         ]
         self._evaluate_all_alarms()
         expected = [mock.call(alarm) for alarm in self.alarms]
@@ -191,10 +191,10 @@ class TestEvaluate(base.TestEvaluatorBase):
     def test_to_alarm_with_all_alarm(self):
         self._set_all_alarms('ok')
         self.storage_conn.get_alarms.side_effect = [
-            self._get_alarm('alarm'),
-            self._get_alarm('alarm'),
-            self._get_alarm('alarm'),
-            self._get_alarm('alarm'),
+            self._get_alarms('alarm'),
+            self._get_alarms('alarm'),
+            self._get_alarms('alarm'),
+            self._get_alarms('alarm'),
         ]
         self._evaluate_all_alarms()
         expected = [mock.call(alarm) for alarm in self.alarms]
@@ -212,10 +212,10 @@ class TestEvaluate(base.TestEvaluatorBase):
     def test_to_alarm_with_one_insufficient_data(self):
         self._set_all_alarms('ok')
         self.storage_conn.get_alarms.side_effect = [
-            self._get_alarm('insufficient data'),
-            self._get_alarm('alarm'),
-            self._get_alarm('alarm'),
-            self._get_alarm('alarm'),
+            self._get_alarms('insufficient data'),
+            self._get_alarms('alarm'),
+            self._get_alarms('alarm'),
+            self._get_alarms('alarm'),
         ]
         self._evaluate_all_alarms()
         expected = [mock.call(alarm) for alarm in self.alarms]
@@ -233,10 +233,10 @@ class TestEvaluate(base.TestEvaluatorBase):
     def test_to_alarm_with_one_ok(self):
         self._set_all_alarms('ok')
         self.storage_conn.get_alarms.side_effect = [
-            self._get_alarm('ok'),
-            self._get_alarm('alarm'),
-            self._get_alarm('alarm'),
-            self._get_alarm('alarm'),
+            self._get_alarms('ok'),
+            self._get_alarms('alarm'),
+            self._get_alarms('alarm'),
+            self._get_alarms('alarm'),
         ]
         self._evaluate_all_alarms()
         expected = [mock.call(alarm) for alarm in self.alarms]
@@ -256,9 +256,9 @@ class TestEvaluate(base.TestEvaluatorBase):
         broken = exc.CommunicationError(message='broken')
         self.storage_conn.get_alarms.side_effect = [
             broken,
-            self._get_alarm('ok'),
-            self._get_alarm('insufficient data'),
-            self._get_alarm('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('insufficient data'),
+            self._get_alarms('ok'),
         ]
         self._evaluate_all_alarms()
         expected = [mock.call(alarm) for alarm in self.alarms]
@@ -280,10 +280,10 @@ class TestEvaluate(base.TestEvaluatorBase):
         self._set_all_alarms('ok')
 
         self.storage_conn.get_alarms.side_effect = [
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
         ]
         self._evaluate_all_alarms()
         update_calls = self.storage_conn.update_alarm.call_args_list
@@ -295,10 +295,10 @@ class TestEvaluate(base.TestEvaluatorBase):
         self.alarms[1].repeat_actions = True
         self._set_all_alarms('ok')
         self.storage_conn.get_alarms.side_effect = [
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
         ]
         self._evaluate_all_alarms()
         update_calls = self.storage_conn.update_alarm.call_args_list
@@ -328,10 +328,10 @@ class TestEvaluate(base.TestEvaluatorBase):
                                tzinfo=pytz.timezone('Europe/Ljubljana'))
         mock_utcnow.return_value = dt.astimezone(pytz.UTC)
         self.storage_conn.get_alarms.side_effect = [
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
         ]
         self._evaluate_all_alarms()
         expected = [mock.call(alarm) for alarm in self.alarms]
@@ -365,10 +365,10 @@ class TestEvaluate(base.TestEvaluatorBase):
         mock_utcnow.return_value = dt.astimezone(pytz.UTC)
 
         self.storage_conn.get_alarms.side_effect = [
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
-            self._get_alarm('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
+            self._get_alarms('ok'),
         ]
         self._evaluate_all_alarms()
         update_calls = self.storage_conn.update_alarm.call_args_list
