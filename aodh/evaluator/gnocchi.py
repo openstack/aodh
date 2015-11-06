@@ -72,7 +72,7 @@ class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
 
         elif alarm.type == 'gnocchi_aggregation_by_metrics_threshold':
             req['url'] += "/aggregation/metric"
-            req['params']['metric[]'] = alarm.rule['metrics']
+            req['params']['metric'] = alarm.rule['metrics']
 
         elif alarm.type == 'gnocchi_resources_threshold':
             req['url'] += "/resource/%s/%s/metric/%s/measures" % (
