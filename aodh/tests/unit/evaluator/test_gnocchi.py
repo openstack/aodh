@@ -28,7 +28,7 @@ from six import moves
 from aodh.evaluator import gnocchi
 from aodh.storage import models
 from aodh.tests import constants
-from aodh.tests.evaluator import base
+from aodh.tests.unit.evaluator import base
 
 
 class FakeResponse(object):
@@ -324,7 +324,7 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self.assertEqual([], self.storage_conn.update_alarm.call_args_list)
         reason = ('Remaining as ok due to 1 samples inside'
                   ' threshold, most recent: 8.0')
-        reason_datas = self._reason_data('inside', 4, 8.0)
+        reason_datas = self._reason_data('inside', 1, 8.0)
         expected = [mock.call(self.alarms[1], 'ok', reason, reason_datas)]
         self.assertEqual(expected, self.notifier.notify.call_args_list)
 
