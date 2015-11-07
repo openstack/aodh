@@ -28,7 +28,7 @@ from six import moves
 from aodh.evaluator import gnocchi
 from aodh.storage import models
 from aodh.tests import constants
-from aodh.tests.evaluator import base
+from aodh.tests.unit.evaluator import base
 
 
 class FakeResponse(object):
