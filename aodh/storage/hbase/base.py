@@ -11,8 +11,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import os
-
 import happybase
 from oslo_log import log
 from oslo_utils import netutils
@@ -33,19 +31,12 @@ class Connection(object):
         opts = self._parse_connection_url(url)
 
         if opts['host'] == '__test__':
-            url = os.environ.get('AODH_TEST_STORAGE_URL')
-            if url:
-                # Reparse URL, but from the env variable now
-                opts = self._parse_connection_url(url)
-                self.conn_pool = self._get_connection_pool(opts)
-            else:
-                # This is a in-memory usage for unit tests
-                if Connection._memory_instance is None:
-                    LOG.debug('Creating a new in-memory HBase Connection '
-                              'object')
-                    Connection._memory_instance = (hbase_inmemory.
-                                                   MConnectionPool())
-                self.conn_pool = Connection._memory_instance
+            # This is a in-memory usage for unit tests
+            if Connection._memory_instance is None:
+                LOG.debug('Creating a new in-memory HBase Connection object')
+                Connection._memory_instance = (hbase_inmemory.
+                                               MConnectionPool())
+            self.conn_pool = Connection._memory_instance
         else:
             self.conn_pool = self._get_connection_pool(opts)
 
