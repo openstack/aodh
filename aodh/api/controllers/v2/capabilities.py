@@ -20,15 +20,49 @@
 
 import pecan
 from pecan import rest
+import six
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
 from aodh.api.controllers.v2 import base
-from aodh import utils
+
+
+def _decode_unicode(input):
+    """Decode the unicode of the message, and encode it into utf-8."""
+    if isinstance(input, dict):
+        temp = {}
+        # If the input data is a dict, create an equivalent dict with a
+        # predictable insertion order to avoid inconsistencies in the
+        # message signature computation for equivalent payloads modulo
+        # ordering
+        for key, value in sorted(six.iteritems(input)):
+            temp[_decode_unicode(key)] = _decode_unicode(value)
+        return temp
+    elif isinstance(input, (tuple, list)):
+        # When doing a pair of JSON encode/decode operations to the tuple,
+        # the tuple would become list. So we have to generate the value as
+        # list here.
+        return [_decode_unicode(element) for element in input]
+    elif isinstance(input, six.text_type):
+        return input.encode('utf-8')
+    else:
+        return input
+
+
+def _recursive_keypairs(d, separator=':'):
+    """Generator that produces sequence of keypairs for nested dictionaries."""
+    for name, value in sorted(six.iteritems(d)):
+        if isinstance(value, dict):
+            for subname, subvalue in _recursive_keypairs(value, separator):
+                yield ('%s%s%s' % (name, separator, subname), subvalue)
+        elif isinstance(value, (tuple, list)):
+            yield name, _decode_unicode(value)
+        else:
+            yield name, value
 
 
 def _flatten_capabilities(capabilities):
-    return dict((k, v) for k, v in utils.recursive_keypairs(capabilities))
+    return dict((k, v) for k, v in _recursive_keypairs(capabilities))
 
 
 class Capabilities(base.Base):

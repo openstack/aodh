@@ -13,16 +13,18 @@
 """
 SQLAlchemy models for aodh data.
 """
+import calendar
+import datetime
+import decimal
 import json
 
 from oslo_utils import timeutils
+from oslo_utils import units
 import six
 from sqlalchemy import Column, String, Index, Boolean, Text, DateTime
 from sqlalchemy.dialects.mysql import DECIMAL
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import TypeDecorator
-
-from aodh import utils
 
 
 class JSONEncodedDict(TypeDecorator):
@@ -60,7 +62,13 @@ class PreciseTimestamp(TypeDecorator):
         if value is None:
             return value
         elif dialect.name == 'mysql':
-            return utils.dt_to_decimal(value)
+            decimal.getcontext().prec = 30
+            return (
+                decimal.Decimal(
+                    str(calendar.timegm(value.utctimetuple()))) +
+                (decimal.Decimal(str(value.microsecond)) /
+                 decimal.Decimal("1000000.0"))
+            )
         return value
 
     def compare_against_backend(self, dialect, conn_type):
@@ -73,7 +81,11 @@ class PreciseTimestamp(TypeDecorator):
         if value is None:
             return value
         elif dialect.name == 'mysql':
-            return utils.decimal_to_dt(value)
+            integer = int(value)
+            micro = (value
+                     - decimal.Decimal(integer)) * decimal.Decimal(units.M)
+            daittyme = datetime.datetime.utcfromtimestamp(integer)
+            return daittyme.replace(microsecond=int(round(micro)))
         return value
 
 

@@ -20,7 +20,6 @@ import tooz.coordination
 from aodh import coordination
 from aodh import service
 from aodh.tests import base
-from aodh import utils
 
 
 class MockToozCoordinator(object):
@@ -105,6 +104,40 @@ class MockAsyncError(tooz.coordination.CoordAsyncResult):
         return True
 
 
+class TestHashRing(base.BaseTestCase):
+    def test_hash_ring(self):
+        num_nodes = 10
+        num_keys = 1000
+
+        nodes = [str(x) for x in range(num_nodes)]
+        hr = coordination.HashRing(nodes)
+
+        buckets = [0] * num_nodes
+        assignments = [-1] * num_keys
+        for k in range(num_keys):
+            n = int(hr.get_node(str(k)))
+            self.assertTrue(0 <= n <= num_nodes)
+            buckets[n] += 1
+            assignments[k] = n
+
+        # at least something in each bucket
+        self.assertTrue(all((c > 0 for c in buckets)))
+
+        # approximately even distribution
+        diff = max(buckets) - min(buckets)
+        self.assertTrue(diff < 0.3 * (num_keys / num_nodes))
+
+        # consistency
+        num_nodes += 1
+        nodes.append(str(num_nodes + 1))
+        hr = coordination.HashRing(nodes)
+        for k in range(num_keys):
+            n = int(hr.get_node(str(k)))
+            assignments[k] -= n
+        reassigned = len([c for c in assignments if c != 0])
+        self.assertTrue(reassigned < num_keys / num_nodes)
+
+
 class TestPartitioning(base.BaseTestCase):
 
     def setUp(self):
@@ -164,7 +197,7 @@ class TestPartitioning(base.BaseTestCase):
         agents = ['agent_%s' % i for i in range(10)]
 
         expected_resources = [list() for _ in range(len(agents))]
-        hr = utils.HashRing(agents)
+        hr = coordination.HashRing(agents)
         for r in all_resources:
             key = agents.index(hr.get_node(r))
             expected_resources[key].append(r)

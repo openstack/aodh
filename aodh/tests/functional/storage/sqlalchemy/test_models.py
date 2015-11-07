@@ -22,7 +22,6 @@ from sqlalchemy.dialects.mysql import DECIMAL
 from sqlalchemy.types import NUMERIC
 
 from aodh.storage.sqlalchemy import models
-from aodh import utils
 
 
 class PreciseTimestampTest(base.BaseTestCase):
@@ -57,11 +56,6 @@ class PreciseTimestampTest(base.BaseTestCase):
         result = self._type.load_dialect_impl(self._postgres_dialect)
         self.assertEqual(sqlalchemy.DateTime, type(result))
 
-    def test_process_bind_param_store_decimal_mysql(self):
-        expected = utils.dt_to_decimal(self._date)
-        result = self._type.process_bind_param(self._date, self._mysql_dialect)
-        self.assertEqual(expected, result)
-
     def test_process_bind_param_store_datetime_postgres(self):
         result = self._type.process_bind_param(self._date,
                                                self._postgres_dialect)
@@ -75,12 +69,6 @@ class PreciseTimestampTest(base.BaseTestCase):
         result = self._type.process_bind_param(None,
                                                self._postgres_dialect)
         self.assertIsNone(result)
-
-    def test_process_result_value_datetime_mysql(self):
-        dec_value = utils.dt_to_decimal(self._date)
-        result = self._type.process_result_value(dec_value,
-                                                 self._mysql_dialect)
-        self.assertEqual(self._date, result)
 
     def test_process_result_value_datetime_postgres(self):
         result = self._type.process_result_value(self._date,

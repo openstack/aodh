@@ -33,7 +33,6 @@ from aodh.api.controllers.v2 import base
 from aodh.api import rbac
 from aodh.i18n import _
 from aodh.storage import models
-from aodh import utils
 
 LOG = log.getLogger(__name__)
 
@@ -228,9 +227,15 @@ class ValidatedComplexQuery(object):
             raise base.ClientSideError(msg)
 
     @staticmethod
-    def _convert_orderby_to_lower_case(orderby):
+    def lowercase_values(mapping):
+        """Converts the values in the mapping dict to lowercase."""
+        items = mapping.items()
+        for key, value in items:
+            mapping[key] = value.lower()
+
+    def _convert_orderby_to_lower_case(self, orderby):
         for orderby_field in orderby:
-            utils.lowercase_values(orderby_field)
+            self.lowercase_values(orderby_field)
 
     def _normalize_field_names_in_orderby(self, orderby):
         for orderby_field in orderby:
@@ -307,8 +312,16 @@ class ValidatedComplexQuery(object):
             del subfilter[field]
             subfilter["resource_" + field] = value
 
+    @staticmethod
+    def lowercase_keys(mapping):
+        """Converts the values of the keys in mapping to lowercase."""
+        items = mapping.items()
+        for key, value in items:
+            del mapping[key]
+            mapping[key.lower()] = value
+
     def _convert_operator_to_lower_case(self, filter_expr):
-        self._traverse_postorder(filter_expr, utils.lowercase_keys)
+        self._traverse_postorder(filter_expr, self.lowercase_keys)
 
     @staticmethod
     def _convert_to_datetime(isotime):

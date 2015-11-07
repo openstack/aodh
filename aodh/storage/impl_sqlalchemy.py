@@ -30,7 +30,6 @@ from aodh.storage import base
 from aodh.storage import models as alarm_api_models
 from aodh.storage.sqlalchemy import models
 from aodh.storage.sqlalchemy import utils as sql_utils
-from aodh import utils
 
 LOG = log.getLogger(__name__)
 
@@ -49,9 +48,9 @@ AVAILABLE_STORAGE_CAPABILITIES = {
 
 class Connection(base.Connection):
     """Put the data into a SQLAlchemy database. """
-    CAPABILITIES = utils.update_nested(base.Connection.CAPABILITIES,
-                                       AVAILABLE_CAPABILITIES)
-    STORAGE_CAPABILITIES = utils.update_nested(
+    CAPABILITIES = base.update_nested(base.Connection.CAPABILITIES,
+                                      AVAILABLE_CAPABILITIES)
+    STORAGE_CAPABILITIES = base.update_nested(
         base.Connection.STORAGE_CAPABILITIES,
         AVAILABLE_STORAGE_CAPABILITIES,
     )
