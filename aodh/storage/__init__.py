@@ -36,7 +36,6 @@ OPTS = [
                      "in the database for (<= 0 means forever).")),
     cfg.StrOpt('alarm_connection',
                secret=True,
-               default=None,
                deprecated_for_removal=True,
                help='The connection string used to connect '
                'to the alarm database - rather use ${database.connection}'),

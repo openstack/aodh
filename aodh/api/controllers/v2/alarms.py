@@ -56,12 +56,10 @@ LOG = log.getLogger(__name__)
 
 ALARM_API_OPTS = [
     cfg.IntOpt('user_alarm_quota',
-               default=None,
                deprecated_group="alarm",
                help='Maximum number of alarms defined for a user.'
                ),
     cfg.IntOpt('project_alarm_quota',
-               default=None,
                deprecated_group="alarm",
                help='Maximum number of alarms defined for a project.'
                ),
