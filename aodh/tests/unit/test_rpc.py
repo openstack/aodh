@@ -47,7 +47,7 @@ class FakeNotifier(object):
 class TestRPCAlarmNotifier(tests_base.BaseTestCase):
     def setUp(self):
         super(TestRPCAlarmNotifier, self).setUp()
-        conf = service.prepare_service([])
+        conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
 

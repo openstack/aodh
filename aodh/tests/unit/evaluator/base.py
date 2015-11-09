@@ -24,7 +24,7 @@ from aodh import service
 class TestEvaluatorBase(base.BaseTestCase):
     def setUp(self):
         super(TestEvaluatorBase, self).setUp()
-        conf = service.prepare_service([])
+        conf = service.prepare_service(argv=[], config_files=[])
         self.conf = self.useFixture(fixture.Config(conf)).conf
         self.api_client = mock.Mock()
         self.useFixture(mockpatch.Patch('ceilometerclient.client.get_client',

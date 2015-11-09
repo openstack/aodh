@@ -26,7 +26,7 @@ from aodh.tests import base as tests_base
 class TestAlarmEvaluationService(tests_base.BaseTestCase):
     def setUp(self):
         super(TestAlarmEvaluationService, self).setUp()
-        conf = service.prepare_service([])
+        conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
 
