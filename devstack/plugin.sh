@@ -131,7 +131,12 @@ function _aodh_create_accounts {
 
 # Activities to do before aodh has been installed.
 function preinstall_aodh {
-    echo_summary "Preinstall not in virtualenv context. Skipping."
+    # Needed to build psycopg2
+    if is_ubuntu; then
+        install_package libpq-dev
+    else
+        install_package postgresql-devel
+    fi
 }
 
 # Remove WSGI files, disable and remove Apache vhost file

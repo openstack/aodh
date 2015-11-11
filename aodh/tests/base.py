@@ -42,7 +42,7 @@ class BaseTestCase(base.BaseTestCase):
         # NOTE(sileht): oslo.messaging fake driver uses time.sleep
         # for task switch, so we need to monkey_patch it
         # and also ensure the correct exchange have been set
-        eventlet.monkey_patch(time=True)
+        eventlet.monkey_patch(time=True, thread=True)
 
         # NOTE(sileht): Ensure a new oslo.messaging driver is loaded
         # between each tests
