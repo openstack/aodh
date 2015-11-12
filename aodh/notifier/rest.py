@@ -14,7 +14,6 @@
 # under the License.
 """Rest alarm notifier."""
 
-import eventlet
 from oslo_config import cfg
 from oslo_context import context
 from oslo_log import log
@@ -102,4 +101,4 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
         session = requests.Session()
         session.mount(action.geturl(),
                       requests.adapters.HTTPAdapter(max_retries=max_retries))
-        eventlet.spawn_n(session.post, action.geturl(), **kwargs)
+        session.post(action.geturl(), **kwargs)
