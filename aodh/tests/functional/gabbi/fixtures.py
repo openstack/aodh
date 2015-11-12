@@ -23,6 +23,7 @@ from gabbi import fixture
 import mock
 from oslo_config import fixture as fixture_config
 from oslo_policy import opts
+from six.moves.urllib import parse as urlparse
 
 from aodh import service
 from aodh import storage
@@ -31,7 +32,7 @@ from aodh import storage
 # TODO(chdent): For now only MongoDB is supported, because of easy
 # database name handling and intentional focus on the API, not the
 # data store.
-ENGINES = ['MONGODB']
+ENGINES = ['mongodb']
 
 
 class ConfigFixture(fixture.GabbiFixture):
@@ -43,16 +44,15 @@ class ConfigFixture(fixture.GabbiFixture):
         self.conf = None
 
         # Determine the database connection.
-        db_url = None
-        for engine in ENGINES:
-            try:
-                db_url = os.environ['AODH_TEST_%s_URL' % engine]
-            except KeyError:
-                pass
-        if db_url is None:
+        db_url = os.environ.get('AODH_TEST_STORAGE_URL')
+        if not db_url:
             raise case.SkipTest('No database connection configured')
 
-        conf = service.prepare_service(argv=[], config_files=[])
+        engine = urlparse.urlparse(db_url).scheme
+        if engine not in ENGINES:
+            raise case.SkipTest('Database engine not supported')
+
+        conf = service.prepare_service([], config_files=[])
         # NOTE(jd): prepare_service() is called twice: first by load_app() for
         # Pecan, then Pecan calls pastedeploy, which starts the app, which has
         # no way to pass the conf object so that Paste apps calls again

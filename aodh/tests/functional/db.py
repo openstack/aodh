@@ -26,7 +26,6 @@ from oslotest import mockpatch
 import six
 from six.moves.urllib import parse as urlparse
 import sqlalchemy
-import testscenarios.testcase
 from testtools import testcase
 
 from aodh import service
@@ -120,7 +119,8 @@ class SQLiteManager(fixtures.Fixture):
         self.url = "sqlite://"
 
 
-class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
+@six.add_metaclass(test_base.SkipNotImplementedMeta)
+class TestBase(test_base.BaseTestCase):
 
     DRIVER_MANAGERS = {
         'mongodb': MongoDbManager,
@@ -132,11 +132,10 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
     if mocks is not None:
         DRIVER_MANAGERS['hbase'] = HBaseManager
 
-    db_url = 'sqlite://'  # NOTE(Alexei_987) Set default db url
-
     def setUp(self):
         super(TestBase, self).setUp()
-        engine = urlparse.urlparse(self.db_url).scheme
+        db_url = os.environ.get('AODH_TEST_STORAGE_URL', 'sqlite://')
+        engine = urlparse.urlparse(db_url).scheme
 
         # NOTE(Alexei_987) Shortcut to skip expensive db setUp
         test_method = self._get_test_method()
@@ -147,12 +146,14 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
 
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
-        self.CONF.set_override('connection', self.db_url, group="database")
+        self.CONF.set_override('connection', db_url, group="database")
 
-        try:
-            self.db_manager = self._get_driver_manager(engine)(self.CONF)
-        except ValueError as exc:
-            self.skipTest("missing driver manager: %s" % exc)
+        manager = self.DRIVER_MANAGERS.get(engine)
+        if not manager:
+            self.skipTest("missing driver manager: %s" % engine)
+
+        self.db_manager = manager(self.CONF)
+
         self.useFixture(self.db_manager)
 
         self.CONF.set_override('connection', self.db_manager.url,
@@ -172,12 +173,6 @@ class TestBase(testscenarios.testcase.WithScenarios, test_base.BaseTestCase):
 
     def _get_connection(self, conf):
         return self.alarm_conn
-
-    def _get_driver_manager(self, engine):
-        manager = self.DRIVER_MANAGERS.get(engine)
-        if not manager:
-            raise ValueError('No manager available for %s' % engine)
-        return manager
 
 
 def run_with(*drivers):
@@ -200,24 +195,3 @@ def run_with(*drivers):
             test._run_with = drivers
         return test
     return decorator
-
-
-@six.add_metaclass(test_base.SkipNotImplementedMeta)
-class MixinTestsWithBackendScenarios(object):
-
-    scenarios = [
-        ('sqlite', {'db_url': 'sqlite://'}),
-    ]
-
-    for db in ('MONGODB', 'MYSQL', 'PGSQL', 'HBASE'):
-        if os.environ.get('AODH_TEST_%s_URL' % db):
-            scenarios.append(
-                (db.lower(), {'db_url': os.environ.get(
-                    'AODH_TEST_%s_URL' % db)}))
-
-    scenarios_db = [db for db, _ in scenarios]
-
-    # Insert default value for hbase test
-    if 'hbase' not in scenarios_db:
-        scenarios.append(
-            ('hbase', {'db_url': 'hbase://__test__'}))

@@ -29,7 +29,6 @@ from aodh import messaging
 from aodh.storage import models
 from aodh.tests import constants
 from aodh.tests.functional.api import v2
-from aodh.tests.functional import db as tests_db
 
 
 def default_alarms(auth_headers):
@@ -138,8 +137,7 @@ def default_alarms(auth_headers):
             ]
 
 
-class TestAlarmsBase(v2.FunctionalTest,
-                     tests_db.MixinTestsWithBackendScenarios):
+class TestAlarmsBase(v2.FunctionalTest):
 
     def setUp(self):
         super(TestAlarmsBase, self).setUp()

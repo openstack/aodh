@@ -31,7 +31,6 @@ class ABCSkip(base.SkipNotImplementedMeta, abc.ABCMeta):
 class ModelsMigrationsSync(
         six.with_metaclass(ABCSkip,
                            tests_db.TestBase,
-                           tests_db.MixinTestsWithBackendScenarios,
                            test_migrations.ModelsMigrationsSync)):
 
     def setUp(self):

@@ -33,7 +33,7 @@ class Connection(object):
         opts = self._parse_connection_url(url)
 
         if opts['host'] == '__test__':
-            url = os.environ.get('AODH_TEST_HBASE_URL')
+            url = os.environ.get('AODH_TEST_STORAGE_URL')
             if url:
                 # Reparse URL, but from the env variable now
                 opts = self._parse_connection_url(url)

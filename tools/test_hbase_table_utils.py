@@ -20,9 +20,9 @@ from aodh import storage
 
 def main(argv):
     cfg.CONF([], project='aodh')
-    if os.getenv("AODH_TEST_HBASE_URL"):
+    if os.getenv("AODH_TEST_STORAGE_URL"):
         url = ("%s?table_prefix=%s" %
-               (os.getenv("AODH_TEST_HBASE_URL"),
+               (os.getenv("AODH_TEST_STORAGE_URL"),
                 os.getenv("AODH_TEST_HBASE_TABLE_PREFIX", "test")))
         cfg.CONF.set_override("connection", url, group="database")
         alarm_conn = storage.get_connection_from_conf(cfg.CONF)

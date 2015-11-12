@@ -138,8 +138,7 @@ class AlarmTestBase(DBTestBase):
             self.alarm_conn.create_alarm(a)
 
 
-class AlarmTest(AlarmTestBase,
-                tests_db.MixinTestsWithBackendScenarios):
+class AlarmTest(AlarmTestBase):
 
     def test_empty(self):
         alarms = list(self.alarm_conn.get_alarms())
@@ -254,8 +253,7 @@ class AlarmTest(AlarmTestBase,
 
 
 @tests_db.run_with('sqlite', 'mysql', 'pgsql', 'hbase')
-class AlarmHistoryTest(AlarmTestBase,
-                       tests_db.MixinTestsWithBackendScenarios):
+class AlarmHistoryTest(AlarmTestBase):
 
     def setUp(self):
         super(AlarmTestBase, self).setUp()
@@ -308,8 +306,7 @@ class AlarmHistoryTest(AlarmTestBase,
         self.assertEqual(0, len(history))
 
 
-class ComplexAlarmQueryTest(AlarmTestBase,
-                            tests_db.MixinTestsWithBackendScenarios):
+class ComplexAlarmQueryTest(AlarmTestBase):
 
     def test_no_filter(self):
         self.add_some_alarms()
@@ -371,8 +368,7 @@ class ComplexAlarmQueryTest(AlarmTestBase,
             self.assertTrue(a.enabled)
 
 
-class ComplexAlarmHistoryQueryTest(AlarmTestBase,
-                                   tests_db.MixinTestsWithBackendScenarios):
+class ComplexAlarmHistoryQueryTest(AlarmTestBase):
     def setUp(self):
         super(DBTestBase, self).setUp()
         self.filter_expr = {"and":
