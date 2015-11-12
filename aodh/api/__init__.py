@@ -17,11 +17,11 @@ from oslo_config import cfg
 
 # Register options for the service
 OPTS = [
-    cfg.IntOpt('port',
-               default=8042,
-               deprecated_group='DEFAULT',
-               help='The port for the aodh API server.',
-               ),
+    cfg.PortOpt('port',
+                default=8042,
+                deprecated_group='DEFAULT',
+                help='The port for the aodh API server.',
+                ),
     cfg.StrOpt('host',
                default='0.0.0.0',
                help='The listen IP for the aodh API server.',
