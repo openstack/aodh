@@ -36,9 +36,11 @@ def list_opts():
              aodh.evaluator.event.OPTS,
              aodh.evaluator.gnocchi.OPTS,
              aodh.event.OPTS,
+             aodh.notifier.OPTS,
              aodh.notifier.rest.OPTS,
-             aodh.service.OPTS,
+             aodh.queue.OPTS,
              aodh.rpc.OPTS,
+             aodh.service.OPTS,
              aodh.api.controllers.v2.alarms.ALARM_API_OPTS)),
         ('api',
          itertools.chain(

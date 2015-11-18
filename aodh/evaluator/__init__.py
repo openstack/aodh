@@ -36,6 +36,7 @@ from aodh import coordination
 from aodh.i18n import _
 from aodh import keystone_client
 from aodh import messaging
+from aodh import queue
 from aodh import rpc
 from aodh import storage
 from aodh.storage import models
@@ -60,9 +61,12 @@ OPTS = [
 class Evaluator(object):
     """Base class for alarm rule evaluator plugins."""
 
-    def __init__(self, conf, notifier):
+    def __init__(self, conf):
         self.conf = conf
-        self.notifier = notifier
+        if conf.ipc_protocol == 'rpc':
+            self.notifier = rpc.RPCAlarmNotifier(self.conf)
+        else:
+            self.notifier = queue.AlarmNotifier(self.conf)
         self.storage_conn = None
         self._ks_client = None
         self._alarm_change_notifier = None
@@ -121,8 +125,7 @@ class Evaluator(object):
 
                 self._storage_conn.update_alarm(alarm)
                 self._record_change(alarm)
-            if self.notifier:
-                self.notifier.notify(alarm, previous, reason, reason_data)
+            self.notifier.notify(alarm, previous, reason, reason_data)
         except Exception:
             # retry will occur naturally on the next evaluation
             # cycle (unless alarm state reverts in the meantime)
@@ -196,7 +199,7 @@ class AlarmService(object):
         self.evaluators = extension.ExtensionManager(
             namespace=self.EVALUATOR_EXTENSIONS_NAMESPACE,
             invoke_on_load=True,
-            invoke_args=(self.conf, rpc.RPCAlarmNotifier(self.conf),)
+            invoke_args=(self.conf,)
         )
 
     def _evaluate_assigned_alarms(self):

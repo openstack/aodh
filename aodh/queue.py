@@ -1,8 +1,4 @@
 #
-# Copyright 2013 eNovance <licensing@enovance.com>
-#
-# Authors: Mehdi Abaakouk <mehdi.abaakouk@enovance.com>
-#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -18,15 +14,15 @@
 from oslo_config import cfg
 from oslo_context import context
 from oslo_log import log
+import oslo_messaging
 import six
 
 from aodh import messaging
 from aodh.storage import models
 
 OPTS = [
-    cfg.StrOpt('notifier_rpc_topic',
-               default='alarm_notifier',
-               deprecated_group='alarm',
+    cfg.StrOpt('notifier_topic',
+               default='alarming',
                help='The topic that aodh uses for alarm notifier '
                     'messages.'),
 ]
@@ -34,13 +30,14 @@ OPTS = [
 LOG = log.getLogger(__name__)
 
 
-class RPCAlarmNotifier(object):
+class AlarmNotifier(object):
     def __init__(self, conf):
-        self.ctxt = context.get_admin_context()
-        transport = messaging.get_transport(conf)
-        self.client = messaging.get_rpc_client(
-            transport, topic=conf.notifier_rpc_topic,
-            version="1.0")
+        self.ctxt = context.get_admin_context().to_dict()
+        self.notifier = oslo_messaging.Notifier(
+            messaging.get_transport(conf),
+            driver='messagingv2',
+            publisher_id="alarming.evaluator",
+            topic=conf.notifier_topic)
 
     def notify(self, alarm, previous, reason, reason_data):
         actions = getattr(alarm, models.Alarm.ALARM_ACTIONS_MAP[alarm.state])
@@ -52,13 +49,12 @@ class RPCAlarmNotifier(object):
                        'previous': previous,
                        'state': alarm.state})
             return
-        self.client.cast(self.ctxt,
-                         'notify_alarm', data={
-                             'actions': actions,
-                             'alarm_id': alarm.alarm_id,
-                             'alarm_name': alarm.name,
-                             'severity': alarm.severity,
-                             'previous': previous,
-                             'current': alarm.state,
-                             'reason': six.text_type(reason),
-                             'reason_data': reason_data})
+        payload = {'actions': actions,
+                   'alarm_id': alarm.alarm_id,
+                   'alarm_name': alarm.name,
+                   'severity': alarm.severity,
+                   'previous': previous,
+                   'current': alarm.state,
+                   'reason': six.text_type(reason),
+                   'reason_data': reason_data}
+        self.notifier.sample(self.ctxt, 'alarm.update', payload)

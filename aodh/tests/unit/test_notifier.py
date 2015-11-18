@@ -41,6 +41,26 @@ NOTIFICATION = dict(alarm_id='foobar',
                     current='ALARM')
 
 
+class TestAlarmNotifierService(tests_base.BaseTestCase):
+
+    def setUp(self):
+        super(TestAlarmNotifierService, self).setUp()
+        conf = service.prepare_service(argv=[], config_files=[])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
+        self.setup_messaging(self.CONF)
+
+    def test_init_host_rpc(self):
+        self.CONF.set_override('ipc_protocol', 'rpc')
+        self.service = notifier.AlarmNotifierService(self.CONF)
+        self.service.start()
+        self.service.stop()
+
+    def test_init_host_queue(self):
+        self.service = notifier.AlarmNotifierService(self.CONF)
+        self.service.start()
+        self.service.stop()
+
+
 class TestAlarmNotifier(tests_base.BaseTestCase):
 
     def setUp(self):
@@ -52,10 +72,6 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.useFixture(mockpatch.Patch(
             'oslo_context.context.generate_request_id',
             self._fake_generate_request_id))
-
-    def test_init_host(self):
-        self.service.start()
-        self.service.stop()
 
     def test_notify_alarm(self):
         data = {

@@ -19,7 +19,6 @@ from oslo_service import service
 
 from aodh.evaluator import event
 from aodh import messaging
-from aodh import rpc
 from aodh import storage
 
 
@@ -46,9 +45,7 @@ class EventAlarmEvaluationService(service.Service):
         super(EventAlarmEvaluationService, self).__init__()
         self.conf = conf
         self.storage_conn = storage.get_connection_from_config(self.conf)
-        self.evaluator = event.EventAlarmEvaluator(
-            self.conf,
-            rpc.RPCAlarmNotifier(self.conf))
+        self.evaluator = event.EventAlarmEvaluator(self.conf)
 
     def start(self):
         super(EventAlarmEvaluationService, self).start()
