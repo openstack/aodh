@@ -12,15 +12,17 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+import bisect
+import hashlib
+import struct
 import uuid
 
 from oslo_config import cfg
 from oslo_log import log
+import six
 import tooz.coordination
 
 from aodh.i18n import _LE, _LI
-from aodh import utils
 
 LOG = log.getLogger(__name__)
 
@@ -41,6 +43,36 @@ OPTS = [
                       'membership has changed')
 
 ]
+
+
+class HashRing(object):
+
+    def __init__(self, nodes, replicas=100):
+        self._ring = dict()
+        self._sorted_keys = []
+
+        for node in nodes:
+            for r in six.moves.range(replicas):
+                hashed_key = self._hash('%s-%s' % (node, r))
+                self._ring[hashed_key] = node
+                self._sorted_keys.append(hashed_key)
+        self._sorted_keys.sort()
+
+    @staticmethod
+    def _hash(key):
+        return struct.unpack_from('>I',
+                                  hashlib.md5(str(key).encode()).digest())[0]
+
+    def _get_position_on_ring(self, key):
+        hashed_key = self._hash(key)
+        position = bisect.bisect(self._sorted_keys, hashed_key)
+        return position if position < len(self._sorted_keys) else 0
+
+    def get_node(self, key):
+        if not self._ring:
+            return None
+        pos = self._get_position_on_ring(key)
+        return self._ring[self._sorted_keys[pos]]
 
 
 class PartitionCoordinator(object):
@@ -166,7 +198,7 @@ class PartitionCoordinator(object):
         try:
             members = self._get_members(group_id)
             LOG.debug('Members of group: %s', members)
-            hr = utils.HashRing(members)
+            hr = HashRing(members)
             filtered = [v for v in iterable
                         if hr.get_node(str(v)) == self._my_id]
             LOG.debug('My subset: %s', filtered)

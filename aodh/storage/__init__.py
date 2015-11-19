@@ -14,14 +14,14 @@
 # under the License.
 """Storage backend management
 """
+import datetime
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_utils import timeutils
 import retrying
 import six.moves.urllib.parse as urlparse
 from stevedore import driver
-
-from aodh import utils
 
 _NAMESPACE = 'aodh.storage'
 
@@ -90,15 +90,24 @@ class SampleFilter(object):
                  metaquery=None):
         self.user = user
         self.project = project
-        self.start_timestamp = utils.sanitize_timestamp(start_timestamp)
+        self.start_timestamp = self.sanitize_timestamp(start_timestamp)
         self.start_timestamp_op = start_timestamp_op
-        self.end_timestamp = utils.sanitize_timestamp(end_timestamp)
+        self.end_timestamp = self.sanitize_timestamp(end_timestamp)
         self.end_timestamp_op = end_timestamp_op
         self.resource = resource
         self.meter = meter
         self.source = source
         self.metaquery = metaquery or {}
         self.message_id = message_id
+
+    @staticmethod
+    def sanitize_timestamp(timestamp):
+        """Return a naive utc datetime object."""
+        if not timestamp:
+            return timestamp
+        if not isinstance(timestamp, datetime.datetime):
+            timestamp = timeutils.parse_isotime(timestamp)
+        return timeutils.normalize_time(timestamp)
 
     def __repr__(self):
         return ("<SampleFilter(user: %s,"

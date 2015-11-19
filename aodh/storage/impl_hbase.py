@@ -22,7 +22,6 @@ from aodh.storage.hbase import base as hbase_base
 from aodh.storage.hbase import migration as hbase_migration
 from aodh.storage.hbase import utils as hbase_utils
 from aodh.storage import models
-from aodh import utils
 
 LOG = log.getLogger(__name__)
 
@@ -61,9 +60,9 @@ class Connection(hbase_base.Connection, base.Connection):
           if not determined
     """
 
-    CAPABILITIES = utils.update_nested(base.Connection.CAPABILITIES,
-                                       AVAILABLE_CAPABILITIES)
-    STORAGE_CAPABILITIES = utils.update_nested(
+    CAPABILITIES = base.update_nested(base.Connection.CAPABILITIES,
+                                      AVAILABLE_CAPABILITIES)
+    STORAGE_CAPABILITIES = base.update_nested(
         base.Connection.STORAGE_CAPABILITIES,
         AVAILABLE_STORAGE_CAPABILITIES,
     )

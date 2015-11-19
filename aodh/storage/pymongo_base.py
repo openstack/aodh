@@ -25,7 +25,6 @@ import six
 from aodh.storage import base
 from aodh.storage import models
 from aodh.storage.mongo import utils as pymongo_utils
-from aodh import utils
 
 LOG = log.getLogger(__name__)
 
@@ -45,10 +44,10 @@ AVAILABLE_STORAGE_CAPABILITIES = {
 
 class Connection(base.Connection):
     """Base Alarm Connection class for MongoDB driver."""
-    CAPABILITIES = utils.update_nested(base.Connection.CAPABILITIES,
-                                       COMMON_AVAILABLE_CAPABILITIES)
+    CAPABILITIES = base.update_nested(base.Connection.CAPABILITIES,
+                                      COMMON_AVAILABLE_CAPABILITIES)
 
-    STORAGE_CAPABILITIES = utils.update_nested(
+    STORAGE_CAPABILITIES = base.update_nested(
         base.Connection.STORAGE_CAPABILITIES,
         AVAILABLE_STORAGE_CAPABILITIES,
     )
