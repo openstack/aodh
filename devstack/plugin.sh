@@ -84,12 +84,18 @@ function _aodh_config_apache_wsgi {
     fi
 
     sudo cp $AODH_DIR/devstack/apache-aodh.template $aodh_apache_conf
+    if [ "$AODH_BACKEND" = 'hbase' ] ; then
+        # Use one process to have single in-memory DB instance for data consistency
+        AODH_API_WORKERS=1
+    else
+        AODH_API_WORKERS=$API_WORKERS
+    fi
     sudo sed -e "
         s|%PORT%|$AODH_SERVICE_PORT|g;
         s|%APACHE_NAME%|$APACHE_NAME|g;
         s|%WSGIAPP%|$AODH_WSGI_DIR/app|g;
         s|%USER%|$STACK_USER|g;
-        s|%APIWORKERS%|$API_WORKERS|g;
+        s|%APIWORKERS%|$AODH_API_WORKERS|g;
         s|%VIRTUALENV%|$venv_path|g
     " -i $aodh_apache_conf
 }
@@ -163,6 +169,8 @@ function _aodh_configure_storage_backend {
     elif [ "$AODH_BACKEND" = 'mongodb' ] ; then
         iniset $AODH_CONF database connection mongodb://localhost:27017/aodh
         cleanup_aodh
+    elif [ "$AODH_BACKEND" = 'hbase' ] ; then
+        iniset $AODH_CONF database connection hbase://__test__
     else
         die $LINENO "Unable to configure unknown AODH_BACKEND $AODH_BACKEND"
     fi
