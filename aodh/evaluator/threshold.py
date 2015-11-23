@@ -46,23 +46,28 @@ class ThresholdEvaluator(evaluator.Evaluator):
 
     def __init__(self, conf, notifier):
         super(ThresholdEvaluator, self).__init__(conf, notifier)
-        auth_config = conf.service_credentials
-        self._client = ceiloclient.get_client(
-            2,
-            os_auth_url=auth_config.os_auth_url.replace('/v2.0', '/'),
-            os_region_name=auth_config.os_region_name,
-            os_tenant_name=auth_config.os_tenant_name,
-            os_password=auth_config.os_password,
-            os_username=auth_config.os_username,
-            os_cacert=auth_config.os_cacert,
-            os_endpoint_type=auth_config.os_endpoint_type,
-            insecure=auth_config.insecure,
-            timeout=conf.http_timeout,
-            os_user_domain_id=auth_config.os_user_domain_id,
-            os_project_name=auth_config.os_project_name,
-            os_project_domain_id=auth_config.os_project_domain_id,
+        self._cm_client = None
 
-        )
+    @property
+    def cm_client(self):
+        if self._cm_client is None:
+            auth_config = self.conf.service_credentials
+            self._cm_client = ceiloclient.get_client(
+                2,
+                os_auth_url=auth_config.os_auth_url.replace('/v2.0', '/'),
+                os_region_name=auth_config.os_region_name,
+                os_tenant_name=auth_config.os_tenant_name,
+                os_password=auth_config.os_password,
+                os_username=auth_config.os_username,
+                os_cacert=auth_config.os_cacert,
+                os_endpoint_type=auth_config.os_endpoint_type,
+                insecure=auth_config.insecure,
+                timeout=self.conf.http_timeout,
+                os_user_domain_id=auth_config.os_user_domain_id,
+                os_project_name=auth_config.os_project_name,
+                os_project_domain_id=auth_config.os_project_domain_id,
+            )
+        return self._cm_client
 
     @classmethod
     def _bound_duration(cls, alarm):
@@ -114,7 +119,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
         query.extend([before, after])
         LOG.debug('stats query %s', query)
         try:
-            return self._client.statistics.list(
+            return self.cm_client.statistics.list(
                 meter_name=alarm.rule['meter_name'], q=query,
                 period=alarm.rule['period'])
         except Exception:
