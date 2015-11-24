@@ -98,5 +98,10 @@ class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
         # policy with granularity that's an even divisor or the period,
         # we could potentially do a mean-of-means (or max-of-maxes or whatever,
         # but not a stddev-of-stddevs).
-        return [stats[2] for stats in statistics
-                if stats[1] == alarm.rule['granularity']]
+        # TODO(sileht): support alarm['exclude_outliers']
+        LOG.debug('sanitize stats %s', statistics)
+        statistics = [stats[2] for stats in statistics
+                      if stats[1] == alarm.rule['granularity']]
+        statistics = statistics[-alarm.rule['evaluation_periods']:]
+        LOG.debug('pruned statistics to %d', len(statistics))
+        return statistics

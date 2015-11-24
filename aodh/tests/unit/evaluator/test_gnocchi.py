@@ -280,7 +280,7 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
                     in zip(self.alarms, reasons, reason_datas)]
         self.assertEqual(expected, self.notifier.notify.call_args_list)
 
-    def test_equivocal_from_known_state(self):
+    def test_equivocal_from_known_state_ok(self):
         self._set_all_alarms('ok')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
                                     for v in moves.xrange(5)])
@@ -296,6 +296,17 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
             [],
             self.storage_conn.update_alarm.call_args_list)
         self.assertEqual([], self.notifier.notify.call_args_list)
+
+    def test_equivocal_ok_to_alarm(self):
+        self.alarms = [self.alarms[1]]
+        self._set_all_alarms('ok')
+        # NOTE(sileht): we add one useless point (81.0) that will break
+        # the test if the evaluator doesn't remove it.
+        maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
+                                     for v in moves.xrange(-1, 5)])
+        self.requests.get.side_effect = [maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('alarm')
 
     def test_equivocal_from_known_state_and_repeat_actions(self):
         self._set_all_alarms('ok')
