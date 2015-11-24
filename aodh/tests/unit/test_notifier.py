@@ -54,12 +54,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             self._fake_generate_request_id))
 
     def test_init_host(self):
-        # If we try to create a real RPC connection, init_host() never
-        # returns. Mock it out so we can establish the service
-        # configuration.
-        with mock.patch.object(self.service.rpc_server, 'start'):
-            self.service.start()
-            self.service.stop()
+        self.service.start()
+        self.service.stop()
 
     def test_notify_alarm(self):
         data = {
