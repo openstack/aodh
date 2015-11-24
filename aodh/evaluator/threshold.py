@@ -44,8 +44,8 @@ class ThresholdEvaluator(evaluator.Evaluator):
     # for reporting/ingestion lag
     look_back = 1
 
-    def __init__(self, conf, notifier):
-        super(ThresholdEvaluator, self).__init__(conf, notifier)
+    def __init__(self, conf):
+        super(ThresholdEvaluator, self).__init__(conf)
         auth_config = conf.service_credentials
         self._client = ceiloclient.get_client(
             2,

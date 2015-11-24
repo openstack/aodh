@@ -19,6 +19,7 @@ from oslo_utils import timeutils
 from oslotest import base
 
 from aodh import evaluator
+from aodh import queue
 
 
 class TestEvaluatorBaseClass(base.BaseTestCase):
@@ -30,15 +31,16 @@ class TestEvaluatorBaseClass(base.BaseTestCase):
         self.called = True
         raise Exception('Boom!')
 
-    def test_base_refresh(self):
-        notifier = mock.MagicMock()
+    @mock.patch.object(queue, 'AlarmNotifier')
+    def test_base_refresh(self, notifier):
         notifier.notify = self._notify
 
         class EvaluatorSub(evaluator.Evaluator):
             def evaluate(self, alarm):
                 pass
 
-        ev = EvaluatorSub(mock.MagicMock(), notifier)
+        ev = EvaluatorSub(mock.MagicMock())
+        ev.notifier = notifier
         ev.storage_conn = mock.MagicMock()
         ev._record_change = mock.MagicMock()
         ev._refresh(mock.MagicMock(), mock.MagicMock(),

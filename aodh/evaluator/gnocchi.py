@@ -33,8 +33,8 @@ OPTS = [
 
 class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
 
-    def __init__(self, conf, notifier):
-        super(threshold.ThresholdEvaluator, self).__init__(conf, notifier)
+    def __init__(self, conf):
+        super(threshold.ThresholdEvaluator, self).__init__(conf)
         self.gnocchi_url = conf.gnocchi_url
 
     def _get_headers(self, content_type="application/json"):

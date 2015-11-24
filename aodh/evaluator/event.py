@@ -150,8 +150,8 @@ class Alarm(object):
 
 class EventAlarmEvaluator(evaluator.Evaluator):
 
-    def __init__(self, conf, notifier):
-        super(EventAlarmEvaluator, self).__init__(conf, notifier)
+    def __init__(self, conf):
+        super(EventAlarmEvaluator, self).__init__(conf)
         self.caches = {}
 
     def evaluate_events(self, events):

@@ -29,8 +29,9 @@ class TestEvaluatorBase(base.BaseTestCase):
         self.api_client = mock.Mock()
         self.useFixture(mockpatch.Patch('ceilometerclient.client.get_client',
                                         return_value=self.api_client))
+        self.evaluator = self.EVALUATOR(self.conf)
         self.notifier = mock.MagicMock()
-        self.evaluator = self.EVALUATOR(self.conf, self.notifier)
+        self.evaluator.notifier = self.notifier
         self.storage_conn = mock.MagicMock()
         self.evaluator.storage_conn = self.storage_conn
         self.evaluator._ks_client = mock.Mock(user_id='fake_user_id',
