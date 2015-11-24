@@ -125,7 +125,6 @@ class TestBase(test_base.BaseTestCase):
     DRIVER_MANAGERS = {
         'mongodb': MongoDbManager,
         'mysql': MySQLManager,
-        'mysql+pymysql': MySQLManager,
         'postgresql': PgSQLManager,
         'sqlite': SQLiteManager,
     }
@@ -136,6 +135,9 @@ class TestBase(test_base.BaseTestCase):
         super(TestBase, self).setUp()
         db_url = os.environ.get('AODH_TEST_STORAGE_URL', 'sqlite://')
         engine = urlparse.urlparse(db_url).scheme
+        # In case some drivers have additional specification, for example:
+        # PyMySQL will have scheme mysql+pymysql.
+        engine = engine.split('+')[0]
 
         # NOTE(Alexei_987) Shortcut to skip expensive db setUp
         test_method = self._get_test_method()
