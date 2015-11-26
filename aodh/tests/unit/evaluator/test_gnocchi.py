@@ -198,7 +198,7 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self.requests.post.side_effect = [avgs2]
         self._evaluate_all_alarms()
 
-        expected_headers = {'X-Auth-Token': 'fake_token',
+        expected_headers = {'X-Auth-Token': mock.ANY,
                             'Content-Type': 'application/json'}
 
         start_alarm1 = "2015-01-26T12:51:00"

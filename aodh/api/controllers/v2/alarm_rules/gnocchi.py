@@ -63,7 +63,7 @@ class AlarmGnocchiThresholdRule(base.AlarmRule):
         ks_client = keystone_client.get_client(pecan.request.cfg)
         gnocchi_url = pecan.request.cfg.gnocchi_url
         headers = {'Content-Type': "application/json",
-                   'X-Auth-Token': ks_client.auth_token}
+                   'X-Auth-Token': keystone_client.get_auth_token(ks_client)}
         try:
             r = requests.get("%s/v1/capabilities" % gnocchi_url,
                              headers=headers)
@@ -103,7 +103,7 @@ class MetricOfResourceRule(AlarmGnocchiThresholdRule):
         ks_client = keystone_client.get_client(pecan.request.cfg)
         gnocchi_url = pecan.request.cfg.gnocchi_url
         headers = {'Content-Type': "application/json",
-                   'X-Auth-Token': ks_client.auth_token}
+                   'X-Auth-Token': keystone_client.get_auth_token(ks_client)}
         try:
             r = requests.get("%s/v1/resource/%s/%s" % (
                 gnocchi_url, rule.resource_type,
@@ -168,7 +168,8 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
                 rule.resource_type,
                 rule.metric),
             'headers': {'Content-Type': "application/json",
-                        'X-Auth-Token': ks_client.auth_token},
+                        'X-Auth-Token': keystone_client.get_auth_token(
+                            ks_client)},
             'params': {'aggregation': rule.aggregation_method,
                        'needed_overlap': 0},
             'data': rule.query,

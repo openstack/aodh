@@ -34,7 +34,7 @@ class TrustRestAlarmNotifier(rest.RestAlarmNotifier):
                reason, reason_data):
         trust_id = action.username
 
-        client = keystone_client.get_v3_client(self.conf, trust_id)
+        client = keystone_client.get_client(self.conf, trust_id)
 
         # Remove the fake user
         netloc = action.netloc.split("@")[1]
@@ -44,7 +44,7 @@ class TrustRestAlarmNotifier(rest.RestAlarmNotifier):
         action = parse.SplitResult(scheme, netloc, action.path, action.query,
                                    action.fragment)
 
-        headers = {'X-Auth-Token': client.auth_token}
+        headers = {'X-Auth-Token': keystone_client.get_auth_token(client)}
         super(TrustRestAlarmNotifier, self).notify(
             action, alarm_id, alarm_name, severity, previous, current, reason,
             reason_data, headers)

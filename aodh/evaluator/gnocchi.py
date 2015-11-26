@@ -20,6 +20,7 @@ import requests
 
 from aodh.evaluator import threshold
 from aodh.i18n import _
+from aodh import keystone_client
 
 LOG = log.getLogger(__name__)
 
@@ -40,7 +41,7 @@ class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
     def _get_headers(self, content_type="application/json"):
         return {
             'Content-Type': content_type,
-            'X-Auth-Token': self.ks_client.auth_token,
+            'X-Auth-Token': keystone_client.get_auth_token(self.ks_client),
         }
 
     def _statistics(self, alarm, start, end):

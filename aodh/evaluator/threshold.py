@@ -25,6 +25,7 @@ from oslo_utils import timeutils
 from aodh import evaluator
 from aodh.evaluator import utils
 from aodh.i18n import _, _LW
+from aodh import keystone_client
 
 LOG = log.getLogger(__name__)
 
@@ -53,20 +54,13 @@ class ThresholdEvaluator(evaluator.Evaluator):
         if self._cm_client is None:
             auth_config = self.conf.service_credentials
             self._cm_client = ceiloclient.get_client(
-                2,
-                os_auth_url=auth_config.os_auth_url.replace('/v2.0', '/'),
-                os_region_name=auth_config.os_region_name,
-                os_tenant_name=auth_config.os_tenant_name,
-                os_password=auth_config.os_password,
-                os_username=auth_config.os_username,
-                os_cacert=auth_config.os_cacert,
-                os_endpoint_type=auth_config.os_endpoint_type,
-                insecure=auth_config.insecure,
-                timeout=self.conf.http_timeout,
-                os_user_domain_id=auth_config.os_user_domain_id,
-                os_project_name=auth_config.os_project_name,
-                os_project_domain_id=auth_config.os_project_domain_id,
+                version=2,
+                session=keystone_client.get_session(self.conf),
+                # ceiloclient adapter options
+                region_name=auth_config.region_name,
+                interface=auth_config.interface,
             )
+
         return self._cm_client
 
     @classmethod

@@ -14,7 +14,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import os
 import socket
 
 from oslo_config import cfg
@@ -23,6 +22,7 @@ import oslo_i18n
 from oslo_log import log
 from oslo_policy import opts as policy_opts
 
+from aodh import keystone_client
 from aodh import messaging
 
 
@@ -47,50 +47,6 @@ OPTS = [
 ]
 
 
-CLI_OPTS = [
-    cfg.StrOpt('os-username',
-               default=os.environ.get('OS_USERNAME', 'aodh'),
-               help='User name to use for OpenStack service access.'),
-    cfg.StrOpt('os-password',
-               secret=True,
-               default=os.environ.get('OS_PASSWORD', 'admin'),
-               help='Password to use for OpenStack service access.'),
-    cfg.StrOpt('os-tenant-id',
-               default=os.environ.get('OS_TENANT_ID', ''),
-               help='Tenant ID to use for OpenStack service access.'),
-    cfg.StrOpt('os-tenant-name',
-               default=os.environ.get('OS_TENANT_NAME', 'admin'),
-               help='Tenant name to use for OpenStack service access.'),
-    cfg.StrOpt('os-cacert',
-               default=os.environ.get('OS_CACERT'),
-               help='Certificate chain for SSL validation.'),
-    cfg.StrOpt('os-auth-url',
-               default=os.environ.get('OS_AUTH_URL',
-                                      'http://localhost:5000/v2.0'),
-               help='Auth URL to use for OpenStack service access.'),
-    cfg.StrOpt('os-region-name',
-               default=os.environ.get('OS_REGION_NAME'),
-               help='Region name to use for OpenStack service endpoints.'),
-    cfg.StrOpt('os-endpoint-type',
-               default=os.environ.get('OS_ENDPOINT_TYPE', 'publicURL'),
-               help='Type of endpoint in Identity service catalog to use for '
-                    'communication with OpenStack services.'),
-    cfg.BoolOpt('insecure',
-                default=False,
-                help='Disables X.509 certificate validation when an '
-                     'SSL connection to Identity Service is established.'),
-    cfg.StrOpt('os-user-domain-id',
-               default=os.environ.get('OS_USER_DOMAIN_ID', 'default'),
-               help='The domain id of the user'),
-    cfg.StrOpt('os-project-domain-id',
-               default=os.environ.get('OS_PROJECT_DOMAIN_ID', 'default'),
-               help='The domain id of the user project'),
-    cfg.StrOpt('os-project-name',
-               default=os.environ.get('OS_PROJECT_NAME', 'admin'),
-               help='The user project name'),
-]
-
-
 def prepare_service(argv=None, config_files=None):
     conf = cfg.ConfigOpts()
     oslo_i18n.enable_lazy()
@@ -105,9 +61,12 @@ def prepare_service(argv=None, config_files=None):
     for group, options in opts.list_opts():
         conf.register_opts(list(options),
                            group=None if group == "DEFAULT" else group)
+    keystone_client.register_keystoneauth_opts(conf)
 
     conf(argv, project='aodh', validate_default_values=True,
          default_config_files=config_files)
+
+    keystone_client.setup_keystoneauth(conf)
     log.setup(conf, 'aodh')
     messaging.setup()
     return conf
