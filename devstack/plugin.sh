@@ -128,9 +128,9 @@ function _aodh_create_accounts {
                 "alarming" "OpenStack Alarming Service")
             get_or_create_endpoint $aodh_service \
                 "$REGION_NAME" \
-                "$(aodh_service_url)/" \
-                "$(aodh_service_url)/" \
-                "$(aodh_service_url)/"
+                "$(aodh_service_url)" \
+                "$(aodh_service_url)" \
+                "$(aodh_service_url)"
         fi
     fi
 }
