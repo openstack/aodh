@@ -1,7 +1,5 @@
 #
-# Copyright 2013 eNovance <licensing@enovance.com>
-#
-# Authors: Mehdi Abaakouk <mehdi.abaakouk@enovance.com>
+# Copyright 2013-2015 eNovance <licensing@enovance.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,7 +14,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_context import context
 from oslo_log import log
 import six
 
@@ -36,7 +33,6 @@ LOG = log.getLogger(__name__)
 
 class RPCAlarmNotifier(object):
     def __init__(self, conf):
-        self.ctxt = context.get_admin_context()
         transport = messaging.get_transport(conf)
         self.client = messaging.get_rpc_client(
             transport, topic=conf.notifier_rpc_topic,
@@ -52,7 +48,7 @@ class RPCAlarmNotifier(object):
                        'previous': previous,
                        'state': alarm.state})
             return
-        self.client.cast(self.ctxt,
+        self.client.cast({},
                          'notify_alarm', data={
                              'actions': actions,
                              'alarm_id': alarm.alarm_id,

@@ -12,7 +12,6 @@
 # under the License.
 
 from oslo_config import cfg
-from oslo_context import context
 from oslo_log import log
 import oslo_messaging
 import six
@@ -32,7 +31,6 @@ LOG = log.getLogger(__name__)
 
 class AlarmNotifier(object):
     def __init__(self, conf):
-        self.ctxt = context.get_admin_context().to_dict()
         self.notifier = oslo_messaging.Notifier(
             messaging.get_transport(conf),
             driver='messagingv2',
@@ -57,4 +55,4 @@ class AlarmNotifier(object):
                    'current': alarm.state,
                    'reason': six.text_type(reason),
                    'reason_data': reason_data}
-        self.notifier.sample(self.ctxt, 'alarm.update', payload)
+        self.notifier.sample({}, 'alarm.update', payload)

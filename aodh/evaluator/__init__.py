@@ -1,7 +1,5 @@
 #
-# Copyright 2013 eNovance <licensing@enovance.com>
-#
-# Authors: Mehdi Abaakouk <mehdi.abaakouk@enovance.com>
+# Copyright 2013-2015 eNovance <licensing@enovance.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -22,7 +20,6 @@ import json
 
 import croniter
 from oslo_config import cfg
-from oslo_context import context
 from oslo_log import log
 from oslo_service import service as os_service
 from oslo_utils import timeutils
@@ -109,7 +106,7 @@ class Evaluator(object):
             self._alarm_change_notifier = messaging.get_notifier(
                 transport, publisher_id="aodh.evaluator")
         notification = "alarm.state_transition"
-        self._alarm_change_notifier.info(context.RequestContext(),
+        self._alarm_change_notifier.info({},
                                          notification, payload)
 
     def _refresh(self, alarm, state, reason, reason_data):
