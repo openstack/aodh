@@ -1,0 +1,4 @@
+---
+features:
+  - >
+    Remove eventlet from Aodh in favour of threaded approach

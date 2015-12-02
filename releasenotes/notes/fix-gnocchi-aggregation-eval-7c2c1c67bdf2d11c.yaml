@@ -1,0 +1,6 @@
+---
+fixes:
+  - >
+    [`bug 1513738 <https://bugs.launchpad.net/aodh/+bug/1513738>`_]
+    Fix an issue where alarms using Gnocchi aggregations are not being
+    evaluated.

@@ -1,0 +1,6 @@
+---
+fixes:
+  - >
+    [`bug 1511252 <https://bugs.launchpad.net/aodh/+bug/1511252>`_]
+    Fix an issue with combination alarms where it fails to evaluate
+    all issues in the chain of alarms.

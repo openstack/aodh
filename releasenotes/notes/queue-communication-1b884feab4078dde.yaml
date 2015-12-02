@@ -1,0 +1,16 @@
+---
+features:
+  - >
+    Support for queue based communication between alarm evaluator service and
+    alarm notifier services was added. Original implementation involved using
+    RPC but there is significant overhead involved with using RPC. Work queues
+    provided required functionality with better performance.
+upgrade:
+  - >
+    Queue based communication is the new default IPC protocol. RPC can still
+    be used by choosing rpc as ipc_protocol option. Only one protocol can be
+    run at any given time.
+deprecations:
+  - >
+    Because queues provide the equivalent functionality. RPC support is
+    deprecated and will be removed after Mitaka.

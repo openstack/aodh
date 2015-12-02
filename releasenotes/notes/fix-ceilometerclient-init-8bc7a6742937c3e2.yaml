@@ -1,0 +1,5 @@
+---
+fixes:
+  - >
+    [`bug 1518447 <https://bugs.launchpad.net/aodh/+bug/1518447>`_]
+    Fix to ensure ceilometerclient is properly initialised on startup.
