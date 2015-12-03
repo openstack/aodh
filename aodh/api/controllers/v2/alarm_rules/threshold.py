@@ -58,8 +58,7 @@ class AlarmThresholdRule(base.AlarmRule):
     "Whether datapoints with anomalously low sample counts are excluded"
 
     def __init__(self, query=None, **kwargs):
-        if query:
-            query = [base.Query(**q) for q in query]
+        query = [base.Query(**q) for q in query] if query else []
         super(AlarmThresholdRule, self).__init__(query=query, **kwargs)
 
     @staticmethod

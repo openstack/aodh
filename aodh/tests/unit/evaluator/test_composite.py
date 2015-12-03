@@ -39,7 +39,7 @@ class TestEvaluate(base.TestEvaluatorBase):
         "threshold": 0.8,
         "query": [{
             "field": "metadata.metering.stack_id",
-            "value": "36b20eb3-d749-4964-a7d2-a71147cd8147",
+            "value": "36b20eb3-d749-4964-a7d2-a71147cd8145",
             "op": "eq"
         }],
         "statistic": "avg",
@@ -55,7 +55,7 @@ class TestEvaluate(base.TestEvaluatorBase):
         "threshold": 200,
         "query": [{
             "field": "metadata.metering.stack_id",
-            "value": "36b20eb3-d749-4964-a7d2-a71147cd8147",
+            "value": "36b20eb3-d749-4964-a7d2-a71147cd8145",
             "op": "eq"
         }],
         "statistic": "max",
@@ -71,7 +71,7 @@ class TestEvaluate(base.TestEvaluatorBase):
         "threshold": 1000,
         "query": [{
             "field": "metadata.metering.stack_id",
-            "value": "36b20eb3-d749-4964-a7d2-a71147cd8147",
+            "value": "36b20eb3-d749-4964-a7d2-a71147cd8145",
             "op": "eq"
         }],
         "statistic": "avg",

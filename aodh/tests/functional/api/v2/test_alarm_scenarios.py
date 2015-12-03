@@ -3085,3 +3085,158 @@ class TestAlarmsEvent(TestAlarmsBase):
                 break
         else:
             self.fail("Alarm not found")
+
+
+class TestAlarmsCompositeRule(TestAlarmsBase):
+
+    def setUp(self):
+        super(TestAlarmsCompositeRule, self).setUp()
+        self.sub_rule1 = {
+            "type": "threshold",
+            "meter_name": "cpu_util",
+            "evaluation_periods": 5,
+            "threshold": 0.8,
+            "query": [{
+                "field": "metadata.metering.stack_id",
+                "value": "36b20eb3-d749-4964-a7d2-a71147cd8147",
+                "op": "eq"
+            }],
+            "statistic": "avg",
+            "period": 60,
+            "exclude_outliers": False,
+            "comparison_operator": "gt"
+        }
+        self.sub_rule2 = {
+            "type": "threshold",
+            "meter_name": "disk.iops",
+            "evaluation_periods": 4,
+            "threshold": 200,
+            "query": [{
+                "field": "metadata.metering.stack_id",
+                "value": "36b20eb3-d749-4964-a7d2-a71147cd8147",
+                "op": "eq"
+            }],
+            "statistic": "max",
+            "period": 60,
+            "exclude_outliers": False,
+            "comparison_operator": "gt"
+        }
+        self.sub_rule3 = {
+            "type": "threshold",
+            "meter_name": "network.incoming.packets.rate",
+            "evaluation_periods": 3,
+            "threshold": 1000,
+            "query": [{
+                "field": "metadata.metering.stack_id",
+                "value":
+                    "36b20eb3-d749-4964-a7d2-a71147cd8147",
+                "op": "eq"
+            }],
+            "statistic": "avg",
+            "period": 60,
+            "exclude_outliers": False,
+            "comparison_operator": "gt"
+        }
+
+        self.rule = {
+            "or": [self.sub_rule1,
+                   {
+                       "and": [self.sub_rule2, self.sub_rule3]
+                   }]}
+
+    def test_list_alarms(self):
+        alarm = models.Alarm(name='composite_alarm',
+                             type='composite',
+                             enabled=True,
+                             alarm_id='composite',
+                             description='composite',
+                             state='insufficient data',
+                             severity='moderate',
+                             state_timestamp=constants.MIN_DATETIME,
+                             timestamp=constants.MIN_DATETIME,
+                             ok_actions=[],
+                             insufficient_data_actions=[],
+                             alarm_actions=[],
+                             repeat_actions=False,
+                             user_id=self.auth_headers['X-User-Id'],
+                             project_id=self.auth_headers['X-Project-Id'],
+                             time_constraints=[],
+                             rule=self.rule,
+                             )
+        self.alarm_conn.update_alarm(alarm)
+
+        data = self.get_json('/alarms', headers=self.auth_headers)
+        self.assertEqual(1, len(data))
+        self.assertEqual(set(['composite_alarm']),
+                         set(r['name'] for r in data))
+        self.assertEqual(self.rule, data[0]['composite_rule'])
+
+    def test_post_with_composite_rule(self):
+        json = {
+            "type": "composite",
+            "name": "composite_alarm",
+            "composite_rule": self.rule,
+            "repeat_actions": False
+        }
+        self.post_json('/alarms', params=json, status=201,
+                       headers=self.auth_headers)
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(1, len(alarms))
+        self.assertEqual(self.rule, alarms[0].rule)
+
+    def test_post_with_sub_rule_with_wrong_type(self):
+        self.sub_rule1['type'] = 'non-type'
+        json = {
+            "type": "composite",
+            "name": "composite_alarm",
+            "composite_rule": self.rule,
+            "repeat_actions": False
+        }
+        response = self.post_json('/alarms', params=json, status=400,
+                                  expect_errors=True,
+                                  headers=self.auth_headers)
+
+        err = ("Unsupported sub-rule type :non-type in composite "
+               "rule, should be one of: "
+               "['gnocchi_aggregation_by_metrics_threshold', "
+               "'gnocchi_aggregation_by_resources_threshold', "
+               "'gnocchi_resources_threshold', 'threshold']")
+        faultstring = response.json['error_message']['faultstring']
+        self.assertEqual(err, faultstring)
+
+    def test_post_with_sub_rule_with_only_required_params(self):
+        sub_rulea = {
+            "meter_name": "cpu_util",
+            "threshold": 0.8,
+            "type": "threshold"}
+        sub_ruleb = {
+            "meter_name": "disk.iops",
+            "threshold": 200,
+            "type": "threshold"}
+        json = {
+            "type": "composite",
+            "name": "composite_alarm",
+            "composite_rule": {"and": [sub_rulea, sub_ruleb]},
+            "repeat_actions": False
+        }
+        self.post_json('/alarms', params=json, status=201,
+                       headers=self.auth_headers)
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(1, len(alarms))
+
+    def test_post_with_sub_rule_with_invalid_params(self):
+        self.sub_rule1['threshold'] = False
+        json = {
+            "type": "composite",
+            "name": "composite_alarm",
+            "composite_rule": self.rule,
+            "repeat_actions": False
+        }
+        response = self.post_json('/alarms', params=json, status=400,
+                                  expect_errors=True,
+                                  headers=self.auth_headers)
+        faultstring = ("Invalid input for field/attribute threshold. "
+                       "Value: 'False'. Wrong type. Expected '<type '"
+                       "float'>', got '<type 'bool'>'")
+        self.assertEqual(faultstring,
+                         response.json['error_message']['faultstring'])
