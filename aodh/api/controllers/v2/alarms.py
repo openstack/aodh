@@ -510,15 +510,23 @@ class AlarmController(rest.RestController):
         pecan.request.context['alarm_id'] = alarm_id
         self._id = alarm_id
 
-    def _alarm(self):
+    def _alarm(self, rbac_directive):
         self.conn = pecan.request.alarm_storage_conn
+
+        # TODO(sileht): We should be able to relax this since we
+        # pass the alarm object to the enforcer.
         auth_project = rbac.get_limited_to_project(pecan.request.headers,
                                                    pecan.request.enforcer)
         alarms = list(self.conn.get_alarms(alarm_id=self._id,
                                            project=auth_project))
         if not alarms:
             raise base.AlarmNotFound(alarm=self._id, auth_project=auth_project)
-        return alarms[0]
+        alarm = alarms[0]
+        target = {'user_id': alarm.user_id,
+                  'project_id': alarm.project_id}
+        rbac.enforce(rbac_directive, pecan.request.headers,
+                     pecan.request.enforcer, target)
+        return alarm
 
     def _record_change(self, data, now, on_behalf_of=None, type=None):
         if not pecan.request.cfg.record_history:
@@ -552,11 +560,7 @@ class AlarmController(rest.RestController):
     @wsme_pecan.wsexpose(Alarm)
     def get(self):
         """Return this alarm."""
-
-        rbac.enforce('get_alarm', pecan.request.headers,
-                     pecan.request.enforcer)
-
-        return Alarm.from_db_model(self._alarm())
+        return Alarm.from_db_model(self._alarm('get_alarm'))
 
     @wsme_pecan.wsexpose(Alarm, body=Alarm)
     def put(self, data):
@@ -565,11 +569,8 @@ class AlarmController(rest.RestController):
         :param data: an alarm within the request body.
         """
 
-        rbac.enforce('change_alarm', pecan.request.headers,
-                     pecan.request.enforcer)
-
         # Ensure alarm exists
-        alarm_in = self._alarm()
+        alarm_in = self._alarm('change_alarm')
 
         now = timeutils.utcnow()
 
@@ -624,11 +625,8 @@ class AlarmController(rest.RestController):
     def delete(self):
         """Delete this alarm."""
 
-        rbac.enforce('delete_alarm', pecan.request.headers,
-                     pecan.request.enforcer)
-
         # ensure alarm exists before deleting
-        alarm = self._alarm()
+        alarm = self._alarm('delete_alarm')
         self.conn.delete_alarm(alarm.alarm_id)
         alarm_object = Alarm.from_db_model(alarm)
         alarm_object.delete_actions()
@@ -640,8 +638,10 @@ class AlarmController(rest.RestController):
         :param q: Filter rules for the changes to be described.
         """
 
+        target = rbac.target_from_segregation_rule(
+            pecan.request.headers, pecan.request.enforcer)
         rbac.enforce('alarm_history', pecan.request.headers,
-                     pecan.request.enforcer)
+                     pecan.request.enforcer, target)
 
         q = q or []
         # allow history to be returned for deleted alarms, but scope changes
@@ -664,15 +664,13 @@ class AlarmController(rest.RestController):
         :param state: an alarm state within the request body.
         """
 
-        rbac.enforce('change_alarm_state', pecan.request.headers,
-                     pecan.request.enforcer)
+        alarm = self._alarm('change_alarm_state')
 
         # note(sileht): body are not validated by wsme
         # Workaround for https://bugs.launchpad.net/wsme/+bug/1227229
         if state not in state_kind:
             raise base.ClientSideError(_("state invalid"))
         now = timeutils.utcnow()
-        alarm = self._alarm()
         alarm.state = state
         alarm.state_timestamp = now
         alarm = self.conn.update_alarm(alarm)
@@ -684,12 +682,7 @@ class AlarmController(rest.RestController):
     @wsme_pecan.wsexpose(state_kind_enum)
     def get_state(self):
         """Get the state of this alarm."""
-
-        rbac.enforce('get_alarm_state', pecan.request.headers,
-                     pecan.request.enforcer)
-
-        alarm = self._alarm()
-        return alarm.state
+        return self._alarm('get_alarm_state').state
 
 
 class AlarmsController(rest.RestController):
@@ -735,7 +728,7 @@ class AlarmsController(rest.RestController):
         :param data: an alarm within the request body.
         """
         rbac.enforce('create_alarm', pecan.request.headers,
-                     pecan.request.enforcer)
+                     pecan.request.enforcer, {})
 
         conn = pecan.request.alarm_storage_conn
         now = timeutils.utcnow()
@@ -797,9 +790,10 @@ class AlarmsController(rest.RestController):
 
         :param q: Filter rules for the alarms to be returned.
         """
-
+        target = rbac.target_from_segregation_rule(
+            pecan.request.headers, pecan.request.enforcer)
         rbac.enforce('get_alarms', pecan.request.headers,
-                     pecan.request.enforcer)
+                     pecan.request.enforcer, target)
 
         q = q or []
         # Timestamp is not supported field for Simple Alarm queries

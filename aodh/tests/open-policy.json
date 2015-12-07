@@ -1,0 +1,5 @@
+{
+    "context_is_admin": "role:admin",
+    "segregation": "rule:context_is_admin",
+    "default": ""
+}

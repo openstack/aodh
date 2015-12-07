@@ -16,13 +16,11 @@
 """Base classes for API tests.
 """
 
-import json
+import os
 
 from oslo_config import fixture as fixture_config
-from oslo_utils import fileutils
 import pecan
 import pecan.testing
-import six
 
 from aodh import service
 from aodh.tests.functional import db as db_test_base
@@ -43,21 +41,8 @@ class FunctionalTest(db_test_base.TestBase):
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
 
-        policies = json.dumps({
-            "context_is_admin": "role:admin",
-            "context_is_project": "project_id:%(target.project_id)s",
-            "context_is_owner": "user_id:%(target.user_id)s",
-            "segregation": "rule:context_is_admin",
-            "default": ""
-        })
-        if six.PY3:
-            policies = policies.encode('utf-8')
-
-        self.CONF.set_override("policy_file",
-                               fileutils.write_to_tempfile(
-                                   content=policies,
-                                   prefix='policy',
-                                   suffix='.json'),
+        self.CONF.set_override('policy_file',
+                               os.path.abspath('etc/aodh/policy.json'),
                                group='oslo_policy')
         self.app = self._make_app()
 

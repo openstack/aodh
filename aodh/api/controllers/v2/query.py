@@ -349,9 +349,10 @@ class QueryAlarmHistoryController(rest.RestController):
 
         :param body: Query rules for the alarm history to be returned.
         """
-
+        target = rbac.target_from_segregation_rule(
+            pecan.request.headers, pecan.request.enforcer)
         rbac.enforce('query_alarm_history', pecan.request.headers,
-                     pecan.request.enforcer)
+                     pecan.request.enforcer, target)
 
         query = ValidatedComplexQuery(body,
                                       models.AlarmChange)
@@ -374,8 +375,10 @@ class QueryAlarmsController(rest.RestController):
         :param body: Query rules for the alarms to be returned.
         """
 
+        target = rbac.target_from_segregation_rule(
+            pecan.request.headers, pecan.request.enforcer)
         rbac.enforce('query_alarm', pecan.request.headers,
-                     pecan.request.enforcer)
+                     pecan.request.enforcer, target)
 
         query = ValidatedComplexQuery(body,
                                       models.Alarm)

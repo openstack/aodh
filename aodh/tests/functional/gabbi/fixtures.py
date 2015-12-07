@@ -15,7 +15,6 @@
 
 """Fixtures used during Gabbi-based test runs."""
 
-import json
 import os
 from unittest import case
 import uuid
@@ -24,8 +23,6 @@ from gabbi import fixture
 import mock
 from oslo_config import fixture as fixture_config
 from oslo_policy import opts
-from oslo_utils import fileutils
-import six
 from six.moves.urllib import parse as urlparse
 
 from aodh import service
@@ -70,22 +67,10 @@ class ConfigFixture(fixture.GabbiFixture):
         self.conf = conf
         opts.set_defaults(self.conf)
 
-        policies = json.dumps({
-            "context_is_admin": "role:admin",
-            "context_is_project": "project_id:%(target.project_id)s",
-            "context_is_owner": "user_id:%(target.user_id)s",
-            "segregation": "rule:context_is_admin",
-            "default": ""
-        })
-        if six.PY3:
-            policies = policies.encode('utf-8')
-
-        self.conf.set_override("policy_file",
-                               fileutils.write_to_tempfile(
-                                   content=policies,
-                                   prefix='policy',
-                                   suffix='.json'),
-                               group='oslo_policy')
+        conf.set_override('policy_file',
+                          os.path.abspath(
+                              'aodh/tests/open-policy.json'),
+                          group='oslo_policy')
 
         database_name = '%s-%s' % (db_url, str(uuid.uuid4()))
         conf.set_override('connection', database_name, group='database')

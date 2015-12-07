@@ -99,7 +99,7 @@ class BinApiTestCase(base.BaseTestCase):
         # create aodh.conf file
         self.api_port = random.randint(10000, 11000)
         self.pipeline_cfg_file = self.path_get('etc/aodh/pipeline.yaml')
-        self.policy_file = self.path_get('etc/aodh/policy.json')
+        self.policy_file = self.path_get('aodh/tests/open-policy.json')
 
     def tearDown(self):
         super(BinApiTestCase, self).tearDown()
