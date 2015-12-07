@@ -25,7 +25,7 @@ class ConfigHook(hooks.PecanHook):
 
     def __init__(self, conf):
         self.conf = conf
-        self.enforcer = policy.Enforcer(conf)
+        self.enforcer = policy.Enforcer(conf, default_rule="default")
 
     def before(self, state):
         state.request.cfg = self.conf

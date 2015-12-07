@@ -15,6 +15,7 @@
 """Tests alarm operation."""
 
 import datetime
+import os
 import uuid
 
 import mock
@@ -163,14 +164,15 @@ class TestAlarmsBase(v2.FunctionalTest,
                 storage_key = key
             self.assertEqual(json[key], getattr(alarm, storage_key))
 
-    def _get_alarm(self, id):
-        data = self.get_json('/alarms')
+    def _get_alarm(self, id, auth_headers=None):
+        data = self.get_json('/alarms',
+                             headers=auth_headers or self.auth_headers)
         match = [a for a in data if a['alarm_id'] == id]
         self.assertEqual(1, len(match), 'alarm %s not found' % id)
         return match[0]
 
     def _update_alarm(self, id, updated_data, auth_headers=None):
-        data = self._get_alarm(id)
+        data = self._get_alarm(id, auth_headers)
         data.update(updated_data)
         self.put_json('/alarms/%s' % id,
                       params=data,
@@ -185,7 +187,7 @@ class TestAlarmsBase(v2.FunctionalTest,
 class TestListEmptyAlarms(TestAlarmsBase):
 
     def test_empty(self):
-        data = self.get_json('/alarms')
+        data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual([], data)
 
 
@@ -197,7 +199,7 @@ class TestAlarms(TestAlarmsBase):
             self.alarm_conn.update_alarm(alarm)
 
     def test_list_alarms(self):
-        data = self.get_json('/alarms')
+        data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(4, len(data))
         self.assertEqual(set(['name1', 'name2', 'name3', 'name4']),
                          set(r['name'] for r in data))
@@ -212,6 +214,7 @@ class TestAlarms(TestAlarmsBase):
         date_time = datetime.datetime(2012, 7, 2, 10, 41)
         isotime = date_time.isoformat()
         resp = self.get_json('/alarms',
+                             headers=self.auth_headers,
                              q=[{'field': 'timestamp',
                                  'op': 'gt',
                                  'value': isotime}],
@@ -224,6 +227,7 @@ class TestAlarms(TestAlarmsBase):
 
     def test_alarms_query_with_meter(self):
         resp = self.get_json('/alarms',
+                             headers=self.auth_headers,
                              q=[{'field': 'meter',
                                  'op': 'eq',
                                  'value': 'meter.mine'}],
@@ -256,6 +260,7 @@ class TestAlarms(TestAlarmsBase):
                              severity='critical')
         self.alarm_conn.update_alarm(alarm)
         resp = self.get_json('/alarms',
+                             headers=self.auth_headers,
                              q=[{'field': 'state',
                                  'op': 'eq',
                                  'value': 'ok'}],
@@ -265,6 +270,7 @@ class TestAlarms(TestAlarmsBase):
 
     def test_list_alarms_by_type(self):
         alarms = self.get_json('/alarms',
+                               headers=self.auth_headers,
                                q=[{'field': 'type',
                                    'op': 'eq',
                                    'value': 'threshold'}])
@@ -273,14 +279,18 @@ class TestAlarms(TestAlarmsBase):
                          set(alarm['type'] for alarm in alarms))
 
     def test_get_not_existing_alarm(self):
-        resp = self.get_json('/alarms/alarm-id-3', expect_errors=True)
+        resp = self.get_json('/alarms/alarm-id-3',
+                             headers=self.auth_headers,
+                             expect_errors=True)
         self.assertEqual(404, resp.status_code)
-        self.assertEqual('Alarm alarm-id-3 not found',
+        self.assertEqual('Alarm alarm-id-3 not found in project %s' %
+                         self.auth_headers["X-Project-Id"],
                          jsonutils.loads(resp.body)['error_message']
                          ['faultstring'])
 
     def test_get_alarm(self):
         alarms = self.get_json('/alarms',
+                               headers=self.auth_headers,
                                q=[{'field': 'name',
                                    'value': 'name1',
                                    }])
@@ -288,7 +298,8 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual('meter.test',
                          alarms[0]['threshold_rule']['meter_name'])
 
-        one = self.get_json('/alarms/%s' % alarms[0]['alarm_id'])
+        one = self.get_json('/alarms/%s' % alarms[0]['alarm_id'],
+                            headers=self.auth_headers)
         self.assertEqual('name1', one['name'])
         self.assertEqual('meter.test', one['threshold_rule']['meter_name'])
         self.assertEqual(alarms[0]['alarm_id'], one['alarm_id'])
@@ -317,12 +328,14 @@ class TestAlarms(TestAlarmsBase):
         self.alarm_conn.update_alarm(alarm)
 
         alarms = self.get_json('/alarms',
+                               headers=self.auth_headers,
                                q=[{'field': 'enabled',
                                    'value': 'False'}])
         self.assertEqual(1, len(alarms))
         self.assertEqual('disabled', alarms[0]['name'])
 
-        one = self.get_json('/alarms/%s' % alarms[0]['alarm_id'])
+        one = self.get_json('/alarms/%s' % alarms[0]['alarm_id'],
+                            headers=self.auth_headers)
         self.assertEqual('disabled', one['name'])
 
     def test_get_alarm_project_filter_wrong_op_normal_user(self):
@@ -350,6 +363,7 @@ class TestAlarms(TestAlarmsBase):
 
         def _test(field):
             alarms = self.get_json('/alarms',
+                                   headers=self.auth_headers,
                                    q=[{'field': field,
                                        'op': 'eq',
                                        'value': project}])
@@ -373,6 +387,20 @@ class TestAlarms(TestAlarmsBase):
 
         _test('project')
         _test('project_id')
+
+    def test_get_alarm_forbiden(self):
+        pf = os.path.abspath('aodh/tests/functional/api/v2/policy.json-test')
+        self.CONF.set_override('policy_file', pf, group='oslo_policy')
+        self.app = self._make_app()
+
+        response = self.get_json('/alarms',
+                                 expect_errors=True,
+                                 status=403,
+                                 headers=self.auth_headers)
+        faultstring = 'RBAC Authorization Failed'
+        self.assertEqual(403, response.status_code)
+        self.assertEqual(faultstring,
+                         response.json['error_message']['faultstring'])
 
     def test_post_alarm_wsme_workaround(self):
         jsons = {
@@ -1345,6 +1373,7 @@ class TestAlarms(TestAlarmsBase):
             }
         }
         data = self.get_json('/alarms',
+                             headers=self.auth_headers,
                              q=[{'field': 'name',
                                  'value': 'name1',
                                  }])
@@ -1436,6 +1465,7 @@ class TestAlarms(TestAlarmsBase):
             }
         }
         data = self.get_json('/alarms',
+                             headers=self.auth_headers,
                              q=[{'field': 'name',
                                  'value': 'name1',
                                  }])
@@ -1474,6 +1504,7 @@ class TestAlarms(TestAlarmsBase):
             }
         }
         data = self.get_json('/alarms',
+                             headers=self.auth_headers,
                              q=[{'field': 'name',
                                  'value': 'name2',
                                  }])
@@ -1513,6 +1544,7 @@ class TestAlarms(TestAlarmsBase):
             }
         }
         data = self.get_json('/alarms',
+                             headers=self.auth_headers,
                              q=[{'field': 'name',
                                  'value': 'name2',
                                  }])
@@ -1561,7 +1593,7 @@ class TestAlarms(TestAlarmsBase):
             ['http://no-trust-something/ok'], data['ok_actions'])
 
     def test_delete_alarm(self):
-        data = self.get_json('/alarms')
+        data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(4, len(data))
 
         resp = self.delete('/alarms/%s' % data[0]['alarm_id'],
@@ -1572,7 +1604,7 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(3, len(alarms))
 
     def test_get_state_alarm(self):
-        data = self.get_json('/alarms')
+        data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(4, len(data))
 
         resp = self.get_json('/alarms/%s/state' % data[0]['alarm_id'],
@@ -1580,7 +1612,7 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(resp, data[0]['state'])
 
     def test_set_state_alarm(self):
-        data = self.get_json('/alarms')
+        data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(4, len(data))
 
         resp = self.put_json('/alarms/%s/state' % data[0]['alarm_id'],
@@ -1592,7 +1624,7 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual('alarm', resp.json)
 
     def test_set_invalid_state_alarm(self):
-        data = self.get_json('/alarms')
+        data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(4, len(data))
 
         self.put_json('/alarms/%s/state' % data[0]['alarm_id'],
@@ -1785,6 +1817,7 @@ class TestAlarmsHistory(TestAlarmsBase):
                        headers=self.auth_headers)
 
         alarms = self.get_json('/alarms',
+                               headers=self.auth_headers,
                                q=[{'field': 'name',
                                    'value': 'new_alarm',
                                    }])
@@ -2041,7 +2074,7 @@ class TestAlarmsQuotas(TestAlarmsBase):
         resp = self.post_json('/alarms', params=alarm,
                               headers=self.auth_headers)
         self.assertEqual(201, resp.status_code)
-        alarms = self.get_json('/alarms')
+        alarms = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(1, len(alarms))
 
         alarm['name'] = 'another_user_alarm'
@@ -2053,7 +2086,7 @@ class TestAlarmsQuotas(TestAlarmsBase):
         self.assertIn(faultstring,
                       resp.json['error_message']['faultstring'])
 
-        alarms = self.get_json('/alarms')
+        alarms = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(1, len(alarms))
 
     def test_alarms_quotas(self):
@@ -2089,7 +2122,8 @@ class TestAlarmsQuotas(TestAlarmsBase):
                 'op': 'eq',
                 'value': value
             }]
-            alarms = self.get_json('/alarms', q=query)
+            alarms = self.get_json('/alarms', q=query,
+                                   headers=self.auth_headers)
             self.assertEqual(1, len(alarms))
 
         alarm = {
@@ -2123,7 +2157,8 @@ class TestAlarmsQuotas(TestAlarmsBase):
         self.assertEqual(201, resp.status_code)
         _test('project_id', self.auth_headers['X-Project-Id'])
 
-        alarms = self.get_json('/alarms')
+        self.auth_headers["X-roles"] = "admin"
+        alarms = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(2, len(alarms))
 
 
@@ -2335,6 +2370,7 @@ class TestAlarmsRuleCombination(TestAlarmsBase):
 
     def test_get_alarm_combination(self):
         alarms = self.get_json('/alarms',
+                               headers=self.auth_headers,
                                q=[{'field': 'name',
                                    'value': 'name4',
                                    }])
@@ -2343,7 +2379,8 @@ class TestAlarmsRuleCombination(TestAlarmsBase):
                          alarms[0]['combination_rule']['alarm_ids'])
         self.assertEqual('or', alarms[0]['combination_rule']['operator'])
 
-        one = self.get_json('/alarms/%s' % alarms[0]['alarm_id'])
+        one = self.get_json('/alarms/%s' % alarms[0]['alarm_id'],
+                            headers=self.auth_headers)
         self.assertEqual('name4', one['name'])
         self.assertEqual(['a', 'b'],
                          alarms[0]['combination_rule']['alarm_ids'])
@@ -2623,6 +2660,7 @@ class TestAlarmsRuleCombination(TestAlarmsBase):
         }
 
         data = self.get_json('/alarms',
+                             headers=self.auth_headers,
                              q=[{'field': 'name',
                                  'value': 'name4',
                                  }])
@@ -2648,6 +2686,7 @@ class TestAlarmsRuleCombination(TestAlarmsBase):
         }
 
         data = self.get_json('/alarms',
+                             headers=self.auth_headers,
                              q=[{'field': 'name',
                                  'value': 'name4',
                                  }])
@@ -2675,6 +2714,7 @@ class TestAlarmsRuleCombination(TestAlarmsBase):
     def test_put_combination_alarm_with_duplicate_ids(self):
         """Test combination alarm doesn't allow duplicate alarm ids."""
         alarms = self.get_json('/alarms',
+                               headers=self.auth_headers,
                                q=[{'field': 'name',
                                    'value': 'name4',
                                    }])
@@ -2787,7 +2827,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
             self.alarm_conn.update_alarm(alarm)
 
     def test_list_alarms(self):
-        data = self.get_json('/alarms')
+        data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(3, len(data))
         self.assertEqual(set(['name1', 'name2', 'name3']),
                          set(r['name'] for r in data))
@@ -2983,7 +3023,7 @@ class TestAlarmsEvent(TestAlarmsBase):
                              )
         self.alarm_conn.update_alarm(alarm)
 
-        data = self.get_json('/alarms')
+        data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(1, len(data))
         self.assertEqual(set(['event.alarm.1']),
                          set(r['name'] for r in data))

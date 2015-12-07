@@ -79,6 +79,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest,
 
     def test_query_all(self):
         data = self.post_json(self.alarm_url,
+                              headers=admin_header,
                               params={})
 
         self.assertEqual(12, len(data.json))
@@ -88,6 +89,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest,
         isotime = date_time.isoformat()
 
         data = self.post_json(self.alarm_url,
+                              headers=admin_header,
                               params={"filter":
                                       '{">": {"timestamp": "'
                                       + isotime + '"}}'})
@@ -103,6 +105,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest,
         isotime = date_time.isoformat()
 
         data = self.post_json(self.alarm_url,
+                              headers=admin_header,
                               params={"filter":
                                       '{">": {"state_timestamp": "'
                                       + isotime + '"}}'})
@@ -162,6 +165,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest,
 
     def test_query_with_field_project(self):
         data = self.post_json(self.alarm_url,
+                              headers=admin_header,
                               params={"filter":
                                       '{"=": {"project": "project-id2"}}'})
 
@@ -171,6 +175,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest,
 
     def test_query_with_field_user_in_orderby(self):
         data = self.post_json(self.alarm_url,
+                              headers=admin_header,
                               params={"filter": '{"=": {"state": "alarm"}}',
                                       "orderby": '[{"user": "DESC"}]'})
 
@@ -181,6 +186,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest,
     def test_query_with_filter_orderby_and_limit(self):
         orderby = '[{"state_timestamp": "DESC"}]'
         data = self.post_json(self.alarm_url,
+                              headers=admin_header,
                               params={"filter": '{"=": {"state": "alarm"}}',
                                       "orderby": orderby,
                                       "limit": 3})
@@ -195,6 +201,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest,
 
     def test_limit_should_be_positive(self):
         data = self.post_json(self.alarm_url,
+                              headers=admin_header,
                               params={"limit": 0},
                               expect_errors=True)
 
@@ -226,6 +233,7 @@ class TestQueryAlarmsHistoryController(
 
     def test_query_all(self):
         data = self.post_json(self.url,
+                              headers=admin_header,
                               params={})
 
         self.assertEqual(8, len(data.json))
@@ -235,6 +243,7 @@ class TestQueryAlarmsHistoryController(
         isotime = date_time.isoformat()
 
         data = self.post_json(self.url,
+                              headers=admin_header,
                               params={"filter":
                                       '{">": {"timestamp":"'
                                       + isotime + '"}}'})
@@ -286,6 +295,7 @@ class TestQueryAlarmsHistoryController(
 
     def test_query_with_filter_for_project_orderby_with_user(self):
         data = self.post_json(self.url,
+                              headers=admin_header,
                               params={"filter":
                                       '{"=": {"project": "project-id1"}}',
                                       "orderby": '[{"user": "DESC"}]',
@@ -301,6 +311,7 @@ class TestQueryAlarmsHistoryController(
 
     def test_query_with_filter_orderby_and_limit(self):
         data = self.post_json(self.url,
+                              headers=admin_header,
                               params={"filter": '{"=": {"type": "creation"}}',
                                       "orderby": '[{"timestamp": "DESC"}]',
                                       "limit": 3})
@@ -316,6 +327,7 @@ class TestQueryAlarmsHistoryController(
     def test_limit_should_be_positive(self):
         data = self.post_json(self.url,
                               params={"limit": 0},
+                              headers=admin_header,
                               expect_errors=True)
 
         self.assertEqual(400, data.status_int)
