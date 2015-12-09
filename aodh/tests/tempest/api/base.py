@@ -10,11 +10,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest_lib import exceptions as lib_exc
-
 from tempest.common.utils import data_utils
 from tempest import config
 import tempest.test
+from tempest_lib import exceptions as lib_exc
+
+from aodh.tests.tempest.service import client
 
 CONF = config.CONF
 
@@ -23,6 +24,7 @@ class BaseAlarmingTest(tempest.test.BaseTestCase):
     """Base test case class for all Alarming API tests."""
 
     credentials = ['primary']
+    client_manager = client.Manager
 
     @classmethod
     def skip_checks(cls):
