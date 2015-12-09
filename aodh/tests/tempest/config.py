@@ -20,12 +20,12 @@ service_available_group = cfg.OptGroup(name="service_available",
                                        title="Available OpenStack Services")
 
 ServiceAvailableGroup = [
-    cfg.BoolOpt("aodh",
+    cfg.BoolOpt("aodh_plugin",
                 default=True,
                 help="Whether or not Aodh is expected to be available"),
 ]
 
-alarming_group = cfg.OptGroup(name='alarming',
+alarming_group = cfg.OptGroup(name='alarming_plugin',
                               title='Alarming Service Options')
 
 AlarmingGroup = [

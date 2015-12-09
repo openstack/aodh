@@ -104,18 +104,24 @@ class AlarmingClient(service_client.ServiceClient):
 
 class Manager(manager.Manager):
 
-    def __init__(self, credentials=None, service=None):
-        super(Manager, self).__init__(credentials, service)
-        self._set_alarming_client()
+    default_params = {
+        'disable_ssl_certificate_validation':
+            CONF.identity.disable_ssl_certificate_validation,
+        'ca_certs': CONF.identity.ca_certificates_file,
+        'trace_requests': CONF.debug.trace_requests
+    }
 
-    def _set_alarming_client(self):
-        if CONF.service_available.aodh:
-            self.alarming_client = AlarmingClient(
-                self.auth_provider,
-                CONF.alarming.catalog_type,
-                CONF.identity.region,
-                endpoint_type=CONF.alarming.endpoint_type,
-                disable_ssl_certificate_validation=(
-                    CONF.identity.disable_ssl_certificate_validation),
-                ca_certs=CONF.identity.ca_certificates_file,
-                trace_requests=CONF.debug.trace_requests)
+    alarming_params = {
+        'service': CONF.alarming_plugin.catalog_type,
+        'region': CONF.identity.region,
+        'endpoint_type': CONF.alarming_plugin.endpoint_type,
+    }
+    alarming_params.update(default_params)
+
+    def __init__(self, credentials=None, service=None):
+        super(Manager, self).__init__(credentials)
+        self.set_alarming_client()
+
+    def set_alarming_client(self):
+        self.alarming_client = AlarmingClient(self.auth_provider,
+                                              **self.alarming_params)

@@ -12,8 +12,8 @@
 
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 import tempest.test
-from tempest_lib import exceptions as lib_exc
 
 from aodh.tests.tempest.service import client
 
@@ -29,7 +29,7 @@ class BaseAlarmingTest(tempest.test.BaseTestCase):
     @classmethod
     def skip_checks(cls):
         super(BaseAlarmingTest, cls).skip_checks()
-        if not CONF.service_available.aodh:
+        if not CONF.service_available.aodh_plugin:
             raise cls.skipException("Aodh support is required")
 
     @classmethod
