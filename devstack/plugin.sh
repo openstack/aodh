@@ -241,7 +241,7 @@ function install_aodh {
     _aodh_prepare_coordination
     _aodh_prepare_storage_backend
     install_aodhclient
-    setup_develop $AODH_DIR
+    sudo -H pip install -e "$AODH_DIR"[test,$AODH_BACKEND]
     sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR $AODH_API_LOG_DIR
 }
 

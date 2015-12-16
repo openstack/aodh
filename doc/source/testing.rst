@@ -37,7 +37,7 @@ run through tox_.
 
 3. Install the test dependencies::
 
-   $ sudo pip install -r /opt/stack/aodh/test-requirements.txt
+   $ sudo pip install -e /opt/stack/aodh[test]
 
 4. Run the unit and code-style tests::
 

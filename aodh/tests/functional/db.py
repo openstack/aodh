@@ -25,7 +25,6 @@ from oslo_config import fixture as fixture_config
 from oslotest import mockpatch
 import six
 from six.moves.urllib import parse as urlparse
-import sqlalchemy
 from testtools import testcase
 
 from aodh import service
@@ -50,6 +49,7 @@ class SQLManager(fixtures.Fixture):
     def __init__(self, conf):
         self.conf = conf
         db_name = 'aodh_%s' % uuid.uuid4().hex
+        import sqlalchemy
         self._engine = sqlalchemy.create_engine(
             conf.database.connection.replace(self.url_dbname_placeholder,
                                              self.url_dbname_createstring))

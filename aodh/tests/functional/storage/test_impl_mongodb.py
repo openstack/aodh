@@ -20,12 +20,17 @@
   server before running the tests.
 
 """
+import unittest
 
-from aodh.storage import impl_mongodb
+try:
+    from aodh.storage import impl_mongodb
+except ImportError:
+    impl_mongodb = None
 from aodh.tests import base as test_base
 from aodh.tests.functional import db as tests_db
 
 
+@unittest.skipUnless(impl_mongodb, "pymongo not available")
 @tests_db.run_with('mongodb')
 class MongoDBConnection(tests_db.TestBase):
     def test_connection_pooling(self):
@@ -39,6 +44,7 @@ class MongoDBConnection(tests_db.TestBase):
         self.assertTrue(conn.conn)
 
 
+@unittest.skipUnless(impl_mongodb, "pymongo not available")
 @tests_db.run_with('mongodb')
 class IndexTest(tests_db.TestBase):
     def _test_ttl_index_absent(self, conn, coll_name, ttl_opt):
@@ -78,6 +84,7 @@ class IndexTest(tests_db.TestBase):
 
 
 class CapabilitiesTest(test_base.BaseTestCase):
+    @unittest.skipUnless(impl_mongodb, "pymongo not available")
     def test_alarm_capabilities(self):
         expected_capabilities = {
             'alarms': {'query': {'simple': True,
