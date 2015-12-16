@@ -18,6 +18,7 @@ check_for_cmd mysqld
 # Start MySQL process for tests
 MYSQL_DATA=`mktemp -d /tmp/AODH-MYSQL-XXXXX`
 trap "clean_exit ${MYSQL_DATA}" EXIT
+mysqld --initialize-insecure --datadir=${MYSQL_DATA} || true
 mkfifo ${MYSQL_DATA}/out
 mysqld --datadir=${MYSQL_DATA} --pid-file=${MYSQL_DATA}/mysql.pid --socket=${MYSQL_DATA}/mysql.socket --skip-networking --skip-grant-tables &> ${MYSQL_DATA}/out &
 # Wait for MySQL to start listening to connections
