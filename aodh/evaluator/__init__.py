@@ -179,15 +179,18 @@ class Evaluator(object):
         """
 
 
-@six.add_metaclass(abc.ABCMeta)
-class AlarmService(object):
+class AlarmEvaluationService(os_service.Service):
+
+    PARTITIONING_GROUP_NAME = "alarm_evaluator"
     EVALUATOR_EXTENSIONS_NAMESPACE = "aodh.evaluator"
 
     def __init__(self, conf):
-        super(AlarmService, self).__init__()
+        super(AlarmEvaluationService, self).__init__()
         self.conf = conf
         self.storage_conn = None
         self._load_evaluators()
+        self.partition_coordinator = coordination.PartitionCoordinator(
+            conf.coordination.backend_url)
 
     @property
     def _storage_conn(self):
@@ -224,23 +227,8 @@ class AlarmService(object):
         except Exception:
             LOG.exception(_('Failed to evaluate alarm %s'), alarm.alarm_id)
 
-    @abc.abstractmethod
-    def _assigned_alarms(self):
-        pass
-
-
-class AlarmEvaluationService(AlarmService, os_service.Service):
-
-    PARTITIONING_GROUP_NAME = "alarm_evaluator"
-
-    def __init__(self, conf):
-        super(AlarmEvaluationService, self).__init__(conf)
-        self.partition_coordinator = coordination.PartitionCoordinator(
-            conf.coordination.backend_url)
-
     def start(self):
         super(AlarmEvaluationService, self).start()
-        self.storage_conn = storage.get_connection_from_config(self.conf)
         self.partition_coordinator.start()
         self.partition_coordinator.join_group(self.PARTITIONING_GROUP_NAME)
 
