@@ -32,63 +32,75 @@ OPTS = [
 ]
 
 
-class GnocchiThresholdEvaluator(threshold.ThresholdEvaluator):
-
+class GnocchiBase(threshold.ThresholdEvaluator):
     def __init__(self, conf):
-        super(threshold.ThresholdEvaluator, self).__init__(conf)
+        super(GnocchiBase, self).__init__(conf)
         self._gnocchi_client = client.Client(
             '1', keystone_client.get_session(conf),
             interface=conf.service_credentials.interface,
             region_name=conf.service_credentials.region_name,
             endpoint_override=conf.gnocchi_url)
 
-    def _statistics(self, alarm, start, end):
-        """Retrieve statistics over the current window."""
-        try:
-            if alarm.type == 'gnocchi_aggregation_by_resources_threshold':
-                # FIXME(sileht): In case of a heat autoscaling stack decide to
-                # delete an instance, the gnocchi metrics associated to this
-                # instance will be no more updated and when the alarm will ask
-                # for the aggregation, gnocchi will raise a 'No overlap'
-                # exception.
-                # So temporary set 'needed_overlap' to 0 to disable the
-                # gnocchi checks about missing points. For more detail see:
-                #   https://bugs.launchpad.net/gnocchi/+bug/1479429
-                return self._gnocchi_client.metric.aggregation(
-                    metrics=alarm.rule['metric'],
-                    query=jsonutils.loads(alarm.rule['query']),
-                    resource_type=alarm.rule["resource_type"],
-                    start=start, stop=end,
-                    aggregation=alarm.rule['aggregation_method'],
-                    needed_overlap=0,
-                )
-            elif alarm.type == 'gnocchi_aggregation_by_metrics_threshold':
-                return self._gnocchi_client.metric.aggregation(
-                    metrics=alarm.rule['metrics'],
-                    start=start, stop=end,
-                    aggregation=alarm.rule['aggregation_method'])
-            elif alarm.type == 'gnocchi_resources_threshold':
-                return self._gnocchi_client.metric.get_measures(
-                    metric=alarm.rule['metric'],
-                    start=start, stop=end,
-                    resource_id=alarm.rule['resource_id'],
-                    aggregation=alarm.rule['aggregation_method'])
-        except Exception:
-            LOG.exception(_('alarm stats retrieval failed'))
-            return []
-
     @staticmethod
-    def _sanitize(alarm, statistics):
+    def _sanitize(rule, statistics):
         """Return the datapoints that correspond to the alarm granularity"""
         # TODO(sileht): if there's no direct match, but there is an archive
         # policy with granularity that's an even divisor or the period,
         # we could potentially do a mean-of-means (or max-of-maxes or whatever,
         # but not a stddev-of-stddevs).
         # TODO(sileht): support alarm['exclude_outliers']
-        LOG.error('sanitize (%s) stats %s', alarm.rule['granularity'],
-                  statistics)
+        LOG.debug('sanitize stats %s', statistics)
         statistics = [stats[2] for stats in statistics
-                      if stats[1] == alarm.rule['granularity']]
-        statistics = statistics[-alarm.rule['evaluation_periods']:]
-        LOG.error('pruned statistics to %d', len(statistics))
+                      if stats[1] == rule['granularity']]
+        statistics = statistics[-rule['evaluation_periods']:]
+        LOG.debug('pruned statistics to %d', len(statistics))
         return statistics
+
+
+class GnocchiResourceThresholdEvaluator(GnocchiBase):
+    def _statistics(self, rule, start, end):
+        try:
+            return self._gnocchi_client.metric.get_measures(
+                metric=rule['metric'],
+                start=start, stop=end,
+                resource_id=rule['resource_id'],
+                aggregation=rule['aggregation_method'])
+        except Exception:
+            LOG.exception(_('alarm stats retrieval failed'))
+            return []
+
+
+class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
+    def _statistics(self, rule, start, end):
+        try:
+            return self._gnocchi_client.metric.aggregation(
+                metrics=rule['metrics'],
+                start=start, stop=end,
+                aggregation=rule['aggregation_method'])
+        except Exception:
+            LOG.exception(_('alarm stats retrieval failed'))
+            return []
+
+
+class GnocchiAggregationResourcesThresholdEvaluator(GnocchiBase):
+    def _statistics(self, rule, start, end):
+        # FIXME(sileht): In case of a heat autoscaling stack decide to
+        # delete an instance, the gnocchi metrics associated to this
+        # instance will be no more updated and when the alarm will ask
+        # for the aggregation, gnocchi will raise a 'No overlap'
+        # exception.
+        # So temporary set 'needed_overlap' to 0 to disable the
+        # gnocchi checks about missing points. For more detail see:
+        #   https://bugs.launchpad.net/gnocchi/+bug/1479429
+        try:
+            return self._gnocchi_client.metric.aggregation(
+                metrics=rule['metric'],
+                query=jsonutils.loads(rule['query']),
+                resource_type=rule["resource_type"],
+                start=start, stop=end,
+                aggregation=rule['aggregation_method'],
+                needed_overlap=0,
+            )
+        except Exception:
+            LOG.exception(_('alarm stats retrieval failed'))
+            return []

@@ -31,17 +31,12 @@ from aodh.tests import constants
 from aodh.tests.unit.evaluator import base
 
 
-class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
-    EVALUATOR = gnocchi.GnocchiThresholdEvaluator
-
+class TestGnocchiEvaluatorBase(base.TestEvaluatorBase):
     def setUp(self):
         self.client = self.useFixture(mockpatch.Patch(
             'aodh.evaluator.gnocchi.client'
         )).mock.Client.return_value
-        super(TestGnocchiThresholdEvaluate, self).setUp()
-
-    def prepare_alarms(self):
-        self.alarms = [
+        self.prepared_alarms = [
             models.Alarm(name='instance_running_hot',
                          description='instance_running_hot',
                          type='gnocchi_resources_threshold',
@@ -115,10 +110,11 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
                              metric='cpu_util',
                              resource_type='instance',
                              query='{"=": {"server_group": '
-                             '"my_autoscaling_group"}}')
+                                   '"my_autoscaling_group"}}')
                          ),
 
         ]
+        super(TestGnocchiEvaluatorBase, self).setUp()
 
     @staticmethod
     def _get_stats(granularity, values):
@@ -135,29 +131,14 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         for alarm in self.alarms:
             alarm.rule[field] = value
 
-    def test_retry_transient_api_failure(self):
-        means = self._get_stats(60, [self.alarms[0].rule['threshold'] - v
-                                     for v in moves.xrange(5)])
-        maxs = self._get_stats(300, [self.alarms[1].rule['threshold'] + v
-                                     for v in moves.xrange(4)])
-        avgs2 = self._get_stats(50, [self.alarms[2].rule['threshold'] - v
-                                     for v in moves.xrange(6)])
-        self.client.metric.get_measures.side_effect = [
-            exceptions.ClientException(501, "error2"),
-            means]
-        self.client.metric.aggregation.side_effect = [
-            Exception('boom'),
-            exceptions.ClientException(500, "error"),
-            maxs, avgs2]
+    def _test_retry_transient(self):
         self._evaluate_all_alarms()
         self._assert_all_alarms('insufficient data')
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
 
-    def test_simple_insufficient(self):
+    def _test_simple_insufficient(self):
         self._set_all_alarms('ok')
-        self.client.metric.get_measures.return_value = []
-        self.client.metric.aggregation.return_value = []
         self._evaluate_all_alarms()
         self._assert_all_alarms('insufficient data')
         expected = [mock.call(alarm) for alarm in self.alarms]
@@ -167,12 +148,30 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
             alarm,
             'ok',
             ('%d datapoints are unknown'
-                % alarm.rule['evaluation_periods']),
+             % alarm.rule['evaluation_periods']),
             self._reason_data('unknown',
                               alarm.rule['evaluation_periods'],
                               None))
             for alarm in self.alarms]
         self.assertEqual(expected, self.notifier.notify.call_args_list)
+
+
+class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
+    EVALUATOR = gnocchi.GnocchiResourceThresholdEvaluator
+
+    def prepare_alarms(self):
+        self.alarms = self.prepared_alarms[0:1]
+
+    def test_retry_transient_api_failure(self):
+        means = self._get_stats(60, [self.alarms[0].rule['threshold'] - v
+                                     for v in moves.xrange(5)])
+        self.client.metric.get_measures.side_effect = [
+            exceptions.ClientException(501, "error2"), means]
+        self._test_retry_transient()
+
+    def test_simple_insufficient(self):
+        self.client.metric.get_measures.return_value = []
+        self._test_simple_insufficient()
 
     @mock.patch.object(timeutils, 'utcnow')
     def test_simple_alarm_trip(self, utcnow):
@@ -180,214 +179,94 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
         self._set_all_alarms('ok')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
                                     for v in moves.xrange(1, 6)])
-        maxs = self._get_stats(300, [self.alarms[1].rule['threshold'] - v
-                                     for v in moves.xrange(4)])
-        avgs2 = self._get_stats(50, [self.alarms[2].rule['threshold'] + v
-                                     for v in moves.xrange(1, 7)])
-
         self.client.metric.get_measures.side_effect = [avgs]
-        self.client.metric.aggregation.side_effect = [maxs, avgs2]
         self._evaluate_all_alarms()
-
-        start_alarm1 = "2015-01-26T12:51:00"
-        start_alarm2 = "2015-01-26T12:32:00"
-        start_alarm3 = "2015-01-26T12:51:10"
+        start_alarm = "2015-01-26T12:51:00"
         end = "2015-01-26T12:57:00"
 
-        self.assertEqual([
-            mock.call.get_measures(aggregation='mean', metric='cpu_util',
-                                   resource_id='my_instance',
-                                   start=start_alarm1, stop=end),
-            mock.call.aggregation(aggregation='max',
-                                  metrics=[
-                                      '0bb1604d-1193-4c0a-b4b8-74b170e35e83',
-                                      '9ddc209f-42f8-41e1-b8f1-8804f59c4053'],
-                                  start=start_alarm2, stop=end),
-            mock.call.aggregation(aggregation='mean', metrics='cpu_util',
-                                  needed_overlap=0,
-                                  query={"=": {"server_group":
-                                               "my_autoscaling_group"}},
-                                  resource_type='instance',
-                                  start=start_alarm3, stop=end),
-            ], self.client.metric.mock_calls)
+        self.assertEqual(
+            [mock.call.get_measures(aggregation='mean', metric='cpu_util',
+                                    resource_id='my_instance',
+                                    start=start_alarm, stop=end)],
+            self.client.metric.mock_calls)
 
-        self._assert_all_alarms('alarm')
-        expected = [mock.call(alarm) for alarm in self.alarms]
-        update_calls = self.storage_conn.update_alarm.call_args_list
-        self.assertEqual(expected, update_calls)
-        reasons = ['Transition to alarm due to 5 samples outside'
-                   ' threshold, most recent: %s' % avgs[-1][2],
-                   'Transition to alarm due to 4 samples outside'
-                   ' threshold, most recent: %s' % maxs[-1][2],
-                   'Transition to alarm due to 6 samples outside'
-                   ' threshold, most recent: %s' % avgs2[-1][2],
-                   ]
-        reason_datas = [self._reason_data('outside', 5, avgs[-1][2]),
-                        self._reason_data('outside', 4, maxs[-1][2]),
-                        self._reason_data('outside', 6, avgs2[-1][2])]
-        expected = [mock.call(alarm, 'ok', reason, reason_data)
-                    for alarm, reason, reason_data
-                    in zip(self.alarms, reasons, reason_datas)]
-        self.assertEqual(expected, self.notifier.notify.call_args_list)
+        reason = ('Transition to alarm due to 5 samples outside threshold,'
+                  ' most recent: %s' % avgs[-1][2])
+        reason_data = self._reason_data('outside', 5, avgs[-1][2])
+        expected = mock.call(self.alarms[0], 'ok', reason, reason_data)
+        self.assertEqual(expected, self.notifier.notify.call_args)
 
     def test_simple_alarm_clear(self):
         self._set_all_alarms('alarm')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] - v
                                     for v in moves.xrange(5)])
-        maxs = self._get_stats(300, [self.alarms[1].rule['threshold'] + v
-                                     for v in moves.xrange(1, 5)])
-        avgs2 = self._get_stats(50, [self.alarms[2].rule['threshold'] - v
-                                     for v in moves.xrange(6)])
+
         self.client.metric.get_measures.side_effect = [avgs]
-        self.client.metric.aggregation.side_effect = [maxs, avgs2]
+
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
         expected = [mock.call(alarm) for alarm in self.alarms]
         update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual(expected, update_calls)
-        reasons = ['Transition to ok due to 5 samples inside'
-                   ' threshold, most recent: %s' % avgs[-1][2],
-                   'Transition to ok due to 4 samples inside'
-                   ' threshold, most recent: %s' % maxs[-1][2],
-                   'Transition to ok due to 6 samples inside'
-                   ' threshold, most recent: %s' % avgs2[-1][2]]
-        reason_datas = [self._reason_data('inside', 5, avgs[-1][2]),
-                        self._reason_data('inside', 4, maxs[-1][2]),
-                        self._reason_data('inside', 6, avgs2[-1][2])]
-        expected = [mock.call(alarm, 'alarm', reason, reason_data)
-                    for alarm, reason, reason_data
-                    in zip(self.alarms, reasons, reason_datas)]
-        self.assertEqual(expected, self.notifier.notify.call_args_list)
+
+        reason = ('Transition to ok due to 5 samples inside'
+                  ' threshold, most recent: %s' % avgs[-1][2])
+
+        reason_data = self._reason_data('inside', 5, avgs[-1][2])
+        expected = mock.call(self.alarms[0], 'alarm', reason, reason_data)
+        self.assertEqual(expected, self.notifier.notify.call_args)
 
     def test_equivocal_from_known_state_ok(self):
         self._set_all_alarms('ok')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
                                     for v in moves.xrange(5)])
-        maxs = self._get_stats(300, [self.alarms[1].rule['threshold'] - v
-                                     for v in moves.xrange(-1, 3)])
-        avgs2 = self._get_stats(50, [self.alarms[2].rule['threshold'] + v
-                                     for v in moves.xrange(6)])
         self.client.metric.get_measures.side_effect = [avgs]
-        self.client.metric.aggregation.side_effect = [maxs, avgs2]
+
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
-        self.assertEqual(
-            [],
-            self.storage_conn.update_alarm.call_args_list)
+        self.assertEqual([],
+                         self.storage_conn.update_alarm.call_args_list)
         self.assertEqual([], self.notifier.notify.call_args_list)
-
-    def test_equivocal_ok_to_alarm(self):
-        self.alarms = [self.alarms[1]]
-        self._set_all_alarms('ok')
-        # NOTE(sileht): we add one useless point (81.0) that will break
-        # the test if the evaluator doesn't remove it.
-        maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
-                                     for v in moves.xrange(-1, 5)])
-        self.client.metric.aggregation.side_effect = [maxs]
-        self._evaluate_all_alarms()
-        self._assert_all_alarms('alarm')
-
-    def test_equivocal_from_known_state_and_repeat_actions(self):
-        self._set_all_alarms('ok')
-        self.alarms[1].repeat_actions = True
-        avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
-                                    for v in moves.xrange(5)])
-        maxs = self._get_stats(300, [self.alarms[1].rule['threshold'] - v
-                                     for v in moves.xrange(-1, 3)])
-        avgs2 = self._get_stats(50, [self.alarms[2].rule['threshold'] + v
-                                     for v in moves.xrange(6)])
-        self.client.metric.get_measures.side_effect = [avgs]
-        self.client.metric.aggregation.side_effect = [maxs, avgs2]
-        self._evaluate_all_alarms()
-        self._assert_all_alarms('ok')
-        self.assertEqual([], self.storage_conn.update_alarm.call_args_list)
-        reason = ('Remaining as ok due to 4 samples inside'
-                  ' threshold, most recent: 8.0')
-        reason_datas = self._reason_data('inside', 4, 8.0)
-        expected = [mock.call(self.alarms[1], 'ok', reason, reason_datas)]
-        self.assertEqual(expected, self.notifier.notify.call_args_list)
-
-    def test_unequivocal_from_known_state_and_repeat_actions(self):
-        self._set_all_alarms('alarm')
-        self.alarms[1].repeat_actions = True
-        avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
-                                    for v in moves.xrange(1, 6)])
-        maxs = self._get_stats(300, [self.alarms[1].rule['threshold'] - v
-                                     for v in moves.xrange(4)])
-        avgs2 = self._get_stats(50, [self.alarms[2].rule['threshold'] + v
-                                     for v in moves.xrange(6)])
-        self.client.metric.get_measures.side_effect = [avgs]
-        self.client.metric.aggregation.side_effect = [maxs, avgs2]
-        self._evaluate_all_alarms()
-        self._assert_all_alarms('alarm')
-        self.assertEqual([], self.storage_conn.update_alarm.call_args_list)
-        reason = ('Remaining as alarm due to 4 samples outside'
-                  ' threshold, most recent: 7.0')
-        reason_datas = self._reason_data('outside', 4, 7.0)
-        expected = [mock.call(self.alarms[1], 'alarm',
-                              reason, reason_datas)]
-        self.assertEqual(expected, self.notifier.notify.call_args_list)
 
     def test_state_change_and_repeat_actions(self):
         self._set_all_alarms('ok')
         self.alarms[0].repeat_actions = True
-        self.alarms[1].repeat_actions = True
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
                                     for v in moves.xrange(1, 6)])
-        maxs = self._get_stats(300, [self.alarms[1].rule['threshold'] - v
-                                     for v in moves.xrange(4)])
-        avgs2 = self._get_stats(50, [self.alarms[2].rule['threshold'] + v
-                                     for v in moves.xrange(1, 7)])
+
         self.client.metric.get_measures.side_effect = [avgs]
-        self.client.metric.aggregation.side_effect = [maxs, avgs2]
+
         self._evaluate_all_alarms()
         self._assert_all_alarms('alarm')
         expected = [mock.call(alarm) for alarm in self.alarms]
         update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual(expected, update_calls)
-        reasons = ['Transition to alarm due to 5 samples outside'
-                   ' threshold, most recent: %s' % avgs[-1][2],
-                   'Transition to alarm due to 4 samples outside'
-                   ' threshold, most recent: %s' % maxs[-1][2],
-                   'Transition to alarm due to 6 samples outside'
-                   ' threshold, most recent: %s' % avgs2[-1][2]]
-        reason_datas = [self._reason_data('outside', 5, avgs[-1][2]),
-                        self._reason_data('outside', 4, maxs[-1][2]),
-                        self._reason_data('outside', 6, avgs2[-1][2])]
-        expected = [mock.call(alarm, 'ok', reason, reason_data)
-                    for alarm, reason, reason_data
-                    in zip(self.alarms, reasons, reason_datas)]
-        self.assertEqual(expected, self.notifier.notify.call_args_list)
+
+        reason = ('Transition to alarm due to 5 samples outside '
+                  'threshold, most recent: %s' % avgs[-1][2])
+        reason_data = self._reason_data('outside', 5, avgs[-1][2])
+        expected = mock.call(self.alarms[0], 'ok', reason, reason_data)
+        self.assertEqual(expected, self.notifier.notify.call_args)
 
     def test_equivocal_from_unknown(self):
         self._set_all_alarms('insufficient data')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
                                     for v in moves.xrange(1, 6)])
-        maxs = self._get_stats(300, [self.alarms[1].rule['threshold'] - v
-                                     for v in moves.xrange(4)])
-        avgs2 = self._get_stats(50, [self.alarms[2].rule['threshold'] + v
-                                     for v in moves.xrange(1, 7)])
+
         self.client.metric.get_measures.side_effect = [avgs]
-        self.client.metric.aggregation.side_effect = [maxs, avgs2]
+
         self._evaluate_all_alarms()
         self._assert_all_alarms('alarm')
         expected = [mock.call(alarm) for alarm in self.alarms]
         update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual(expected, update_calls)
-        reasons = ['Transition to alarm due to 5 samples outside'
-                   ' threshold, most recent: %s' % avgs[-1][2],
-                   'Transition to alarm due to 4 samples outside'
-                   ' threshold, most recent: %s' % maxs[-1][2],
-                   'Transition to alarm due to 6 samples outside'
-                   ' threshold, most recent: %s' % avgs2[-1][2]]
-        reason_datas = [self._reason_data('outside', 5, avgs[-1][2]),
-                        self._reason_data('outside', 4, maxs[-1][2]),
-                        self._reason_data('outside', 6, avgs2[-1][2])]
-        expected = [mock.call(alarm, 'insufficient data',
-                              reason, reason_data)
-                    for alarm, reason, reason_data
-                    in zip(self.alarms, reasons, reason_datas)]
-        self.assertEqual(expected, self.notifier.notify.call_args_list)
+
+        reason = ('Transition to alarm due to 5 samples outside'
+                  ' threshold, most recent: %s' % avgs[-1][2])
+        reason_data = self._reason_data('outside', 5, avgs[-1][2])
+        expected = mock.call(self.alarms[0], 'insufficient data',
+                             reason, reason_data)
+        self.assertEqual(expected, self.notifier.notify.call_args)
 
     @unittest.skipIf(six.PY3,
                      "the aodh base class is not python 3 ready")
@@ -401,17 +280,208 @@ class TestGnocchiThresholdEvaluate(base.TestEvaluatorBase):
              'duration': 10800,  # 3 hours
              'timezone': 'Europe/Ljubljana'}
         ]
-        self.alarms[1].time_constraints = self.alarms[0].time_constraints
-        self.alarms[2].time_constraints = self.alarms[0].time_constraints
         dt = datetime.datetime(2014, 1, 1, 15, 0, 0,
                                tzinfo=pytz.timezone('Europe/Ljubljana'))
         mock_utcnow.return_value = dt.astimezone(pytz.UTC)
         self.client.metric.get_measures.return_value = []
-        self.client.metric.aggregation.return_value = []
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
         update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual([], update_calls,
                          "Alarm should not change state if the current "
                          " time is outside its time constraint.")
+        self.assertEqual([], self.notifier.notify.call_args_list)
+
+
+class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
+    EVALUATOR = gnocchi.GnocchiAggregationMetricsThresholdEvaluator
+
+    def prepare_alarms(self):
+        self.alarms = self.prepared_alarms[1:2]
+
+    def test_retry_transient_api_failure(self):
+        maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] + v
+                                     for v in moves.xrange(4)])
+        self.client.metric.aggregation.side_effect = [Exception('boom'), maxs]
+        self._test_retry_transient()
+
+    def test_simple_insufficient(self):
+        self.client.metric.aggregation.return_value = []
+        self._test_simple_insufficient()
+
+    @mock.patch.object(timeutils, 'utcnow')
+    def test_simple_alarm_trip(self, utcnow):
+        utcnow.return_value = datetime.datetime(2015, 1, 26, 12, 57, 0, 0)
+        self._set_all_alarms('ok')
+
+        maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
+                                     for v in moves.xrange(4)])
+        self.client.metric.aggregation.side_effect = [maxs]
+        self._evaluate_all_alarms()
+        start_alarm = "2015-01-26T12:32:00"
+        end = "2015-01-26T12:57:00"
+
+        self.assertEqual(
+            [mock.call.aggregation(aggregation='max',
+                                   metrics=[
+                                       '0bb1604d-1193-4c0a-b4b8-74b170e35e83',
+                                       '9ddc209f-42f8-41e1-b8f1-8804f59c4053'],
+                                   start=start_alarm, stop=end)],
+            self.client.metric.mock_calls)
+        self._assert_all_alarms('alarm')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reason = ('Transition to alarm due to 4 samples outside '
+                  'threshold, most recent: %s' % maxs[-1][2])
+
+        reason_data = self._reason_data('outside', 4, maxs[-1][2])
+        expected = mock.call(self.alarms[0], 'ok', reason, reason_data)
+        self.assertEqual(expected, self.notifier.notify.call_args)
+
+    def test_simple_alarm_clear(self):
+        self._set_all_alarms('alarm')
+        maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] + v
+                                     for v in moves.xrange(1, 5)])
+        self.client.metric.aggregation.side_effect = [maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reason = ('Transition to ok due to 4 samples inside '
+                  'threshold, most recent: %s' % maxs[-1][2])
+        reason_data = self._reason_data('inside', 4, maxs[-1][2])
+        expected = mock.call(self.alarms[0], 'alarm', reason, reason_data)
+
+        self.assertEqual(expected, self.notifier.notify.call_args)
+
+    def test_equivocal_from_known_state_ok(self):
+        self._set_all_alarms('ok')
+        maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
+                                     for v in moves.xrange(-1, 3)])
+        self.client.metric.aggregation.side_effect = [maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        self.assertEqual(
+            [],
+            self.storage_conn.update_alarm.call_args_list)
+        self.assertEqual([], self.notifier.notify.call_args_list)
+
+    def test_equivocal_ok_to_alarm(self):
+        self._set_all_alarms('ok')
+        # NOTE(sileht): we add one useless point (81.0) that will break
+        # the test if the evaluator doesn't remove it.
+        maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
+                                     for v in moves.xrange(-1, 5)])
+        self.client.metric.aggregation.side_effect = [maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('alarm')
+
+    def test_equivocal_from_known_state_and_repeat_actions(self):
+        self._set_all_alarms('ok')
+        self.alarms[0].repeat_actions = True
+        maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
+                                     for v in moves.xrange(-1, 3)])
+        self.client.metric.aggregation.side_effect = [maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        self.assertEqual([], self.storage_conn.update_alarm.call_args_list)
+        reason = ('Remaining as ok due to 4 samples inside'
+                  ' threshold, most recent: 8.0')
+        reason_datas = self._reason_data('inside', 4, 8.0)
+        expected = [mock.call(self.alarms[0], 'ok', reason, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
+
+    def test_unequivocal_from_known_state_and_repeat_actions(self):
+        self._set_all_alarms('alarm')
+        self.alarms[0].repeat_actions = True
+
+        maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
+                                     for v in moves.xrange(4)])
+        self.client.metric.aggregation.side_effect = [maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('alarm')
+        self.assertEqual([], self.storage_conn.update_alarm.call_args_list)
+        reason = ('Remaining as alarm due to 4 samples outside'
+                  ' threshold, most recent: 7.0')
+        reason_datas = self._reason_data('outside', 4, 7.0)
+        expected = [mock.call(self.alarms[0], 'alarm',
+                              reason, reason_datas)]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
+
+
+class TestGnocchiAggregationResourcesThresholdEvaluate(
+        TestGnocchiEvaluatorBase):
+    EVALUATOR = gnocchi.GnocchiAggregationResourcesThresholdEvaluator
+
+    def prepare_alarms(self):
+        self.alarms = self.prepared_alarms[2:3]
+
+    def test_retry_transient_api_failure(self):
+        avgs2 = self._get_stats(50, [self.alarms[0].rule['threshold'] - v
+                                     for v in moves.xrange(6)])
+        self.client.metric.aggregation.side_effect = [
+            exceptions.ClientException(500, "error"), avgs2]
+        self._test_retry_transient()
+
+    def test_simple_insufficient(self):
+        self.client.metric.aggregation.return_value = []
+        self._test_simple_insufficient()
+
+    @mock.patch.object(timeutils, 'utcnow')
+    def test_simple_alarm_trip(self, utcnow):
+        utcnow.return_value = datetime.datetime(2015, 1, 26, 12, 57, 0, 0)
+        self._set_all_alarms('ok')
+        avgs = self._get_stats(50, [self.alarms[0].rule['threshold'] + v
+                                    for v in moves.xrange(1, 7)])
+
+        self.client.metric.aggregation.side_effect = [avgs]
+        self._evaluate_all_alarms()
+        start_alarm = "2015-01-26T12:51:10"
+        end = "2015-01-26T12:57:00"
+        self.assertEqual(
+            [mock.call.aggregation(aggregation='mean', metrics='cpu_util',
+                                   needed_overlap=0,
+                                   query={"=": {"server_group":
+                                          "my_autoscaling_group"}},
+                                   resource_type='instance',
+                                   start=start_alarm, stop=end)],
+            self.client.metric.mock_calls)
+        self._assert_all_alarms('alarm')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reason = ('Transition to alarm due to 6 samples outside '
+                  'threshold, most recent: %s' % avgs[-1][2])
+        reason_data = self._reason_data('outside', 6, avgs[-1][2])
+        expected = mock.call(self.alarms[0], 'ok', reason, reason_data)
+        self.assertEqual(expected, self.notifier.notify.call_args)
+
+    def test_simple_alarm_clear(self):
+        self._set_all_alarms('alarm')
+        avgs = self._get_stats(50, [self.alarms[0].rule['threshold'] - v
+                                    for v in moves.xrange(6)])
+        self.client.metric.aggregation.side_effect = [avgs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        reason = ('Transition to ok due to 6 samples inside '
+                  'threshold, most recent: %s' % avgs[-1][2])
+        reason_data = self._reason_data('inside', 6, avgs[-1][2])
+        expected = mock.call(self.alarms[0], 'alarm', reason, reason_data)
+        self.assertEqual(expected, self.notifier.notify.call_args)
+
+    def test_equivocal_from_known_state_ok(self):
+        self._set_all_alarms('ok')
+        avgs = self._get_stats(50, [self.alarms[0].rule['threshold'] + v
+                                    for v in moves.xrange(6)])
+        self.client.metric.aggregation.side_effect = [avgs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        self.assertEqual(
+            [],
+            self.storage_conn.update_alarm.call_args_list)
         self.assertEqual([], self.notifier.notify.call_args_list)
