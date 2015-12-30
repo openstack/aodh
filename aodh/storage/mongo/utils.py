@@ -82,8 +82,8 @@ class ConnectionPool(object):
                 retry_interval,
             )
         except pymongo.errors.ConnectionFailure as e:
-            LOG.warn(_('Unable to connect to the database server: '
-                       '%(errmsg)s.') % {'errmsg': e})
+            LOG.warning(_('Unable to connect to the database server: '
+                        '%(errmsg)s.') % {'errmsg': e})
             raise
         self._pool[pool_key] = weakref.ref(client)
         return client
