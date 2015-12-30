@@ -214,6 +214,10 @@ function configure_aodh {
         iniset $AODH_CONF api pecan_debug "False"
         _aodh_config_apache_wsgi
     fi
+
+    if is_service_enabled gnocchi-api; then
+        iniset $AODH_CONF DEFAULT gnocchi_url $(gnocchi_service_url)
+    fi
 }
 
 # init_aodh() - Initialize etc.
