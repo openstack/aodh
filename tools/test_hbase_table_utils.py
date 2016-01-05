@@ -25,7 +25,7 @@ def main(argv):
                (os.getenv("AODH_TEST_STORAGE_URL"),
                 os.getenv("AODH_TEST_HBASE_TABLE_PREFIX", "test")))
         cfg.CONF.set_override("connection", url, group="database")
-        alarm_conn = storage.get_connection_from_conf(cfg.CONF)
+        alarm_conn = storage.get_connection_from_config(cfg.CONF)
         for arg in argv:
             if arg == "--upgrade":
                 alarm_conn.upgrade()
