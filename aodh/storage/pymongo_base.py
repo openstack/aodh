@@ -18,15 +18,12 @@
 """Common functions for MongoDB backend
 """
 
-from oslo_log import log
 import pymongo
 import six
 
 from aodh.storage import base
 from aodh.storage import models
 from aodh.storage.mongo import utils as pymongo_utils
-
-LOG = log.getLogger(__name__)
 
 
 COMMON_AVAILABLE_CAPABILITIES = {
