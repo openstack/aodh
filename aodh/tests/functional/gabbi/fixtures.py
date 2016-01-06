@@ -70,12 +70,15 @@ class ConfigFixture(fixture.GabbiFixture):
         conf.set_override('policy_file',
                           os.path.abspath(
                               'aodh/tests/open-policy.json'),
-                          group='oslo_policy')
+                          group='oslo_policy',
+                          enforce_type=True)
 
         database_name = '%s-%s' % (db_url, str(uuid.uuid4()))
-        conf.set_override('connection', database_name, group='database')
+        conf.set_override('connection', database_name, group='database',
+                          enforce_type=True)
 
-        conf.set_override('pecan_debug', True, group='api')
+        conf.set_override('pecan_debug', True, group='api',
+                          enforce_type=True)
 
     def stop_fixture(self):
         """Reset the config and remove data."""

@@ -398,7 +398,8 @@ class TestAlarms(TestAlarmsBase):
 
     def test_get_alarm_forbiden(self):
         pf = os.path.abspath('aodh/tests/functional/api/v2/policy.json-test')
-        self.CONF.set_override('policy_file', pf, group='oslo_policy')
+        self.CONF.set_override('policy_file', pf, group='oslo_policy',
+                               enforce_type=True)
         self.app = self._make_app()
 
         response = self.get_json('/alarms',

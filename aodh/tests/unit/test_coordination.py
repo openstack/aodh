@@ -150,7 +150,7 @@ class TestPartitioning(base.BaseTestCase):
                                      coordinator_cls=None):
         coordinator_cls = coordinator_cls or MockToozCoordinator
         self.CONF.set_override('backend_url', 'xxx://yyy',
-                               group='coordination')
+                               group='coordination', enforce_type=True)
         with mock.patch('tooz.coordination.get_coordinator',
                         lambda _, member_id:
                         coordinator_cls(member_id, shared_storage)):
