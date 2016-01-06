@@ -204,7 +204,7 @@ class AlarmTest(AlarmTestBase):
         orange.rule['query'] = query
         orange.rule['meter_name'] = 'new_meter_name'
         updated = self.alarm_conn.update_alarm(orange)
-        self.assertEqual(False, updated.enabled)
+        self.assertFalse(updated.enabled)
         self.assertEqual(alarm_models.Alarm.ALARM_INSUFFICIENT_DATA,
                          updated.state)
         self.assertEqual(query, updated.rule['query'])
