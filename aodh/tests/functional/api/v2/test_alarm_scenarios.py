@@ -1320,7 +1320,7 @@ class TestAlarms(TestAlarmsBase):
         }
         auth = mock.Mock()
         trust_client = mock.Mock()
-        with mock.patch('aodh.keystone_client.get_v3_client') as client:
+        with mock.patch('aodh.keystone_client.get_client') as client:
             client.return_value = mock.Mock(
                 auth_ref=mock.Mock(user_id='my_user'))
             with mock.patch('keystoneclient.v3.client.Client') as sub_client:
@@ -1345,7 +1345,7 @@ class TestAlarms(TestAlarmsBase):
         else:
             self.fail("Alarm not found")
 
-        with mock.patch('aodh.keystone_client.get_v3_client') as client:
+        with mock.patch('aodh.keystone_client.get_client') as client:
             client.return_value = mock.Mock(
                 auth_ref=mock.Mock(user_id='my_user'))
             with mock.patch('keystoneclient.v3.client.Client') as sub_client:
@@ -1571,7 +1571,7 @@ class TestAlarms(TestAlarmsBase):
         data = self._get_alarm('a')
         data.update({'ok_actions': ['trust+http://something/ok']})
         trust_client = mock.Mock()
-        with mock.patch('aodh.keystone_client.get_v3_client') as client:
+        with mock.patch('aodh.keystone_client.get_client') as client:
             client.return_value = mock.Mock(
                 auth_ref=mock.Mock(user_id='my_user'))
             with mock.patch('keystoneclient.v3.client.Client') as sub_client:
@@ -1586,7 +1586,7 @@ class TestAlarms(TestAlarmsBase):
 
         data.update({'ok_actions': ['http://no-trust-something/ok']})
 
-        with mock.patch('aodh.keystone_client.get_v3_client') as client:
+        with mock.patch('aodh.keystone_client.get_client') as client:
             client.return_value = mock.Mock(
                 auth_ref=mock.Mock(user_id='my_user'))
             with mock.patch('keystoneclient.v3.client.Client') as sub_client:

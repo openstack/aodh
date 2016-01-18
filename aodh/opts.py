@@ -13,6 +13,7 @@
 # under the License.
 import itertools
 
+from keystoneauth1 import loading
 from oslo_config import cfg
 
 import aodh.api
@@ -22,6 +23,7 @@ import aodh.evaluator
 import aodh.evaluator.event
 import aodh.evaluator.gnocchi
 import aodh.event
+import aodh.keystone_client
 import aodh.notifier.rest
 import aodh.rpc
 import aodh.service
@@ -64,5 +66,16 @@ def list_opts():
              ])),
         ('coordination', aodh.coordination.OPTS),
         ('database', aodh.storage.OPTS),
-        ('service_credentials', aodh.service.CLI_OPTS),
+        ('service_credentials', aodh.keystone_client.OPTS),
     ]
+
+
+def list_keystoneauth_opts():
+    # NOTE(sileht): the configuration file contains only the options
+    # for the password plugin that handles keystone v2 and v3 API
+    # with discovery. But other options are possible.
+    # Also, the default loaded plugin is password-aodh-legacy for
+    # backward compatibily
+    return [('service_credentials', (
+            loading.get_auth_common_conf_options() +
+            loading.get_auth_plugin_conf_options('password')))]

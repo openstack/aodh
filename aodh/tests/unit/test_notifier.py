@@ -243,7 +243,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         url = 'http://host/action'
 
         client = mock.MagicMock()
-        client.auth_token = 'token_1234'
+        client.session.auth.get_access.return_value.auth_token = 'token_1234'
         headers = {'X-Auth-Token': 'token_1234'}
         headers.update(self.HTTP_HEADERS)
 
