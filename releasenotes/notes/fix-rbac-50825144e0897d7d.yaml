@@ -1,0 +1,14 @@
+---
+upgrade:
+  - >
+    A new default policy.json is provided to properly handle RBAC control.
+    Existing policy.json files may not grant the appropriate access.
+security:
+  - >
+    Patch was added to address inconsistent RBAC policy handling.
+    Certain rules may not have been given appropriate access.
+fixes:
+  - >
+    [`bug 1504495 <https://bugs.launchpad.net/ceilometer/+bug/1504495>`_]
+    Patch was added to address inconsistent RBAC policy handling.
+    Certain rules may not have been given appropriate access.
