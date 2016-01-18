@@ -18,13 +18,12 @@ import datetime
 import os
 import uuid
 
+from gnocchiclient import exceptions
 import mock
 import oslo_messaging.conffixture
 from oslo_serialization import jsonutils
-import requests
 import six
 from six import moves
-import six.moves.urllib.parse as urlparse
 
 from aodh import messaging
 from aodh.storage import models
@@ -2846,8 +2845,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
                              for r in data
                              if 'gnocchi_resources_threshold_rule' in r))
 
-    @mock.patch('aodh.keystone_client.get_client')
-    def test_post_gnocchi_resources_alarm(self, __):
+    def test_post_gnocchi_resources_alarm(self):
         json = {
             'enabled': False,
             'name': 'name_post',
@@ -2870,53 +2868,44 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
             }
         }
 
-        with mock.patch('requests.get',
-                        side_effect=requests.ConnectionError()):
+        with mock.patch('aodh.api.controllers.v2.alarm_rules.'
+                        'gnocchi.client') as clientlib:
+            c = clientlib.Client.return_value
+            c.capabilities.list.side_effect = Exception("boom!")
             resp = self.post_json('/alarms', params=json,
                                   headers=self.auth_headers,
                                   expect_errors=True)
             self.assertEqual(503, resp.status_code, resp.body)
 
-        with mock.patch('requests.get',
-                        return_value=mock.Mock(status_code=500,
-                                               body="my_custom_error",
-                                               text="my_custom_error")):
+        with mock.patch('aodh.api.controllers.v2.alarm_rules.'
+                        'gnocchi.client') as clientlib:
+            c = clientlib.Client.return_value
+            c.capabilities.list.side_effect = (
+                exceptions.ClientException(500, "my_custom_error"))
             resp = self.post_json('/alarms', params=json,
                                   headers=self.auth_headers,
                                   expect_errors=True)
-            self.assertEqual(503, resp.status_code, resp.body)
+            self.assertEqual(500, resp.status_code, resp.body)
             self.assertIn('my_custom_error',
                           resp.json['error_message']['faultstring'])
 
-        cap_result = mock.Mock(status_code=201,
-                               text=jsonutils.dumps(
-                                   {'aggregation_methods': ['count']}))
-        resource_result = mock.Mock(status_code=200, text="blob")
-        with mock.patch('requests.get', side_effect=[cap_result,
-                                                     resource_result]
-                        ) as gnocchi_get:
+        with mock.patch('aodh.api.controllers.v2.alarm_rules.'
+                        'gnocchi.client') as clientlib:
+            c = clientlib.Client.return_value
+            c.capabilities.list.return_value = {
+                'aggregation_methods': ['count']}
             self.post_json('/alarms', params=json, headers=self.auth_headers)
-
-            gnocchi_url = self.CONF.gnocchi_url
-            capabilities_url = urlparse.urljoin(gnocchi_url,
-                                                '/v1/capabilities')
-            resource_url = urlparse.urljoin(
-                gnocchi_url,
-                '/v1/resource/instance/209ef69c-c10c-4efb-90ff-46f4b2d90d2e'
-            )
-
-            expected = [mock.call(capabilities_url,
-                                  headers=mock.ANY),
-                        mock.call(resource_url,
-                                  headers=mock.ANY)]
-            self.assertEqual(expected, gnocchi_get.mock_calls)
+            expected = [mock.call.capabilities.list(),
+                        mock.call.resource.get(
+                            "instance",
+                            "209ef69c-c10c-4efb-90ff-46f4b2d90d2e")]
+            self.assertEqual(expected, c.mock_calls)
 
         alarms = list(self.alarm_conn.get_alarms(enabled=False))
         self.assertEqual(1, len(alarms))
         self._verify_alarm(json, alarms[0])
 
-    @mock.patch('aodh.keystone_client.get_client')
-    def test_post_gnocchi_metrics_alarm(self, __):
+    def test_post_gnocchi_metrics_alarm(self):
         json = {
             'enabled': False,
             'name': 'name_post',
@@ -2938,19 +2927,19 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
             }
         }
 
-        cap_result = mock.Mock(status_code=200,
-                               text=jsonutils.dumps(
-                                   {'aggregation_methods': ['count']}))
-        with mock.patch('requests.get', return_value=cap_result):
+        with mock.patch('aodh.api.controllers.v2.alarm_rules.'
+                        'gnocchi.client') as clientlib:
+            c = clientlib.Client.return_value
+            c.capabilities.list.return_value = {
+                'aggregation_methods': ['count']}
+
             self.post_json('/alarms', params=json, headers=self.auth_headers)
 
         alarms = list(self.alarm_conn.get_alarms(enabled=False))
         self.assertEqual(1, len(alarms))
         self._verify_alarm(json, alarms[0])
 
-    @mock.patch('aodh.keystone_client.get_client')
-    def test_post_gnocchi_aggregation_alarm_project_constraint(self, __):
-        self.CONF.set_override('gnocchi_url', 'http://localhost:8041')
+    def test_post_gnocchi_aggregation_alarm_project_constraint(self):
         json = {
             'enabled': False,
             'name': 'project_constraint',
@@ -2973,39 +2962,31 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
             }
         }
 
-        cap_result = mock.Mock(status_code=201,
-                               text=jsonutils.dumps(
-                                   {'aggregation_methods': ['count']}))
-        resource_result = mock.Mock(status_code=200, text="blob")
-        query_check_result = mock.Mock(status_code=200, text="blob")
+        expected_query = {"and": [{"=": {"created_by_project_id":
+                                         self.auth_headers['X-Project-Id']}},
+                                  {"=": {"server_group":
+                                         "my_autoscaling_group"}}]}
 
-        expected_query = ('{"and": [{"=": {"created_by_project_id": "%s"}}, '
-                          '{"=": {"server_group": "my_autoscaling_group"}}]}' %
-                          self.auth_headers['X-Project-Id'])
+        with mock.patch('aodh.api.controllers.v2.alarm_rules.'
+                        'gnocchi.client') as clientlib:
+            c = clientlib.Client.return_value
+            c.capabilities.list.return_value = {
+                'aggregation_methods': ['count']}
+            self.post_json('/alarms', params=json, headers=self.auth_headers)
 
-        with mock.patch('requests.get',
-                        side_effect=[cap_result, resource_result]):
-            with mock.patch('requests.post',
-                            side_effect=[query_check_result]) as fake_post:
-
-                self.post_json('/alarms', params=json,
-                               headers=self.auth_headers)
-
-                self.assertEqual([mock.call(
-                    url=('http://localhost:8041/v1/aggregation/'
-                         'resource/instance/metric/ameter'),
-                    headers={'Content-Type': 'application/json',
-                             'X-Auth-Token': mock.ANY},
-                    params={'aggregation': 'count',
-                            'needed_overlap': 0},
-                    data=expected_query)],
-                    fake_post.mock_calls),
+            self.assertEqual([mock.call(
+                aggregation='count',
+                metrics='ameter',
+                needed_overlap=0,
+                query=expected_query,
+                resource_type="instance")],
+                c.metric.aggregation.mock_calls),
 
         alarms = list(self.alarm_conn.get_alarms(enabled=False))
         self.assertEqual(1, len(alarms))
 
         json['gnocchi_aggregation_by_resources_threshold_rule']['query'] = (
-            expected_query)
+            jsonutils.dumps(expected_query))
         self._verify_alarm(json, alarms[0])
 
 

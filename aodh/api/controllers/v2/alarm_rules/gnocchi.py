@@ -13,9 +13,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from gnocchiclient import client
+from gnocchiclient import exceptions
 from oslo_serialization import jsonutils
 import pecan
-import requests
 import wsme
 from wsme import types as wtypes
 
@@ -60,19 +61,20 @@ class AlarmGnocchiThresholdRule(base.AlarmRule):
     # @cachetools.ttl_cache(maxsize=1, ttl=600)
     @staticmethod
     def _get_aggregation_methods():
-        ks_client = keystone_client.get_client(pecan.request.cfg)
-        gnocchi_url = pecan.request.cfg.gnocchi_url
-        headers = {'Content-Type': "application/json",
-                   'X-Auth-Token': keystone_client.get_auth_token(ks_client)}
-        try:
-            r = requests.get("%s/v1/capabilities" % gnocchi_url,
-                             headers=headers)
-        except requests.ConnectionError as e:
-            raise GnocchiUnavailable(e)
-        if r.status_code // 200 != 1:
-            raise GnocchiUnavailable(r.text)
+        conf = pecan.request.cfg
+        gnocchi_client = client.Client(
+            '1', keystone_client.get_session(conf),
+            interface=conf.service_credentials.interface,
+            region_name=conf.service_credentials.region_name,
+            endpoint_override=conf.gnocchi_url)
 
-        return jsonutils.loads(r.text).get('aggregation_methods', [])
+        try:
+            return gnocchi_client.capabilities.list().get(
+                'aggregation_methods', [])
+        except exceptions.ClientException as e:
+            raise base.ClientSideError(e.message, status_code=e.code)
+        except Exception as e:
+            raise GnocchiUnavailable(e)
 
 
 class MetricOfResourceRule(AlarmGnocchiThresholdRule):
@@ -99,23 +101,21 @@ class MetricOfResourceRule(AlarmGnocchiThresholdRule):
         super(MetricOfResourceRule,
               cls).validate_alarm(alarm)
 
+        conf = pecan.request.cfg
+        gnocchi_client = client.Client(
+            '1', keystone_client.get_session(conf),
+            interface=conf.service_credentials.interface,
+            region_name=conf.service_credentials.region_name,
+            endpoint_override=conf.gnocchi_url)
+
         rule = alarm.gnocchi_resources_threshold_rule
-        ks_client = keystone_client.get_client(pecan.request.cfg)
-        gnocchi_url = pecan.request.cfg.gnocchi_url
-        headers = {'Content-Type': "application/json",
-                   'X-Auth-Token': keystone_client.get_auth_token(ks_client)}
         try:
-            r = requests.get("%s/v1/resource/%s/%s" % (
-                gnocchi_url, rule.resource_type,
-                rule.resource_id),
-                headers=headers)
-        except requests.ConnectionError as e:
+            gnocchi_client.resource.get(rule.resource_type,
+                                        rule.resource_id)
+        except exceptions.ClientException as e:
+            raise base.ClientSideError(e.message, status_code=e.code)
+        except Exception as e:
             raise GnocchiUnavailable(e)
-        if r.status_code == 404:
-            raise base.EntityNotFound('gnocchi resource',
-                                      rule.resource_id)
-        elif r.status_code // 200 != 1:
-            raise base.ClientSideError(r.content, status_code=r.status_code)
 
 
 class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
@@ -156,31 +156,28 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
         # Scope the alarm to the project id if needed
         auth_project = v2_utils.get_auth_project(alarm.project_id)
         if auth_project:
-            rule.query = jsonutils.dumps({
-                "and": [{"=": {"created_by_project_id": auth_project}},
-                        query]})
+            query = {"and": [{"=": {"created_by_project_id": auth_project}},
+                             query]}
+            rule.query = jsonutils.dumps(query)
 
-        # Delegate the query validation to gnocchi
-        ks_client = keystone_client.get_client(pecan.request.cfg)
-        request = {
-            'url': "%s/v1/aggregation/resource/%s/metric/%s" % (
-                pecan.request.cfg.gnocchi_url,
-                rule.resource_type,
-                rule.metric),
-            'headers': {'Content-Type': "application/json",
-                        'X-Auth-Token': keystone_client.get_auth_token(
-                            ks_client)},
-            'params': {'aggregation': rule.aggregation_method,
-                       'needed_overlap': 0},
-            'data': rule.query,
-        }
+        conf = pecan.request.cfg
+        gnocchi_client = client.Client(
+            '1', keystone_client.get_session(conf),
+            interface=conf.service_credentials.interface,
+            region_name=conf.service_credentials.region_name,
+            endpoint_override=conf.gnocchi_url)
 
         try:
-            r = requests.post(**request)
-        except requests.ConnectionError as e:
+            gnocchi_client.metric.aggregation(
+                metrics=rule.metric,
+                query=query,
+                aggregation=rule.aggregation_method,
+                needed_overlap=0,
+                resource_type=rule.resource_type)
+        except exceptions.ClientException as e:
+            raise base.ClientSideError(e.message, status_code=e.code)
+        except Exception as e:
             raise GnocchiUnavailable(e)
-        if r.status_code // 200 != 1:
-            raise base.ClientSideError(r.content, status_code=r.status_code)
 
 
 class AggregationMetricsByIdLookupRule(AlarmGnocchiThresholdRule):
