@@ -50,21 +50,21 @@ class SQLManager(fixtures.Fixture):
         self.conf = conf
         db_name = 'aodh_%s' % uuid.uuid4().hex
         import sqlalchemy
-        self._engine = sqlalchemy.create_engine(
-            conf.database.connection.replace(self.url_dbname_placeholder,
-                                             self.url_dbname_createstring))
+        self._engine = sqlalchemy.create_engine(conf.database.connection)
         self._conn = self._engine.connect()
         self._create_db(self._conn, db_name)
         self._conn.close()
         self._engine.dispose()
-        self.url = conf.database.connection.replace(
-            self.url_dbname_placeholder, db_name)
+        parsed = list(urlparse.urlparse(conf.database.connection))
+        # NOTE(jd) We need to set an host otherwise urlunparse() will not
+        # construct a proper URL
+        if parsed[1] == '':
+            parsed[1] = 'localhost'
+        parsed[2] = '/' + db_name
+        self.url = urlparse.urlunparse(parsed)
 
 
 class PgSQLManager(SQLManager):
-
-    url_dbname_placeholder = 'template1'
-    url_dbname_createstring = url_dbname_placeholder
 
     @staticmethod
     def _create_db(conn, db_name):
@@ -74,9 +74,6 @@ class PgSQLManager(SQLManager):
 
 
 class MySQLManager(SQLManager):
-
-    url_dbname_placeholder = 'test'
-    url_dbname_createstring = ''
 
     @staticmethod
     def _create_db(conn, db_name):
@@ -133,7 +130,11 @@ class TestBase(test_base.BaseTestCase):
 
     def setUp(self):
         super(TestBase, self).setUp()
-        db_url = os.environ.get('AODH_TEST_STORAGE_URL', 'sqlite://')
+        db_url = os.environ.get(
+            'AODH_TEST_STORAGE_URL',
+            os.environ.get(
+                "OVERTEST_URL", 'sqlite://').replace(
+                    "mysql://", "mysql+pymysql://"))
         engine = urlparse.urlparse(db_url).scheme
         # In case some drivers have additional specification, for example:
         # PyMySQL will have scheme mysql+pymysql.
