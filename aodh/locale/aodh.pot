@@ -1,21 +1,21 @@
 # Translations template for aodh.
-# Copyright (C) 2015 ORGANIZATION
+# Copyright (C) 2016 ORGANIZATION
 # This file is distributed under the same license as the aodh project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 1.0.1.dev12\n"
+"Project-Id-Version: aodh 2.0.0.0b2.dev28\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-16 16:40+0000\n"
+"POT-Creation-Date: 2016-01-19 06:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.0\n"
+"Generated-By: Babel 2.2.0\n"
 
 #: aodh/api/app.py:93
 #, python-format
@@ -41,79 +41,79 @@ msgstr ""
 msgid "Error parsing HTTP response: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:88
+#: aodh/api/controllers/v2/alarms.py:84
 #, python-format
 msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:170
+#: aodh/api/controllers/v2/alarms.py:166
 #, python-format
 msgid "Timezone %s is not valid"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:288
+#: aodh/api/controllers/v2/alarms.py:284
 msgid "Time constraint names must be unique for a given alarm."
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:298
+#: aodh/api/controllers/v2/alarms.py:294
 #, python-format
 msgid "%(rule)s must be set for %(type)s type alarm"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:309
+#: aodh/api/controllers/v2/alarms.py:305
 #, python-format
 msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:324
+#: aodh/api/controllers/v2/alarms.py:320
 #, python-format
 msgid "duplicate actions are found: %s, remove duplicate ones"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:330
+#: aodh/api/controllers/v2/alarms.py:326
 #, python-format
 msgid "%(name)s count exceeds maximum value %(maximum)d"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:342
+#: aodh/api/controllers/v2/alarms.py:338
 #, python-format
 msgid "Unable to parse action %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:345
+#: aodh/api/controllers/v2/alarms.py:341
 #, python-format
 msgid "Unsupported action %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:348
+#: aodh/api/controllers/v2/alarms.py:344
 #, python-format
 msgid "You are not authorized to create action: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:596
+#: aodh/api/controllers/v2/alarms.py:600
 #, python-format
 msgid "Alarm with name=%s exists"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:608
+#: aodh/api/controllers/v2/alarms.py:612
 #, python-format
 msgid "Error while putting alarm: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:609 aodh/api/controllers/v2/alarms.py:783
+#: aodh/api/controllers/v2/alarms.py:613 aodh/api/controllers/v2/alarms.py:779
 msgid "Alarm incorrect"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:669
+#: aodh/api/controllers/v2/alarms.py:671
 msgid "state invalid"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:776
+#: aodh/api/controllers/v2/alarms.py:772
 #, python-format
 msgid "Alarm with name='%s' exists"
 msgstr ""
 
-#: aodh/api/controllers/v2/alarms.py:782
+#: aodh/api/controllers/v2/alarms.py:778
 #, python-format
 msgid "Error while posting alarm: %s"
 msgstr ""
@@ -157,26 +157,26 @@ msgstr ""
 msgid "Alarm %(alarm_id)s not found in project %(project)s"
 msgstr ""
 
-#: aodh/api/controllers/v2/query.py:202
+#: aodh/api/controllers/v2/query.py:201
 #, python-format
 msgid "Filter expression not valid: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/query.py:217
+#: aodh/api/controllers/v2/query.py:216
 #, python-format
 msgid "Order-by expression not valid: %s"
 msgstr ""
 
-#: aodh/api/controllers/v2/query.py:227
+#: aodh/api/controllers/v2/query.py:226
 msgid "Limit should be positive"
 msgstr ""
 
-#: aodh/api/controllers/v2/query.py:320
+#: aodh/api/controllers/v2/query.py:333
 #, python-format
 msgid "String %s is not a valid isotime"
 msgstr ""
 
-#: aodh/api/controllers/v2/query.py:321
+#: aodh/api/controllers/v2/query.py:334
 #, python-format
 msgid "Failed to parse the timestamp value %s"
 msgstr ""
@@ -207,7 +207,7 @@ msgid ""
 "%(threshold)s over %(period)s seconds"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:117
+#: aodh/evaluator/__init__.py:118
 #, python-format
 msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
 msgstr ""
@@ -216,35 +216,31 @@ msgstr ""
 msgid "alarm state update failed"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:205
+#: aodh/evaluator/__init__.py:208
 #, python-format
 msgid "initiating evaluation cycle on %d alarms"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:210
+#: aodh/evaluator/__init__.py:213
 msgid "alarm evaluation cycle failed"
 msgstr ""
 
-#: aodh/evaluator/__init__.py:222
+#: aodh/evaluator/__init__.py:225
 #, python-format
 msgid "Failed to evaluate alarm %s"
 msgstr ""
 
-#: aodh/evaluator/combination.py:36
-msgid "alarm retrieval failed"
-msgstr ""
-
-#: aodh/evaluator/combination.py:57
+#: aodh/evaluator/combination.py:60
 #, python-format
 msgid "Alarms %(alarm_ids)s are in unknown state"
 msgstr ""
 
-#: aodh/evaluator/combination.py:79
+#: aodh/evaluator/combination.py:82
 #, python-format
 msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr ""
 
-#: aodh/evaluator/combination.py:83
+#: aodh/evaluator/combination.py:86
 #, python-format
 msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr ""
@@ -254,50 +250,45 @@ msgstr ""
 msgid "Event (message_id=%(message)s) hit the query of alarm (id=%(alarm)s)"
 msgstr ""
 
-#: aodh/evaluator/gnocchi.py:85 aodh/evaluator/threshold.py:121
+#: aodh/evaluator/gnocchi.py:77 aodh/evaluator/threshold.py:120
 msgid "alarm stats retrieval failed"
 msgstr ""
 
-#: aodh/evaluator/gnocchi.py:88
-#, python-format
-msgid "alarm stats retrieval failed: %s"
-msgstr ""
-
-#: aodh/evaluator/threshold.py:138
+#: aodh/evaluator/threshold.py:137
 #, python-format
 msgid "%d datapoints are unknown"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:162
+#: aodh/evaluator/threshold.py:161
 #, python-format
 msgid ""
 "Transition to %(state)s due to %(count)d samples %(disposition)s "
 "threshold, most recent: %(most_recent)s"
 msgstr ""
 
-#: aodh/evaluator/threshold.py:166
+#: aodh/evaluator/threshold.py:165
 #, python-format
 msgid ""
 "Remaining as %(state)s due to %(count)d samples %(disposition)s "
 "threshold, most recent: %(most_recent)s"
 msgstr ""
 
-#: aodh/notifier/__init__.py:84
+#: aodh/notifier/__init__.py:127
 #, python-format
 msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
 msgstr ""
 
-#: aodh/notifier/__init__.py:93
+#: aodh/notifier/__init__.py:136
 #, python-format
 msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
 msgstr ""
 
-#: aodh/notifier/__init__.py:104
+#: aodh/notifier/__init__.py:147
 #, python-format
 msgid "Unable to notify alarm %s"
 msgstr ""
 
-#: aodh/notifier/__init__.py:125
+#: aodh/notifier/__init__.py:160
 msgid "Unable to notify for an alarm with no action"
 msgstr ""
 
@@ -308,7 +299,7 @@ msgid ""
 " %(previous)s to %(current)s with action %(action)s because %(reason)s."
 msgstr ""
 
-#: aodh/notifier/rest.py:69
+#: aodh/notifier/rest.py:68
 #, python-format
 msgid ""
 "Notifying alarm %(alarm_name)s %(alarm_id)s with severity %(severity)s "
