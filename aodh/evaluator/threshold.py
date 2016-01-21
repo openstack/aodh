@@ -64,26 +64,26 @@ class ThresholdEvaluator(evaluator.Evaluator):
         return self._cm_client
 
     @classmethod
-    def _bound_duration(cls, alarm):
+    def _bound_duration(cls, rule):
         """Bound the duration of the statistics query."""
         now = timeutils.utcnow()
         # when exclusion of weak datapoints is enabled, we extend
         # the look-back period so as to allow a clearer sample count
         # trend to be established
-        look_back = (cls.look_back if not alarm.rule.get('exclude_outliers')
-                     else alarm.rule['evaluation_periods'])
-        window = ((alarm.rule.get('period', None) or alarm.rule['granularity'])
-                  * (alarm.rule['evaluation_periods'] + look_back))
+        look_back = (cls.look_back if not rule.get('exclude_outliers')
+                     else rule['evaluation_periods'])
+        window = ((rule.get('period', None) or rule['granularity'])
+                  * (rule['evaluation_periods'] + look_back))
         start = now - datetime.timedelta(seconds=window)
         LOG.debug('query stats from %(start)s to '
                   '%(now)s', {'start': start, 'now': now})
         return start.isoformat(), now.isoformat()
 
     @staticmethod
-    def _sanitize(alarm, statistics):
+    def _sanitize(rule, statistics):
         """Sanitize statistics."""
         LOG.debug('sanitize stats %s', statistics)
-        if alarm.rule.get('exclude_outliers'):
+        if rule.get('exclude_outliers'):
             key = operator.attrgetter('count')
             mean = utils.mean(statistics, key)
             stddev = utils.stddev(statistics, key, mean)
@@ -99,49 +99,26 @@ class ThresholdEvaluator(evaluator.Evaluator):
 
         # in practice statistics are always sorted by period start, not
         # strictly required by the API though
-        statistics = statistics[-alarm.rule['evaluation_periods']:]
-        result_statistics = [getattr(stat, alarm.rule['statistic'])
+        statistics = statistics[-rule['evaluation_periods']:]
+        result_statistics = [getattr(stat, rule['statistic'])
                              for stat in statistics]
         LOG.debug('pruned statistics to %d', len(statistics))
         return result_statistics
 
-    def _statistics(self, alarm, start, end):
+    def _statistics(self, rule, start, end):
         """Retrieve statistics over the current window."""
         after = dict(field='timestamp', op='ge', value=start)
         before = dict(field='timestamp', op='le', value=end)
-        query = copy.copy(alarm.rule['query'])
+        query = copy.copy(rule['query'])
         query.extend([before, after])
         LOG.debug('stats query %s', query)
         try:
             return self.cm_client.statistics.list(
-                meter_name=alarm.rule['meter_name'], q=query,
-                period=alarm.rule['period'])
+                meter_name=rule['meter_name'], q=query,
+                period=rule['period'])
         except Exception:
             LOG.exception(_('alarm stats retrieval failed'))
             return []
-
-    def _sufficient(self, alarm, statistics):
-        """Check for the sufficiency of the data for evaluation.
-
-        Ensure there is sufficient data for evaluation, transitioning to
-        unknown otherwise.
-        """
-        sufficient = len(statistics) >= alarm.rule['evaluation_periods']
-        if not sufficient and alarm.state != evaluator.UNKNOWN:
-            LOG.warning(_LW('Expecting %(expected)d datapoints but only get '
-                            '%(actual)d') % {
-                'expected': alarm.rule['evaluation_periods'],
-                'actual': len(statistics)})
-            # Reason is not same as log message because we want to keep
-            # consistent since thirdparty software may depend on old format.
-            reason = _('%d datapoints are unknown') % alarm.rule[
-                'evaluation_periods']
-            last = None if not statistics else statistics[-1]
-            reason_data = self._reason_data('unknown',
-                                            alarm.rule['evaluation_periods'],
-                                            last)
-            self._refresh(alarm, evaluator.UNKNOWN, reason, reason_data)
-        return sufficient
 
     @staticmethod
     def _reason_data(disposition, count, most_recent):
@@ -150,7 +127,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
                 'count': count, 'most_recent': most_recent}
 
     @classmethod
-    def _reason(cls, alarm, statistics, distilled, state):
+    def _reason(cls, alarm, statistics, state):
         """Fabricate reason string."""
         count = len(statistics)
         disposition = 'inside' if state == evaluator.OK else 'outside'
@@ -166,35 +143,64 @@ class ThresholdEvaluator(evaluator.Evaluator):
                   ' %(disposition)s threshold, most recent: %(most_recent)s')
                 % dict(reason_data, state=state)), reason_data
 
-    def _transition(self, alarm, statistics, compared):
-        """Transition alarm state if necessary.
+    def evaluate_rule(self, alarm_rule):
+        """Evaluate alarm rule.
 
-           The transition rules are currently hardcoded as:
-
-           - transitioning from a known state requires an unequivocal
-             set of datapoints
-
-           - transitioning from unknown is on the basis of the most
-             recent datapoint if equivocal
-
-           Ultimately this will be policy-driven.
+        :returns: state, trending state and statistics.
         """
+        start, end = self._bound_duration(alarm_rule)
+        statistics = self._statistics(alarm_rule, start, end)
+        statistics = self._sanitize(alarm_rule, statistics)
+        sufficient = len(statistics) >= alarm_rule['evaluation_periods']
+        if not sufficient:
+            return evaluator.UNKNOWN, None, statistics
+
+        def _compare(value):
+            op = COMPARATORS[alarm_rule['comparison_operator']]
+            limit = alarm_rule['threshold']
+            LOG.debug('comparing value %(value)s against threshold'
+                      ' %(limit)s', {'value': value, 'limit': limit})
+            return op(value, limit)
+
+        compared = list(six.moves.map(_compare, statistics))
         distilled = all(compared)
         unequivocal = distilled or not any(compared)
-        unknown = alarm.state == evaluator.UNKNOWN
-        continuous = alarm.repeat_actions
 
         if unequivocal:
             state = evaluator.ALARM if distilled else evaluator.OK
-            reason, reason_data = self._reason(alarm, statistics,
-                                               distilled, state)
-            if alarm.state != state or continuous:
-                self._refresh(alarm, state, reason, reason_data)
-        elif unknown or continuous:
+            return state, None, statistics
+        else:
             trending_state = evaluator.ALARM if compared[-1] else evaluator.OK
-            state = trending_state if unknown else alarm.state
-            reason, reason_data = self._reason(alarm, statistics,
-                                               distilled, state)
+            return None, trending_state, statistics
+
+    def _transition_alarm(self, alarm, state, trending_state, statistics):
+        unknown = alarm.state == evaluator.UNKNOWN
+        continuous = alarm.repeat_actions
+
+        if trending_state:
+            if unknown or continuous:
+                state = trending_state if unknown else alarm.state
+                reason, reason_data = self._reason(alarm, statistics, state)
+                self._refresh(alarm, state, reason, reason_data)
+                return
+
+        if state == evaluator.UNKNOWN and not unknown:
+            LOG.warn(_LW('Expecting %(expected)d datapoints but only get '
+                         '%(actual)d') % {
+                'expected': alarm.rule['evaluation_periods'],
+                'actual': len(statistics)})
+            # Reason is not same as log message because we want to keep
+            # consistent since thirdparty software may depend on old format.
+            reason = _('%d datapoints are unknown') % alarm.rule[
+                'evaluation_periods']
+            last = None if not statistics else statistics[-1]
+            reason_data = self._reason_data('unknown',
+                                            alarm.rule['evaluation_periods'],
+                                            last)
+            self._refresh(alarm, state, reason, reason_data)
+
+        elif state and (alarm.state != state or continuous):
+            reason, reason_data = self._reason(alarm, statistics, state)
             self._refresh(alarm, state, reason, reason_data)
 
     def evaluate(self, alarm):
@@ -203,18 +209,5 @@ class ThresholdEvaluator(evaluator.Evaluator):
                       'within its time constraint.', alarm.alarm_id)
             return
 
-        start, end = self._bound_duration(alarm)
-        statistics = self._statistics(alarm, start, end)
-        statistics = self._sanitize(alarm, statistics)
-
-        if self._sufficient(alarm, statistics):
-            def _compare(value):
-                op = COMPARATORS[alarm.rule['comparison_operator']]
-                limit = alarm.rule['threshold']
-                LOG.debug('comparing value %(value)s against threshold'
-                          ' %(limit)s', {'value': value, 'limit': limit})
-                return op(value, limit)
-
-            self._transition(alarm,
-                             statistics,
-                             list(six.moves.map(_compare, statistics)))
+        state, trending_state, statistics = self.evaluate_rule(alarm.rule)
+        self._transition_alarm(alarm, state, trending_state, statistics)

@@ -396,7 +396,7 @@ class TestEvaluate(base.TestEvaluatorBase):
             alarm.rule['exclude_outliers'] = exclude_outliers
         with mock.patch.object(timeutils, 'utcnow') as mock_utcnow:
             mock_utcnow.return_value = datetime.datetime(2012, 7, 2, 10, 45)
-            constraint = self.evaluator._bound_duration(alarm)
+            constraint = self.evaluator._bound_duration(alarm.rule)
             self.assertEqual((start, timeutils.utcnow().isoformat()),
                              constraint)
 
