@@ -57,7 +57,8 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
                                test_interval)
         self.CONF.set_override('heartbeat',
                                coordination_heartbeat,
-                               group='coordination')
+                               group='coordination',
+                               enforce_type=True)
         with mock.patch('aodh.storage.get_connection_from_config',
                         return_value=self.storage_conn):
             p_coord_mock = self.svc.partition_coordinator

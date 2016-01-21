@@ -43,7 +43,7 @@ class FunctionalTest(db_test_base.TestBase):
 
         self.CONF.set_override('policy_file',
                                os.path.abspath('etc/aodh/policy.json'),
-                               group='oslo_policy')
+                               group='oslo_policy', enforce_type=True)
         self.app = self._make_app()
 
     def _make_app(self):
