@@ -67,6 +67,10 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
+        self.zaqar = FakeZaqarClient(self)
+        self.useFixture(mockpatch.Patch(
+            'aodh.notifier.zaqar.ZaqarAlarmNotifier.get_zaqar_client',
+            return_value=self.zaqar))
         self.service = notifier.AlarmNotifierService(self.CONF)
         self.useFixture(mockpatch.Patch(
             'oslo_context.context.generate_request_id',
@@ -260,3 +264,44 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             args, kwargs = poster.call_args
             self.assertEqual(headers, kwargs['headers'])
             self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+
+    def test_zaqar_notifier_action(self):
+        action = 'zaqar://?topic=critical&subscriber=http://example.com/data' \
+                 '&subscriber=mailto:foo@example.com&ttl=7200'
+        self.service.notify_alarm({},
+                                  self._notification(action))
+        self.assertEqual(self.zaqar,
+                         self.service.notifiers['zaqar'].obj.client)
+
+
+class FakeZaqarClient(object):
+
+    def __init__(self, testcase):
+        self.client = testcase
+
+    def queue(self, queue_name, **kwargs):
+        self.client.assertEqual('foobar-critical', queue_name)
+        self.client.assertEqual(dict(force_create=True), kwargs)
+        return FakeZaqarQueue(self.client)
+
+    def subscription(self, queue_name, **kwargs):
+        self.client.assertEqual('foobar-critical', queue_name)
+        subscribers = ['http://example.com/data', 'mailto:foo@example.com']
+        self.client.assertTrue(kwargs['subscriber'] in subscribers)
+        self.client.assertEqual('7200', kwargs['ttl'])
+
+
+class FakeZaqarQueue(object):
+
+    def __init__(self, testcase):
+        self.queue = testcase
+
+    def post(self, message):
+        expected_message = {'body': {'alarm_name': 'testalarm',
+                                     'reason_data': {'test': 'test'},
+                                     'current': 'ALARM',
+                                     'alarm_id': 'foobar',
+                                     'reason': 'what ?',
+                                     'severity': 'critical',
+                                     'previous': 'OK'}}
+        self.queue.assertEqual(expected_message, message)
