@@ -160,7 +160,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
         """Fabricate reason string."""
         count = len(statistics)
         disposition = 'inside' if state == evaluator.OK else 'outside'
-        last = statistics[-1]
+        last = statistics[-1] if count else None
         transition = alarm.state != state
         reason_data = cls._reason_data(disposition, count, last)
         if transition:
