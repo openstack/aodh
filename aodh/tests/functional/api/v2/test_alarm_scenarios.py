@@ -1813,6 +1813,27 @@ class TestAlarmsHistory(TestAlarmsBase):
                          ['rule']["statistic"])
         self.assertEqual('min', new_alarm['threshold_rule']['statistic'])
 
+    def test_redundant_update_alarm_property_no_history_change(self):
+        alarm = self._get_alarm('a')
+        history = self._get_alarm_history('a')
+        self.assertEqual([], history)
+        self.assertEqual('critical', alarm['severity'])
+
+        self._update_alarm('a', dict(severity='low'))
+        new_alarm = self._get_alarm('a')
+        history = self._get_alarm_history('a')
+        self.assertEqual(1, len(history))
+        self.assertEqual(jsonutils.dumps({'severity': 'low'}),
+                         history[0]['detail'])
+        self.assertEqual('low', new_alarm['severity'])
+
+        self._update_alarm('a', dict(severity='low'))
+        updated_history = self._get_alarm_history('a')
+        self.assertEqual(1, len(updated_history))
+        self.assertEqual(jsonutils.dumps({'severity': 'low'}),
+                         updated_history[0]['detail'])
+        self.assertEqual(history, updated_history)
+
     def test_get_recorded_alarm_history_on_create(self):
         new_alarm = {
             'name': 'new_alarm',
