@@ -530,6 +530,8 @@ class AlarmController(rest.RestController):
     def _record_change(self, data, now, on_behalf_of=None, type=None):
         if not pecan.request.cfg.record_history:
             return
+        if not data:
+            return
         type = type or models.AlarmChange.RULE_CHANGE
         scrubbed_data = stringify_timestamps(data)
         detail = json.dumps(scrubbed_data)
