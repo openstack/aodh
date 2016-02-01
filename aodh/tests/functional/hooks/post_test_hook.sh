@@ -37,7 +37,7 @@ if [ -d $BASE/new/devstack ]; then
     sudo chown -R $STACK_USER:stack $AODH_DIR
     source $BASE/new/devstack/openrc admin admin
     openstack catalog list
-    export AODH_SERVICE_URL=$(openstack catalog show alarming -c endpoints -f value | awk '/publicURL/{print $2}')
+    export AODH_SERVICE_URL=$(openstack catalog show alarming -c endpoints -f value | awk '/public/{print $2}')
     export AODH_SERVICE_TOKEN=$(openstack token issue -c id -f value)
     # Go to the aodh dir
     cd $AODH_DIR
