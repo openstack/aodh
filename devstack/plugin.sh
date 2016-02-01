@@ -195,11 +195,14 @@ function configure_aodh {
     cp $AODH_DIR/etc/aodh/api_paste.ini $AODH_CONF_DIR
 
     # The alarm evaluator needs these options to call gnocchi/ceilometer APIs
-    iniset $AODH_CONF service_credentials os_username aodh
-    iniset $AODH_CONF service_credentials os_password $SERVICE_PASSWORD
-    iniset $AODH_CONF service_credentials os_tenant_name $SERVICE_TENANT_NAME
-    iniset $AODH_CONF service_credentials os_region_name $REGION_NAME
-    iniset $AODH_CONF service_credentials os_auth_url $KEYSTONE_SERVICE_URI/v2.0
+    iniset $AODH_CONF service_credentials auth_type password
+    iniset $AODH_CONF service_credentials username aodh
+    iniset $AODH_CONF service_credentials user_domain_name default
+    iniset $AODH_CONF service_credentials project_domain_name default
+    iniset $AODH_CONF service_credentials password $SERVICE_PASSWORD
+    iniset $AODH_CONF service_credentials project_name $SERVICE_TENANT_NAME
+    iniset $AODH_CONF service_credentials region_name $REGION_NAME
+    iniset $AODH_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
 
     configure_auth_token_middleware $AODH_CONF aodh $AODH_AUTH_CACHE_DIR
 
