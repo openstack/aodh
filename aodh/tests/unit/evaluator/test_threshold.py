@@ -296,9 +296,9 @@ class TestEvaluate(base.TestEvaluatorBase):
         self._assert_all_alarms('ok')
         self.assertEqual([],
                          self.storage_conn.update_alarm.call_args_list)
-        reason = ('Remaining as ok due to 4 samples inside'
+        reason = ('Remaining as ok due to 1 samples inside'
                   ' threshold, most recent: 8.0')
-        reason_datas = self._reason_data('inside', 4, 8.0)
+        reason_datas = self._reason_data('inside', 1, 8.0)
         expected = [mock.call(self.alarms[1], 'ok', reason, reason_datas)]
         self.assertEqual(expected, self.notifier.notify.call_args_list)
 
@@ -371,7 +371,7 @@ class TestEvaluate(base.TestEvaluatorBase):
         avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] + v)
                 for v in moves.xrange(1, 6)]
         maxs = [self._get_stat('max', self.alarms[1].rule['threshold'] - v)
-                for v in moves.xrange(4)]
+                for v in moves.xrange(-3, 1)]
         self.api_client.statistics.list.side_effect = [avgs, maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('alarm')
@@ -380,10 +380,10 @@ class TestEvaluate(base.TestEvaluatorBase):
         self.assertEqual(expected, update_calls)
         reasons = ['Transition to alarm due to 5 samples outside'
                    ' threshold, most recent: %s' % avgs[-1].avg,
-                   'Transition to alarm due to 4 samples outside'
+                   'Transition to alarm due to 1 samples outside'
                    ' threshold, most recent: %s' % maxs[-1].max]
         reason_datas = [self._reason_data('outside', 5, avgs[-1].avg),
-                        self._reason_data('outside', 4, maxs[-1].max)]
+                        self._reason_data('outside', 1, maxs[-1].max)]
         expected = [mock.call(alarm, 'insufficient data',
                               reason, reason_data)
                     for alarm, reason, reason_data

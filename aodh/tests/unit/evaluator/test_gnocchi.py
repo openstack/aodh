@@ -387,9 +387,9 @@ class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
         self.assertEqual([], self.storage_conn.update_alarm.call_args_list)
-        reason = ('Remaining as ok due to 4 samples inside'
+        reason = ('Remaining as ok due to 1 samples inside'
                   ' threshold, most recent: 8.0')
-        reason_datas = self._reason_data('inside', 4, 8.0)
+        reason_datas = self._reason_data('inside', 1, 8.0)
         expected = [mock.call(self.alarms[0], 'ok', reason, reason_datas)]
         self.assertEqual(expected, self.notifier.notify.call_args_list)
 

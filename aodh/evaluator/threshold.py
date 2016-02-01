@@ -127,11 +127,14 @@ class ThresholdEvaluator(evaluator.Evaluator):
                 'count': count, 'most_recent': most_recent}
 
     @classmethod
-    def _reason(cls, alarm, statistics, state):
+    def _reason(cls, alarm, statistics, state, count):
         """Fabricate reason string."""
-        count = len(statistics)
-        disposition = 'inside' if state == evaluator.OK else 'outside'
-        last = statistics[-1] if count else None
+        if state == evaluator.OK:
+            disposition = 'inside'
+            count = len(statistics) - count
+        else:
+            disposition = 'outside'
+        last = statistics[-1] if statistics else None
         transition = alarm.state != state
         reason_data = cls._reason_data(disposition, count, last)
         if transition:
@@ -153,7 +156,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
         statistics = self._sanitize(alarm_rule, statistics)
         sufficient = len(statistics) >= alarm_rule['evaluation_periods']
         if not sufficient:
-            return evaluator.UNKNOWN, None, statistics
+            return evaluator.UNKNOWN, None, statistics, len(statistics)
 
         def _compare(value):
             op = COMPARATORS[alarm_rule['comparison_operator']]
@@ -165,22 +168,25 @@ class ThresholdEvaluator(evaluator.Evaluator):
         compared = list(six.moves.map(_compare, statistics))
         distilled = all(compared)
         unequivocal = distilled or not any(compared)
+        number_outside = len([c for c in compared if c])
 
         if unequivocal:
             state = evaluator.ALARM if distilled else evaluator.OK
-            return state, None, statistics
+            return state, None, statistics, number_outside
         else:
             trending_state = evaluator.ALARM if compared[-1] else evaluator.OK
-            return None, trending_state, statistics
+            return None, trending_state, statistics, number_outside
 
-    def _transition_alarm(self, alarm, state, trending_state, statistics):
+    def _transition_alarm(self, alarm, state, trending_state, statistics,
+                          outside_count):
         unknown = alarm.state == evaluator.UNKNOWN
         continuous = alarm.repeat_actions
 
         if trending_state:
             if unknown or continuous:
                 state = trending_state if unknown else alarm.state
-                reason, reason_data = self._reason(alarm, statistics, state)
+                reason, reason_data = self._reason(alarm, statistics, state,
+                                                   outside_count)
                 self._refresh(alarm, state, reason, reason_data)
                 return
 
@@ -200,7 +206,8 @@ class ThresholdEvaluator(evaluator.Evaluator):
             self._refresh(alarm, state, reason, reason_data)
 
         elif state and (alarm.state != state or continuous):
-            reason, reason_data = self._reason(alarm, statistics, state)
+            reason, reason_data = self._reason(alarm, statistics, state,
+                                               outside_count)
             self._refresh(alarm, state, reason, reason_data)
 
     def evaluate(self, alarm):
@@ -209,5 +216,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
                       'within its time constraint.', alarm.alarm_id)
             return
 
-        state, trending_state, statistics = self.evaluate_rule(alarm.rule)
-        self._transition_alarm(alarm, state, trending_state, statistics)
+        state, trending_state, statistics, outside_count = self.evaluate_rule(
+            alarm.rule)
+        self._transition_alarm(alarm, state, trending_state, statistics,
+                               outside_count)
