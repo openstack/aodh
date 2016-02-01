@@ -156,11 +156,14 @@ class ThresholdEvaluator(evaluator.Evaluator):
                 'count': count, 'most_recent': most_recent}
 
     @classmethod
-    def _reason(cls, alarm, statistics, distilled, state):
+    def _reason(cls, alarm, statistics, distilled, state, count):
         """Fabricate reason string."""
-        count = len(statistics)
-        disposition = 'inside' if state == evaluator.OK else 'outside'
-        last = statistics[-1] if count else None
+        if state == evaluator.OK:
+            disposition = 'inside'
+            count = len(statistics) - count
+        else:
+            disposition = 'outside'
+        last = statistics[-1] if statistics else None
         transition = alarm.state != state
         reason_data = cls._reason_data(disposition, count, last)
         if transition:
@@ -189,18 +192,21 @@ class ThresholdEvaluator(evaluator.Evaluator):
         unequivocal = distilled or not any(compared)
         unknown = alarm.state == evaluator.UNKNOWN
         continuous = alarm.repeat_actions
+        number_outside = len([c for c in compared if c])
 
         if unequivocal:
             state = evaluator.ALARM if distilled else evaluator.OK
             reason, reason_data = self._reason(alarm, statistics,
-                                               distilled, state)
+                                               distilled, state,
+                                               number_outside)
             if alarm.state != state or continuous:
                 self._refresh(alarm, state, reason, reason_data)
         elif unknown or continuous:
             trending_state = evaluator.ALARM if compared[-1] else evaluator.OK
             state = trending_state if unknown else alarm.state
             reason, reason_data = self._reason(alarm, statistics,
-                                               distilled, state)
+                                               distilled, state,
+                                               number_outside)
             self._refresh(alarm, state, reason, reason_data)
 
     def evaluate(self, alarm):
