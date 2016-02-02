@@ -36,8 +36,13 @@ if [ -d $BASE/new/devstack ]; then
     STACK_USER=stack
     sudo chown -R $STACK_USER:stack $AODH_DIR
     source $BASE/new/devstack/openrc admin admin
+    if [ $OS_IDENTITY_API_VERSION == '2.0' ]; then
+        urltag='publicURL'
+    else
+        urltag='public'
+    fi
     openstack catalog list
-    export AODH_SERVICE_URL=$(openstack catalog show alarming -c endpoints -f value | awk '/public/{print $2}')
+    export AODH_SERVICE_URL=$(openstack catalog show alarming -c endpoints -f value | awk "/$urltag"'/{print $2}')
     export AODH_SERVICE_TOKEN=$(openstack token issue -c id -f value)
     # Go to the aodh dir
     cd $AODH_DIR
