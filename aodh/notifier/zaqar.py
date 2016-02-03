@@ -41,7 +41,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
     def __init__(self, conf):
         super(ZaqarAlarmNotifier, self).__init__(conf)
         self.conf = conf
-        self.client = self.get_zaqar_client()
+        self._zclient = None
 
     def _get_endpoint(self):
         try:
@@ -94,6 +94,12 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
                 'reason_data': reason_data}
         message = dict(body=body)
         self.notify_zaqar(action, message)
+
+    @property
+    def client(self):
+        if self._zclient is None:
+            self._zclient = self.get_zaqar_client()
+        return self._zclient
 
     def notify_zaqar(self, action, message):
         queue_info = urlparse.parse_qs(action.query)
