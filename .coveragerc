@@ -1,7 +1,7 @@
 [run]
 branch = True
 source = aodh
-omit = aodh/tests/*, aodh/openstack/common/*
+omit = aodh/tests/*
 
 [report]
 ignore_errors = True

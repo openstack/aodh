@@ -1,6 +1,9 @@
 *.egg*
 *.mo
 *.pyc
+*~
+.*.swp
+.*sw?
 .coverage
 .testrepository
 .tox
