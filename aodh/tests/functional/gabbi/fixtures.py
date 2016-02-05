@@ -76,6 +76,11 @@ class ConfigFixture(fixture.GabbiFixture):
                               'aodh/tests/open-policy.json'),
                           group='oslo_policy',
                           enforce_type=True)
+        conf.set_override(
+            'paste_config',
+            os.path.abspath('aodh/tests/functional/gabbi/gabbi_paste.ini'),
+            group='api',
+        )
 
         database_name = '%s-%s' % (db_url, str(uuid.uuid4()))
         conf.set_override('connection', database_name, group='database',
