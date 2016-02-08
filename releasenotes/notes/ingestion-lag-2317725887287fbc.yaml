@@ -1,0 +1,7 @@
+---
+features:
+  - Allow to extends the alarm evaluation windows to to compensate the
+    reporting/ingestion lag.
+
+    An new option is introduced additional_ingestion_lag defaulted to 0.
+    It represents the number of seconds of the window extension.

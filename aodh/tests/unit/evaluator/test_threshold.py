@@ -193,6 +193,56 @@ class TestEvaluate(base.TestEvaluatorBase):
                     in zip(self.alarms, reasons, reason_datas)]
         self.assertEqual(expected, self.notifier.notify.call_args_list)
 
+    @mock.patch.object(timeutils, 'utcnow')
+    def test_lag_configuration(self, mock_utcnow):
+        mock_utcnow.return_value = datetime.datetime(2012, 7, 2, 10, 45)
+        self.api_client.statistics.list.side_effect = []
+
+        self._set_all_alarms('ok')
+        self._evaluate_all_alarms()
+        self._set_all_alarms('ok')
+        self.conf.set_override("additional_ingestion_lag", 42)
+        self._evaluate_all_alarms()
+
+        self.assertEqual([
+            mock.call(
+                meter_name='cpu_util', period=60,
+                q=[{'value': 'cpu_util', 'op': 'eq', 'field': 'meter'},
+                   {'value': 'my_instance', 'op': 'eq',
+                    'field': 'resource_id'},
+                   {'value': '2012-07-02T10:45:00', 'op': 'le',
+                    'field': 'timestamp'},
+                   {'value': '2012-07-02T10:39:00', 'op': 'ge',
+                    'field': 'timestamp'}]),
+            mock.call(
+                meter_name='cpu_util', period=300,
+                q=[{'value': 'cpu_util', 'op': 'eq', 'field': 'meter'},
+                   {'value': 'my_group', 'op': 'eq',
+                    'field': 'metadata.user_metadata.AS'},
+                   {'value': '2012-07-02T10:45:00', 'op': 'le',
+                    'field': 'timestamp'},
+                   {'value': '2012-07-02T10:20:00', 'op': 'ge',
+                    'field': 'timestamp'}]),
+            mock.call(
+                meter_name='cpu_util', period=60,
+                q=[{'value': 'cpu_util', 'op': 'eq', 'field': 'meter'},
+                   {'value': 'my_instance', 'op': 'eq',
+                    'field': 'resource_id'},
+                   {'value': '2012-07-02T10:45:00', 'op': 'le',
+                    'field': 'timestamp'},
+                   {'value': '2012-07-02T10:38:18', 'op': 'ge',
+                    'field': 'timestamp'}]),
+            mock.call(
+                meter_name='cpu_util', period=300,
+                q=[{'value': 'cpu_util', 'op': 'eq', 'field': 'meter'},
+                   {'value': 'my_group', 'op': 'eq',
+                    'field': 'metadata.user_metadata.AS'},
+                   {'value': '2012-07-02T10:45:00', 'op': 'le',
+                    'field': 'timestamp'},
+                   {'value': '2012-07-02T10:19:18', 'op': 'ge',
+                    'field': 'timestamp'}])],
+            self.api_client.statistics.list.mock_calls)
+
     def test_simple_alarm_clear(self):
         self._set_all_alarms('alarm')
         avgs = [self._get_stat('avg', self.alarms[0].rule['threshold'] - v)

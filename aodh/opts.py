@@ -35,6 +35,7 @@ def list_opts():
          itertools.chain(
              aodh.evaluator.OPTS,
              aodh.evaluator.event.OPTS,
+             aodh.evaluator.threshold.OPTS,
              aodh.notifier.rest.OPTS,
              aodh.queue.OPTS,
              aodh.service.OPTS)),
