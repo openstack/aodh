@@ -25,6 +25,7 @@ LOG = log.getLogger(__name__)
 
 OPTS = [
     cfg.StrOpt('gnocchi_url',
+               deprecated_group="alarm",
                default="http://localhost:8041",
                help='URL to Gnocchi.'),
 ]
