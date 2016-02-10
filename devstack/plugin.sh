@@ -197,8 +197,8 @@ function configure_aodh {
     # The alarm evaluator needs these options to call gnocchi/ceilometer APIs
     iniset $AODH_CONF service_credentials auth_type password
     iniset $AODH_CONF service_credentials username aodh
-    iniset $AODH_CONF service_credentials user_domain_name default
-    iniset $AODH_CONF service_credentials project_domain_name default
+    iniset $AODH_CONF service_credentials user_domain_id default
+    iniset $AODH_CONF service_credentials project_domain_id default
     iniset $AODH_CONF service_credentials password $SERVICE_PASSWORD
     iniset $AODH_CONF service_credentials project_name $SERVICE_TENANT_NAME
     iniset $AODH_CONF service_credentials region_name $REGION_NAME
