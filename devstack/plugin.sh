@@ -123,15 +123,13 @@ function _aodh_create_accounts {
 
         create_service_user "aodh" "admin"
 
-        if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
-            local aodh_service=$(get_or_create_service "aodh" \
-                "alarming" "OpenStack Alarming Service")
-            get_or_create_endpoint $aodh_service \
-                "$REGION_NAME" \
-                "$(aodh_service_url)" \
-                "$(aodh_service_url)" \
-                "$(aodh_service_url)"
-        fi
+        local aodh_service=$(get_or_create_service "aodh" \
+            "alarming" "OpenStack Alarming Service")
+        get_or_create_endpoint $aodh_service \
+            "$REGION_NAME" \
+            "$(aodh_service_url)" \
+            "$(aodh_service_url)" \
+            "$(aodh_service_url)"
     fi
 }
 
