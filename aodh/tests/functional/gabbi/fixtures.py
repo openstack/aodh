@@ -21,6 +21,7 @@ import uuid
 
 from gabbi import fixture
 import mock
+from oslo_config import cfg
 from oslo_config import fixture as fixture_config
 from oslo_policy import opts
 from six.moves.urllib import parse as urlparse
@@ -95,3 +96,24 @@ class ConfigFixture(fixture.GabbiFixture):
             storage.get_connection_from_config(self.conf).clear()
             self.conf.reset()
         service.prepare_service = self.prepare_service
+
+
+class CORSConfigFixture(fixture.GabbiFixture):
+    """Inject mock configuration for the CORS middleware."""
+
+    def start_fixture(self):
+        # Here we monkeypatch GroupAttr.__getattr__, necessary because the
+        # paste.ini method of initializing this middleware creates its own
+        # ConfigOpts instance, bypassing the regular config fixture.
+
+        def _mock_getattr(instance, key):
+            if key != 'allowed_origin':
+                return self._original_call_method(instance, key)
+            return "http://valid.example.com"
+
+        self._original_call_method = cfg.ConfigOpts.GroupAttr.__getattr__
+        cfg.ConfigOpts.GroupAttr.__getattr__ = _mock_getattr
+
+    def stop_fixture(self):
+        """Remove the monkeypatch."""
+        cfg.ConfigOpts.GroupAttr.__getattr__ = self._original_call_method
