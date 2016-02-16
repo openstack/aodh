@@ -5,8 +5,6 @@ enable_service aodh-api
 enable_service aodh-notifier aodh-evaluator
 # Listener for Event Alarming
 enable_service aodh-listener
-# Ensure legacy ceilometer alarm stuffs is disabled
-disable_service ceilometer-alarm-notifier ceilometer-alarm-evaluator
 
 # Default directories
 AODH_DIR=$DEST/aodh
