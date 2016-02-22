@@ -15,8 +15,12 @@
 
 from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
-
 from tempest.common import service_client
+from tempest import config
+from tempest import manager
+
+
+CONF = config.CONF
 
 
 class AlarmingClient(service_client.ServiceClient):
@@ -96,3 +100,22 @@ class AlarmingClient(service_client.ServiceClient):
         self.expected_success(200, resp.status)
         body = self.deserialize(body)
         return service_client.ResponseBodyData(resp, body)
+
+
+class Manager(manager.Manager):
+
+    def __init__(self, credentials=None, service=None):
+        super(Manager, self).__init__(credentials, service)
+        self._set_alarming_client()
+
+    def _set_alarming_client(self):
+        if CONF.service_available.aodh:
+            self.alarming_client = AlarmingClient(
+                self.auth_provider,
+                CONF.alarming.catalog_type,
+                CONF.identity.region,
+                endpoint_type=CONF.alarming.endpoint_type,
+                disable_ssl_certificate_validation=(
+                    CONF.identity.disable_ssl_certificate_validation),
+                ca_certs=CONF.identity.ca_certificates_file,
+                trace_requests=CONF.debug.trace_requests)
