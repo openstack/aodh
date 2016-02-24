@@ -13,9 +13,22 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-=======================
- Configuration Options
-=======================
+
+=============
+Configuration
+=============
+
+Configure Aodh by editing `/etc/aodh/aodh.conf`.
+
+No config file is provided with the source code, but one can be easily created
+by running:
+
+::
+
+    tox -e genconfig
+
+This command will create an `etc/aodh/aodh.conf` file which can be used as a
+base for the default configuration file at `/etc/aodh/aodh.conf`.
 
 For the list and description of configuration options that can be set for Aodh in
 order to set up the services please see the
