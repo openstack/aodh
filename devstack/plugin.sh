@@ -198,7 +198,7 @@ function configure_aodh {
     iniset $AODH_CONF service_credentials user_domain_id default
     iniset $AODH_CONF service_credentials project_domain_id default
     iniset $AODH_CONF service_credentials password $SERVICE_PASSWORD
-    iniset $AODH_CONF service_credentials project_name $SERVICE_TENANT_NAME
+    iniset $AODH_CONF service_credentials project_name $SERVICE_PROJECT_NAME
     iniset $AODH_CONF service_credentials region_name $REGION_NAME
     iniset $AODH_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
 
