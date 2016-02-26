@@ -52,7 +52,7 @@ class CompositeRule(wtypes.UserType):
     @staticmethod
     def valid_composite_rule(rules):
         if isinstance(rules, dict) and len(rules) == 1:
-            and_or_key = rules.keys()[0]
+            and_or_key = list(rules)[0]
             if and_or_key not in ('and', 'or'):
                 raise base.ClientSideError(
                     _('Threshold rules should be combined with "and" or "or"'))
