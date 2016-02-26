@@ -1,0 +1,7 @@
+---
+features:
+  - >
+    Add a new composite type alarm, which allow users specifying a composite
+    rule to define an alarm with multiple triggering conditions, using a
+    combination of *and*, *or* relationships. The composite rule is composed of
+    multiple threshold rules or gnocchi rules.
