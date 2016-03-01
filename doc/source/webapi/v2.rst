@@ -89,3 +89,32 @@ The *filter*, *orderby* and *limit* are all optional fields in a query.
 
 .. autotype:: aodh.api.controllers.v2.query.ComplexQuery
    :members:
+
+Composite rule Alarm
+====================
+
+The *composite* type alarm allows users to specify a composite rule to define
+an alarm with multiple triggering conditions, using a combination of *and* and
+*or* relations. A composite rule is composed of multiple threshold rules or
+gnocchi rules. A sample composite alarm request form is as follows::
+
+   {
+       "name": "test_composite",
+       "type": "composite",
+       "composite_rule": {
+           "and": [THRESHOLD_RULE1, THRESHOLD_RULE2, {
+               'or': [THRESHOLD_RULE3, GNOCCHI_RULE1,
+                      GNOCCHI_RULE2, GNOCCHI_RULE3]
+           }]
+       }
+   }
+
+A sub-rule in composite_rule is same as a threshold_rule in threshold alarm
+or a gnocchi_rule in gnocchi alarm. Additionally it has a mandatory *type*
+field to specify the rule type, like in the following sample::
+
+   {
+       "threshold": 0.8,
+       "meter_name": "cpu_util",
+       "type": "threshold"
+   }
