@@ -21,7 +21,7 @@ from aodh.i18n import _
 
 
 class AlarmCombinationRule(base.AlarmRule):
-    """Alarm Combinarion Rule
+    """Alarm Combination Rule
 
     Describe when to trigger the alarm based on combining the state of
     other alarms.
