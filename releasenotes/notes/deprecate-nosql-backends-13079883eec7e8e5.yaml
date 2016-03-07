@@ -1,0 +1,7 @@
+---
+deprecations:
+  - >
+    Drop support for NoSQL backends in Aodh. SQL is a prefectly sufficient
+    backend for handling the scope of alarms. To maximise available resources,
+    NoSQL backends are deprecated so developers do not need to worry about
+    adding features to multiple backends.
