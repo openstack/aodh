@@ -22,6 +22,7 @@ import oslo_i18n
 from oslo_log import log
 from oslo_policy import opts as policy_opts
 
+from aodh.conf import defaults
 from aodh import keystone_client
 from aodh import messaging
 
@@ -54,6 +55,7 @@ def prepare_service(argv=None, config_files=None):
     log_levels = (conf.default_log_levels +
                   ['stevedore=INFO', 'keystoneclient=INFO'])
     log.set_defaults(default_log_levels=log_levels)
+    defaults.set_cors_middleware_defaults()
     db_options.set_defaults(conf)
     policy_opts.set_defaults(conf)
     from aodh import opts
