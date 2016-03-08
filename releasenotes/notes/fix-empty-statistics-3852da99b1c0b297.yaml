@@ -1,0 +1,6 @@
+---
+fixes:
+  - >
+    [`bug 1539069 <https://bugs.launchpad.net/aodh/+bug/1539069>`_]
+    Fix to handle scenario where no valid statistics exist for specified
+    period.

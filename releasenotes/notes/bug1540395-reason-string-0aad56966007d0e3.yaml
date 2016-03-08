@@ -1,0 +1,6 @@
+---
+fixes:
+  - >
+    [`bug 1540395 <https://bugs.launchpad.net/aodh/+bug/1540395>`_]
+    Fix reason string to properly handle transitions when one sample is outside
+    of defined threshold.
