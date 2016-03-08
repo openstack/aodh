@@ -251,11 +251,13 @@ class EventAlarmEvaluator(evaluator.Evaluator):
                     '(id=%(alarm)s)') %
                   {'message': event.id, 'alarm': alarm.id})
         reason_data = {'type': 'event', 'event': event.obj}
-        self._refresh(alarm.obj, state, reason, reason_data)
+        always_record = alarm.obj.repeat_actions
+        self._refresh(alarm.obj, state, reason, reason_data, always_record)
 
-    def _refresh(self, alarm, state, reason, reason_data):
+    def _refresh(self, alarm, state, reason, reason_data, always_record):
         super(EventAlarmEvaluator, self)._refresh(alarm, state,
-                                                  reason, reason_data)
+                                                  reason, reason_data,
+                                                  always_record)
 
         project = alarm.project_id
         if self.conf.event_alarm_cache_ttl and project in self.caches:

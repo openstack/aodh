@@ -109,12 +109,12 @@ class Evaluator(object):
         self._alarm_change_notifier.info({},
                                          notification, payload)
 
-    def _refresh(self, alarm, state, reason, reason_data):
+    def _refresh(self, alarm, state, reason, reason_data, always_record=False):
         """Refresh alarm state."""
         try:
             previous = alarm.state
             alarm.state = state
-            if previous != state:
+            if previous != state or always_record:
                 LOG.info(_('alarm %(id)s transitioning to %(state)s because '
                            '%(reason)s') % {'id': alarm.alarm_id,
                                             'state': state,

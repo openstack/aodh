@@ -211,7 +211,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
         self._do_test_event_alarm(
             [alarm], [event],
             expect_alarm_states={alarm.alarm_id: evaluator.ALARM},
-            expect_alarm_updates=[],
+            expect_alarm_updates=[alarm],
             expect_notifications=[dict(alarm=alarm, event=event,
                                        previous=evaluator.ALARM)])
 
