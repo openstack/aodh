@@ -1321,8 +1321,9 @@ class TestAlarms(TestAlarmsBase):
         auth = mock.Mock()
         trust_client = mock.Mock()
         with mock.patch('aodh.keystone_client.get_client') as client:
-            client.return_value = mock.Mock(
-                auth_ref=mock.Mock(user_id='my_user'))
+            mock_session = mock.Mock()
+            mock_session.get_user_id.return_value = 'my_user'
+            client.return_value = mock.Mock(session=mock_session)
             with mock.patch('keystoneclient.v3.client.Client') as sub_client:
                 sub_client.return_value = trust_client
                 trust_client.trusts.create.return_value = mock.Mock(id='5678')

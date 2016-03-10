@@ -64,7 +64,7 @@ def create_trust_id(conf, trustor_user_id, trustor_project_id, roles,
                     auth_plugin):
     """Create a new trust using the aodh service user."""
     admin_client = get_client(conf)
-    trustee_user_id = admin_client.auth_ref.user_id
+    trustee_user_id = admin_client.session.get_user_id()
 
     client = get_client_on_behalf_user(conf, auth_plugin=auth_plugin)
     trust = client.trusts.create(trustor_user=trustor_user_id,
