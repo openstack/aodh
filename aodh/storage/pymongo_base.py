@@ -17,14 +17,17 @@
 # under the License.
 """Common functions for MongoDB backend
 """
-
+from oslo_log import log
 import pymongo
 import six
 
+from aodh import storage
 from aodh.storage import base
 from aodh.storage import models
 from aodh.storage.mongo import utils as pymongo_utils
 
+
+LOG = log.getLogger(__name__)
 
 COMMON_AVAILABLE_CAPABILITIES = {
     'alarms': {'query': {'simple': True,
@@ -56,22 +59,26 @@ class Connection(base.Connection):
         if 'alarm_history' not in self.db.conn.collection_names():
             self.db.conn.create_collection('alarm_history')
 
-    def update_alarm(self, alarm):
+    def update_alarm(self, alarm, upsert=False):
         """Update alarm."""
         data = alarm.as_dict()
 
         self.db.alarm.update(
             {'alarm_id': alarm.alarm_id},
             {'$set': data},
-            upsert=True)
+            upsert=upsert)
 
-        stored_alarm = self.db.alarm.find({'alarm_id': alarm.alarm_id})[0]
+        alarms_found = self.db.alarm.find({'alarm_id': alarm.alarm_id})
+        if alarms_found.count() == 0:
+            raise storage.AlarmNotFound(alarm.alarm_id)
+        stored_alarm = alarms_found[0]
         del stored_alarm['_id']
         self._ensure_encapsulated_rule_format(stored_alarm)
         self._ensure_time_constraints(stored_alarm)
         return models.Alarm(**stored_alarm)
 
-    create_alarm = update_alarm
+    def create_alarm(self, alarm):
+        return self.update_alarm(alarm, upsert=True)
 
     def delete_alarm(self, alarm_id):
         """Delete an alarm and its history data."""

@@ -73,7 +73,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
                                                            'value':
                                                            project_id}]),
                                          severity='critical')
-                    self.alarm_conn.update_alarm(alarm)
+                    self.alarm_conn.create_alarm(alarm)
 
     def test_query_all(self):
         data = self.post_json(self.alarm_url,

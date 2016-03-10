@@ -203,7 +203,7 @@ class TestAlarms(TestAlarmsBase):
     def setUp(self):
         super(TestAlarms, self).setUp()
         for alarm in default_alarms(self.auth_headers):
-            self.alarm_conn.update_alarm(alarm)
+            self.alarm_conn.create_alarm(alarm)
 
     def test_list_alarms(self):
         data = self.get_json('/alarms', headers=self.auth_headers)
@@ -1732,7 +1732,7 @@ class TestAlarmsHistory(TestAlarmsBase):
                                   op='eq',
                                   value=self.auth_headers['X-Project-Id'])
                              ]))
-        self.alarm_conn.update_alarm(alarm)
+        self.alarm_conn.create_alarm(alarm)
 
     def _get_alarm_history(self, alarm_id, auth_headers=None, query=None,
                            expect_errors=False, status=200):
@@ -2387,7 +2387,7 @@ class TestAlarmsRuleCombination(TestAlarmsBase):
     def setUp(self):
         super(TestAlarmsRuleCombination, self).setUp()
         for alarm in default_alarms(self.auth_headers):
-            self.alarm_conn.update_alarm(alarm)
+            self.alarm_conn.create_alarm(alarm)
 
     def test_get_alarm_combination(self):
         alarms = self.get_json('/alarms',
@@ -2850,7 +2850,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
 
                 ]:
 
-            self.alarm_conn.update_alarm(alarm)
+            self.alarm_conn.create_alarm(alarm)
 
     def test_list_alarms(self):
         data = self.get_json('/alarms', headers=self.auth_headers)
@@ -3034,7 +3034,7 @@ class TestAlarmsEvent(TestAlarmsBase):
                              rule=dict(event_type='event.test',
                                        query=[]),
                              )
-        self.alarm_conn.update_alarm(alarm)
+        self.alarm_conn.create_alarm(alarm)
 
         data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(1, len(data))
@@ -3158,7 +3158,7 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
                              time_constraints=[],
                              rule=self.rule,
                              )
-        self.alarm_conn.update_alarm(alarm)
+        self.alarm_conn.create_alarm(alarm)
 
         data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(1, len(data))
