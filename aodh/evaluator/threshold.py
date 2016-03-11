@@ -191,8 +191,8 @@ class ThresholdEvaluator(evaluator.Evaluator):
                 return
 
         if state == evaluator.UNKNOWN and not unknown:
-            LOG.warn(_LW('Expecting %(expected)d datapoints but only get '
-                         '%(actual)d') % {
+            LOG.warning(_LW('Expecting %(expected)d datapoints but only get '
+                            '%(actual)d') % {
                 'expected': alarm.rule['evaluation_periods'],
                 'actual': len(statistics)})
             # Reason is not same as log message because we want to keep
