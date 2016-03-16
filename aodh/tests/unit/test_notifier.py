@@ -287,7 +287,7 @@ class FakeZaqarClient(object):
     def subscription(self, queue_name, **kwargs):
         self.client.assertEqual('foobar-critical', queue_name)
         subscribers = ['http://example.com/data', 'mailto:foo@example.com']
-        self.client.assertTrue(kwargs['subscriber'] in subscribers)
+        self.client.assertIn(kwargs['subscriber'], subscribers)
         self.client.assertEqual('7200', kwargs['ttl'])
 
 
