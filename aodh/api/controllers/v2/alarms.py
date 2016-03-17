@@ -640,10 +640,8 @@ class AlarmController(rest.RestController):
         :param q: Filter rules for the changes to be described.
         """
 
-        target = rbac.target_from_segregation_rule(
-            pecan.request.headers, pecan.request.enforcer)
-        rbac.enforce('alarm_history', pecan.request.headers,
-                     pecan.request.enforcer, target)
+        # Ensure alarm exists
+        self._alarm('alarm_history')
 
         q = q or []
         # allow history to be returned for deleted alarms, but scope changes
