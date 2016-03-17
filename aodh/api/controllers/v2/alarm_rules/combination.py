@@ -55,7 +55,7 @@ class AlarmCombinationRule(base.AlarmRule):
         project = v2_utils.get_auth_project(
             alarm.project_id if alarm.project_id != wtypes.Unset else None)
         for id in alarm.combination_rule.alarm_ids:
-            alarms = list(pecan.request.alarm_storage_conn.get_alarms(
+            alarms = list(pecan.request.storage.get_alarms(
                 alarm_id=id, project=project))
             if not alarms:
                 raise base.AlarmNotFound(id, project)

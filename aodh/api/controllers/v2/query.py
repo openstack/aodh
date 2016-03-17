@@ -357,7 +357,7 @@ class QueryAlarmHistoryController(rest.RestController):
         query = ValidatedComplexQuery(body,
                                       models.AlarmChange)
         query.validate(visibility_field="on_behalf_of")
-        conn = pecan.request.alarm_storage_conn
+        conn = pecan.request.storage
         return [alarms.AlarmChange.from_db_model(s)
                 for s in conn.query_alarm_history(query.filter_expr,
                                                   query.orderby,
@@ -383,7 +383,7 @@ class QueryAlarmsController(rest.RestController):
         query = ValidatedComplexQuery(body,
                                       models.Alarm)
         query.validate(visibility_field="project_id")
-        conn = pecan.request.alarm_storage_conn
+        conn = pecan.request.storage
         return [alarms.Alarm.from_db_model(s)
                 for s in conn.query_alarms(query.filter_expr,
                                            query.orderby,

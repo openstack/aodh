@@ -35,10 +35,10 @@ class ConfigHook(hooks.PecanHook):
 class DBHook(hooks.PecanHook):
 
     def __init__(self, alarm_conn):
-        self.alarm_storage_connection = alarm_conn
+        self.storage = alarm_conn
 
     def before(self, state):
-        state.request.alarm_storage_conn = self.alarm_storage_connection
+        state.request.storage = self.storage
 
 
 class TranslationHook(hooks.PecanHook):

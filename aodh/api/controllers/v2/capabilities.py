@@ -101,7 +101,7 @@ class CapabilitiesController(rest.RestController):
         """
         # variation in API capabilities is effectively determined by
         # the lack of strict feature parity across storage drivers
-        alarm_conn = pecan.request.alarm_storage_conn
+        alarm_conn = pecan.request.storage
         driver_capabilities = {
             'alarms': alarm_conn.get_capabilities()['alarms'],
         }

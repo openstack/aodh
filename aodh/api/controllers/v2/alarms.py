@@ -511,14 +511,12 @@ class AlarmController(rest.RestController):
         self._id = alarm_id
 
     def _alarm(self, rbac_directive):
-        self.conn = pecan.request.alarm_storage_conn
-
         # TODO(sileht): We should be able to relax this since we
         # pass the alarm object to the enforcer.
         auth_project = rbac.get_limited_to_project(pecan.request.headers,
                                                    pecan.request.enforcer)
-        alarms = list(self.conn.get_alarms(alarm_id=self._id,
-                                           project=auth_project))
+        alarms = list(pecan.request.storage.get_alarms(alarm_id=self._id,
+                                                       project=auth_project))
         if not alarms:
             raise base.AlarmNotFound(alarm=self._id, auth_project=auth_project)
         alarm = alarms[0]
@@ -551,7 +549,7 @@ class AlarmController(rest.RestController):
                        severity=severity)
 
         try:
-            self.conn.record_alarm_change(payload)
+            pecan.request.storage.record_alarm_change(payload)
         except aodh.NotImplementedError:
             pass
 
@@ -596,8 +594,8 @@ class AlarmController(rest.RestController):
 
         # make sure alarms are unique by name per project.
         if alarm_in.name != data.name:
-            alarms = list(self.conn.get_alarms(name=data.name,
-                                               project=data.project_id))
+            alarms = list(pecan.request.storage.get_alarms(
+                name=data.name, project=data.project_id))
             if alarms:
                 raise base.ClientSideError(
                     _("Alarm with name=%s exists") % data.name,
@@ -615,7 +613,7 @@ class AlarmController(rest.RestController):
             LOG.exception(_("Error while putting alarm: %s") % updated_alarm)
             raise base.ClientSideError(_("Alarm incorrect"))
 
-        alarm = self.conn.update_alarm(alarm_in)
+        alarm = pecan.request.storage.update_alarm(alarm_in)
 
         change = dict((k, v) for k, v in updated_alarm.items()
                       if v != old_alarm[k] and k not in
@@ -629,7 +627,7 @@ class AlarmController(rest.RestController):
 
         # ensure alarm exists before deleting
         alarm = self._alarm('delete_alarm')
-        self.conn.delete_alarm(alarm.alarm_id)
+        pecan.request.storage.delete_alarm(alarm.alarm_id)
         alarm_object = Alarm.from_db_model(alarm)
         alarm_object.delete_actions()
 
@@ -649,7 +647,7 @@ class AlarmController(rest.RestController):
         # avoid inappropriate cross-tenant visibility of alarm history
         auth_project = rbac.get_limited_to_project(pecan.request.headers,
                                                    pecan.request.enforcer)
-        conn = pecan.request.alarm_storage_conn
+        conn = pecan.request.storage
         kwargs = v2_utils.query_to_kwargs(
             q, conn.get_alarm_changes, ['on_behalf_of', 'alarm_id'])
         return [AlarmChange.from_db_model(ac)
@@ -673,7 +671,7 @@ class AlarmController(rest.RestController):
         now = timeutils.utcnow()
         alarm.state = state
         alarm.state_timestamp = now
-        alarm = self.conn.update_alarm(alarm)
+        alarm = pecan.request.storage.update_alarm(alarm)
         change = {'state': alarm.state}
         self._record_change(change, now, on_behalf_of=alarm.project_id,
                             type=models.AlarmChange.STATE_TRANSITION)
@@ -730,7 +728,7 @@ class AlarmsController(rest.RestController):
         rbac.enforce('create_alarm', pecan.request.headers,
                      pecan.request.enforcer, {})
 
-        conn = pecan.request.alarm_storage_conn
+        conn = pecan.request.storage
         now = timeutils.utcnow()
 
         data.alarm_id = str(uuid.uuid4())
@@ -798,7 +796,7 @@ class AlarmsController(rest.RestController):
         q = q or []
         # Timestamp is not supported field for Simple Alarm queries
         kwargs = v2_utils.query_to_kwargs(
-            q, pecan.request.alarm_storage_conn.get_alarms,
+            q, pecan.request.storage.get_alarms,
             allow_timestamps=False)
         return [Alarm.from_db_model(m)
-                for m in pecan.request.alarm_storage_conn.get_alarms(**kwargs)]
+                for m in pecan.request.storage.get_alarms(**kwargs)]
