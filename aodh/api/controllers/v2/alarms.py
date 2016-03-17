@@ -510,7 +510,7 @@ class AlarmController(rest.RestController):
         pecan.request.context['alarm_id'] = alarm_id
         self._id = alarm_id
 
-    def _alarm(self, rbac_directive):
+    def _enforce_rbac(self, rbac_directive):
         # TODO(sileht): We should be able to relax this since we
         # pass the alarm object to the enforcer.
         auth_project = rbac.get_limited_to_project(pecan.request.headers,
@@ -560,7 +560,7 @@ class AlarmController(rest.RestController):
     @wsme_pecan.wsexpose(Alarm)
     def get(self):
         """Return this alarm."""
-        return Alarm.from_db_model(self._alarm('get_alarm'))
+        return Alarm.from_db_model(self._enforce_rbac('get_alarm'))
 
     @wsme_pecan.wsexpose(Alarm, body=Alarm)
     def put(self, data):
@@ -570,7 +570,7 @@ class AlarmController(rest.RestController):
         """
 
         # Ensure alarm exists
-        alarm_in = self._alarm('change_alarm')
+        alarm_in = self._enforce_rbac('change_alarm')
 
         now = timeutils.utcnow()
 
@@ -626,7 +626,7 @@ class AlarmController(rest.RestController):
         """Delete this alarm."""
 
         # ensure alarm exists before deleting
-        alarm = self._alarm('delete_alarm')
+        alarm = self._enforce_rbac('delete_alarm')
         pecan.request.storage.delete_alarm(alarm.alarm_id)
         alarm_object = Alarm.from_db_model(alarm)
         alarm_object.delete_actions()
@@ -639,7 +639,7 @@ class AlarmController(rest.RestController):
         """
 
         # Ensure alarm exists
-        self._alarm('alarm_history')
+        self._enforce_rbac('alarm_history')
 
         q = q or []
         # allow history to be returned for deleted alarms, but scope changes
@@ -662,7 +662,7 @@ class AlarmController(rest.RestController):
         :param state: an alarm state within the request body.
         """
 
-        alarm = self._alarm('change_alarm_state')
+        alarm = self._enforce_rbac('change_alarm_state')
 
         # note(sileht): body are not validated by wsme
         # Workaround for https://bugs.launchpad.net/wsme/+bug/1227229
@@ -680,7 +680,7 @@ class AlarmController(rest.RestController):
     @wsme_pecan.wsexpose(state_kind_enum)
     def get_state(self):
         """Get the state of this alarm."""
-        return self._alarm('get_alarm_state').state
+        return self._enforce_rbac('get_alarm_state').state
 
 
 class AlarmsController(rest.RestController):
