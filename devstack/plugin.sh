@@ -20,6 +20,24 @@ else
     AODH_BIN_DIR=$(get_python_exec_prefix)
 fi
 
+
+if [ -z "$AODH_DEPLOY" ]; then
+    # Default
+    AODH_DEPLOY=werkzeug
+
+    # Fallback to common wsgi devstack configuration
+    if [ "$ENABLE_HTTPD_MOD_WSGI_SERVICES" == "True" ]; then
+        AODH_DEPLOY=mod_wsgi
+
+    # Deprecated config
+    elif [ -n "$AODH_USE_MOD_WSGI" ] ; then
+        echo_summary "AODH_USE_MOD_WSGI is deprecated, use AODH_DEPLOY instead"
+        if [ "$AODH_USE_MOD_WSGI" == True ]; then
+            AODH_DEPLOY=mod_wsgi
+        fi
+    fi
+fi
+
 # Test if any Aodh services are enabled
 # is_aodh_enabled
 function is_aodh_enabled {
@@ -155,7 +173,7 @@ function cleanup_aodh {
     if [ "$AODH_BACKEND" = 'mongodb' ] ; then
         mongo aodh --eval "db.dropDatabase();"
     fi
-    if [ "$AODH_USE_MOD_WSGI" == "True" ]; then
+    if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
         _aodh_cleanup_apache_wsgi
     fi
 }
@@ -186,6 +204,16 @@ function configure_aodh {
         iniset $AODH_CONF coordination backend_url $AODH_COORDINATION_URL
     fi
 
+    # Set up logging
+    if [ "$SYSLOG" != "False" ]; then
+        iniset $AODH_CONF DEFAULT use_syslog "True"
+    fi
+
+    # Format logging
+    if [ "$LOG_COLOR" == "True" ] && [ "$SYSLOG" == "False" ] && [ "$AODH_DEPLOY" != "mod_wsgi" ]; then
+        setup_colorized_logging $AODH_CONF DEFAULT
+    fi
+
     # Install the policy file for the API server
     cp $AODH_DIR/etc/aodh/policy.json $AODH_CONF_DIR
     iniset $AODH_CONF oslo_policy policy_file $AODH_CONF_DIR/policy.json
@@ -211,9 +239,33 @@ function configure_aodh {
 
     # NOTE: This must come after database configuration as those can
     # call cleanup_aodh which will wipe the WSGI config.
-    if [ "$AODH_USE_MOD_WSGI" == "True" ]; then
+    if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
         iniset $AODH_CONF api pecan_debug "False"
         _aodh_config_apache_wsgi
+    elif [ "$AODH_DEPLOY" == "uwsgi" ]; then
+        # iniset creates these files when it's called if they don't exist.
+        AODH_UWSGI_FILE=$AODH_CONF_DIR/aodh-uwsgi.ini
+
+        rm -f "$AODH_UWSGI_FILE"
+
+        iniset "$AODH_UWSGI_FILE" uwsgi http $AODH_SERVICE_HOST:$AODH_SERVICE_PORT
+        iniset "$AODH_UWSGI_FILE" uwsgi wsgi-file "$AODH_DIR/aodh/api/app.wsgi"
+        # This is running standalone
+        iniset "$AODH_UWSGI_FILE" uwsgi master true
+        # Set die-on-term & exit-on-reload so that uwsgi shuts down
+        iniset "$AODH_UWSGI_FILE" uwsgi die-on-term true
+        iniset "$AODH_UWSGI_FILE" uwsgi exit-on-reload true
+        iniset "$AODH_UWSGI_FILE" uwsgi threads 10
+        iniset "$AODH_UWSGI_FILE" uwsgi processes $API_WORKERS
+        iniset "$AODH_UWSGI_FILE" uwsgi enable-threads true
+        iniset "$AODH_UWSGI_FILE" uwsgi plugins python
+        iniset "$AODH_UWSGI_FILE" uwsgi lazy-apps true
+        # uwsgi recommends this to prevent thundering herd on accept.
+        iniset "$AODH_UWSGI_FILE" uwsgi thunder-lock true
+        # Override the default size for headers from the 4k default.
+        iniset "$AODH_UWSGI_FILE" uwsgi buffer-size 65535
+        # Make sure the client doesn't try to re-use the connection.
+        iniset "$AODH_UWSGI_FILE" uwsgi add-header "Connection: close"
     fi
 
     if is_service_enabled gnocchi-api; then
@@ -248,6 +300,12 @@ function install_aodh {
     install_aodhclient
     sudo -H pip install -e "$AODH_DIR"[test,$AODH_BACKEND]
     sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR $AODH_API_LOG_DIR
+
+    if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
+        install_apache_wsgi
+    elif [ "$AODH_DEPLOY" == "uwsgi" ]; then
+        pip_install uwsgi
+    fi
 }
 
 # install_aodhclient() - Collect source and prepare
@@ -263,13 +321,15 @@ function install_aodhclient {
 
 # start_aodh() - Start running processes, including screen
 function start_aodh {
-    if [[ "$AODH_USE_MOD_WSGI" == "False" ]]; then
-        run_process aodh-api "$AODH_BIN_DIR/aodh-api -d -v --log-dir=$AODH_API_LOG_DIR --config-file $AODH_CONF"
-    else
+    if [[ "$AODH_DEPLOY" == "mod_wsgi" ]]; then
         enable_apache_site aodh
         restart_apache_server
         tail_log aodh /var/log/$APACHE_NAME/aodh.log
         tail_log aodh-api /var/log/$APACHE_NAME/aodh_access.log
+    elif [ "$AODH_DEPLOY" == "uwsgi" ]; then
+        run_process aodh-api "$AODH_BIN_DIR/uwsgi $AODH_UWSGI_FILE"
+    else
+        run_process aodh-api "$AODH_BIN_DIR/aodh-api -d -v --log-dir=$AODH_API_LOG_DIR --config-file $AODH_CONF"
     fi
 
     # Only die on API if it was actually intended to be turned on
@@ -287,7 +347,7 @@ function start_aodh {
 
 # stop_aodh() - Stop running processes
 function stop_aodh {
-    if [ "$AODH_USE_MOD_WSGI" == "True" ]; then
+    if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
         disable_apache_site aodh
         restart_apache_server
     fi
