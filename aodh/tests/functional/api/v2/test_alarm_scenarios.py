@@ -1970,20 +1970,17 @@ class TestAlarmsHistory(TestAlarmsBase):
         auth = {'X-Roles': 'member',
                 'X-User-Id': str(uuid.uuid4()),
                 'X-Project-Id': str(uuid.uuid4())}
-        history = self._get_alarm_history('a', auth)
-        self.assertEqual([], history)
+        self._get_alarm_history('a', auth_headers=auth,
+                                expect_errors=True, status=404)
 
     def test_delete_alarm_history_after_deletion(self):
-        history = self._get_alarm_history('a')
-        self.assertEqual([], history)
         self._update_alarm('a', dict(name='renamed'))
         history = self._get_alarm_history('a')
         self.assertEqual(1, len(history))
         self.delete('/alarms/%s' % 'a',
                     headers=self.auth_headers,
                     status=204)
-        history = self._get_alarm_history('a')
-        self.assertEqual(0, len(history))
+        self._get_alarm_history('a', expect_errors=True, status=404)
 
     def test_get_alarm_history_ordered_by_recentness(self):
         for i in moves.xrange(10):
@@ -2069,10 +2066,7 @@ class TestAlarmsHistory(TestAlarmsBase):
                          history[0]['detail'])
 
     def test_get_nonexistent_alarm_history(self):
-        # the existence of alarm history is independent of the
-        # continued existence of the alarm itself
-        history = self._get_alarm_history('foobar')
-        self.assertEqual([], history)
+        self._get_alarm_history('foobar', expect_errors=True, status=404)
 
 
 class TestAlarmsHistoryLegacy(LegacyPolicyFileMixin, TestAlarmsHistory):
