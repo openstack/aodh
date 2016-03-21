@@ -31,6 +31,11 @@ OPTS = [
                help='URL to Gnocchi. default: autodetection'),
 ]
 
+# The list of points that Gnocchi API returned is composed
+# of tuples with (timestamp, granularity, value)
+GRANULARITY = 1
+VALUE = 2
+
 
 class GnocchiBase(threshold.ThresholdEvaluator):
     def __init__(self, conf):
@@ -50,8 +55,8 @@ class GnocchiBase(threshold.ThresholdEvaluator):
         # but not a stddev-of-stddevs).
         # TODO(sileht): support alarm['exclude_outliers']
         LOG.debug('sanitize stats %s', statistics)
-        statistics = [stats[2] for stats in statistics
-                      if stats[1] == rule['granularity']]
+        statistics = [stats[VALUE] for stats in statistics
+                      if stats[GRANULARITY] == rule['granularity']]
         statistics = statistics[-rule['evaluation_periods']:]
         LOG.debug('pruned statistics to %d', len(statistics))
         return statistics
