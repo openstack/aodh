@@ -20,7 +20,7 @@ Create aodh-uwsgi.ini file::
 
     [uwsgi]
     http = 0.0.0.0:8041
-    wsgi-file = <path_to_aodh>/aodh/rest/app.wsgi
+    wsgi-file = <path_to_aodh>/aodh/api/app.wsgi
     plugins = python
     # This is running standalone
     master = true
@@ -34,7 +34,7 @@ Create aodh-uwsgi.ini file::
     enable-threads = true
     # Set the number of threads usually with the returns of command nproc
     threads = 8
-    # Make sure the client doesn’t try to re-use the connection.
+    # Make sure the client doesn't try to re-use the connection.
     add-header = Connection: close
     # Set uid and gip to a appropriate user on your server. In many
     # installations ``aodh`` will be correct.
