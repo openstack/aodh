@@ -45,22 +45,6 @@ def get_transport(conf, url=None, optional=False, cache=True):
     return transport
 
 
-def get_rpc_server(conf, transport, topic, endpoint):
-    """Return a configured oslo_messaging rpc server."""
-    target = oslo_messaging.Target(server=conf.host, topic=topic)
-    return oslo_messaging.get_rpc_server(transport, target,
-                                         [endpoint], executor='threading',
-                                         serializer=_SERIALIZER)
-
-
-def get_rpc_client(transport, retry=None, **kwargs):
-    """Return a configured oslo_messaging RPCClient."""
-    target = oslo_messaging.Target(**kwargs)
-    return oslo_messaging.RPCClient(transport, target,
-                                    serializer=_SERIALIZER,
-                                    retry=retry)
-
-
 def get_notification_listener(transport, targets, endpoints,
                               allow_requeue=False):
     """Return a configured oslo_messaging notification listener."""

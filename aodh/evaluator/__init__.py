@@ -34,7 +34,6 @@ from aodh.i18n import _
 from aodh import keystone_client
 from aodh import messaging
 from aodh import queue
-from aodh import rpc
 from aodh import storage
 from aodh.storage import models
 
@@ -60,10 +59,7 @@ class Evaluator(object):
 
     def __init__(self, conf):
         self.conf = conf
-        if conf.ipc_protocol == 'rpc':
-            self.notifier = rpc.RPCAlarmNotifier(self.conf)
-        else:
-            self.notifier = queue.AlarmNotifier(self.conf)
+        self.notifier = queue.AlarmNotifier(self.conf)
         self.storage_conn = None
         self._ks_client = None
         self._alarm_change_notifier = None

@@ -25,7 +25,6 @@ import aodh.evaluator.gnocchi
 import aodh.event
 import aodh.keystone_client
 import aodh.notifier.rest
-import aodh.rpc
 import aodh.service
 import aodh.storage
 
@@ -38,10 +37,8 @@ def list_opts():
              aodh.evaluator.event.OPTS,
              aodh.evaluator.gnocchi.OPTS,
              aodh.event.OPTS,
-             aodh.notifier.OPTS,
              aodh.notifier.rest.OPTS,
              aodh.queue.OPTS,
-             aodh.rpc.OPTS,
              aodh.service.OPTS,
              aodh.api.controllers.v2.alarms.ALARM_API_OPTS)),
         ('api',

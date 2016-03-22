@@ -48,12 +48,6 @@ class TestAlarmNotifierService(tests_base.BaseTestCase):
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
 
-    def test_init_host_rpc(self):
-        self.CONF.set_override('ipc_protocol', 'rpc')
-        self.service = notifier.AlarmNotifierService(self.CONF)
-        self.service.start()
-        self.service.stop()
-
     def test_init_host_queue(self):
         self.service = notifier.AlarmNotifierService(self.CONF)
         self.service.start()

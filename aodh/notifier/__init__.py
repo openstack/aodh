@@ -16,7 +16,6 @@
 import abc
 import logging
 
-from oslo_config import cfg
 import oslo_messaging
 from oslo_service import service as os_service
 from oslo_utils import netutils
@@ -26,13 +25,6 @@ from stevedore import extension
 from aodh.i18n import _
 from aodh import messaging
 
-OPTS = [
-    cfg.StrOpt('ipc_protocol',
-               default='queue',
-               choices=['queue', 'rpc'],
-               help='The protocol used to communicate between evaluator and '
-                    'notifier services.'),
-]
 
 LOG = logging.getLogger(__name__)
 
@@ -67,38 +59,25 @@ class AlarmNotifierService(os_service.Service):
     def __init__(self, conf):
         super(AlarmNotifierService, self).__init__()
         transport = messaging.get_transport(conf)
-
         self.notifiers = extension.ExtensionManager(
             self.NOTIFIER_EXTENSIONS_NAMESPACE,
             invoke_on_load=True,
             invoke_args=(conf,))
 
-        if conf.ipc_protocol == 'rpc':
-            self.ipc = 'rpc'
-            self.rpc_server = messaging.get_rpc_server(
-                conf, transport, conf.notifier_rpc_topic, self)
-        else:
-            self.ipc = 'queue'
-            target = oslo_messaging.Target(topic=conf.notifier_topic)
-            self.listener = messaging.get_notification_listener(
-                transport, [target],
-                [AlarmEndpoint(self.notifiers)])
+        target = oslo_messaging.Target(topic=conf.notifier_topic)
+        self.listener = messaging.get_notification_listener(
+            transport, [target],
+            [AlarmEndpoint(self.notifiers)])
 
     def start(self):
         super(AlarmNotifierService, self).start()
-        if self.ipc == 'rpc':
-            self.rpc_server.start()
-        else:
-            self.listener.start()
+        self.listener.start()
         # Add a dummy thread to have wait() working
         self.tg.add_timer(604800, lambda: None)
 
     def stop(self):
-        if self.ipc == 'rpc':
-            self.rpc_server.stop()
-        else:
-            self.listener.stop()
-            self.listener.wait()
+        self.listener.stop()
+        self.listener.wait()
         super(AlarmNotifierService, self).stop()
 
     def notify_alarm(self, context, data):
