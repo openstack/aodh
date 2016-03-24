@@ -14,7 +14,6 @@
 # under the License.
 
 from gnocchiclient import client
-from oslo_config import cfg
 from oslo_log import log
 from oslo_serialization import jsonutils
 
@@ -23,13 +22,6 @@ from aodh.i18n import _
 from aodh import keystone_client
 
 LOG = log.getLogger(__name__)
-
-OPTS = [
-    cfg.StrOpt('gnocchi_url',
-               deprecated_group="alarm",
-               deprecated_for_removal=True,
-               help='URL to Gnocchi. default: autodetection'),
-]
 
 # The list of points that Gnocchi API returned is composed
 # of tuples with (timestamp, granularity, value)
@@ -43,8 +35,7 @@ class GnocchiBase(threshold.ThresholdEvaluator):
         self._gnocchi_client = client.Client(
             '1', keystone_client.get_session(conf),
             interface=conf.service_credentials.interface,
-            region_name=conf.service_credentials.region_name,
-            endpoint_override=conf.gnocchi_url)
+            region_name=conf.service_credentials.region_name)
 
     @staticmethod
     def _sanitize(rule, statistics):
