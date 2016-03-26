@@ -213,10 +213,12 @@ class Connection(base.Connection):
         """
         session = self._engine_facade.get_session()
         with session.begin():
-            alarm_row = session.merge(models.Alarm(alarm_id=alarm.alarm_id))
-            alarm_row.update(alarm.as_dict())
-
-        return self._row_to_alarm_model(alarm_row)
+            count = session.query(models.Alarm).filter(
+                models.Alarm.alarm_id == alarm.alarm_id).update(
+                    alarm.as_dict())
+            if not count:
+                raise storage.AlarmNotFound(alarm.alarm_id)
+        return alarm
 
     def delete_alarm(self, alarm_id):
         """Delete an alarm and its history data.

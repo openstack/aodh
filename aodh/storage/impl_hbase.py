@@ -17,6 +17,7 @@ import operator
 from oslo_log import log
 
 import aodh
+from aodh import storage
 from aodh.storage import base
 from aodh.storage.hbase import base as hbase_base
 from aodh.storage.hbase import migration as hbase_migration
@@ -92,7 +93,7 @@ class Connection(hbase_base.Connection, base.Connection):
                 except Exception:
                     LOG.debug('Cannot delete table but ignoring error')
 
-    def update_alarm(self, alarm):
+    def update_alarm(self, alarm, upsert=False):
         """Create an alarm.
 
         :param alarm: The alarm to create. It is Alarm object, so we need to
@@ -102,12 +103,18 @@ class Connection(hbase_base.Connection, base.Connection):
         alarm_to_store = hbase_utils.serialize_entry(alarm.as_dict())
         with self.conn_pool.connection() as conn:
             alarm_table = conn.table(self.ALARM_TABLE)
+            if not upsert:
+                q = hbase_utils.make_query(alarm_id=alarm.alarm_id)
+                query_alarm = alarm_table.scan(filter=q)
+                if len(list(query_alarm)) == 0:
+                    raise storage.AlarmNotFound(alarm.alarm_id)
             alarm_table.put(_id, alarm_to_store)
             stored_alarm = hbase_utils.deserialize_entry(
                 alarm_table.row(_id))
         return models.Alarm(**stored_alarm)
 
-    create_alarm = update_alarm
+    def create_alarm(self, alarm):
+        return self.update_alarm(alarm, upsert=True)
 
     def delete_alarm(self, alarm_id):
         """Delete an alarm and its history data."""

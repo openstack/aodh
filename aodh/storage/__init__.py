@@ -47,6 +47,14 @@ class StorageBadVersion(Exception):
     """Error raised when the storage backend version is not good enough."""
 
 
+class AlarmNotFound(Exception):
+    """Error raised when the needed resource not found."""
+
+    def __init__(self, alarm_id):
+        self.alarm_id = alarm_id
+        super(AlarmNotFound, self).__init__("Alarm %s not found" % alarm_id)
+
+
 def get_connection_from_config(conf):
     retries = conf.database.max_retries
     if conf.database.alarm_connection is None:

@@ -20,6 +20,7 @@ import datetime
 import mock
 from oslo_utils import timeutils
 
+from aodh import storage
 from aodh.storage import models as alarm_models
 from aodh.tests import constants
 from aodh.tests.functional import db as tests_db
@@ -234,13 +235,25 @@ class AlarmTest(AlarmTestBase):
                                            meter_name='llt',
                                            query=[])
                                  )
-        updated = self.alarm_conn.update_alarm(llu)
+        updated = self.alarm_conn.create_alarm(llu)
         updated.state = alarm_models.Alarm.ALARM_OK
         updated.description = ':)'
         self.alarm_conn.update_alarm(updated)
 
         all = list(self.alarm_conn.get_alarms())
         self.assertEqual(1, len(all))
+
+    def test_update_deleted_alarm_failed(self):
+        self.add_some_alarms()
+        alarm1 = list(self.alarm_conn.get_alarms(name='orange-alert'))[0]
+        self.alarm_conn.delete_alarm(alarm1.alarm_id)
+        survivors = list(self.alarm_conn.get_alarms())
+        self.assertEqual(2, len(survivors))
+        alarm1.state = alarm_models.Alarm.ALARM_ALARM
+        self.assertRaises(storage.AlarmNotFound,
+                          self.alarm_conn.update_alarm, alarm1)
+        survivors = list(self.alarm_conn.get_alarms())
+        self.assertEqual(2, len(survivors))
 
     def test_delete(self):
         self.add_some_alarms()
