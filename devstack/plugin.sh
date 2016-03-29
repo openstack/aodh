@@ -268,9 +268,6 @@ function configure_aodh {
         iniset "$AODH_UWSGI_FILE" uwsgi add-header "Connection: close"
     fi
 
-    if is_service_enabled gnocchi-api; then
-        iniset $AODH_CONF DEFAULT gnocchi_url $(gnocchi_service_url)
-    fi
 }
 
 # init_aodh() - Initialize etc.

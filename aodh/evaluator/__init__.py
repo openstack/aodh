@@ -47,7 +47,6 @@ ALARM = 'alarm'
 OPTS = [
     cfg.BoolOpt('record_history',
                 default=True,
-                deprecated_group="alarm",
                 help='Record alarm change events.'
                 ),
 ]

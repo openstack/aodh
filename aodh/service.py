@@ -41,10 +41,7 @@ OPTS = [
                default=60,
                help='Period of evaluation cycle, should'
                ' be >= than configured pipeline interval for'
-               ' collection of underlying meters.',
-               deprecated_group='alarm',
-               deprecated_opts=[cfg.DeprecatedOpt(
-                   'threshold_evaluation_interval', group='alarm')]),
+               ' collection of underlying meters.'),
 ]
 
 
