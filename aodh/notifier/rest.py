@@ -14,8 +14,9 @@
 # under the License.
 """Rest alarm notifier."""
 
+import uuid
+
 from oslo_config import cfg
-from oslo_context import context
 from oslo_log import log
 from oslo_serialization import jsonutils
 import requests
@@ -58,8 +59,9 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
     def notify(self, action, alarm_id, alarm_name, severity, previous,
                current, reason, reason_data, headers=None):
         headers = headers or {}
-        if not headers.get('x-openstack-request-id'):
-            headers['x-openstack-request-id'] = context.generate_request_id()
+        if 'x-openstack-request-id' not in headers:
+            headers['x-openstack-request-id'] = b'req-' + str(
+                uuid.uuid4()).encode('ascii')
 
         LOG.info(_(
             "Notifying alarm %(alarm_name)s %(alarm_id)s with severity"

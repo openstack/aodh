@@ -66,9 +66,6 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             'aodh.notifier.zaqar.ZaqarAlarmNotifier.get_zaqar_client',
             return_value=self.zaqar))
         self.service = notifier.AlarmNotifierService(self.CONF)
-        self.useFixture(mockpatch.Patch(
-            'oslo_context.context.generate_request_id',
-            self._fake_generate_request_id))
 
     def test_notify_alarm(self):
         data = {
@@ -111,12 +108,6 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         notification['actions'] = [action]
         return notification
 
-    HTTP_HEADERS = {'x-openstack-request-id': 'fake_request_id',
-                    'content-type': 'application/json'}
-
-    def _fake_generate_request_id(self):
-        return self.HTTP_HEADERS['x-openstack-request-id']
-
     def test_notify_alarm_rest_action_ok(self):
         action = 'http://host/action'
 
@@ -126,7 +117,13 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             poster.assert_called_with(action, data=mock.ANY,
                                       headers=mock.ANY)
             args, kwargs = poster.call_args
-            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(
+                {
+                    'x-openstack-request-id':
+                    kwargs['headers']['x-openstack-request-id'],
+                    'content-type': 'application/json'
+                },
+                kwargs['headers'])
             self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_client_cert(self):
@@ -142,7 +139,13 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       headers=mock.ANY,
                                       cert=certificate, verify=True)
             args, kwargs = poster.call_args
-            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(
+                {
+                    'x-openstack-request-id':
+                    kwargs['headers']['x-openstack-request-id'],
+                    'content-type': 'application/json'
+                },
+                kwargs['headers'])
             self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_client_cert_and_key(self):
@@ -160,7 +163,12 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       headers=mock.ANY,
                                       cert=(certificate, key), verify=True)
             args, kwargs = poster.call_args
-            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(
+                {
+                    'x-openstack-request-id':
+                    kwargs['headers']['x-openstack-request-id'],
+                    'content-type': 'application/json'},
+                kwargs['headers'])
             self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_verify_disable_by_cfg(self):
@@ -175,7 +183,13 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       headers=mock.ANY,
                                       verify=False)
             args, kwargs = poster.call_args
-            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(
+                {
+                    'x-openstack-request-id':
+                    kwargs['headers']['x-openstack-request-id'],
+                    'content-type': 'application/json'
+                },
+                kwargs['headers'])
             self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_verify_disable(self):
@@ -188,7 +202,13 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       headers=mock.ANY,
                                       verify=False)
             args, kwargs = poster.call_args
-            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(
+                {
+                    'x-openstack-request-id':
+                    kwargs['headers']['x-openstack-request-id'],
+                    'content-type': 'application/json'
+                },
+                kwargs['headers'])
             self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_verify_enable_by_user(self):
@@ -203,7 +223,13 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       headers=mock.ANY,
                                       verify=True)
             args, kwargs = poster.call_args
-            self.assertEqual(self.HTTP_HEADERS, kwargs['headers'])
+            self.assertEqual(
+                {
+                    'x-openstack-request-id':
+                    kwargs['headers']['x-openstack-request-id'],
+                    'content-type': 'application/json'
+                },
+                kwargs['headers'])
             self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     @staticmethod
@@ -242,8 +268,6 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
         client = mock.MagicMock()
         client.session.auth.get_access.return_value.auth_token = 'token_1234'
-        headers = {'X-Auth-Token': 'token_1234'}
-        headers.update(self.HTTP_HEADERS)
 
         self.useFixture(mockpatch.Patch('keystoneclient.v3.client.Client',
                                         lambda **kwargs: client))
@@ -251,12 +275,18 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         with mock.patch.object(requests.Session, 'post') as poster:
             self.service.notify_alarm({},
                                       self._notification(action))
-            headers = {'X-Auth-Token': 'token_1234'}
-            headers.update(self.HTTP_HEADERS)
             poster.assert_called_with(
                 url, data=mock.ANY, headers=mock.ANY)
             args, kwargs = poster.call_args
-            self.assertEqual(headers, kwargs['headers'])
+            self.assertEqual(
+                {
+                    'X-Auth-Token': 'token_1234',
+                    'x-openstack-request-id':
+                    kwargs['headers']['x-openstack-request-id'],
+                    'content-type': 'application/json'
+                },
+                kwargs['headers'])
+
             self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
     def test_zaqar_notifier_action(self):
