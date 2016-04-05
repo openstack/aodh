@@ -17,14 +17,6 @@ from oslo_config import cfg
 
 # Register options for the service
 OPTS = [
-    cfg.PortOpt('port',
-                default=8042,
-                help='The port for the aodh API server.',
-                ),
-    cfg.StrOpt('host',
-               default='0.0.0.0',
-               help='The listen IP for the aodh API server.',
-               ),
     cfg.StrOpt('paste_config',
                default="api_paste.ini",
                help="Configuration file for WSGI definition of API."),

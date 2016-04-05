@@ -35,25 +35,3 @@ class TestApp(base.BaseTestCase):
             ff.return_value = None
             self.assertRaises(cfg.ConfigFilesNotFoundError,
                               app.load_app, self.CONF)
-
-    @mock.patch('aodh.storage.get_connection_from_config',
-                mock.MagicMock())
-    @mock.patch('pecan.make_app')
-    def test_pecan_debug(self, mocked):
-        def _check_pecan_debug(g_debug, p_debug, expected, workers=1):
-            self.CONF.set_override('debug', g_debug)
-            if p_debug is not None:
-                self.CONF.set_override('pecan_debug', p_debug, group='api')
-            self.CONF.set_override('workers', workers, 'api')
-            app.setup_app(conf=self.CONF)
-            args, kwargs = mocked.call_args
-            self.assertEqual(expected, kwargs.get('debug'))
-
-        _check_pecan_debug(g_debug=False, p_debug=None, expected=False)
-        _check_pecan_debug(g_debug=True, p_debug=None, expected=False)
-        _check_pecan_debug(g_debug=True, p_debug=False, expected=False)
-        _check_pecan_debug(g_debug=False, p_debug=True, expected=True)
-        _check_pecan_debug(g_debug=True, p_debug=None, expected=False,
-                           workers=5)
-        _check_pecan_debug(g_debug=False, p_debug=True, expected=False,
-                           workers=5)
