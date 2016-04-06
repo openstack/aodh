@@ -196,8 +196,7 @@ function _aodh_configure_storage_backend {
 function configure_aodh {
     iniset_rpc_backend aodh $AODH_CONF
 
-    iniset $AODH_CONF DEFAULT notification_topics "$AODH_NOTIFICATION_TOPICS"
-    iniset $AODH_CONF DEFAULT verbose True
+    iniset $AODH_CONF oslo_messaging_notifications topics "$AODH_NOTIFICATION_TOPICS"
     iniset $AODH_CONF DEFAULT debug "$ENABLE_DEBUG_LOG_LEVEL"
 
     if [[ -n "$AODH_COORDINATION_URL" ]]; then
