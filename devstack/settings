@@ -37,8 +37,8 @@ AODH_COORDINATION_URL=${AODH_COORDINATION_URL:-}
 # Tell Tempest this project is present
 TEMPEST_SERVICES+=,aodh
 
-# Set up default directories for client and middleware
-GITDIR["python-ceilometerclient"]=$DEST/python-ceilometerclient
+# Set up default directories for client
+GITDIR["python-aodhclient"]=$DEST/python-aodhclient
 
 # Get rid of this before done.
 # Tell emacs to use shell-script-mode
