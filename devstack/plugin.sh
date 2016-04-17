@@ -231,8 +231,6 @@ function configure_aodh {
 
     configure_auth_token_middleware $AODH_CONF aodh $AODH_AUTH_CACHE_DIR
 
-    iniset $AODH_CONF notification store_events $AODH_EVENTS
-
     # Configured storage
     _aodh_configure_storage_backend
 
