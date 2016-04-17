@@ -1,0 +1,263 @@
+# Lucas Palm <lapalm@us.ibm.com>, 2015. #zanata
+# OpenStack Infra <zanata@openstack.org>, 2015. #zanata
+# Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: aodh 2.0.1.dev17\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2016-04-12 17:53+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: Chinese (China)\n"
+"Language: zh-CN\n"
+"X-Generator: Zanata 3.7.3\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+#, python-format
+msgid "%(entity)s %(id)s Not Found"
+msgstr "无法找到%(entity)s %(id)s "
+
+#, python-format
+msgid "%(name)s count exceeds maximum value %(maximum)d"
+msgstr "%(name)s数量超过最大值%(maximum)d"
+
+#, python-format
+msgid "%(rule)s must be set for %(type)s type alarm"
+msgstr "类型为%(type)s的告警必须设置%(rule)s"
+
+#, python-format
+msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
+msgstr "%(rule1)s和%(rule2)s无法同时被设置"
+
+#, python-format
+msgid "%d datapoints are unknown"
+msgstr "%d 数据点为未知"
+
+#, python-format
+msgid "%s is not JSON serializable"
+msgstr "%s 不是可序列化 JSON"
+
+#, python-format
+msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
+msgstr "警报 %(alarm_id)s 的动作 %(scheme)s 未知，无法通知"
+
+#, python-format
+msgid "Alarm %(alarm_id)s not found in project %(project)s"
+msgstr "告警%(alarm_id)s在项目%(project)s中未找到"
+
+#, python-format
+msgid "Alarm %s not found"
+msgstr "告警%s没有找到"
+
+msgid "Alarm combination rule should contain at least two different alarm ids."
+msgstr "告警组合规则必须包含至少两个不同的告警id"
+
+msgid "Alarm incorrect"
+msgstr "警报不正确"
+
+#, python-format
+msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
+msgstr "用户%(u)s在项目%(p)s中的告警配额已溢出"
+
+#, python-format
+msgid ""
+"Alarm when %(meter_name)s is %(comparison_operator)s a %(statistic)s of "
+"%(threshold)s over %(period)s seconds"
+msgstr ""
+"请在 %(meter_name)s 是 %(comparison_operator)s（%(threshold)s 的 "
+"%(statistic)s）的时间超过 %(period)s 秒时发出警报"
+
+#, python-format
+msgid "Alarm with name=%s exists"
+msgstr "名称为%s的告警已存在"
+
+#, python-format
+msgid "Alarm with name='%s' exists"
+msgstr "名称为'%s'的告警已经存在"
+
+#, python-format
+msgid "Alarms %(alarm_ids)s are in unknown state"
+msgstr "告警%(alarm_ids)s处于未知的状态"
+
+#, python-format
+msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
+msgstr "表%(table_name)s已经存在，无法创建。忽略此错误继续执行。"
+
+#, python-format
+msgid "Cannot specify alarm %s itself in combination rule"
+msgstr "无法在组合规则中指定告警%s自身"
+
+#, python-format
+msgid "Combined state of alarms %s"
+msgstr "将告警%s的状态进行组合"
+
+msgid "Configuration:"
+msgstr "配置"
+
+#, python-format
+msgid "Connecting to %(db)s on %(nodelist)s"
+msgstr "连接到%(nodelist)s节点的数据库%(db)s。"
+
+#, python-format
+msgid "Error parsing HTTP response: %s"
+msgstr "解析HTTP响应失败: %s"
+
+#, python-format
+msgid "Error while posting alarm: %s"
+msgstr "创建告警%s时遇到错误"
+
+#, python-format
+msgid "Error while putting alarm: %s"
+msgstr "修改告警%s时遇到错误"
+
+#, python-format
+msgid "Failed to evaluate alarm %s"
+msgstr "评估告警%s时失败了"
+
+#, python-format
+msgid "Failed to parse the timestamp value %s"
+msgstr "解析时间戳%s失败"
+
+#, python-format
+msgid "Filter expression not valid: %s"
+msgstr "过滤表达式不合法：%s"
+
+#, python-format
+msgid "Not Authorized to access %(aspect)s %(id)s"
+msgstr "权限不足以访问%(aspect)s %(id)s"
+
+#, python-format
+msgid ""
+"Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s priority from "
+"%(previous)s to %(current)s with action %(action)s because %(reason)s."
+msgstr ""
+"正在通知警报%(alarm_name)s %(alarm_id)s，警报级别%(severity)s，状态"
+"从%(previous)s变为%(current)s，动作为%(action)s，原因是%(reason)s。"
+
+#, python-format
+msgid "Order-by expression not valid: %s"
+msgstr "orderby表达式不合法：%s"
+
+#, python-format
+msgid ""
+"Remaining as %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"有%(count)d个数据满足%(disposition)s阈值，因而状态保持为%(state)s，最近的一次"
+"数据：%(most_recent)s"
+
+#, python-format
+msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr "停留在状态%(state)s因为告警%(alarm_ids)s处于状态%(state)s"
+
+#, python-format
+msgid "Starting server in PID %s"
+msgstr "正在启动服务进程PID %s"
+
+#, python-format
+msgid "String %s is not a valid isotime"
+msgstr "字符串%s不是个合法的标准时间格式"
+
+#, python-format
+msgid ""
+"The data type %(type)s is not supported. The supported data type list is: "
+"%(supported)s"
+msgstr "数据类型%(type)s不被支持。支持的数据类型列表：%(supported)s"
+
+msgid "Time constraint names must be unique for a given alarm."
+msgstr "一个指定的告警的时间约束名称必须唯一"
+
+#, python-format
+msgid "Timezone %s is not valid"
+msgstr "时区%s不合法"
+
+#, python-format
+msgid ""
+"Transition to %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"有%(count)d个数据满足%(disposition)s阈值，因而状态迁移到%(state)s，最近的一次"
+"数据：%(most_recent)s"
+
+#, python-format
+msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr "迁移到状态%(state)s，因为告警%(alarm_ids)s处于状态%(state)s"
+
+#, python-format
+msgid "Unable to connect to the database server: %(errmsg)s."
+msgstr "无法连接到数据库服务器：%(errmsg)s。"
+
+#, python-format
+msgid ""
+"Unable to convert the value %(value)s to the expected data type %(type)s."
+msgstr "无法转换%(value)s到预期的数据类型%(type)s。"
+
+#, python-format
+msgid "Unable to notify alarm %s"
+msgstr "无法通知警报 %s"
+
+msgid "Unable to notify for an alarm with no action"
+msgstr "无法为一个没有动作的警报进行通知"
+
+#, python-format
+msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
+msgstr "无法为警报 %(alarm_id)s 解析动作 %(action)s "
+
+#, python-format
+msgid "Unable to parse action %s"
+msgstr "无法解析动作%s"
+
+#, python-format
+msgid ""
+"Unexpected exception converting %(value)s to the expected data type %(type)s."
+msgstr "在转换%(value)s到预期的数据类型%(type)s时发生了未预料的异常。"
+
+#, python-format
+msgid "Unsupported action %s"
+msgstr "动作%s不支持"
+
+#, python-format
+msgid "You are not authorized to create action: %s"
+msgstr "你没有权限创建动作：%s"
+
+#, python-format
+msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
+msgstr "因为 %(reason)s, 警报 %(id)s 转换至 %(state)s "
+
+msgid "alarm evaluation cycle failed"
+msgstr "警报周期评估失败"
+
+msgid "alarm state update failed"
+msgstr "警报状态更新失败"
+
+msgid "alarm stats retrieval failed"
+msgstr "警报统计信息获取失败"
+
+#, python-format
+msgid "duplicate actions are found: %s, remove duplicate ones"
+msgstr "检测到重复的动作：%s，已去除重复的内容"
+
+#, python-format
+msgid "initiating evaluation cycle on %d alarms"
+msgstr "在 %d 个警报上初始化评估周期"
+
+#, python-format
+msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
+msgstr ""
+"服务在0.0.0.0:%(sport)s上运行，可以通过http://127.0.0.1:%(vport)s来查看"
+
+#, python-format
+msgid "serving on http://%(host)s:%(port)s"
+msgstr "在 http://%(host)s:%(port)s上服务"
+
+msgid "state invalid"
+msgstr "状态无效"
+
+msgid "state_timestamp should be datetime object"
+msgstr "state_timestamp必须是datetime对象"
+
+msgid "timestamp should be datetime object"
+msgstr "timestamp必须是datatime对象"

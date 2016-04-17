@@ -1,0 +1,250 @@
+# Lucas Palm <lapalm@us.ibm.com>, 2015. #zanata
+# Jennifer <cristxu@tw.ibm.com>, 2016. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: aodh 2.0.1.dev17\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2016-04-12 17:53+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: Chinese (Taiwan)\n"
+"Language: zh-TW\n"
+"X-Generator: Zanata 3.7.3\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+#, python-format
+msgid "%(entity)s %(id)s Not Found"
+msgstr "找不到 %(entity)s %(id)s"
+
+#, python-format
+msgid "%(rule)s must be set for %(type)s type alarm"
+msgstr "必須為 %(type)s 類型警示設定 %(rule)s"
+
+#, python-format
+msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
+msgstr "無法同時設定 %(rule1)s 和 %(rule2)s"
+
+#, python-format
+msgid "%d datapoints are unknown"
+msgstr "%d 個資料點不明"
+
+#, python-format
+msgid "%s is not JSON serializable"
+msgstr "%s 不可進行 JSON 序列化"
+
+#, python-format
+msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
+msgstr "警示 %(alarm_id)s 的動作 %(scheme)s 不明，無法通知"
+
+#, python-format
+msgid "Alarm %(alarm_id)s not found in project %(project)s"
+msgstr "在專案 %(project)s 中找不到警示 %(alarm_id)s"
+
+#, python-format
+msgid "Alarm %s not found"
+msgstr "找不到警示 %s"
+
+msgid "Alarm combination rule should contain at least two different alarm ids."
+msgstr "警示組合規則應該至少包含兩個不同的警示 ID。"
+
+msgid "Alarm incorrect"
+msgstr "警示不正確"
+
+#, python-format
+msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
+msgstr "在專案 %(p)s 上，針對使用者 %(u)s 已超出的警示配額"
+
+#, python-format
+msgid ""
+"Alarm when %(meter_name)s is %(comparison_operator)s a %(statistic)s of "
+"%(threshold)s over %(period)s seconds"
+msgstr ""
+"如果 %(meter_name)s 在 %(period)s 秒內 %(comparison_operator)s %(threshold)s "
+"的%(statistic)s，則會出現警示"
+
+#, python-format
+msgid "Alarm with name=%s exists"
+msgstr "名稱為 %s 的警示已存在"
+
+#, python-format
+msgid "Alarm with name='%s' exists"
+msgstr "名稱為 '%s' 的警示已存在"
+
+#, python-format
+msgid "Alarms %(alarm_ids)s are in unknown state"
+msgstr "警示 %(alarm_ids)s 處於不明狀態"
+
+#, python-format
+msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
+msgstr "無法建立表格 %(table_name)s，該表格已經存在。將忽略錯誤"
+
+#, python-format
+msgid "Cannot specify alarm %s itself in combination rule"
+msgstr "無法在組合規則中指定警示 %s 本身"
+
+#, python-format
+msgid "Combined state of alarms %s"
+msgstr "警示 %s 的合併狀態"
+
+msgid "Configuration:"
+msgstr "配置："
+
+#, python-format
+msgid "Connecting to %(db)s on %(nodelist)s"
+msgstr "正在連接至 %(nodelist)s 上的 %(db)s"
+
+#, python-format
+msgid "Error parsing HTTP response: %s"
+msgstr "剖析 HTTP 回應時發生錯誤：%s"
+
+#, python-format
+msgid "Error while posting alarm: %s"
+msgstr "公佈警示時發生錯誤：%s"
+
+#, python-format
+msgid "Error while putting alarm: %s"
+msgstr "放置警示時發生錯誤：%s"
+
+#, python-format
+msgid "Failed to evaluate alarm %s"
+msgstr "無法評估警示 %s"
+
+#, python-format
+msgid "Failed to parse the timestamp value %s"
+msgstr "無法剖析時間戳記值 %s"
+
+#, python-format
+msgid "Filter expression not valid: %s"
+msgstr "過濾表示式無效：%s"
+
+#, python-format
+msgid "Not Authorized to access %(aspect)s %(id)s"
+msgstr "未獲授權來存取 %(aspect)s %(id)s"
+
+#, python-format
+msgid ""
+"Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s priority from "
+"%(previous)s to %(current)s with action %(action)s because %(reason)s."
+msgstr ""
+"正在以動作 %(action)s 通知優先順序為 %(severity)s 的警示 %(alarm_name)s "
+"%(alarm_id)s（從 %(previous)s 至 %(current)s），因為 %(reason)s。"
+
+#, python-format
+msgid "Order-by expression not valid: %s"
+msgstr "排序方式表示式無效：%s"
+
+#, python-format
+msgid ""
+"Remaining as %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"保持 %(state)s，因為有 %(count)d 個樣本 %(disposition)s 臨界值，最新："
+"%(most_recent)s"
+
+#, python-format
+msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr "保持 %(state)s，因為警示 %(alarm_ids)s 處於狀態 %(state)s"
+
+#, python-format
+msgid "Starting server in PID %s"
+msgstr "正在以 PID %s 啟動伺服器"
+
+#, python-format
+msgid "String %s is not a valid isotime"
+msgstr "字串 %s 不是有效的 ISO 時間"
+
+#, python-format
+msgid ""
+"The data type %(type)s is not supported. The supported data type list is: "
+"%(supported)s"
+msgstr "不支援資料類型 %(type)s。支援的資料類型清單為：%(supported)s"
+
+msgid "Time constraint names must be unique for a given alarm."
+msgstr "針對給定的警示，時間限制名稱必須是唯一的。"
+
+#, python-format
+msgid "Timezone %s is not valid"
+msgstr "時區 %s 無效"
+
+#, python-format
+msgid ""
+"Transition to %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"轉移到 %(state)s，由於 %(count)d 個樣本 %(disposition)s 臨界值，最新："
+"%(most_recent)s"
+
+#, python-format
+msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr "轉移至 %(state)s，因為警示 %(alarm_ids)s 處於狀態 %(state)s"
+
+#, python-format
+msgid "Unable to connect to the database server: %(errmsg)s."
+msgstr "無法連接至資料庫伺服器：%(errmsg)s。"
+
+#, python-format
+msgid ""
+"Unable to convert the value %(value)s to the expected data type %(type)s."
+msgstr "無法將值 %(value)s 轉換成預期的資料類型 %(type)s。"
+
+#, python-format
+msgid "Unable to notify alarm %s"
+msgstr "無法通知警示 %s"
+
+msgid "Unable to notify for an alarm with no action"
+msgstr "在不使用任何動作的情況下，無法通知警示"
+
+#, python-format
+msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
+msgstr "無法剖析警示 %(alarm_id)s 的動作 %(action)s"
+
+#, python-format
+msgid "Unable to parse action %s"
+msgstr "無法剖析動作 %s"
+
+#, python-format
+msgid ""
+"Unexpected exception converting %(value)s to the expected data type %(type)s."
+msgstr "將 %(value)s 轉換為預期的資料類型%(type)s 時發生非預期的異常狀況。"
+
+#, python-format
+msgid "Unsupported action %s"
+msgstr "不受支援的動作 %s"
+
+#, python-format
+msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
+msgstr "警示 %(id)s 正在轉移到 %(state)s，原因：%(reason)s"
+
+msgid "alarm evaluation cycle failed"
+msgstr "警示評估週期失敗"
+
+msgid "alarm state update failed"
+msgstr "警示狀態更新失敗"
+
+msgid "alarm stats retrieval failed"
+msgstr "警示統計資料擷取失敗"
+
+#, python-format
+msgid "initiating evaluation cycle on %d alarms"
+msgstr "正在 %d 個警示上起始評估週期"
+
+#, python-format
+msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
+msgstr ""
+"正在於 0.0.0.0:%(sport)s 提供服務，可在 http://127.0.0.1:%(vport)s 檢視"
+
+#, python-format
+msgid "serving on http://%(host)s:%(port)s"
+msgstr "正在於 http://%(host)s:%(port)s 提供服務"
+
+msgid "state invalid"
+msgstr "狀態無效"
+
+msgid "state_timestamp should be datetime object"
+msgstr "state_timestamp 應該為日期時間物件"
+
+msgid "timestamp should be datetime object"
+msgstr "時間戳記應該為日期時間物件"

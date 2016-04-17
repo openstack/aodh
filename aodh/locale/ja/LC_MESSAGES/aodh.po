@@ -1,0 +1,268 @@
+# Akihiro Motoki <amotoki@gmail.com>, 2015. #zanata
+# KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>, 2015. #zanata
+# Tom Cocozzello <tjcocozz@us.ibm.com>, 2015. #zanata
+# Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
+# Shinichi Take <chantake33@gmail.com>, 2016. #zanata
+# Yuta Hono <yuta.hono@ntt.com>, 2016. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: aodh 2.0.1.dev17\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2016-04-12 17:53+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2016-02-16 01:12+0000\n"
+"Last-Translator: Shinichi Take <chantake33@gmail.com>\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"X-Generator: Zanata 3.7.3\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+#, python-format
+msgid "%(entity)s %(id)s Not Found"
+msgstr "%(entity)s %(id)s が見つかりません"
+
+#, python-format
+msgid "%(name)s count exceeds maximum value %(maximum)d"
+msgstr "%(name)s が最大値 %(maximum)d を超えています"
+
+#, python-format
+msgid "%(rule)s must be set for %(type)s type alarm"
+msgstr "%(type)s タイプのアラームに %(rule)s を設定する必要があります"
+
+#, python-format
+msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
+msgstr "%(rule1)s と %(rule2)s を同時に設定することはできません"
+
+#, python-format
+msgid "%d datapoints are unknown"
+msgstr "%d データポイントが不明です"
+
+#, python-format
+msgid "%s is not JSON serializable"
+msgstr "%s が JSON シリアライズ可能ではありません"
+
+#, python-format
+msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
+msgstr ""
+"アラーム %(alarm_id)s のアクション %(scheme)s が不明なため、通知できません"
+
+#, python-format
+msgid "Alarm %(alarm_id)s not found in project %(project)s"
+msgstr "アラーム %(alarm_id)s がプロジェクト %(project)s には見つかりません"
+
+#, python-format
+msgid "Alarm %s not found"
+msgstr "アラーム %s が見つかりません"
+
+msgid "Alarm combination rule should contain at least two different alarm ids."
+msgstr ""
+"アラーム組み合わせルールには、少なくとも 2 つの異なるアラーム ID が含まれてい"
+"る必要があります。"
+
+msgid "Alarm incorrect"
+msgstr "アラームが正しくありません"
+
+#, python-format
+msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
+msgstr "プロジェクト %(p)s のユーザー %(u)s のアラームクォータを超過しました"
+
+#, python-format
+msgid ""
+"Alarm when %(meter_name)s is %(comparison_operator)s a %(statistic)s of "
+"%(threshold)s over %(period)s seconds"
+msgstr ""
+"%(period)s 秒にわたる %(meter_name)s と %(threshold)s の %(statistic)s の比較"
+"が %(comparison_operator)s である場合のアラーム"
+
+#, python-format
+msgid "Alarm with name=%s exists"
+msgstr "name=%s のアラームは存在します"
+
+#, python-format
+msgid "Alarm with name='%s' exists"
+msgstr "name='%s' のアラームは存在します"
+
+#, python-format
+msgid "Alarms %(alarm_ids)s are in unknown state"
+msgstr "アラーム %(alarm_ids)s は不明な状態にあります"
+
+#, python-format
+msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
+msgstr ""
+"テーブル %(table_name)s は既に存在するため、作成できません。エラーを無視しま"
+"す"
+
+#, python-format
+msgid "Cannot specify alarm %s itself in combination rule"
+msgstr "アラーム %s 自体を組み合わせルールに指定することはできません"
+
+#, python-format
+msgid "Combined state of alarms %s"
+msgstr "アラーム %s の結合状態"
+
+msgid "Configuration:"
+msgstr "設定:"
+
+#, python-format
+msgid "Connecting to %(db)s on %(nodelist)s"
+msgstr "%(nodelist)s 上の %(db)s に接続しています"
+
+#, python-format
+msgid "Error parsing HTTP response: %s"
+msgstr "HTTP 応答を解析している際にエラーが発生しました: %s"
+
+#, python-format
+msgid "Error while posting alarm: %s"
+msgstr "アラームを通知するときにエラーが発生しました: %s"
+
+#, python-format
+msgid "Error while putting alarm: %s"
+msgstr "アラームを配置するときにエラーが発生しました: %s"
+
+#, python-format
+msgid "Failed to evaluate alarm %s"
+msgstr "アラーム %s の評価に失敗しました"
+
+#, python-format
+msgid "Failed to parse the timestamp value %s"
+msgstr "タイムスタンプ値 %s を解析できませんでした"
+
+#, python-format
+msgid "Filter expression not valid: %s"
+msgstr "フィルター式が無効です: %s"
+
+#, python-format
+msgid "Not Authorized to access %(aspect)s %(id)s"
+msgstr "%(aspect)s %(id)s にアクセスする権限がありません"
+
+#, python-format
+msgid ""
+"Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s priority from "
+"%(previous)s to %(current)s with action %(action)s because %(reason)s."
+msgstr ""
+"優先順位 %(severity)s のアラーム %(alarm_name)s %(alarm_id)s をアクション "
+"%(action)s によって %(previous)s から %(current)s へ通知中。理由: "
+"%(reason)s。"
+
+#, python-format
+msgid "Order-by expression not valid: %s"
+msgstr "order-by 式が無効です: %s"
+
+#, python-format
+msgid ""
+"Remaining as %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"%(count)d 個のサンプル %(disposition)s しきい値が原因で %(state)s のままで"
+"す。最新: %(most_recent)s"
+
+#, python-format
+msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr ""
+"%(state)s のままです。アラーム %(alarm_ids)s の状態が %(state)s であるためで"
+"す"
+
+#, python-format
+msgid "Starting server in PID %s"
+msgstr "PID %s でサーバーを開始しています"
+
+#, python-format
+msgid "String %s is not a valid isotime"
+msgstr "文字列 %s は無効な isotime です"
+
+#, python-format
+msgid ""
+"The data type %(type)s is not supported. The supported data type list is: "
+"%(supported)s"
+msgstr ""
+"データ型 %(type)s はサポートされていません。サポートされているデータ型のリス"
+"ト: %(supported)s"
+
+msgid "Time constraint names must be unique for a given alarm."
+msgstr "時間制約の名前は、指定されたアラームで一意でなければなりません。"
+
+#, python-format
+msgid "Timezone %s is not valid"
+msgstr "タイムゾーン %s が無効です"
+
+#, python-format
+msgid ""
+"Transition to %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"%(count)d 個のサンプルの %(disposition)s しきい値が原因で%(state)s に遷移しま"
+"す。最新: %(most_recent)s"
+
+#, python-format
+msgid "Unable to connect to the database server: %(errmsg)s."
+msgstr "データベースサーバーに接続できません: %(errmsg)s。"
+
+#, python-format
+msgid ""
+"Unable to convert the value %(value)s to the expected data type %(type)s."
+msgstr "値 %(value)s を、想定されるデータ型 %(type)s に変換できません。"
+
+#, python-format
+msgid "Unable to notify alarm %s"
+msgstr "アラーム %s を通知できません"
+
+msgid "Unable to notify for an alarm with no action"
+msgstr "アクションのないアラームは通知できません"
+
+#, python-format
+msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
+msgstr "アラーム %(alarm_id)s のアクション %(action)s を解析できません"
+
+#, python-format
+msgid "Unable to parse action %s"
+msgstr "アクション %s を解析できません"
+
+#, python-format
+msgid ""
+"Unexpected exception converting %(value)s to the expected data type %(type)s."
+msgstr ""
+"%(value)s を想定されるデータ型 %(type)s に変換する際に、想定しない例外が発生"
+"しました。"
+
+#, python-format
+msgid "Unsupported action %s"
+msgstr "サポートされないアクション %s"
+
+#, python-format
+msgid "You are not authorized to create action: %s"
+msgstr "アクションの作成を許可されていません: %s"
+
+#, python-format
+msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
+msgstr "アラーム %(id)s は %(state)s に遷移します。理由: %(reason)s"
+
+msgid "alarm state update failed"
+msgstr "アラームの状態を更新できませんでした"
+
+msgid "alarm stats retrieval failed"
+msgstr "アラーム統計の取得に失敗しました"
+
+#, python-format
+msgid "initiating evaluation cycle on %d alarms"
+msgstr "%d アラームで評価サイクルを開始しています"
+
+#, python-format
+msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
+msgstr ""
+"0.0.0.0:%(sport)s でサービスを提供しています。http://127.0.0.1:%(vport)s で確"
+"認してください"
+
+#, python-format
+msgid "serving on http://%(host)s:%(port)s"
+msgstr "http://%(host)s:%(port)s でサービスを提供しています"
+
+msgid "state invalid"
+msgstr "状態が無効です"
+
+msgid "state_timestamp should be datetime object"
+msgstr "state_timestamp は datetime オブジェクトでなければなりません"
+
+msgid "timestamp should be datetime object"
+msgstr "タイムスタンプは datetime オブジェクトでなければなりません"

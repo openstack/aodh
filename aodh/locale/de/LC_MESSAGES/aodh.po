@@ -1,0 +1,271 @@
+# OpenStack Infra <zanata@openstack.org>, 2015. #zanata
+# Tom Cocozzello <tjcocozz@us.ibm.com>, 2015. #zanata
+# Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
+# Frank Kloeker <eumel@arcor.de>, 2016. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: aodh 2.0.1.dev17\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2016-04-12 17:53+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2016-04-04 05:06+0000\n"
+"Last-Translator: Monika Wolf <vcomas3@de.ibm.com>\n"
+"Language-Team: German\n"
+"Language: de\n"
+"X-Generator: Zanata 3.7.3\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#, python-format
+msgid "%(entity)s %(id)s Not Found"
+msgstr "%(entity)s %(id)s nicht gefunden"
+
+#, python-format
+msgid "%(rule)s must be set for %(type)s type alarm"
+msgstr "%(rule)s muss für den Alarmtyp %(type)s gesetzt sein"
+
+#, python-format
+msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
+msgstr "%(rule1)s und %(rule2)s können nicht gleichzeitig festgelegt werden"
+
+#, python-format
+msgid "%d datapoints are unknown"
+msgstr "%d Datenpunkte sind unbekannt"
+
+#, python-format
+msgid "%s is not JSON serializable"
+msgstr "%s ist nicht JSON-serialisierbar"
+
+#, python-format
+msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
+msgstr ""
+"Aktion %(scheme)s für Alarm %(alarm_id)s ist unbekannt; keine "
+"Benachrichtigung möglich"
+
+#, python-format
+msgid "Alarm %(alarm_id)s not found in project %(project)s"
+msgstr "Alarm %(alarm_id)s nicht gefunden in Projekt %(project)s"
+
+#, python-format
+msgid "Alarm %s not found"
+msgstr "Alarm %s nicht gefunden"
+
+msgid "Alarm combination rule should contain at least two different alarm ids."
+msgstr ""
+"Alarmkombinationsregel sollte mindestens zwei unterschiedliche Alarm-IDs "
+"enthalten."
+
+msgid "Alarm incorrect"
+msgstr "Alaram inkorrekt"
+
+#, python-format
+msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
+msgstr "Alarmquote überschritten für Benutzer %(u)s bei Projekt %(p)s"
+
+#, python-format
+msgid ""
+"Alarm when %(meter_name)s is %(comparison_operator)s a %(statistic)s of "
+"%(threshold)s over %(period)s seconds"
+msgstr ""
+"Alarm, wenn %(meter_name)s %(comparison_operator)s ein %(statistic)s von "
+"%(threshold)s über %(period)s Sekunden ist"
+
+#, python-format
+msgid "Alarm with name=%s exists"
+msgstr "Alarm mit Name=%s existiert"
+
+#, python-format
+msgid "Alarm with name='%s' exists"
+msgstr "Alarm mit name='%s' vorhanden"
+
+#, python-format
+msgid "Alarms %(alarm_ids)s are in unknown state"
+msgstr "Alarme %(alarm_ids)s sind in unbekanntem Status"
+
+#, python-format
+msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
+msgstr ""
+"Tabelle %(table_name)s kann nicht erstellt werden, da sie bereits vorhanden "
+"ist. Fehler wird ignoriert"
+
+#, python-format
+msgid "Cannot specify alarm %s itself in combination rule"
+msgstr ""
+"Der Alarm %s selbst kann nicht in der Kombinationsregel angegeben werden"
+
+#, python-format
+msgid "Combined state of alarms %s"
+msgstr "Kombinierter Alarmstatus %s"
+
+msgid "Configuration:"
+msgstr "Konfiguration:"
+
+#, python-format
+msgid "Connecting to %(db)s on %(nodelist)s"
+msgstr "Verbindung mit %(db)s auf %(nodelist)s wird hergestellt"
+
+#, python-format
+msgid "Error parsing HTTP response: %s"
+msgstr "Fehler bei Auswertung der HTTP-Antwort %s"
+
+#, python-format
+msgid "Error while posting alarm: %s"
+msgstr "Fehler beim Übergeben von Alarm: %s"
+
+#, python-format
+msgid "Error while putting alarm: %s"
+msgstr "Fehler beim Verwenden von Alarm: %s"
+
+#, python-format
+msgid "Failed to evaluate alarm %s"
+msgstr "Alarm %s konnte nicht ausgewertet werden"
+
+#, python-format
+msgid "Failed to parse the timestamp value %s"
+msgstr "Zeitmarkenwert %s konnte nicht analysiert werden"
+
+#, python-format
+msgid "Filter expression not valid: %s"
+msgstr "Filterausdruck nicht gültig: %s"
+
+#, python-format
+msgid "Not Authorized to access %(aspect)s %(id)s"
+msgstr "Nicht berechtigt für den Zugriff auf %(aspect)s %(id)s"
+
+#, python-format
+msgid ""
+"Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s priority from "
+"%(previous)s to %(current)s with action %(action)s because %(reason)s."
+msgstr ""
+"Benachrichtigung von Alarm %(alarm_name)s %(alarm_id)s mit Priorität "
+"%(severity)s von %(previous)s in %(current)s mit Aktion %(action)s wegen "
+"%(reason)s."
+
+#, python-format
+msgid "Order-by expression not valid: %s"
+msgstr "Ausdruck für 'Sortieren nach' nicht gültig: %s"
+
+#, python-format
+msgid ""
+"Remaining as %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"Verbleibend %(state)s aufgrund von %(count)d Stichproben %(disposition)s "
+"Schwellenwert, aktuellster: %(most_recent)s"
+
+#, python-format
+msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr ""
+"Verbleibt als %(state)s aufgrund von Alarmen %(alarm_ids)s in Status "
+"%(state)s"
+
+#, python-format
+msgid "Starting server in PID %s"
+msgstr "Starten von Server in PID %s"
+
+#, python-format
+msgid "String %s is not a valid isotime"
+msgstr "Zeichenfolge %s ist kein gültiger Wert für 'isotime'"
+
+#, python-format
+msgid ""
+"The data type %(type)s is not supported. The supported data type list is: "
+"%(supported)s"
+msgstr ""
+"Der Datentyp %(type)s wird nicht unterstützt. Die Liste der unterstützten "
+"Datentypen lautet: %(supported)s"
+
+msgid "Time constraint names must be unique for a given alarm."
+msgstr "Zeitvorgabennamen müssen für einen angegebenen Alarm eindeutig sein."
+
+#, python-format
+msgid "Timezone %s is not valid"
+msgstr "Zeitzone %s ist nicht gültig"
+
+#, python-format
+msgid ""
+"Transition to %(state)s due to %(count)d samples %(disposition)s threshold, "
+"most recent: %(most_recent)s"
+msgstr ""
+"Übergang in %(state)s aufgrund von %(count)d Stichproben %(disposition)s "
+"Schwellenwert, aktuellster: %(most_recent)s"
+
+#, python-format
+msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
+msgstr ""
+"Übergang in %(state)s aufgrund von Alarmen %(alarm_ids)s in Status%(state)s"
+
+#, python-format
+msgid "Unable to connect to the database server: %(errmsg)s."
+msgstr ""
+"Es kann keine Verbindung zum Datenbankserver hergestellt werden: %(errmsg)s."
+
+#, python-format
+msgid ""
+"Unable to convert the value %(value)s to the expected data type %(type)s."
+msgstr ""
+"Wert %(value)s kann nicht in den erwarteten Datentyp %(type)s umgewandelt "
+"werden."
+
+#, python-format
+msgid "Unable to notify alarm %s"
+msgstr "Alarm %s kann nicht benachrichtigt werden"
+
+msgid "Unable to notify for an alarm with no action"
+msgstr "Für einen Alarm ohne Aktion kann nicht benachrichtigt werden"
+
+#, python-format
+msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
+msgstr "Aktion %(action)s konnte nicht für %(alarm_id)s analysiert werden"
+
+#, python-format
+msgid "Unable to parse action %s"
+msgstr "Aktion %s konnte nicht analysiert werden"
+
+#, python-format
+msgid ""
+"Unexpected exception converting %(value)s to the expected data type %(type)s."
+msgstr ""
+"Unerwartete Ausnahme beim Konvertieren von %(value)s in den erwarteten "
+"Datentyp %(type)s."
+
+#, python-format
+msgid "Unsupported action %s"
+msgstr "Nicht unterstützte Aktion %s"
+
+#, python-format
+msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
+msgstr "Alarm %(id)s wird geändert in %(state)s aufgrund von %(reason)s"
+
+msgid "alarm evaluation cycle failed"
+msgstr "Der Zyklus für die Alarmauswertung ist fehlgeschlagen"
+
+msgid "alarm state update failed"
+msgstr "Aktualisierung des Alarmzustands ist fehlgeschlagen"
+
+msgid "alarm stats retrieval failed"
+msgstr "Abrufen der Alarmstatistiken ist fehlgeschlagen"
+
+#, python-format
+msgid "initiating evaluation cycle on %d alarms"
+msgstr "Auswertungszyklus für %d Alarme wird eingeleitet"
+
+#, python-format
+msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
+msgstr ""
+"Bereitstellung auf 0.0.0.0:%(sport)s, Ansicht unter http://127.0.0.1:"
+"%(vport)s"
+
+#, python-format
+msgid "serving on http://%(host)s:%(port)s"
+msgstr "Bereitstellung auf http://%(host)s:%(port)s"
+
+msgid "state invalid"
+msgstr "Zustand ungültig"
+
+msgid "state_timestamp should be datetime object"
+msgstr "state_timestamp sollte ein datetime-Objekt sein"
+
+msgid "timestamp should be datetime object"
+msgstr "timestamp sollte ein datetime-Objekt sein"
