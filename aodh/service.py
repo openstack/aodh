@@ -16,6 +16,7 @@
 # under the License.
 import socket
 
+from keystoneauth1 import loading as ka_loading
 from oslo_config import cfg
 from oslo_db import options as db_options
 import oslo_i18n
@@ -65,7 +66,7 @@ def prepare_service(argv=None, config_files=None):
     conf(argv, project='aodh', validate_default_values=True,
          default_config_files=config_files)
 
-    keystone_client.setup_keystoneauth(conf)
+    ka_loading.load_auth_from_conf_options(conf, "service_credentials")
     log.setup(conf, 'aodh')
     messaging.setup()
     return conf
