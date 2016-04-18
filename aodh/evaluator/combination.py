@@ -36,7 +36,7 @@ class CombinationEvaluator(evaluator.Evaluator):
             LOG.exception(_LE('alarm %s retrieval failed'), alarm_id)
             return None
         if not alarms:
-            LOG.error(_LE("alarm %s doesn't exists anymore"), alarm_id)
+            LOG.error(_LE("alarm %s doesn't exist anymore"), alarm_id)
             return None
         return list(alarms)[0].state
 

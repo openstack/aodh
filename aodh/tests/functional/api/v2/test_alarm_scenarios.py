@@ -1525,7 +1525,7 @@ class TestAlarms(TestAlarmsBase):
                              params=json,
                              headers=self.auth_headers)
         self.assertEqual(
-            'Alarm with name=name1 exists',
+            "Alarm with name='name1' exists",
             resp.json['error_message']['faultstring'])
 
     def test_put_invalid_alarm_actions(self):

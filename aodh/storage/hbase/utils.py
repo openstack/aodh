@@ -21,7 +21,7 @@ from happybase.hbase import ttypes
 from oslo_log import log
 import six
 
-from aodh.i18n import _
+from aodh.i18n import _LW
 
 LOG = log.getLogger(__name__)
 
@@ -227,9 +227,8 @@ def create_tables(conn, tables, column_families):
                               separator=conn.table_prefix_separator,
                               table_name=table))
 
-            LOG.warning(_("Cannot create table %(table_name)s   "
-                        "it already exists. Ignoring error")
-                        % {'table_name': table})
+            LOG.warning(_LW("Cannot create table %s because "
+                            "it already exists. Ignoring error"), table)
 
 
 def quote(s, *args):
