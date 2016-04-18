@@ -29,7 +29,6 @@ AODH_SERVICE_PORT=${AODH_SERVICE_PORT:-8042}
 # - <empty>: Fallback to AODH_USE_MOD_WSGI or ENABLE_HTTPD_MOD_WSGI_SERVICES
 AODH_DEPLOY=${AODH_DEPLOY}
 
-# To enable OSprofiler change value of this variable to "notifications,profiler"
 AODH_NOTIFICATION_TOPICS=${AODH_NOTIFICATION_TOPICS:-notifications}
 
 AODH_COORDINATION_URL=${AODH_COORDINATION_URL:-}
