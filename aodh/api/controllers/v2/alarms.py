@@ -595,7 +595,7 @@ class AlarmController(rest.RestController):
                 name=data.name, project=data.project_id))
             if alarms:
                 raise base.ClientSideError(
-                    _("Alarm with name=%s exists") % data.name,
+                    _("Alarm with name='%s' exists") % data.name,
                     status_code=409)
 
         ALARMS_RULES[data.type].plugin.update_hook(data)
