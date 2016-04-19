@@ -35,11 +35,6 @@ OPTS = [
                default=-1,
                help=("Number of seconds that alarm histories are kept "
                      "in the database for (<= 0 means forever).")),
-    cfg.StrOpt('alarm_connection',
-               secret=True,
-               deprecated_for_removal=True,
-               help='The connection string used to connect '
-               'to the alarm database - rather use ${database.connection}'),
 ]
 
 
@@ -57,10 +52,7 @@ class AlarmNotFound(Exception):
 
 def get_connection_from_config(conf):
     retries = conf.database.max_retries
-    if conf.database.alarm_connection is None:
-        url = conf.database.connection
-    else:
-        url = conf.database.alarm_connection
+    url = conf.database.connection
     connection_scheme = urlparse.urlparse(url).scheme
     if connection_scheme not in ('mysql', 'mysql+pymysql', 'postgresql',
                                  'sqlite'):
