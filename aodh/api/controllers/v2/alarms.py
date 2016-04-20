@@ -352,10 +352,10 @@ class Alarm(base.Base):
                    user_id="c96c887c216949acbdfbd8b494863567",
                    project_id="c96c887c216949acbdfbd8b494863567",
                    enabled=True,
-                   timestamp=datetime.datetime.utcnow(),
+                   timestamp=datetime.datetime(2015, 1, 1, 12, 0, 0, 0),
                    state="ok",
                    severity="moderate",
-                   state_timestamp=datetime.datetime.utcnow(),
+                   state_timestamp=datetime.datetime(2015, 1, 1, 12, 0, 0, 0),
                    ok_actions=["http://site:8000/ok"],
                    alarm_actions=["http://site:8000/alarm"],
                    insufficient_data_actions=["http://site:8000/nodata"],
@@ -474,7 +474,7 @@ class AlarmChange(base.Base):
                    user_id="3e5d11fda79448ac99ccefb20be187ca",
                    project_id="b6f16144010811e387e4de429e99ee8c",
                    on_behalf_of="92159030020611e3b26dde429e99ee8c",
-                   timestamp=datetime.datetime.utcnow(),
+                   timestamp=datetime.datetime(2015, 1, 1, 12, 0, 0, 0),
                    )
 
 
