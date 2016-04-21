@@ -9,7 +9,7 @@
 
 You can get API version list via request to endpoint root path. For example::
 
-  curl -H "X-AUTH-TOKEN: fa2ec18631f94039a5b9a8b4fe8f56ad" http://127.0.0.1:8777
+  curl -H "X-AUTH-TOKEN: fa2ec18631f94039a5b9a8b4fe8f56ad" http://127.0.0.1:8042
 
 Sample response::
 
@@ -20,7 +20,7 @@ Sample response::
                   "id": "v2",
                   "links": [
                       {
-                          "href": "http://127.0.0.1:8777/v2",
+                          "href": "http://127.0.0.1:8042/v2",
                           "rel": "self"
                       },
                       {
