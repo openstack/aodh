@@ -69,20 +69,8 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
             self.svc.partition_coordinator.join_group.assert_called_once_with(
                 self.svc.PARTITIONING_GROUP_NAME)
 
-            initial_delay = test_interval if coordination_active else None
-            expected = [
-                mock.call(test_interval,
-                          self.svc._evaluate_assigned_alarms,
-                          initial_delay=initial_delay),
-                mock.call(604800, mock.ANY),
-            ]
-            if coordination_active:
-                hb_interval = min(coordination_heartbeat, test_interval / 4)
-                hb_call = mock.call(hb_interval,
-                                    self.svc.partition_coordinator.heartbeat)
-                expected.insert(1, hb_call)
             actual = self.svc.tg.add_timer.call_args_list
-            self.assertEqual(expected, actual)
+            self.assertEqual([mock.call(604800, mock.ANY)], actual)
 
     def test_start_singleton(self):
         self._do_test_start(coordination_active=False)

@@ -17,8 +17,11 @@
 import abc
 import datetime
 import json
+import threading
 
+from concurrent import futures
 import croniter
+from futurist import periodics
 from oslo_config import cfg
 from oslo_log import log
 from oslo_service import service as os_service
@@ -232,19 +235,43 @@ class AlarmEvaluationService(os_service.Service):
         # allow time for coordination if necessary
         delay_start = self.partition_coordinator.is_active()
 
+        ef = lambda: futures.ThreadPoolExecutor(max_workers=10)
+        self.periodic = periodics.PeriodicWorker.create(
+            [], executor_factory=ef)
+
         if self.evaluators:
-            interval = self.conf.evaluation_interval
-            self.tg.add_timer(
-                interval,
-                self._evaluate_assigned_alarms,
-                initial_delay=interval if delay_start else None)
+            @periodics.periodic(spacing=self.conf.evaluation_interval,
+                                run_immediately=not delay_start)
+            def evaluate_alarms():
+                self._evaluate_assigned_alarms()
+
+            self.periodic.add(evaluate_alarms)
+
         if self.partition_coordinator.is_active():
             heartbeat_interval = min(self.conf.coordination.heartbeat,
                                      self.conf.evaluation_interval / 4)
-            self.tg.add_timer(heartbeat_interval,
-                              self.partition_coordinator.heartbeat)
+
+            @periodics.periodic(spacing=heartbeat_interval,
+                                run_immediately=True)
+            def heartbeat():
+                self.partition_coordinator.heartbeat()
+
+            self.periodic.add(heartbeat)
+
+        t = threading.Thread(target=self.periodic.start)
+        t.daemon = True
+        t.start()
+
+        # NOTE(sileht): We have to drop eventlet to drop this last eventlet
+        # thread
         # Add a dummy thread to have wait() working
         self.tg.add_timer(604800, lambda: None)
+
+    def stop(self):
+        self.periodic.stop()
+        self.periodic.wait()
+        self.partition_coordinator.stop()
+        super(AlarmEvaluationService, self).stop()
 
     def _assigned_alarms(self):
         # NOTE(r-mibu): The 'event' type alarms will be evaluated by the
