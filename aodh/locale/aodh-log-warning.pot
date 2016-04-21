@@ -1,14 +1,14 @@
-# Translations template for PROJECT.
+# Translations template for aodh.
 # Copyright (C) 2016 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
+# This file is distributed under the same license as the aodh project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-04-17 07:11+0000\n"
+"Project-Id-Version: aodh 2.0.1.dev39\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
+"POT-Creation-Date: 2016-04-21 07:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,5 +31,10 @@ msgstr ""
 #: aodh/evaluator/threshold.py:194
 #, python-format
 msgid "Expecting %(expected)d datapoints but only get %(actual)d"
+msgstr ""
+
+#: aodh/storage/hbase/utils.py:230
+#, python-format
+msgid "Cannot create table %s because it already exists. Ignoring error"
 msgstr ""
 

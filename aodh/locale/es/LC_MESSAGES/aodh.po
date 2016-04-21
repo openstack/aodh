@@ -5,9 +5,9 @@
 # Eugènia Torrella <tester03@es.ibm.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev17\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-04-12 17:53+0200\n"
+"Project-Id-Version: aodh 2.0.1.dev37\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
+"POT-Creation-Date: 2016-04-21 02:26+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -74,21 +74,12 @@ msgstr ""
 "%(threshold)s por encima de %(period)s segundos"
 
 #, python-format
-msgid "Alarm with name=%s exists"
-msgstr "Ya existe la alarma con el nombre=%s"
-
-#, python-format
 msgid "Alarm with name='%s' exists"
 msgstr "Existe alarma con nombre='%s'"
 
 #, python-format
 msgid "Alarms %(alarm_ids)s are in unknown state"
 msgstr "Las alarmas %(alarm_ids)s están en estado desconocido"
-
-#, python-format
-msgid "Cannot create table %(table_name)s   it already exists. Ignoring error"
-msgstr ""
-"No se puede crear la tabla %(table_name)s, ya existe. Se ignorará el error."
 
 #, python-format
 msgid "Cannot specify alarm %s itself in combination rule"
