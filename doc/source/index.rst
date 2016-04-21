@@ -51,6 +51,7 @@ Appendix
 .. toctree::
    :maxdepth: 1
 
+   releasenotes/index
    glossary
    api/index
 
