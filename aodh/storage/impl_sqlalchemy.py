@@ -13,6 +13,7 @@
 """SQLAlchemy storage backend."""
 
 from __future__ import absolute_import
+import copy
 import datetime
 import os.path
 
@@ -20,10 +21,11 @@ from alembic import command
 from alembic import config
 from alembic import migration
 from oslo_db.sqlalchemy import session as db_session
+from oslo_db.sqlalchemy import utils as oslo_sql_utils
 from oslo_log import log
 from oslo_utils import timeutils
 import six
-from sqlalchemy import desc
+from sqlalchemy.orm import exc
 
 from aodh.i18n import _LI
 from aodh import storage
@@ -143,9 +145,31 @@ class Connection(base.Connection):
     def _retrieve_alarms(self, query):
         return (self._row_to_alarm_model(x) for x in query.all())
 
+    @staticmethod
+    def _get_pagination_query(query, pagination, api_model, model):
+        if not pagination.get('sort'):
+            pagination['sort'] = api_model.DEFAULT_SORT
+        marker = None
+        if pagination.get('marker'):
+            key_attr = getattr(model, api_model.PRIMARY_KEY)
+            marker_query = copy.copy(query)
+            marker_query = marker_query.filter(
+                key_attr == pagination['marker'])
+            try:
+                marker = marker_query.limit(1).one()
+            except exc.NoResultFound:
+                raise storage.InvalidMarker(
+                    'Marker %s not found.' % pagination['marker'])
+        limit = pagination.get('limit')
+        sort_keys = [s[0] for s in pagination['sort']]
+        sort_dirs = [s[1] for s in pagination['sort']]
+        return oslo_sql_utils.paginate_query(
+            query, model, limit, sort_keys, sort_dirs=sort_dirs, marker=marker)
+
     def get_alarms(self, name=None, user=None, state=None, meter=None,
                    project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None, exclude=None):
+                   alarm_type=None, severity=None, exclude=None,
+                   pagination=None):
         """Yields a lists of alarms that match filters.
 
         :param name: Optional name for alarm.
@@ -158,8 +182,10 @@ class Connection(base.Connection):
         :param alarm_type: Optional alarm type.
         :param severity: Optional alarm severity.
         :param exclude: Optional dict for inequality constraint.
+        :param pagination: Pagination query parameters.
         """
 
+        pagination = pagination or {}
         session = self._engine_facade.get_session()
         query = session.query(models.Alarm)
         if name is not None:
@@ -182,7 +208,8 @@ class Connection(base.Connection):
             for key, value in six.iteritems(exclude):
                 query = query.filter(getattr(models.Alarm, key) != value)
 
-        query = query.order_by(desc(models.Alarm.timestamp))
+        query = self._get_pagination_query(
+            query, pagination, alarm_api_models.Alarm, models.Alarm)
         alarms = self._retrieve_alarms(query)
 
         # TODO(cmart): improve this by using sqlalchemy.func factory
@@ -262,7 +289,7 @@ class Connection(base.Connection):
                           user=None, project=None, alarm_type=None,
                           severity=None, start_timestamp=None,
                           start_timestamp_op=None, end_timestamp=None,
-                          end_timestamp_op=None):
+                          end_timestamp_op=None, pagination=None):
         """Yields list of AlarmChanges describing alarm history
 
         Changes are always sorted in reverse order of occurrence, given
@@ -286,7 +313,9 @@ class Connection(base.Connection):
         :param start_timestamp_op: Optional timestamp start range operation
         :param end_timestamp: Optional modified timestamp end range
         :param end_timestamp_op: Optional timestamp end range operation
+        :param pagination: Pagination query parameters.
         """
+        pagination = pagination or {}
         session = self._engine_facade.get_session()
         query = session.query(models.AlarmChange)
         query = query.filter(models.AlarmChange.alarm_id == alarm_id)
@@ -317,7 +346,9 @@ class Connection(base.Connection):
                 query = query.filter(
                     models.AlarmChange.timestamp < end_timestamp)
 
-        query = query.order_by(desc(models.AlarmChange.timestamp))
+        query = self._get_pagination_query(
+            query, pagination, alarm_api_models.AlarmChange,
+            models.AlarmChange)
         return self._retrieve_alarm_history(query)
 
     def record_alarm_change(self, alarm_change):

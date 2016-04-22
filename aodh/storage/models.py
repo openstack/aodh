@@ -36,6 +36,12 @@ class Alarm(base.Model):
     ALARM_LEVEL_MODERATE = 'moderate'
     ALARM_LEVEL_CRITICAL = 'critical'
 
+    SUPPORT_SORT_KEYS = (
+        'alarm_id', 'enabled', 'name', 'type', 'severity', 'timestamp',
+        'user_id', 'project_id', 'state', 'repeat_actions', 'state_timestamp')
+    DEFAULT_SORT = [('timestamp', 'desc')]
+    PRIMARY_KEY = 'alarm_id'
+
     """
     An alarm to monitor.
 
@@ -109,6 +115,12 @@ class AlarmChange(base.Model):
     CREATION = 'creation'
     RULE_CHANGE = 'rule change'
     STATE_TRANSITION = 'state transition'
+
+    SUPPORT_SORT_KEYS = (
+        'event_id', 'alarm_id', 'on_behalf_of', 'project_id', 'user_id',
+        'type', 'timestamp', 'severity')
+    DEFAULT_SORT = [('timestamp', 'desc')]
+    PRIMARY_KEY = 'event_id'
 
     def __init__(self,
                  event_id,

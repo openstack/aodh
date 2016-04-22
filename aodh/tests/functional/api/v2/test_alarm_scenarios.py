@@ -29,6 +29,7 @@ from aodh import messaging
 from aodh.storage import models
 from aodh.tests import constants
 from aodh.tests.functional.api import v2
+from aodh.tests.functional import db as tests_db
 
 
 def default_alarms(auth_headers):
@@ -3237,3 +3238,92 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
                        "float'>', got '<type 'bool'>'")
         self.assertEqual(faultstring,
                          response.json['error_message']['faultstring'])
+
+
+@tests_db.run_with('mysql', 'pgsql', 'sqlite')
+class TestPaginationQuery(TestAlarmsBase):
+    def setUp(self):
+        super(TestPaginationQuery, self).setUp()
+        for alarm in default_alarms(self.auth_headers):
+            self.alarm_conn.create_alarm(alarm)
+
+    def test_pagination_query_single_sort(self):
+        data = self.get_json('/alarms?sort=name:desc',
+                             headers=self.auth_headers)
+        names = [a['name'] for a in data]
+        self.assertEqual(['name4', 'name3', 'name2', 'name1'], names)
+        data = self.get_json('/alarms?sort=name:asc',
+                             headers=self.auth_headers)
+        names = [a['name'] for a in data]
+        self.assertEqual(['name1', 'name2', 'name3', 'name4'], names)
+
+    def test_pagination_query_limit(self):
+        data = self.get_json('/alarms?limit=2',  headers=self.auth_headers)
+        self.assertEqual(2, len(data))
+
+    def test_pagination_query_limit_sort(self):
+        data = self.get_json('/alarms?sort=name:asc&limit=2',
+                             headers=self.auth_headers)
+        self.assertEqual(2, len(data))
+
+    def test_pagination_query_marker(self):
+        data = self.get_json('/alarms?sort=name:desc',
+                             headers=self.auth_headers)
+        self.assertEqual(4, len(data))
+        alarm_ids = [a['alarm_id'] for a in data]
+        names = [a['name'] for a in data]
+        self.assertEqual(['name4', 'name3', 'name2', 'name1'], names)
+        marker_url = ('/alarms?sort=name:desc&marker=%s' % alarm_ids[1])
+        data = self.get_json(marker_url, headers=self.auth_headers)
+        self.assertEqual(2, len(data))
+        new_alarm_ids = [a['alarm_id'] for a in data]
+        self.assertEqual(alarm_ids[2:], new_alarm_ids)
+        new_names = [a['name'] for a in data]
+        self.assertEqual(['name2', 'name1'], new_names)
+
+    def test_pagination_query_multiple_sorts(self):
+        new_alarms = default_alarms(self.auth_headers)
+        for a_id in zip(new_alarms, ['e', 'f', 'g', 'h']):
+            a_id[0].alarm_id = a_id[1]
+            self.alarm_conn.create_alarm(a_id[0])
+        data = self.get_json('/alarms', headers=self.auth_headers)
+        self.assertEqual(8, len(data))
+        sort_url = '/alarms?sort=name:desc&sort=alarm_id:asc'
+        data = self.get_json(sort_url, headers=self.auth_headers)
+        name_ids = [(a['name'], a['alarm_id']) for a in data]
+        expected = [('name4', 'd'), ('name4', 'h'), ('name3', 'c'),
+                    ('name3', 'g'), ('name2', 'b'), ('name2', 'f'),
+                    ('name1', 'a'), ('name1', 'e')]
+        self.assertEqual(expected, name_ids)
+
+    def test_pagination_query_invalid_sort_key(self):
+        resp = self.get_json('/alarms?sort=invalid_key:desc',
+                             headers=self.auth_headers,
+                             expect_errors=True)
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual("Invalid input for field/attribute sort. Value: "
+                         "'invalid_key:desc'. the sort parameter should be"
+                         " a pair of sort key and sort dir combined with "
+                         "':', or only sort key specified and sort dir will "
+                         "be default 'asc', the supported sort keys are: "
+                         "('alarm_id', 'enabled', 'name', 'type', 'severity',"
+                         " 'timestamp', 'user_id', 'project_id', 'state', "
+                         "'repeat_actions', 'state_timestamp')",
+                         jsonutils.loads(resp.body)['error_message']
+                         ['faultstring'])
+
+    def test_pagination_query_only_sort_key_specified(self):
+        data = self.get_json('/alarms?sort=name',
+                             headers=self.auth_headers)
+        names = [a['name'] for a in data]
+        self.assertEqual(['name1', 'name2', 'name3', 'name4'], names)
+
+    def test_pagination_query_history_data(self):
+        for i in moves.xrange(10):
+            self._update_alarm('a', dict(name='%s' % i))
+        url = '/alarms/a/history?sort=event_id:desc&sort=timestamp:desc'
+        data = self.get_json(url, headers=self.auth_headers)
+        sorted_data = sorted(data,
+                             key=lambda d: (d['event_id'], d['timestamp']),
+                             reverse=True)
+        self.assertEqual(sorted_data, data)

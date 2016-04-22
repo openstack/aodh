@@ -119,6 +119,8 @@ def validate_query(query, db_func, internal_keys=None,
     if 'alarm_type' in valid_keys:
         valid_keys.remove('alarm_type')
         valid_keys.append('type')
+    if 'pagination' in valid_keys:
+        valid_keys.remove('pagination')
 
     internal_timestamp_keys = ['end_timestamp', 'start_timestamp',
                                'end_timestamp_op', 'start_timestamp_op']
@@ -298,3 +300,25 @@ def set_resp_location_hdr(location):
         location = location.encode('utf-8')
     location = urllib_parse.quote(location)
     pecan.response.headers['Location'] = location
+
+
+def get_pagination_options(sort, limit, marker, api_model):
+    sorts = list()
+    if limit and limit <= 0:
+        raise wsme.exc.InvalidInput('limit', limit,
+                                    'it should be a positive integer.')
+    for s in sort or []:
+        sort_key, __, sort_dir = s.partition(':')
+        if sort_key not in api_model.SUPPORT_SORT_KEYS:
+            raise wsme.exc.InvalidInput(
+                'sort', s, "the sort parameter should be a pair of sort "
+                           "key and sort dir combined with ':', or only"
+                           " sort key specified and sort dir will be default "
+                           "'asc', the supported sort keys are: %s" %
+                           str(api_model.SUPPORT_SORT_KEYS))
+        # the default sort direction is 'asc'
+        sorts.append((sort_key, sort_dir or 'asc'))
+
+    return {'limit': limit,
+            'marker': marker,
+            'sort': sorts}

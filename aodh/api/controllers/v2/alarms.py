@@ -622,11 +622,14 @@ class AlarmController(rest.RestController):
         alarm_object = Alarm.from_db_model(alarm)
         alarm_object.delete_actions()
 
-    @wsme_pecan.wsexpose([AlarmChange], [base.Query])
-    def history(self, q=None):
+    @wsme_pecan.wsexpose([AlarmChange], [base.Query], [str], int, str)
+    def history(self, q=None, sort=None, limit=None, marker=None):
         """Assembles the alarm history requested.
 
         :param q: Filter rules for the changes to be described.
+        :param sort: A list of pairs of sort key and sort dir.
+        :param limit: The maximum number of items to be return.
+        :param marker: The pagination query marker.
         """
 
         # Ensure alarm exists
@@ -641,6 +644,9 @@ class AlarmController(rest.RestController):
         conn = pecan.request.storage
         kwargs = v2_utils.query_to_kwargs(
             q, conn.get_alarm_changes, ['on_behalf_of', 'alarm_id'])
+        if sort or limit or marker:
+            kwargs['pagination'] = v2_utils.get_pagination_options(
+                sort, limit, marker, models.AlarmChange)
         return [AlarmChange.from_db_model(ac)
                 for ac in conn.get_alarm_changes(self._id, auth_project,
                                                  **kwargs)]
@@ -766,11 +772,14 @@ class AlarmsController(rest.RestController):
         v2_utils.set_resp_location_hdr("/v2/alarms/" + alarm.alarm_id)
         return Alarm.from_db_model(alarm)
 
-    @wsme_pecan.wsexpose([Alarm], [base.Query])
-    def get_all(self, q=None):
+    @wsme_pecan.wsexpose([Alarm], [base.Query], [str], int, str)
+    def get_all(self, q=None, sort=None, limit=None, marker=None):
         """Return all alarms, based on the query provided.
 
         :param q: Filter rules for the alarms to be returned.
+        :param sort: A list of pairs of sort key and sort dir.
+        :param limit: The maximum number of items to be return.
+        :param marker: The pagination query marker.
         """
         target = rbac.target_from_segregation_rule(
             pecan.request.headers, pecan.request.enforcer)
@@ -782,5 +791,8 @@ class AlarmsController(rest.RestController):
         kwargs = v2_utils.query_to_kwargs(
             q, pecan.request.storage.get_alarms,
             allow_timestamps=False)
+        if sort or limit or marker:
+            kwargs['pagination'] = v2_utils.get_pagination_options(
+                sort, limit, marker, models.Alarm)
         return [Alarm.from_db_model(m)
                 for m in pecan.request.storage.get_alarms(**kwargs)]

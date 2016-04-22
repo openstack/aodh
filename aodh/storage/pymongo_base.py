@@ -18,6 +18,7 @@ from oslo_log import log
 import pymongo
 import six
 
+import aodh
 from aodh import storage
 from aodh.storage import base
 from aodh.storage import models
@@ -88,7 +89,8 @@ class Connection(base.Connection):
 
     def get_alarms(self, name=None, user=None, state=None, meter=None,
                    project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None, exclude=None):
+                   alarm_type=None, severity=None, exclude=None,
+                   pagination=None):
         """Yields a lists of alarms that match filters.
 
         :param name: Optional name for alarm.
@@ -101,7 +103,10 @@ class Connection(base.Connection):
         :param alarm_type: Optional alarm type.
         :param severity: Optional alarm severity.
         :param exclude: Optional dict for inequality constraint.
+        :param pagination: Pagination query parameters.
         """
+        if pagination:
+            raise aodh.NotImplementedError('Pagination query not implemented')
         q = {}
         if user is not None:
             q['user_id'] = user
@@ -134,7 +139,7 @@ class Connection(base.Connection):
                           user=None, project=None, alarm_type=None,
                           severity=None, start_timestamp=None,
                           start_timestamp_op=None, end_timestamp=None,
-                          end_timestamp_op=None):
+                          end_timestamp_op=None, pagination=None):
         """Yields list of AlarmChanges describing alarm history
 
         Changes are always sorted in reverse order of occurrence, given
@@ -158,7 +163,10 @@ class Connection(base.Connection):
         :param start_timestamp_op: Optional timestamp start range operation
         :param end_timestamp: Optional modified timestamp end range
         :param end_timestamp_op: Optional timestamp end range operation
+        :param pagination: Pagination query parameters.
         """
+        if pagination:
+            raise aodh.NotImplementedError('Pagination query not implemented')
         q = dict(alarm_id=alarm_id)
         if on_behalf_of is not None:
             q['on_behalf_of'] = on_behalf_of

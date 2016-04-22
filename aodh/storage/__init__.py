@@ -50,6 +50,10 @@ class AlarmNotFound(Exception):
         super(AlarmNotFound, self).__init__("Alarm %s not found" % alarm_id)
 
 
+class InvalidMarker(Exception):
+    """Invalid pagination marker parameters"""
+
+
 def get_connection_from_config(conf):
     retries = conf.database.max_retries
     url = conf.database.connection
