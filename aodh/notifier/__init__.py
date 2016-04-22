@@ -15,6 +15,7 @@
 
 import abc
 
+from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
@@ -27,6 +28,18 @@ from aodh import messaging
 
 
 LOG = log.getLogger(__name__)
+
+OPTS = [
+    cfg.IntOpt('batch_size',
+               default=1,
+               help='Number of notification messages to wait before '
+                    'dispatching them.'),
+    cfg.IntOpt('batch_timeout',
+               default=None,
+               help='Number of seconds to wait before dispatching samples '
+                    'when batch_size is not reached (None means indefinitely).'
+               ),
+]
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -69,9 +82,9 @@ class AlarmNotifierService(os_service.Service):
             invoke_args=(self.conf,))
 
         target = oslo_messaging.Target(topic=self.conf.notifier_topic)
-        self.listener = messaging.get_notification_listener(
-            transport, [target],
-            [AlarmEndpoint(self.notifiers)])
+        self.listener = messaging.get_batch_notification_listener(
+            transport, [target], [AlarmEndpoint(self.notifiers)], False,
+            self.conf.notifier.batch_size, self.conf.notifier.batch_timeout)
         self.listener.start()
         # Add a dummy thread to have wait() working
         self.tg.add_timer(604800, lambda: None)
@@ -88,9 +101,11 @@ class AlarmEndpoint(object):
     def __init__(self, notifiers):
         self.notifiers = notifiers
 
-    def sample(self, ctxt, publisher_id, event_type, payload, metadata):
+    def sample(self, notifications):
         """Endpoint for alarm notifications"""
-        self._process_alarm(self.notifiers, payload)
+        LOG.debug('Received %s messages in batch.', len(notifications))
+        for notification in notifications:
+            self._process_alarm(self.notifiers, notification['payload'])
 
     @staticmethod
     def _handle_action(notifiers, action, alarm_id, alarm_name, severity,
@@ -133,7 +148,6 @@ class AlarmEndpoint(object):
                             previous, current, reason, reason_data)
         except Exception:
             LOG.exception(_LE("Unable to notify alarm %s"), alarm_id)
-            return
 
     @staticmethod
     def _process_alarm(notifiers, data):

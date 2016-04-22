@@ -98,6 +98,60 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                           data['reason_data']),
                          notifications[0])
 
+    @mock.patch('aodh.notifier.LOG.debug')
+    def test_notify_alarm_with_batch_listener(self, logger):
+        data1 = {
+            'actions': ['test://'],
+            'alarm_id': 'foobar',
+            'alarm_name': 'testalarm',
+            'severity': 'critical',
+            'previous': 'OK',
+            'current': 'ALARM',
+            'reason': 'Everything is on fire',
+            'reason_data': {'fire': 'everywhere'}
+        }
+        data2 = {
+            'actions': ['test://'],
+            'alarm_id': 'foobar2',
+            'alarm_name': 'testalarm2',
+            'severity': 'low',
+            'previous': 'ALARM',
+            'current': 'OK',
+            'reason': 'Everything is fine',
+            'reason_data': {'fine': 'fine'}
+        }
+        self.service.stop()
+        self.CONF.set_override("batch_size", 2, 'notifier')
+        # Init a new service with new configuration
+        self.svc = notifier.AlarmNotifierService(self.CONF)
+        self.svc.start()
+        self._msg_notifier.sample({}, 'alarm.update', data1)
+        self._msg_notifier.sample({}, 'alarm.update', data2)
+        time.sleep(1)
+        notifications = self.svc.notifiers['test'].obj.notifications
+        self.assertEqual(2, len(notifications))
+        self.assertEqual((urlparse.urlsplit(data1['actions'][0]),
+                          data1['alarm_id'],
+                          data1['alarm_name'],
+                          data1['severity'],
+                          data1['previous'],
+                          data1['current'],
+                          data1['reason'],
+                          data1['reason_data']),
+                         notifications[0])
+        self.assertEqual((urlparse.urlsplit(data2['actions'][0]),
+                          data2['alarm_id'],
+                          data2['alarm_name'],
+                          data2['severity'],
+                          data2['previous'],
+                          data2['current'],
+                          data2['reason'],
+                          data2['reason_data']),
+                         notifications[1])
+        self.assertEqual(mock.call('Received %s messages in batch.', 2),
+                         logger.call_args_list[0])
+        self.svc.stop()
+
     @staticmethod
     def _notification(action):
         notification = {}

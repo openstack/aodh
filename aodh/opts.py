@@ -68,6 +68,7 @@ def list_opts():
         ('notifier', aodh.service.NOTIFIER_OPTS),
         ('service_credentials', aodh.keystone_client.OPTS),
         ('service_types', aodh.notifier.zaqar.SERVICE_OPTS),
+        ('notifier', aodh.notifier.OPTS)
     ]
 
 
