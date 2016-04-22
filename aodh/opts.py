@@ -14,7 +14,6 @@
 import itertools
 
 from keystoneauth1 import loading
-from oslo_config import cfg
 
 import aodh.api
 import aodh.api.controllers.v2.alarms
@@ -38,28 +37,11 @@ def list_opts():
              aodh.event.OPTS,
              aodh.notifier.rest.OPTS,
              aodh.queue.OPTS,
-             aodh.service.OPTS,
-             aodh.api.controllers.v2.alarms.ALARM_API_OPTS)),
+             aodh.service.OPTS)),
         ('api',
          itertools.chain(
              aodh.api.OPTS,
-             [
-                 cfg.StrOpt(
-                     'paste_config',
-                     deprecated_name='api_paste_config',
-                     deprecated_group='DEFAULT',
-                     default="api_paste.ini",
-                     help="Configuration file for WSGI definition of API."),
-                 cfg.IntOpt(
-                     'workers', default=1,
-                     deprecated_name='api_workers',
-                     deprecated_group='DEFAULT',
-                     min=1,
-                     help='Number of workers for aodh API server.'),
-                 cfg.BoolOpt('pecan_debug',
-                             default=False,
-                             help='Toggle Pecan Debug Middleware.'),
-             ])),
+             aodh.api.controllers.v2.alarms.ALARM_API_OPTS)),
         ('coordination', aodh.coordination.OPTS),
         ('database', aodh.storage.OPTS),
         ('service_credentials', aodh.keystone_client.OPTS),
