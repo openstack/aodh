@@ -12,9 +12,11 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import time
 
 import mock
 from oslo_config import fixture as fixture_config
+import oslo_messaging
 from oslo_serialization import jsonutils
 from oslotest import mockpatch
 import requests
@@ -55,17 +57,21 @@ class TestAlarmNotifierService(tests_base.BaseTestCase):
 
 
 class TestAlarmNotifier(tests_base.BaseTestCase):
-
     def setUp(self):
         super(TestAlarmNotifier, self).setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
+        self._msg_notifier = oslo_messaging.Notifier(
+            self.transport, topics=['alarming'], driver='messaging',
+            publisher_id='testpublisher')
         self.zaqar = FakeZaqarClient(self)
         self.useFixture(mockpatch.Patch(
             'aodh.notifier.zaqar.ZaqarAlarmNotifier.get_zaqar_client',
             return_value=self.zaqar))
         self.service = notifier.AlarmNotifierService(self.CONF)
+        self.service.start()
+        self.addCleanup(self.service.stop)
 
     def test_notify_alarm(self):
         data = {
@@ -78,7 +84,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             'reason': 'Everything is on fire',
             'reason_data': {'fire': 'everywhere'}
         }
-        self.service.notify_alarm({}, data)
+        self._msg_notifier.sample({}, 'alarm.update', data)
+        time.sleep(1)
         notifications = self.service.notifiers['test'].obj.notifications
         self.assertEqual(1, len(notifications))
         self.assertEqual((urlparse.urlsplit(data['actions'][0]),
@@ -91,16 +98,6 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                           data['reason_data']),
                          notifications[0])
 
-    def test_notify_alarm_no_action(self):
-        self.service.notify_alarm({}, {})
-
-    def test_notify_alarm_log_action(self):
-        self.service.notify_alarm({},
-                                  {
-                                      'actions': ['log://'],
-                                      'alarm_id': 'foobar',
-                                      'condition': {'threshold': 42}})
-
     @staticmethod
     def _notification(action):
         notification = {}
@@ -112,8 +109,10 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         action = 'http://host/action'
 
         with mock.patch.object(requests.Session, 'post') as poster:
-            self.service.notify_alarm({},
+            self._msg_notifier.sample({},
+                                      'alarm.update',
                                       self._notification(action))
+            time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
                                       headers=mock.ANY)
             args, kwargs = poster.call_args
@@ -133,8 +132,10 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.CONF.set_override("rest_notifier_certificate_file", certificate)
 
         with mock.patch.object(requests.Session, 'post') as poster:
-            self.service.notify_alarm({},
+            self._msg_notifier.sample({},
+                                      'alarm.update',
                                       self._notification(action))
+            time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
                                       headers=mock.ANY,
                                       cert=certificate, verify=True)
@@ -157,8 +158,10 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.CONF.set_override("rest_notifier_certificate_key", key)
 
         with mock.patch.object(requests.Session, 'post') as poster:
-            self.service.notify_alarm({},
+            self._msg_notifier.sample({},
+                                      'alarm.update',
                                       self._notification(action))
+            time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
                                       headers=mock.ANY,
                                       cert=(certificate, key), verify=True)
@@ -177,8 +180,10 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.CONF.set_override("rest_notifier_ssl_verify", False)
 
         with mock.patch.object(requests.Session, 'post') as poster:
-            self.service.notify_alarm({},
+            self._msg_notifier.sample({},
+                                      'alarm.update',
                                       self._notification(action))
+            time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
                                       headers=mock.ANY,
                                       verify=False)
@@ -196,8 +201,10 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         action = 'https://host/action?aodh-alarm-ssl-verify=0'
 
         with mock.patch.object(requests.Session, 'post') as poster:
-            self.service.notify_alarm({},
+            self._msg_notifier.sample({},
+                                      'alarm.update',
                                       self._notification(action))
+            time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
                                       headers=mock.ANY,
                                       verify=False)
@@ -217,8 +224,10 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.CONF.set_override("rest_notifier_ssl_verify", False)
 
         with mock.patch.object(requests.Session, 'post') as poster:
-            self.service.notify_alarm({},
+            self._msg_notifier.sample({},
+                                      'alarm.update',
                                       self._notification(action))
+            time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
                                       headers=mock.ANY,
                                       verify=True)
@@ -241,25 +250,27 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                         self._fake_urlsplit):
             LOG = mock.MagicMock()
             with mock.patch('aodh.notifier.LOG', LOG):
-                self.service.notify_alarm(
-                    {},
+                self._msg_notifier.sample(
+                    {}, 'alarm.update',
                     {
                         'actions': ['no-such-action-i-am-sure'],
                         'alarm_id': 'foobar',
                         'condition': {'threshold': 42},
                     })
+                time.sleep(1)
                 self.assertTrue(LOG.error.called)
 
     def test_notify_alarm_invalid_action(self):
         LOG = mock.MagicMock()
         with mock.patch('aodh.notifier.LOG', LOG):
-            self.service.notify_alarm(
-                {},
+            self._msg_notifier.sample(
+                {}, 'alarm.update',
                 {
                     'actions': ['no-such-action-i-am-sure://'],
                     'alarm_id': 'foobar',
                     'condition': {'threshold': 42},
                 })
+            time.sleep(1)
             self.assertTrue(LOG.error.called)
 
     def test_notify_alarm_trust_action(self):
@@ -273,8 +284,9 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                         lambda **kwargs: client))
 
         with mock.patch.object(requests.Session, 'post') as poster:
-            self.service.notify_alarm({},
+            self._msg_notifier.sample({}, 'alarm.update',
                                       self._notification(action))
+            time.sleep(1)
             poster.assert_called_with(
                 url, data=mock.ANY, headers=mock.ANY)
             args, kwargs = poster.call_args
@@ -292,8 +304,9 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
     def test_zaqar_notifier_action(self):
         action = 'zaqar://?topic=critical&subscriber=http://example.com/data' \
                  '&subscriber=mailto:foo@example.com&ttl=7200'
-        self.service.notify_alarm({},
+        self._msg_notifier.sample({}, 'alarm.update',
                                   self._notification(action))
+        time.sleep(1)
         self.assertEqual(self.zaqar,
                          self.service.notifiers['zaqar'].obj.client)
 
