@@ -7,5 +7,3 @@ Aodh Style Commandments
 
 Aodh Specific Commandments
 --------------------------
-
-- [C300] Check for oslo library imports use the non-namespaced packages
