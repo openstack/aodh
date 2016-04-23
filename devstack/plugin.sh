@@ -304,13 +304,13 @@ function install_aodh {
 
 # install_aodhclient() - Collect source and prepare
 function install_aodhclient {
-    if use_library_from_git "python-ceilometerclient"; then
-        git_clone_by_name "python-ceilometerclient"
-        setup_dev_lib "python-ceilometerclient"
-        sudo install -D -m 0644 -o $STACK_USER {${GITDIR["python-ceilometerclient"]}/tools/,/etc/bash_completion.d/}ceilometer.bash_completion
+    if use_library_from_git "python-aodhclient"; then
+        git_clone_by_name "python-aodhclient"
+        setup_dev_lib "python-aodhclient"
     else
-        pip_install_gr python-ceilometerclient
+        pip_install_gr aodhclient
     fi
+    aodh complete | sudo tee /etc/bash_completion.d/aodh.bash_completion > /dev/null
 }
 
 # start_aodh() - Start running processes, including screen
