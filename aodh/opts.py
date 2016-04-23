@@ -36,7 +36,6 @@ def list_opts():
          itertools.chain(
              aodh.evaluator.OPTS,
              aodh.evaluator.event.OPTS,
-             aodh.event.OPTS,
              aodh.notifier.rest.OPTS,
              aodh.queue.OPTS,
              aodh.service.OPTS,
@@ -64,11 +63,12 @@ def list_opts():
         ('coordination', aodh.coordination.OPTS),
         ('database', aodh.storage.OPTS),
         ('evaluator', aodh.service.EVALUATOR_OPTS),
-        ('listener', aodh.service.LISTENER_OPTS),
+        ('listener', itertools.chain(aodh.service.LISTENER_OPTS,
+                                     aodh.event.OPTS)),
         ('notifier', aodh.service.NOTIFIER_OPTS),
         ('service_credentials', aodh.keystone_client.OPTS),
         ('service_types', aodh.notifier.zaqar.SERVICE_OPTS),
-        ('notifier', aodh.notifier.OPTS)
+        ('notifier', aodh.notifier.OPTS),
     ]
 
 

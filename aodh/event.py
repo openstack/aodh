@@ -14,6 +14,7 @@
 # under the License.
 
 from oslo_config import cfg
+from oslo_log import log
 import oslo_messaging
 from oslo_service import service
 
@@ -21,11 +22,21 @@ from aodh.evaluator import event
 from aodh import messaging
 from aodh import storage
 
+LOG = log.getLogger(__name__)
 
 OPTS = [
     cfg.StrOpt('event_alarm_topic',
                default='alarm.all',
+               deprecated_group='DEFAULT',
                help='The topic that aodh uses for event alarm evaluation.'),
+    cfg.IntOpt('batch_size',
+               default=1,
+               help='Number of notification messages to wait before '
+               'dispatching them.'),
+    cfg.IntOpt('batch_timeout',
+               default=None,
+               help='Number of seconds to wait before dispatching samples '
+               'when batch_size is not reached (None means indefinitely).'),
 ]
 
 
@@ -34,9 +45,10 @@ class EventAlarmEndpoint(object):
     def __init__(self, evaluator):
         self.evaluator = evaluator
 
-    def sample(self, ctxt, publisher_id, event_type, payload, metadata):
-        # TODO(r-mibu): requeue on error
-        self.evaluator.evaluate_events(payload)
+    def sample(self, notifications):
+        LOG.debug('Received %s messages in batch.', len(notifications))
+        for notification in notifications:
+            self.evaluator.evaluate_events(notification['payload'])
 
 
 class EventAlarmEvaluationService(service.Service):
@@ -49,10 +61,13 @@ class EventAlarmEvaluationService(service.Service):
         super(EventAlarmEvaluationService, self).start()
         self.storage_conn = storage.get_connection_from_config(self.conf)
         self.evaluator = event.EventAlarmEvaluator(self.conf)
-        self.listener = messaging.get_notification_listener(
+        self.listener = messaging.get_batch_notification_listener(
             messaging.get_transport(self.conf),
-            [oslo_messaging.Target(topic=self.conf.event_alarm_topic)],
-            [EventAlarmEndpoint(self.evaluator)])
+            [oslo_messaging.Target(
+                topic=self.conf.listener.event_alarm_topic)],
+            [EventAlarmEndpoint(self.evaluator)], False,
+            self.conf.listener.batch_size,
+            self.conf.listener.batch_timeout)
         self.listener.start()
         # Add a dummy thread to have wait() working
         self.tg.add_timer(604800, lambda: None)

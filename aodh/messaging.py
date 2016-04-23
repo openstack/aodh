@@ -45,14 +45,6 @@ def get_transport(conf, url=None, optional=False, cache=True):
     return transport
 
 
-def get_notification_listener(transport, targets, endpoints,
-                              allow_requeue=False):
-    """Return a configured oslo_messaging notification listener."""
-    return oslo_messaging.get_notification_listener(
-        transport, targets, endpoints, executor='threading',
-        allow_requeue=allow_requeue)
-
-
 def get_batch_notification_listener(transport, targets, endpoints,
                                     allow_requeue=False,
                                     batch_size=1, batch_timeout=None):

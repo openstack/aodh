@@ -1657,15 +1657,16 @@ class TestAlarms(TestAlarmsBase):
         }
         endpoint = mock.MagicMock()
         target = oslo_messaging.Target(topic="notifications")
-        listener = messaging.get_notification_listener(
+        listener = messaging.get_batch_notification_listener(
             self.transport, [target], [endpoint])
         listener.start()
         endpoint.info.side_effect = lambda *args: listener.stop()
         self.post_json('/alarms', params=json, headers=self.auth_headers)
         listener.wait()
 
-        class PayloadMatcher(object):
-            def __eq__(self, payload):
+        class NotificationsMatcher(object):
+            def __eq__(self, notifications):
+                payload = notifications[0]['payload']
                 return (payload['detail']['name'] == 'sent_notification' and
                         payload['type'] == 'creation' and
                         payload['detail']['rule']['meter_name'] == 'ameter' and
@@ -1673,10 +1674,7 @@ class TestAlarms(TestAlarmsBase):
                              'project_id', 'timestamp',
                              'user_id']).issubset(payload.keys()))
 
-        endpoint.info.assert_called_once_with(
-            {},
-            'aodh.api', 'alarm.creation',
-            PayloadMatcher(), mock.ANY)
+        endpoint.info.assert_called_once_with(NotificationsMatcher())
 
     def test_alarm_sends_notification(self):
         with mock.patch.object(messaging, 'get_notifier') as get_notifier:
