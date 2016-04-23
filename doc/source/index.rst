@@ -44,6 +44,7 @@ Developer Documentation
    configuration
    testing
    contributing
+   event-alarm
 
 Appendix
 ========
