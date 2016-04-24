@@ -22,7 +22,7 @@ from oslo_utils import timeutils
 import six
 
 from aodh import evaluator
-from aodh.i18n import _, _LE
+from aodh.i18n import _, _LE, _LW
 
 LOG = log.getLogger(__name__)
 
@@ -167,7 +167,8 @@ class EventAlarmEvaluator(evaluator.Evaluator):
             try:
                 event = Event(e)
             except InvalidEvent:
-                LOG.debug('Aborting evaluation of the event.')
+                LOG.warning(_LW('Event <%s> is invalid, aborting evaluation '
+                                'for it.'), e)
                 continue
 
             for id, alarm in six.iteritems(
