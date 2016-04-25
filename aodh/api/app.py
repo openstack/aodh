@@ -14,7 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import logging
 import os
 
 from oslo_config import cfg
@@ -92,7 +91,7 @@ def build_server(conf):
 
     LOG.info(_('Starting server in PID %s') % os.getpid())
     LOG.info(_("Configuration:"))
-    conf.log_opt_values(LOG, logging.INFO)
+    conf.log_opt_values(LOG, log.INFO)
 
     if host == '0.0.0.0':
         LOG.info(_(

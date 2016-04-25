@@ -14,8 +14,8 @@
 # under the License.
 
 import abc
-import logging
 
+from oslo_log import log
 import oslo_messaging
 from oslo_service import service as os_service
 from oslo_utils import netutils
@@ -26,7 +26,7 @@ from aodh.i18n import _
 from aodh import messaging
 
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)
