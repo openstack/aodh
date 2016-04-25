@@ -22,7 +22,7 @@ from oslo_utils import netutils
 import six
 from stevedore import extension
 
-from aodh.i18n import _
+from aodh.i18n import _LE
 from aodh import messaging
 
 
@@ -80,75 +80,6 @@ class AlarmNotifierService(os_service.Service):
         self.listener.wait()
         super(AlarmNotifierService, self).stop()
 
-    def notify_alarm(self, context, data):
-        process_alarm(self.notifiers, data)
-
-
-def _handle_action(notifiers, action, alarm_id, alarm_name, severity,
-                   previous, current, reason, reason_data):
-    """Process action on alarm
-
-    :param notifiers: list of possible notifiers.
-    :param action: The action that is being attended, as a parsed URL.
-    :param alarm_id: The triggered alarm.
-    :param alarm_name: The name of triggered alarm.
-    :param severity: The level of triggered alarm
-    :param previous: The previous state of the alarm.
-    :param current: The current state of the alarm.
-    :param reason: The reason the alarm changed its state.
-    :param reason_data: A dict representation of the reason.
-    """
-
-    try:
-        action = netutils.urlsplit(action)
-    except Exception:
-        LOG.error(
-            _("Unable to parse action %(action)s for alarm %(alarm_id)s"),
-            {'action': action, 'alarm_id': alarm_id})
-        return
-
-    try:
-        notifier = notifiers[action.scheme].obj
-    except KeyError:
-        scheme = action.scheme
-        LOG.error(
-            _("Action %(scheme)s for alarm %(alarm_id)s is unknown, "
-              "cannot notify"),
-            {'scheme': scheme, 'alarm_id': alarm_id})
-        return
-
-    try:
-        LOG.debug("Notifying alarm %(id)s with action %(act)s",
-                  {'id': alarm_id, 'act': action})
-        notifier.notify(action, alarm_id, alarm_name, severity,
-                        previous, current, reason, reason_data)
-    except Exception:
-        LOG.exception(_("Unable to notify alarm %s"), alarm_id)
-        return
-
-
-def process_alarm(notifiers, data):
-    """Notify that alarm has been triggered.
-
-    :param notifiers: list of possible notifiers
-    :param data: (dict): alarm data
-    """
-
-    actions = data.get('actions')
-    if not actions:
-        LOG.error(_("Unable to notify for an alarm with no action"))
-        return
-
-    for action in actions:
-        _handle_action(notifiers, action,
-                       data.get('alarm_id'),
-                       data.get('alarm_name'),
-                       data.get('severity'),
-                       data.get('previous'),
-                       data.get('current'),
-                       data.get('reason'),
-                       data.get('reason_data'))
-
 
 class AlarmEndpoint(object):
 
@@ -157,4 +88,70 @@ class AlarmEndpoint(object):
 
     def sample(self, ctxt, publisher_id, event_type, payload, metadata):
         """Endpoint for alarm notifications"""
-        process_alarm(self.notifiers, payload)
+        self._process_alarm(self.notifiers, payload)
+
+    @staticmethod
+    def _handle_action(notifiers, action, alarm_id, alarm_name, severity,
+                       previous, current, reason, reason_data):
+        """Process action on alarm
+
+        :param notifiers: list of possible notifiers.
+        :param action: The action that is being attended, as a parsed URL.
+        :param alarm_id: The triggered alarm.
+        :param alarm_name: The name of triggered alarm.
+        :param severity: The level of triggered alarm
+        :param previous: The previous state of the alarm.
+        :param current: The current state of the alarm.
+        :param reason: The reason the alarm changed its state.
+        :param reason_data: A dict representation of the reason.
+        """
+
+        try:
+            action = netutils.urlsplit(action)
+        except Exception:
+            LOG.error(
+                _LE("Unable to parse action %(action)s for alarm "
+                    "%(alarm_id)s"), {'action': action, 'alarm_id': alarm_id})
+            return
+
+        try:
+            notifier = notifiers[action.scheme].obj
+        except KeyError:
+            scheme = action.scheme
+            LOG.error(
+                _LE("Action %(scheme)s for alarm %(alarm_id)s is unknown, "
+                    "cannot notify"),
+                {'scheme': scheme, 'alarm_id': alarm_id})
+            return
+
+        try:
+            LOG.debug("Notifying alarm %(id)s with action %(act)s",
+                      {'id': alarm_id, 'act': action})
+            notifier.notify(action, alarm_id, alarm_name, severity,
+                            previous, current, reason, reason_data)
+        except Exception:
+            LOG.exception(_LE("Unable to notify alarm %s"), alarm_id)
+            return
+
+    @staticmethod
+    def _process_alarm(notifiers, data):
+        """Notify that alarm has been triggered.
+
+        :param notifiers: list of possible notifiers
+        :param data: (dict): alarm data
+        """
+
+        actions = data.get('actions')
+        if not actions:
+            LOG.error(_LE("Unable to notify for an alarm with no action"))
+            return
+
+        for action in actions:
+            AlarmEndpoint._handle_action(notifiers, action,
+                                         data.get('alarm_id'),
+                                         data.get('alarm_name'),
+                                         data.get('severity'),
+                                         data.get('previous'),
+                                         data.get('current'),
+                                         data.get('reason'),
+                                         data.get('reason_data'))
