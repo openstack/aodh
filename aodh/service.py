@@ -50,7 +50,7 @@ def prepare_service(argv=None, config_files=None):
     oslo_i18n.enable_lazy()
     log.register_options(conf)
     log_levels = (conf.default_log_levels +
-                  ['stevedore=INFO', 'keystoneclient=INFO'])
+                  ['futurist=INFO', 'keystoneclient=INFO'])
     log.set_defaults(default_log_levels=log_levels)
     defaults.set_cors_middleware_defaults()
     db_options.set_defaults(conf)
