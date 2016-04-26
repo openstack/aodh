@@ -41,6 +41,12 @@
      Logging is one of the alarm actions that is useful mostly for debugging,
      it stores the alarms in a log file.
 
+   zaqar
+     According to `Zaqar Developer Documentation`_:
+
+       Zaqar is a multi-tenant cloud messaging and notification service for web
+       and mobile developers.
+
    project
      The OpenStack tenant or project.
 
@@ -51,3 +57,4 @@
      An OpenStack user.
 
 .. [#] http://en.wikipedia.org/wiki/Ceilometer
+.. _Zaqar Developer Documentation: http://docs.openstack.org/developer/zaqar/

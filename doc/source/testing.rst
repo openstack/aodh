@@ -35,11 +35,7 @@ run through tox_.
    $ sudo yum install mongodb
    $ sudo yum install mariadb-devel.x86_64
 
-3. Install the test dependencies::
-
-   $ sudo pip install -e /opt/stack/aodh[test]
-
-4. Run the unit and code-style tests::
+3. Run the unit and code-style tests::
 
    $ cd /opt/stack/aodh
    $ tox -e py27,pep8
@@ -62,16 +58,16 @@ run through tox_.
    For reference, the ``debug`` tox environment implements the instructions
    here: https://wiki.openstack.org/wiki/Testr#Debugging_.28pdb.29_Tests
 
-5. There is a growing suite of tests which use a tool called `gabbi`_ to
+4. There is a growing suite of tests which use a tool called `gabbi`_ to
    test and validate the behavior of the Aodh API. These tests are run
-   when using the usual ``py27`` tox target but if desired they can be run by
-   themselves::
+   when using the usual ``functional`` tox target but if desired they can be
+   run by themselves::
 
    $ tox -e gabbi
 
    The YAML files used to drive the gabbi tests can be found in
-   ``aodh/tests/gabbi/gabbits``. If you are adding to or adjusting the
-   API you should consider adding tests here.
+   ``aodh/tests/functional/gabbi/gabbits``. If you are adding to or adjusting
+   the API you should consider adding tests here.
 
 .. _gabbi: https://gabbi.readthedocs.org/
 
