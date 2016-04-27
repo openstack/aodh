@@ -27,9 +27,10 @@ class MockToozCoordinator(object):
     def __init__(self, member_id, shared_storage):
         self._member_id = member_id
         self._groups = shared_storage
+        self.is_started = False
 
     def start(self):
-        pass
+        self.is_started = True
 
     def stop(self):
         pass
@@ -121,8 +122,7 @@ class TestPartitioning(base.BaseTestCase):
         with mock.patch('tooz.coordination.get_coordinator',
                         lambda _, member_id:
                         coordinator_cls(member_id, shared_storage)):
-            pc = coordination.PartitionCoordinator(
-                self.CONF.coordination.backend_url, agent_id)
+            pc = coordination.PartitionCoordinator(self.CONF, agent_id)
             pc.start()
             return pc
 
@@ -211,7 +211,7 @@ class TestPartitioning(base.BaseTestCase):
 
     def test_group_id_none(self):
         coord = self._get_new_started_coordinator({}, 'a')
-        self.assertTrue(coord._started)
+        self.assertTrue(coord._coordinator.is_started)
 
         with mock.patch.object(coord._coordinator, 'join_group') as mocked:
             coord.join_group(None)
@@ -222,9 +222,8 @@ class TestPartitioning(base.BaseTestCase):
 
     def test_stop(self):
         coord = self._get_new_started_coordinator({}, 'a')
-        self.assertTrue(coord._started)
+        self.assertTrue(coord._coordinator.is_started)
         coord.join_group("123")
         coord.stop()
         self.assertIsEmpty(coord._groups)
-        self.assertFalse(coord._started)
         self.assertIsNone(coord._coordinator)

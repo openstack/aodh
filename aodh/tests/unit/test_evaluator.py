@@ -94,7 +94,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
                             coordination_heartbeat=5)
 
     def test_evaluation_cycle(self):
-        alarm = mock.Mock(type='threshold')
+        alarm = mock.Mock(type='threshold', alarm_id="alarm_id1")
         self.storage_conn.get_alarms.return_value = [alarm]
         with mock.patch('aodh.storage.get_connection_from_config',
                         return_value=self.storage_conn):
@@ -104,7 +104,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
             self.svc._evaluate_assigned_alarms()
 
             p_coord_mock.extract_my_subset.assert_called_once_with(
-                self.svc.PARTITIONING_GROUP_NAME, [alarm])
+                self.svc.PARTITIONING_GROUP_NAME, ["alarm_id1"])
             self.threshold_eval.evaluate.assert_called_once_with(alarm)
 
     def test_evaluation_cycle_with_bad_alarm(self):

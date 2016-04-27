@@ -1,0 +1,6 @@
+---
+fixes:
+  - >
+    [`bug 1575530 <https://bugs.launchpad.net/aodh/+bug/1575530>`_]
+    Patch was added to fix and improve the partition coordinator, make sure
+    the input tasks can be correctly distributed to partition members.
