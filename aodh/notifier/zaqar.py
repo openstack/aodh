@@ -32,8 +32,6 @@ SERVICE_OPTS = [
                help='Message queue service type.'),
 ]
 
-cfg.CONF.register_opts(SERVICE_OPTS, group='service_types')
-
 
 class ZaqarAlarmNotifier(notifier.AlarmNotifier):
     """Zaqar notifier."""

@@ -25,6 +25,7 @@ import aodh.evaluator.gnocchi
 import aodh.event
 import aodh.keystone_client
 import aodh.notifier.rest
+import aodh.notifier.zaqar
 import aodh.service
 import aodh.storage
 
@@ -63,6 +64,7 @@ def list_opts():
         ('coordination', aodh.coordination.OPTS),
         ('database', aodh.storage.OPTS),
         ('service_credentials', aodh.keystone_client.OPTS),
+        ('service_types', aodh.notifier.zaqar.SERVICE_OPTS),
     ]
 
 
