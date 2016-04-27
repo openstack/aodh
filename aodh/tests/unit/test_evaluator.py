@@ -86,8 +86,8 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
     @mock.patch('aodh.storage.get_connection_from_config')
     @mock.patch('aodh.coordination.PartitionCoordinator')
     def test_evaluation_cycle(self, m_pc, m_conn, m_em):
-        alarm = mock.Mock(type='threshold')
-        m_pc.return_value.extract_my_subset.return_value = [alarm]
+        alarm = mock.Mock(type='threshold', alarm_id="alarm_id1")
+        m_pc.return_value.extract_my_subset.return_value = ["alarm_id1"]
         m_pc.return_value.is_active.return_value = False
         m_conn.return_value.get_alarms.return_value = [alarm]
         m_em.return_value = self.evaluators
@@ -100,7 +100,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
 
         target = self.svc.partition_coordinator.extract_my_subset
         target.assert_called_once_with(self.svc.PARTITIONING_GROUP_NAME,
-                                       [alarm])
+                                       ["alarm_id1"])
         self.threshold_eval.evaluate.assert_called_once_with(alarm)
 
     @mock.patch('stevedore.extension.ExtensionManager')

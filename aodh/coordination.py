@@ -19,10 +19,11 @@ import uuid
 
 from oslo_config import cfg
 from oslo_log import log
+import retrying
 import six
 import tooz.coordination
 
-from aodh.i18n import _LE, _LI
+from aodh.i18n import _LE, _LI, _LW
 
 LOG = log.getLogger(__name__)
 
@@ -40,9 +41,38 @@ OPTS = [
     cfg.FloatOpt('check_watchers',
                  default=10.0,
                  help='Number of seconds between checks to see if group '
-                      'membership has changed')
-
+                      'membership has changed'),
+    cfg.IntOpt('retry_backoff',
+               default=1,
+               help='Retry backoff factor when retrying to connect with'
+                    ' coordination backend'),
+    cfg.IntOpt('max_retry_interval',
+               default=30,
+               help='Maximum number of seconds between retry to join '
+                    'partitioning group')
 ]
+
+
+class ErrorJoiningPartitioningGroup(Exception):
+    def __init__(self):
+        super(ErrorJoiningPartitioningGroup, self).__init__(_LE(
+            'Error occurred when joining partitioning group'))
+
+
+class MemberNotInGroupError(Exception):
+    def __init__(self, group_id, members, my_id):
+        super(MemberNotInGroupError, self).__init__(_LE(
+            'Group ID: %{group_id}s, Members: %{members}s, Me: %{me}s: '
+            'Current agent is not part of group and cannot take tasks') %
+            {'group_id': group_id, 'members': members, 'me': my_id})
+
+
+def retry_on_error_joining_partition(exception):
+    return isinstance(exception, ErrorJoiningPartitioningGroup)
+
+
+def retry_on_member_not_in_group(exception):
+    return isinstance(exception, MemberNotInGroupError)
 
 
 class HashRing(object):
@@ -89,12 +119,12 @@ class PartitionCoordinator(object):
     empty iterable in this case.
     """
 
-    def __init__(self, backend_url, my_id=None):
-        self.backend_url = backend_url
+    def __init__(self, conf, my_id=None):
+        self.conf = conf
+        self.backend_url = self.conf.coordination.backend_url
         self._coordinator = None
         self._groups = set()
         self._my_id = my_id or str(uuid.uuid4())
-        self._started = False
 
     def start(self):
         if self.backend_url:
@@ -102,10 +132,8 @@ class PartitionCoordinator(object):
                 self._coordinator = tooz.coordination.get_coordinator(
                     self.backend_url, self._my_id)
                 self._coordinator.start()
-                self._started = True
                 LOG.info(_LI('Coordination backend started successfully.'))
             except tooz.coordination.ToozError:
-                self._started = False
                 LOG.exception(_LE('Error connecting to coordination backend.'))
 
     def stop(self):
@@ -121,14 +149,13 @@ class PartitionCoordinator(object):
             LOG.exception(_LE('Error connecting to coordination backend.'))
         finally:
             self._coordinator = None
-            self._started = False
 
     def is_active(self):
         return self._coordinator is not None
 
     def heartbeat(self):
         if self._coordinator:
-            if not self._started:
+            if not self._coordinator.is_started:
                 # re-connect
                 self.start()
             try:
@@ -147,14 +174,23 @@ class PartitionCoordinator(object):
             self._coordinator.run_watchers()
 
     def join_group(self, group_id):
-        if not self._coordinator or not self._started or not group_id:
+        if (not self._coordinator or not self._coordinator.is_started
+                or not group_id):
             return
-        while True:
+
+        retry_backoff = self.conf.coordination.retry_backoff * 1000
+        max_retry_interval = self.conf.coordination.max_retry_interval * 1000
+
+        @retrying.retry(
+            wait_exponential_multiplier=retry_backoff,
+            wait_exponential_max=max_retry_interval,
+            retry_on_exception=retry_on_error_joining_partition,
+            wrap_exception=True)
+        def _inner():
             try:
                 join_req = self._coordinator.join_group(group_id)
                 join_req.get()
                 LOG.info(_LI('Joined partitioning group %s'), group_id)
-                break
             except tooz.coordination.MemberAlreadyExist:
                 return
             except tooz.coordination.GroupNotCreated:
@@ -163,7 +199,14 @@ class PartitionCoordinator(object):
                     create_grp_req.get()
                 except tooz.coordination.GroupAlreadyExist:
                     pass
-        self._groups.add(group_id)
+                raise ErrorJoiningPartitioningGroup()
+            except tooz.coordination.ToozError:
+                LOG.exception(_LE('Error joining partitioning group %s,'
+                                  ' re-trying'), group_id)
+                raise ErrorJoiningPartitioningGroup()
+            self._groups.add(group_id)
+
+        return _inner()
 
     def leave_group(self, group_id):
         if group_id not in self._groups:
@@ -184,7 +227,9 @@ class PartitionCoordinator(object):
             except tooz.coordination.GroupNotCreated:
                 self.join_group(group_id)
 
-    def extract_my_subset(self, group_id, iterable):
+    @retrying.retry(stop_max_attempt_number=5, wait_random_max=2000,
+                    retry_on_exception=retry_on_member_not_in_group)
+    def extract_my_subset(self, group_id, universal_set):
         """Filters an iterable, returning only objects assigned to this agent.
 
         We have a list of objects and get a list of active group members from
@@ -192,17 +237,26 @@ class PartitionCoordinator(object):
         the ones that hashed into *our* bucket.
         """
         if not group_id:
-            return iterable
+            return universal_set
         if group_id not in self._groups:
             self.join_group(group_id)
         try:
             members = self._get_members(group_id)
-            LOG.debug('Members of group: %s', members)
+            LOG.debug('Members of group: %s, Me: %s', members, self._my_id)
+            if self._my_id not in members:
+                LOG.warning(_LW('Cannot extract tasks because agent failed to '
+                                'join group properly. Rejoining group.'))
+                self.join_group(group_id)
+                members = self._get_members(group_id)
+                if self._my_id not in members:
+                    raise MemberNotInGroupError(group_id, members, self._my_id)
+                LOG.debug('Members of group: %s, Me: %s', members, self._my_id)
             hr = HashRing(members)
-            filtered = [v for v in iterable
-                        if hr.get_node(str(v)) == self._my_id]
-            LOG.debug('My subset: %s', filtered)
-            return filtered
+            LOG.debug('Universal set: %s', universal_set)
+            my_subset = [v for v in universal_set
+                         if hr.get_node(str(v)) == self._my_id]
+            LOG.debug('My subset: %s', my_subset)
+            return my_subset
         except tooz.coordination.ToozError:
             LOG.exception(_LE('Error getting group membership info from '
                               'coordination backend.'))
