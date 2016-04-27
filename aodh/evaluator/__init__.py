@@ -186,8 +186,7 @@ class AlarmEvaluationService(os_service.Service):
         self.conf = conf
         self.storage_conn = None
         self._load_evaluators()
-        self.partition_coordinator = coordination.PartitionCoordinator(
-            conf.coordination.backend_url)
+        self.partition_coordinator = coordination.PartitionCoordinator(conf)
 
     @property
     def _storage_conn(self):
@@ -226,6 +225,7 @@ class AlarmEvaluationService(os_service.Service):
 
     def start(self):
         super(AlarmEvaluationService, self).start()
+
         self.partition_coordinator.start()
         self.partition_coordinator.join_group(self.PARTITIONING_GROUP_NAME)
 
@@ -252,5 +252,8 @@ class AlarmEvaluationService(os_service.Service):
         # those alarms.
         all_alarms = self._storage_conn.get_alarms(enabled=True,
                                                    exclude=dict(type='event'))
-        return self.partition_coordinator.extract_my_subset(
-            self.PARTITIONING_GROUP_NAME, all_alarms)
+        all_alarms = list(all_alarms)
+        all_alarm_ids = [a.alarm_id for a in all_alarms]
+        selected = self.partition_coordinator.extract_my_subset(
+            self.PARTITIONING_GROUP_NAME, all_alarm_ids)
+        return list(filter(lambda a: a.alarm_id in selected, all_alarms))
