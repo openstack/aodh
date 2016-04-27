@@ -44,11 +44,11 @@ class EventAlarmEvaluationService(service.Service):
     def __init__(self, conf):
         super(EventAlarmEvaluationService, self).__init__()
         self.conf = conf
-        self.storage_conn = storage.get_connection_from_config(self.conf)
-        self.evaluator = event.EventAlarmEvaluator(self.conf)
 
     def start(self):
         super(EventAlarmEvaluationService, self).start()
+        self.storage_conn = storage.get_connection_from_config(self.conf)
+        self.evaluator = event.EventAlarmEvaluator(self.conf)
         self.listener = messaging.get_notification_listener(
             messaging.get_transport(self.conf),
             [oslo_messaging.Target(topic=self.conf.event_alarm_topic)],
@@ -58,6 +58,7 @@ class EventAlarmEvaluationService(service.Service):
         self.tg.add_timer(604800, lambda: None)
 
     def stop(self):
-        self.listener.stop()
-        self.listener.wait()
+        if getattr(self, 'listener', None):
+            self.listener.stop()
+            self.listener.wait()
         super(EventAlarmEvaluationService, self).stop()

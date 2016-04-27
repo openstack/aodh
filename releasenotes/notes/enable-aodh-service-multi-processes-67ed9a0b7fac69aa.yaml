@@ -1,0 +1,7 @@
+---
+features:
+  - Enable aodh services, including aodh-evalutor, aodh-listener and
+    aodh-notifier to run in multiple worker mode.
+
+    New options are introduced corresponsively as [evaluator]workers,
+    [listener]workers and [notifier]workers. They all default to 1.

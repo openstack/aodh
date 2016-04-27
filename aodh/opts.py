@@ -62,6 +62,9 @@ def list_opts():
              ])),
         ('coordination', aodh.coordination.OPTS),
         ('database', aodh.storage.OPTS),
+        ('evaluator', aodh.service.EVALUATOR_OPTS),
+        ('listener', aodh.service.LISTENER_OPTS),
+        ('notifier', aodh.service.NOTIFIER_OPTS),
         ('service_credentials', aodh.keystone_client.OPTS),
     ]
 
