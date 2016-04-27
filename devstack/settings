@@ -10,7 +10,6 @@ enable_service aodh-listener
 AODH_DIR=$DEST/aodh
 AODH_CONF_DIR=/etc/aodh
 AODH_CONF=$AODH_CONF_DIR/aodh.conf
-AODH_API_LOG_DIR=/var/log/aodh-api
 AODH_AUTH_CACHE_DIR=${AODH_AUTH_CACHE_DIR:-/var/cache/aodh}
 AODH_WSGI_DIR=${AODH_WSGI_DIR:-/var/www/aodh}
 

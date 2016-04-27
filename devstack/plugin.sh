@@ -293,7 +293,7 @@ function install_aodh {
     _aodh_prepare_storage_backend
     install_aodhclient
     sudo -H pip install -e "$AODH_DIR"[test,$AODH_BACKEND]
-    sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR $AODH_API_LOG_DIR
+    sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR
 
     if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
         install_apache_wsgi
@@ -323,7 +323,7 @@ function start_aodh {
     elif [ "$AODH_DEPLOY" == "uwsgi" ]; then
         run_process aodh-api "$AODH_BIN_DIR/uwsgi $AODH_UWSGI_FILE"
     else
-        run_process aodh-api "$AODH_BIN_DIR/aodh-api -d -v --log-dir=$AODH_API_LOG_DIR --config-file $AODH_CONF"
+        run_process aodh-api "$AODH_BIN_DIR/aodh-api -d -v --config-file $AODH_CONF"
     fi
 
     # Only die on API if it was actually intended to be turned on
