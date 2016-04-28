@@ -15,12 +15,9 @@
 # under the License.
 
 import os
-import random
 import subprocess
-import time
 
 from oslo_utils import fileutils
-import requests
 import six
 
 from aodh.tests import base
@@ -79,88 +76,6 @@ class BinTestCase(base.BaseTestCase):
         if six.PY3:
             msg = msg.encode('utf-8')
         self.assertIn(msg, err)
-
-
-class BinApiTestCase(base.BaseTestCase):
-
-    def setUp(self):
-        super(BinApiTestCase, self).setUp()
-        # create api_paste.ini file without authentication
-        content = ("[pipeline:main]\n"
-                   "pipeline = api-server\n"
-                   "[app:api-server]\n"
-                   "paste.app_factory = aodh.api.app:app_factory\n")
-        if six.PY3:
-            content = content.encode('utf-8')
-        self.paste = fileutils.write_to_tempfile(content=content,
-                                                 prefix='api_paste',
-                                                 suffix='.ini')
-
-        # create aodh.conf file
-        self.api_port = random.randint(10000, 11000)
-        self.pipeline_cfg_file = self.path_get('etc/aodh/pipeline.yaml')
-        self.policy_file = self.path_get('aodh/tests/open-policy.json')
-
-    def tearDown(self):
-        super(BinApiTestCase, self).tearDown()
-        try:
-            self.subp.kill()
-            self.subp.wait()
-        except OSError:
-            pass
-        os.remove(self.tempfile)
-
-    def get_response(self, path):
-        url = 'http://%s:%d/%s' % ('127.0.0.1', self.api_port, path)
-
-        for x in range(10):
-            try:
-                r = requests.get(url)
-            except requests.exceptions.ConnectionError:
-                time.sleep(.5)
-                self.assertIsNone(self.subp.poll())
-            else:
-                return r
-        return None
-
-    def run_api(self, content, err_pipe=None):
-        if six.PY3:
-            content = content.encode('utf-8')
-
-        self.tempfile = fileutils.write_to_tempfile(content=content,
-                                                    prefix='aodh',
-                                                    suffix='.conf')
-        if err_pipe:
-            return subprocess.Popen(['aodh-api',
-                                    "--config-file=%s" % self.tempfile],
-                                    stderr=subprocess.PIPE)
-        else:
-            return subprocess.Popen(['aodh-api',
-                                    "--config-file=%s" % self.tempfile])
-
-    def test_v2(self):
-        content = ("[DEFAULT]\n"
-                   "rpc_backend=fake\n"
-                   "auth_strategy=noauth\n"
-                   "debug=true\n"
-                   "pipeline_cfg_file={0}\n"
-                   "[api]\n"
-                   "paste_config={2}\n"
-                   "port={3}\n"
-                   "[oslo_policy]\n"
-                   "policy_file={1}\n"
-                   "[database]\n"
-                   "connection=log://localhost\n".
-                   format(self.pipeline_cfg_file,
-                          self.policy_file,
-                          self.paste,
-                          self.api_port))
-
-        self.subp = self.run_api(content)
-
-        response = self.get_response('v2/alarms')
-        self.assertEqual(200, response.status_code)
-        self.assertEqual([], response.json())
 
 
 class BinEvaluatorTestCase(base.BaseTestCase):
