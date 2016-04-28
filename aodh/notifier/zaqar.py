@@ -45,7 +45,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
         try:
             ks_client = keystone_client.get_client(self.conf)
             return ks_client.service_catalog.url_for(
-                service_type=cfg.CONF.service_types.zaqar,
+                service_type=self.conf.service_types.zaqar,
                 endpoint_type=self.conf.service_credentials.os_endpoint_type)
         except Exception:
             LOG.error(_LE("Aodh was configured to use zaqar:// action,"
