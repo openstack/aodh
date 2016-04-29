@@ -187,10 +187,6 @@ class AlarmEvaluationService(os_service.Service):
     def __init__(self, conf):
         super(AlarmEvaluationService, self).__init__()
         self.conf = conf
-        self.storage_conn = None
-        self._load_evaluators()
-        self.partition_coordinator = coordination.PartitionCoordinator(
-            conf.coordination.backend_url)
 
     @property
     def _storage_conn(self):
@@ -229,6 +225,12 @@ class AlarmEvaluationService(os_service.Service):
 
     def start(self):
         super(AlarmEvaluationService, self).start()
+
+        self.storage_conn = None
+        self._load_evaluators()
+        self.partition_coordinator = coordination.PartitionCoordinator(
+            self.conf.coordination.backend_url)
+
         self.partition_coordinator.start()
         self.partition_coordinator.join_group(self.PARTITIONING_GROUP_NAME)
 
@@ -268,9 +270,11 @@ class AlarmEvaluationService(os_service.Service):
         self.tg.add_timer(604800, lambda: None)
 
     def stop(self):
-        self.periodic.stop()
-        self.periodic.wait()
-        self.partition_coordinator.stop()
+        if getattr(self, 'periodic', None):
+            self.periodic.stop()
+            self.periodic.wait()
+        if getattr(self, 'partition_coordinator', None):
+            self.partition_coordinator.stop()
         super(AlarmEvaluationService, self).stop()
 
     def _assigned_alarms(self):

@@ -58,26 +58,28 @@ class AlarmNotifierService(os_service.Service):
 
     def __init__(self, conf):
         super(AlarmNotifierService, self).__init__()
-        transport = messaging.get_transport(conf)
-        self.notifiers = extension.ExtensionManager(
-            self.NOTIFIER_EXTENSIONS_NAMESPACE,
-            invoke_on_load=True,
-            invoke_args=(conf,))
-
-        target = oslo_messaging.Target(topic=conf.notifier_topic)
-        self.listener = messaging.get_notification_listener(
-            transport, [target],
-            [AlarmEndpoint(self.notifiers)])
+        self.conf = conf
 
     def start(self):
         super(AlarmNotifierService, self).start()
+        transport = messaging.get_transport(self.conf)
+        self.notifiers = extension.ExtensionManager(
+            self.NOTIFIER_EXTENSIONS_NAMESPACE,
+            invoke_on_load=True,
+            invoke_args=(self.conf,))
+
+        target = oslo_messaging.Target(topic=self.conf.notifier_topic)
+        self.listener = messaging.get_notification_listener(
+            transport, [target],
+            [AlarmEndpoint(self.notifiers)])
         self.listener.start()
         # Add a dummy thread to have wait() working
         self.tg.add_timer(604800, lambda: None)
 
     def stop(self):
-        self.listener.stop()
-        self.listener.wait()
+        if getattr(self, 'listener', None):
+            self.listener.stop()
+            self.listener.wait()
         super(AlarmNotifierService, self).stop()
 
 

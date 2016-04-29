@@ -25,14 +25,17 @@ from aodh import service
 
 def notifier():
     conf = service.prepare_service()
-    os_service.launch(conf, notifier_svc.AlarmNotifierService(conf)).wait()
+    os_service.launch(conf, notifier_svc.AlarmNotifierService(conf),
+                      workers=conf.notifier.workers).wait()
 
 
 def evaluator():
     conf = service.prepare_service()
-    os_service.launch(conf, evaluator_svc.AlarmEvaluationService(conf)).wait()
+    os_service.launch(conf, evaluator_svc.AlarmEvaluationService(conf),
+                      workers=conf.evaluator.workers).wait()
 
 
 def listener():
     conf = service.prepare_service()
-    os_service.launch(conf, event_svc.EventAlarmEvaluationService(conf)).wait()
+    os_service.launch(conf, event_svc.EventAlarmEvaluationService(conf),
+                      workers=conf.listener.workers).wait()

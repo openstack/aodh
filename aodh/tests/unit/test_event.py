@@ -30,21 +30,23 @@ class TestEventAlarmEvaluationService(tests_base.BaseTestCase):
 
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
-        self.storage_conn = mock.MagicMock()
         self.setup_messaging(self.CONF)
-        with mock.patch('aodh.storage.get_connection_from_config',
-                        return_value=self.storage_conn):
-            self.service = event.EventAlarmEvaluationService(self.CONF)
+        self.service = event.EventAlarmEvaluationService(self.CONF)
 
+    @mock.patch('aodh.storage.get_connection_from_config',
+                mock.MagicMock())
     def test_start_and_stop_service(self):
+        self.addCleanup(self.service.stop)
         self.service.start()
         self.assertIsInstance(self.service.listener,
                               server.MessageHandlingServer)
-        self.service.stop()
 
+    @mock.patch('aodh.storage.get_connection_from_config',
+                mock.MagicMock())
     def test_listener_start_called(self):
         listener = mock.Mock()
         with mock.patch('aodh.messaging.get_notification_listener',
                         return_value=listener):
+            self.addCleanup(self.service.stop)
             self.service.start()
         self.assertTrue(listener.start.called)

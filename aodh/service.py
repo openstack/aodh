@@ -45,6 +45,30 @@ OPTS = [
                ' collection of underlying meters.'),
 ]
 
+EVALUATOR_OPTS = [
+    cfg.IntOpt('workers',
+               default=1,
+               min=1,
+               help='Number of workers for evaluator service. '
+               'default value is 1.')
+]
+
+NOTIFIER_OPTS = [
+    cfg.IntOpt('workers',
+               default=1,
+               min=1,
+               help='Number of workers for notifier service. '
+               'default value is 1.')
+]
+
+LISTENER_OPTS = [
+    cfg.IntOpt('workers',
+               default=1,
+               min=1,
+               help='Number of workers for evaluator service. '
+                    'default value is 1.')
+]
+
 
 def prepare_service(argv=None, config_files=None):
     conf = cfg.ConfigOpts()
