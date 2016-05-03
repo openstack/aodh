@@ -22,7 +22,7 @@ from oslo_serialization import jsonutils
 import requests
 import six.moves.urllib.parse as urlparse
 
-from aodh.i18n import _
+from aodh.i18n import _LI
 from aodh import notifier
 
 LOG = log.getLogger(__name__)
@@ -63,7 +63,7 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
             headers['x-openstack-request-id'] = b'req-' + str(
                 uuid.uuid4()).encode('ascii')
 
-        LOG.info(_(
+        LOG.info(_LI(
             "Notifying alarm %(alarm_name)s %(alarm_id)s with severity"
             " %(severity)s from %(previous)s to %(current)s with action "
             "%(action)s because %(reason)s. request-id: %(request_id)s ") %
@@ -99,4 +99,8 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
         session = requests.Session()
         session.mount(action.geturl(),
                       requests.adapters.HTTPAdapter(max_retries=max_retries))
-        session.post(action.geturl(), **kwargs)
+        resp = session.post(action.geturl(), **kwargs)
+        LOG.info(_LI('Notifying alarm <%(id)s> gets response: %(status_code)s '
+                     '%(reason)s.'), {'id': alarm_id,
+                                      'status_code': resp.status_code,
+                                      'reason': resp.reason})
