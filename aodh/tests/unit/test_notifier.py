@@ -105,7 +105,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         notification['actions'] = [action]
         return notification
 
-    def test_notify_alarm_rest_action_ok(self):
+    @mock.patch('aodh.notifier.rest.LOG')
+    def test_notify_alarm_rest_action_ok(self, m_log):
         action = 'http://host/action'
 
         with mock.patch.object(requests.Session, 'post') as poster:
@@ -124,6 +125,11 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                 },
                 kwargs['headers'])
             self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+            self.assertEqual(2, len(m_log.info.call_args_list))
+            expected = mock.call('Notifying alarm <%(id)s> gets response: '
+                                 '%(status_code)s %(reason)s.',
+                                 mock.ANY)
+            self.assertEqual(expected, m_log.info.call_args_list[1])
 
     def test_notify_alarm_rest_action_with_ssl_client_cert(self):
         action = 'https://host/action'
