@@ -65,7 +65,7 @@ LISTENER_OPTS = [
     cfg.IntOpt('workers',
                default=1,
                min=1,
-               help='Number of workers for evaluator service. '
+               help='Number of workers for listener service. '
                     'default value is 1.')
 ]
 
