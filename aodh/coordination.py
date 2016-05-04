@@ -164,15 +164,6 @@ class PartitionCoordinator(object):
                 LOG.exception(_LE('Error sending a heartbeat to coordination '
                                   'backend.'))
 
-    def watch_group(self, namespace, callback):
-        if self._coordinator:
-            self._coordinator.watch_join_group(namespace, callback)
-            self._coordinator.watch_leave_group(namespace, callback)
-
-    def run_watchers(self):
-        if self._coordinator:
-            self._coordinator.run_watchers()
-
     def join_group(self, group_id):
         if (not self._coordinator or not self._coordinator.is_started
                 or not group_id):
