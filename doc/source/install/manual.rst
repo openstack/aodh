@@ -34,12 +34,29 @@ Aodh data.
 ..
 
 
+SQLalchemy-supported DBs
+------------------------
+
+   The recommended Aodh storage backend is any SQLAlchemy-supported
+   database (`PostgreSQL` or `MySQL`).
+
+   In case of SQL-based database backends, you need to create a `aodh`
+   database first and then initialise it by running::
+
+    aodh-dbsync
+
+   To use MySQL as the storage backend, change the 'database' section in
+   aodh.conf as follows::
+
+    [database]
+    connection = mysql+pymysql://username:password@host/aodh?charset=utf8
+
+
 MongoDB
 -------
 
-   The recommended Aodh storage backend is `MongoDB`. Follow the
-   instructions to install the MongoDB_ package for your operating system, then
-   start the service. The required minimum version of MongoDB is 2.4.
+   Follow the instructions to install the MongoDB_ package for your operating
+   system, then start the service. The required minimum version of MongoDB is 2.4.
 
    To use MongoDB as the storage backend, change the 'database' section in
    aodh.conf as follows::
@@ -53,23 +70,6 @@ MongoDB
     [database]
     connection = mongodb://username:password@host:27017/aodh?replicaSet=foobar
 
-
-SQLalchemy-supported DBs
-------------------------
-
-   You may alternatively use `MySQL` (or any other SQLAlchemy-supported DB
-   like `PostgreSQL`).
-
-   In case of SQL-based database backends, you need to create a `aodh`
-   database first and then initialise it by running::
-
-    aodh-dbsync
-
-   To use MySQL as the storage backend, change the 'database' section in
-   aodh.conf as follows::
-
-    [database]
-    connection = mysql+pymysql://username:password@host/aodh?charset=utf8
 
 HBase
 -----
