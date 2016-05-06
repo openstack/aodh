@@ -19,6 +19,7 @@ import six
 import uuid
 
 import mock
+from oslo_serialization import jsonutils
 from oslo_utils import timeutils
 
 from aodh import evaluator
@@ -122,9 +123,12 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
                 alarm = n['alarm']
                 event = n['event']
                 previous = n.get('previous', evaluator.UNKNOWN)
-                reason = ('Event (message_id=%(e)s) hit the query of alarm '
-                          '(id=%(a)s)' %
-                          {'e': event['message_id'], 'a': alarm.alarm_id})
+                reason = ('Event <id=%(e)s,event_type=%(type)s> hits the '
+                          'query <query=%(query)s>.') % {
+                    'e': event['message_id'],
+                    'type': event['event_type'],
+                    'query': jsonutils.dumps(alarm.rule['query'],
+                                             sort_keys=True)}
                 data = {'type': 'event', 'event': event}
                 expected = dict(alarm_id=alarm.alarm_id,
                                 state=evaluator.ALARM,
