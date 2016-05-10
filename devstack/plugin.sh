@@ -218,6 +218,7 @@ function configure_aodh {
     iniset $AODH_CONF oslo_policy policy_file $AODH_CONF_DIR/policy.json
 
     cp $AODH_DIR/etc/aodh/api_paste.ini $AODH_CONF_DIR
+    cp $AODH_DIR/etc/aodh/aodh-config-generator.conf $AODH_CONF_DIR
 
     # The alarm evaluator needs these options to call gnocchi/ceilometer APIs
     iniset $AODH_CONF service_credentials auth_type password
