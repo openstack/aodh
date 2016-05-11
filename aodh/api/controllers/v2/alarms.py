@@ -592,15 +592,6 @@ class AlarmController(rest.RestController):
         else:
             data.state_timestamp = alarm_in.state_timestamp
 
-        # make sure alarms are unique by name per project.
-        if alarm_in.name != data.name:
-            alarms = list(pecan.request.storage.get_alarms(
-                name=data.name, project=data.project_id))
-            if alarms:
-                raise base.ClientSideError(
-                    _("Alarm with name='%s' exists") % data.name,
-                    status_code=409)
-
         ALARMS_RULES[data.type].plugin.update_hook(data)
 
         old_data = Alarm.from_db_model(alarm_in)
@@ -763,13 +754,6 @@ class AlarmsController(rest.RestController):
         change = data.as_dict(models.Alarm)
 
         data.update_actions()
-        # make sure alarms are unique by name per project.
-        alarms = list(conn.get_alarms(name=data.name,
-                                      project=data.project_id))
-        if alarms:
-            raise base.ClientSideError(
-                _("Alarm with name='%s' exists") % data.name,
-                status_code=409)
 
         try:
             alarm_in = models.Alarm(**change)

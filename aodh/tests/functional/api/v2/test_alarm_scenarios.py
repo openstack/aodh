@@ -816,10 +816,10 @@ class TestAlarms(TestAlarmsBase):
         else:
             self.fail("Alarm not found")
 
-    def test_post_conflict(self):
+    def test_post_alarm_with_same_name(self):
         json = {
             'enabled': False,
-            'name': 'added_alarm',
+            'name': 'dup_alarm_name',
             'state': 'ok',
             'type': 'threshold',
             'ok_actions': ['http://something/ok'],
@@ -840,10 +840,17 @@ class TestAlarms(TestAlarmsBase):
             }
         }
 
-        self.post_json('/alarms', params=json, status=201,
-                       headers=self.auth_headers)
-        self.post_json('/alarms', params=json, status=409,
-                       headers=self.auth_headers)
+        resp1 = self.post_json('/alarms', params=json, status=201,
+                               headers=self.auth_headers)
+        resp2 = self.post_json('/alarms', params=json, status=201,
+                               headers=self.auth_headers)
+        self.assertEqual(resp1.json['name'], resp2.json['name'])
+        self.assertNotEqual(resp1.json['alarm_id'], resp2.json['alarm_id'])
+        alarms = self.get_json('/alarms',
+                               headers=self.auth_headers,
+                               q=[{'field': 'name',
+                                   'value': 'dup_alarm_name'}])
+        self.assertEqual(2, len(alarms))
 
     def _do_test_post_alarm(self, exclude_outliers=None):
         json = {
@@ -1521,12 +1528,9 @@ class TestAlarms(TestAlarmsBase):
         alarm_id = data[0]['alarm_id']
 
         resp = self.put_json('/alarms/%s' % alarm_id,
-                             expect_errors=True, status=409,
                              params=json,
                              headers=self.auth_headers)
-        self.assertEqual(
-            "Alarm with name='name1' exists",
-            resp.json['error_message']['faultstring'])
+        self.assertEqual(200, resp.status_code)
 
     def test_put_invalid_alarm_actions(self):
         json = {
