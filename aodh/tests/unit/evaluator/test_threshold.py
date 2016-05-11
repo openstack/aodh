@@ -302,6 +302,22 @@ class TestEvaluate(base.TestEvaluatorBase):
         expected = [mock.call(self.alarms[1], 'ok', reason, reason_datas)]
         self.assertEqual(expected, self.notifier.notify.call_args_list)
 
+    def test_equivocal_from_known_state_and_non_repeat_actions(self):
+        self._set_all_alarms('ok')
+        self.alarms[1].repeat_actions = False
+        avgs = [self._get_stat('avg',
+                               self.alarms[0].rule['threshold'] + v)
+                for v in moves.xrange(5)]
+        maxs = [self._get_stat('max',
+                               self.alarms[1].rule['threshold'] - v)
+                for v in moves.xrange(-1, 3)]
+        self.api_client.statistics.list.side_effect = [avgs, maxs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        self.assertEqual([],
+                         self.storage_conn.update_alarm.call_args_list)
+        self.assertEqual([], self.notifier.notify.call_args_list)
+
     def test_unequivocal_from_known_state_and_repeat_actions(self):
         self._set_all_alarms('alarm')
         self.alarms[1].repeat_actions = True
