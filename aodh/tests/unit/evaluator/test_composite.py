@@ -405,3 +405,17 @@ class TestEvaluate(base.TestEvaluatorBase):
                                   (2, self.sub_rule2),
                                   (3, self.sub_rule3)), False))
         self.assertEqual(expected, self.notifier.notify.call_args)
+
+    def test_known_state_with_sub_rules_trending_state_and_not_repeat(self):
+        alarm = self.alarms[2]
+        alarm.state = 'ok'
+        maxs = [self._get_stats('max', self.sub_rule2['threshold'] + 0.01 * v)
+                for v in moves.xrange(-1, 4)]
+        avgs = [self._get_stats('avg', self.sub_rule3['threshold'] + 0.01 * v)
+                for v in moves.xrange(-1, 3)]
+        avgs2 = [self._get_stats('avg', self.sub_rule1['threshold'] - 0.01 * v)
+                 for v in moves.xrange(1, 6)]
+        self.api_client.statistics.list.side_effect = [avgs2, maxs, avgs]
+        self.evaluator.evaluate(alarm)
+        self.assertEqual('ok', alarm.state)
+        self.assertEqual([], self.notifier.notify.mock_calls)

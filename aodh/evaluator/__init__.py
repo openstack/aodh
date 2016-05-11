@@ -30,7 +30,7 @@ import uuid
 
 import aodh
 from aodh import coordination
-from aodh.i18n import _
+from aodh.i18n import _, _LW
 from aodh import keystone_client
 from aodh import messaging
 from aodh import queue
@@ -119,10 +119,17 @@ class Evaluator(object):
                            '%(reason)s') % {'id': alarm.alarm_id,
                                             'state': state,
                                             'reason': reason})
-
-                self._storage_conn.update_alarm(alarm)
-                self._record_change(alarm)
-            self.notifier.notify(alarm, previous, reason, reason_data)
+                try:
+                    self._storage_conn.update_alarm(alarm)
+                except storage.AlarmNotFound:
+                    LOG.warning(_LW("Skip updating this alarm's state, the"
+                                    "alarm: %s has been deleted"),
+                                alarm.alarm_id)
+                else:
+                    self._record_change(alarm)
+                self.notifier.notify(alarm, previous, reason, reason_data)
+            elif alarm.repeat_actions:
+                self.notifier.notify(alarm, previous, reason, reason_data)
         except Exception:
             # retry will occur naturally on the next evaluation
             # cycle (unless alarm state reverts in the meantime)
