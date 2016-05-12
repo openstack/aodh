@@ -125,7 +125,9 @@ class Evaluator(object):
                                 alarm.alarm_id)
                 else:
                     self._record_change(alarm)
-            self.notifier.notify(alarm, previous, reason, reason_data)
+                self.notifier.notify(alarm, previous, reason, reason_data)
+            elif alarm.repeat_actions:
+                self.notifier.notify(alarm, previous, reason, reason_data)
         except Exception:
             # retry will occur naturally on the next evaluation
             # cycle (unless alarm state reverts in the meantime)
