@@ -18,23 +18,6 @@
 Configuration
 =============
 
-Configure Aodh by editing `/etc/aodh/aodh.conf`.
-
-No config file is provided with the source code, but one can be easily created
-by running:
-
-::
-
-    tox -e genconfig
-
-This command will create an `etc/aodh/aodh.conf` file which can be used as a
-base for the default configuration file at `/etc/aodh/aodh.conf`.
-
-For the list and description of configuration options that can be set for Aodh in
-order to set up the services please see the
-`Telemetry section <http://docs.openstack.org/trunk/config-reference/content/ch_configuring-openstack-telemetry.html>`_
-in the OpenStack Manuals Configuration Reference.
-
 HBase
 ===================
 
@@ -74,3 +57,29 @@ To find out more about supported storage backends please take a look on the
     services.
 
 .. _Apache: https://hbase.apache.org/book/quickstart.html
+
+
+Aodh Sample Configuration File
+==============================
+
+Configure Aodh by editing /etc/aodh/aodh.conf.
+
+No config file is provided with the source code, it will be created during
+the installation. In case where no configuration file was installed, one
+can be easily created by running::
+
+    oslo-config-generator --config-file=/etc/aodh/aodh-config-generator.conf \
+        --output-file=/etc/aodh/aodh.conf
+
+The following is a sample Aodh configuration for adaptation and use. It is
+auto-generated from Aodh when this documentation is built, and can also be
+viewed in `file form <_static/aodh.conf.sample>`_.
+
+.. note::
+
+    As a developer, with full development tools, you can create a sample
+    configuration file from any branch or commit. Just checkout to that
+    branch or commit, run ``tox -e genconfig``, then `etc/aodh/aodh.conf`
+    will be generated.
+
+.. literalinclude:: _static/aodh.conf.sample
