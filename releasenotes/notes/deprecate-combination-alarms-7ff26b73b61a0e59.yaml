@@ -1,0 +1,7 @@
+---
+deprecations:
+  - The combination alarms are officially deprecated and disabled by default.
+    Set api.enable_combination_alarms to True to enable them.
+    Existing alarms will still be evaluated, but access to them via the API is
+    linked to whether that configuration option is turned on or off.
+    It's advised to use composite alarms instead.
