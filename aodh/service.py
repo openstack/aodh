@@ -14,8 +14,6 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import socket
-
 from keystoneauth1 import loading as ka_loading
 from oslo_config import cfg
 from oslo_db import options as db_options
@@ -29,11 +27,6 @@ from aodh import messaging
 
 
 OPTS = [
-    cfg.StrOpt('host',
-               default=socket.gethostname(),
-               help='Name of this node, which must be valid in an AMQP '
-               'key. Can be an opaque identifier. For ZeroMQ only, must '
-               'be a valid host name, FQDN, or IP address.'),
     cfg.IntOpt('http_timeout',
                default=600,
                help='Timeout seconds for HTTP requests. Set it to None to '
