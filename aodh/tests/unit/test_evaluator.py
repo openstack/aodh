@@ -62,8 +62,8 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         with mock.patch('aodh.coordination.PartitionCoordinator') as m_pc:
             m_pc.return_value.is_active.return_value = coordination_active
 
-            self.addCleanup(self.svc.stop)
             self.svc.start()
+            self.svc.stop()
 
         self.svc.partition_coordinator.start.assert_called_once_with()
         self.svc.partition_coordinator.join_group.assert_called_once_with(
@@ -137,9 +137,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
                                return_value=alarms):
             self.addCleanup(self.svc.stop)
             self.svc.start()
-
             time.sleep(1)
-
             self.threshold_eval.evaluate.assert_called_once_with(alarms[1])
 
     @mock.patch('stevedore.extension.ExtensionManager')
@@ -151,7 +149,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         m_pc.return_value.is_active.return_value = False
         m_em.return_value = self.evaluators
 
-        self.addCleanup(self.svc.start)
+        self.addCleanup(self.svc.stop)
         self.svc.start()
 
         time.sleep(1)
