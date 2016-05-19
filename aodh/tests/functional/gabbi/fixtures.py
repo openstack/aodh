@@ -42,10 +42,8 @@ class ConfigFixture(fixture.GabbiFixture):
 
         # Determine the database connection.
         db_url = os.environ.get(
-            'AODH_TEST_STORAGE_URL',
-            os.environ.get(
-                "OVERTEST_URL", 'sqlite://').replace(
-                    "mysql://", "mysql+pymysql://"))
+            'AODH_TEST_STORAGE_URL', "").replace(
+                "mysql://", "mysql+pymysql://")
         if not db_url:
             raise case.SkipTest('No database connection configured')
 
@@ -78,9 +76,11 @@ class ConfigFixture(fixture.GabbiFixture):
         conf.set_override('pecan_debug', True, group='api',
                           enforce_type=True)
 
-        parsed_url = list(urlparse.urlparse(db_url))
-        parsed_url[2] += '-%s' % str(uuid.uuid4()).replace('-', '')
-        db_url = urlparse.urlunparse(parsed_url)
+        parsed_url = urlparse.urlparse(db_url)
+        if parsed_url.scheme != 'sqlite':
+            parsed_url = list(parsed_url)
+            parsed_url[2] += '-%s' % str(uuid.uuid4()).replace('-', '')
+            db_url = urlparse.urlunparse(parsed_url)
 
         conf.set_override('connection', db_url, group='database',
                           enforce_type=True)

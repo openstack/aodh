@@ -132,9 +132,8 @@ class TestBase(test_base.BaseTestCase):
         super(TestBase, self).setUp()
         db_url = os.environ.get(
             'AODH_TEST_STORAGE_URL',
-            os.environ.get(
-                "OVERTEST_URL", 'sqlite://').replace(
-                    "mysql://", "mysql+pymysql://"))
+            'sqlite://').replace(
+                "mysql://", "mysql+pymysql://")
         engine = urlparse.urlparse(db_url).scheme
         # In case some drivers have additional specification, for example:
         # PyMySQL will have scheme mysql+pymysql.
