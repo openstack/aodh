@@ -11,6 +11,7 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -94,6 +95,7 @@ class TelemetryAlarmingAPITest(base.BaseAlarmingTest):
         self.assertEqual(new_state, state.data)
 
     @test.idempotent_id('08d7e45a-1344-4e5c-ba6f-f6cbb77f55ba')
+    @decorators.skip_because(bug='1585267')
     def test_create_delete_alarm_with_combination_rule(self):
         rule = {"alarm_ids": self.alarm_ids,
                 "operator": "or"}
