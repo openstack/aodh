@@ -34,4 +34,11 @@ OPTS = [
     cfg.BoolOpt('pecan_debug',
                 default=False,
                 help='Toggle Pecan Debug Middleware.'),
+    cfg.BoolOpt('enable_combination_alarms',
+                default=False,
+                help="Enable deprecated combination alarms.",
+                deprecated_for_removal=True,
+                deprecated_reason="Combination alarms are deprecated. "
+                "This option and combination alarms will be "
+                "removed in Aodh 5.0."),
 ]

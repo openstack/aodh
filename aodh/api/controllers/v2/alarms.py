@@ -289,6 +289,10 @@ class Alarm(base.Base):
 
     @staticmethod
     def check_rule(alarm):
+        if (not pecan.request.cfg.api.enable_combination_alarms
+           and alarm.type == 'combination'):
+            raise base.ClientSideError("Unavailable alarm type")
+
         rule = '%s_rule' % alarm.type
         if getattr(alarm, rule) in (wtypes.Unset, None):
             error = _("%(rule)s must be set for %(type)s"

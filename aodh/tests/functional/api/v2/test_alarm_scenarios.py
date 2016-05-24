@@ -1184,7 +1184,7 @@ class TestAlarms(TestAlarmsBase):
             'enabled': False,
             'name': 'added_alarm',
             'state': 'ok',
-            'type': 'combination',
+            'type': 'gnocchi_resources_threshold',
             'ok_actions': ['http://something/ok'],
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
@@ -1206,15 +1206,25 @@ class TestAlarms(TestAlarmsBase):
                               expect_errors=True, status=400,
                               headers=self.auth_headers)
         self.assertEqual(
-            "combination_rule must be set for combination type alarm",
+            "gnocchi_resources_threshold_rule must "
+            "be set for gnocchi_resources_threshold type alarm",
             resp.json['error_message']['faultstring'])
 
     def test_post_alarm_with_duplicate_actions(self):
         body = {
             'name': 'dup-alarm-actions',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': ['a', 'b'],
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'metadata.field',
+                           'op': 'eq',
+                           'value': '5',
+                           'type': 'string'}],
+                'comparison_operator': 'le',
+                'statistic': 'count',
+                'threshold': 50,
+                'evaluation_periods': '3',
+                'period': '180',
             },
             'alarm_actions': ['http://no.where', 'http://no.where']
         }
@@ -1229,9 +1239,18 @@ class TestAlarms(TestAlarmsBase):
         self.CONF.set_override('alarm_max_actions', 1, group='api')
         body = {
             'name': 'alarm-with-many-actions',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': ['a', 'b'],
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'metadata.field',
+                           'op': 'eq',
+                           'value': '5',
+                           'type': 'string'}],
+                'comparison_operator': 'le',
+                'statistic': 'count',
+                'threshold': 50,
+                'evaluation_periods': '3',
+                'period': '180',
             },
             'alarm_actions': ['http://no.where', 'http://no.where2']
         }
@@ -1244,9 +1263,18 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_normal_user_set_log_actions(self):
         body = {
             'name': 'log_alarm_actions',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': ['a', 'b'],
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'metadata.field',
+                           'op': 'eq',
+                           'value': '5',
+                           'type': 'string'}],
+                'comparison_operator': 'le',
+                'statistic': 'count',
+                'threshold': 50,
+                'evaluation_periods': '3',
+                'period': '180',
             },
             'alarm_actions': ['log://']
         }
@@ -1260,9 +1288,18 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_normal_user_set_test_actions(self):
         body = {
             'name': 'test_alarm_actions',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': ['a', 'b'],
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'metadata.field',
+                           'op': 'eq',
+                           'value': '5',
+                           'type': 'string'}],
+                'comparison_operator': 'le',
+                'statistic': 'count',
+                'threshold': 50,
+                'evaluation_periods': '3',
+                'period': '180',
             },
             'alarm_actions': ['test://']
         }
@@ -1276,9 +1313,18 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_admin_user_set_log_test_actions(self):
         body = {
             'name': 'admin_alarm_actions',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': ['a', 'b'],
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'metadata.field',
+                           'op': 'eq',
+                           'value': '5',
+                           'type': 'string'}],
+                'comparison_operator': 'le',
+                'statistic': 'count',
+                'threshold': 50,
+                'evaluation_periods': '3',
+                'period': '180',
             },
             'alarm_actions': ['test://', 'log://']
         }
@@ -1294,9 +1340,18 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_without_actions(self):
         body = {
             'name': 'alarm_actions_none',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': ['a', 'b'],
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'metadata.field',
+                           'op': 'eq',
+                           'value': '5',
+                           'type': 'string'}],
+                'comparison_operator': 'le',
+                'statistic': 'count',
+                'threshold': 50,
+                'evaluation_periods': '3',
+                'period': '180',
             },
             'alarm_actions': None
         }
@@ -2388,6 +2443,7 @@ class TestAlarmsRuleCombination(TestAlarmsBase):
 
     def setUp(self):
         super(TestAlarmsRuleCombination, self).setUp()
+        self.CONF.set_override("enable_combination_alarms", True, "api")
         for alarm in default_alarms(self.auth_headers):
             self.alarm_conn.create_alarm(alarm)
 
