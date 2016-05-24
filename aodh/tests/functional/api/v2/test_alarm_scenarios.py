@@ -25,6 +25,7 @@ from oslo_serialization import jsonutils
 import six
 from six import moves
 
+from aodh.cmd import alarm_conversion
 from aodh import messaging
 from aodh.storage import models
 from aodh.tests import constants
@@ -3383,3 +3384,66 @@ class TestPaginationQuery(TestAlarmsBase):
                              key=lambda d: (d['event_id'], d['timestamp']),
                              reverse=True)
         self.assertEqual(sorted_data, data)
+
+
+class TestCombinationCompositeConversion(TestAlarmsBase):
+    def setUp(self):
+        super(TestCombinationCompositeConversion, self).setUp()
+        alarms = default_alarms(self.auth_headers)
+        for alarm in alarms:
+            self.alarm_conn.create_alarm(alarm)
+        com_parameters = alarms[3].as_dict()
+        com_parameters.update(dict(name='name5', alarm_id='e', description='e',
+                                   rule=dict(alarm_ids=['b', 'c'],
+                                             operator='and')))
+        combin1 = models.Alarm(**com_parameters)
+        self.alarm_conn.create_alarm(combin1)
+        com_parameters.update(dict(name='name6', alarm_id='f', description='f',
+                                   rule=dict(alarm_ids=['d', 'e'],
+                                             operator='and')))
+        combin2 = models.Alarm(**com_parameters)
+        self.alarm_conn.create_alarm(combin2)
+
+    def test_conversion_without_combination_deletion(self):
+        data = self.get_json('/alarms', headers=self.auth_headers)
+        self.assertEqual(6, len(data))
+        url = '/alarms?q.field=type&q.op=eq&q.value=combination'
+        combination_alarms = self.get_json(url, headers=self.auth_headers)
+        self.assertEqual(3, len(combination_alarms))
+        test_args = alarm_conversion.get_parser().parse_args([])
+        with mock.patch('__builtin__.raw_input', return_value='yes'):
+            with mock.patch('argparse.ArgumentParser.parse_args',
+                            return_value=test_args):
+                alarm_conversion.conversion()
+        url = '/alarms?q.field=type&q.op=eq&q.value=composite'
+        composite_alarms = self.get_json(url, headers=self.auth_headers)
+        self.assertEqual(3, len(composite_alarms))
+        url = '/alarms?q.field=type&q.op=eq&q.value=combination'
+        combination_alarms = self.get_json(url, headers=self.auth_headers)
+        self.assertEqual(3, len(combination_alarms))
+
+    def test_conversion_with_combination_deletion(self):
+        test_args = alarm_conversion.get_parser().parse_args(
+            ['--delete-combination-alarm', 'True'])
+        with mock.patch('__builtin__.raw_input', return_value='yes'):
+            with mock.patch('argparse.ArgumentParser.parse_args',
+                            return_value=test_args):
+                alarm_conversion.conversion()
+        url = '/alarms?q.field=type&q.op=eq&q.value=composite'
+        composite_alarms = self.get_json(url, headers=self.auth_headers)
+        self.assertEqual(3, len(composite_alarms))
+        url = '/alarms?q.field=type&q.op=eq&q.value=combination'
+        combination_alarms = self.get_json(url, headers=self.auth_headers)
+        self.assertEqual(0, len(combination_alarms))
+
+    def test_conversion_with_alarm_specified(self):
+        test_args = alarm_conversion.get_parser().parse_args(
+            ['--alarm-id', 'e'])
+        with mock.patch('__builtin__.raw_input', return_value='yes'):
+            with mock.patch('argparse.ArgumentParser.parse_args',
+                            return_value=test_args):
+                alarm_conversion.conversion()
+        url = '/alarms?q.field=type&q.op=eq&q.value=composite'
+        composite_alarms = self.get_json(url, headers=self.auth_headers)
+        self.assertEqual(1, len(composite_alarms))
+        self.assertEqual('From-combination: e', composite_alarms[0]['name'])
