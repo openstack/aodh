@@ -27,7 +27,7 @@ CFG_GROUP = "service_credentials"
 
 
 def get_session(conf, requests_session=None):
-    """Get a aodh service credentials auth session."""
+    """Get an aodh service credentials auth session."""
     auth_plugin = ka_loading.load_auth_from_conf_options(conf, CFG_GROUP)
     session = ka_loading.load_session_from_conf_options(
         conf, CFG_GROUP, auth=auth_plugin, session=requests_session

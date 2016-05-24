@@ -36,7 +36,7 @@ Create aodh-uwsgi.ini file::
     threads = 8
     # Make sure the client doesn't try to re-use the connection.
     add-header = Connection: close
-    # Set uid and gip to a appropriate user on your server. In many
+    # Set uid and gip to an appropriate user on your server. In many
     # installations ``aodh`` will be correct.
     uid = aodh
     gid = aodh
