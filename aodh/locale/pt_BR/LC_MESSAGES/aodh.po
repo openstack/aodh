@@ -3,9 +3,9 @@
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev37\n"
+"Project-Id-Version: aodh 2.0.1.dev110\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-04-21 02:26+0000\n"
+"POT-Creation-Date: 2016-05-24 07:52+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -15,10 +15,6 @@ msgstr ""
 "Language: pt-BR\n"
 "X-Generator: Zanata 3.7.3\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-
-#, python-format
-msgid "%(entity)s %(id)s Not Found"
-msgstr "%(entity)s %(id)s Não Encontrada"
 
 #, python-format
 msgid "%(rule)s must be set for %(type)s type alarm"
@@ -35,12 +31,6 @@ msgstr "%d datapoints são desconhecidos"
 #, python-format
 msgid "%s is not JSON serializable"
 msgstr "%s não é JSON serializável"
-
-#, python-format
-msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
-msgstr ""
-"Ação %(scheme)s para alarme %(alarm_id)s é desconhecida, não é possível "
-"notificar"
 
 #, python-format
 msgid "Alarm %(alarm_id)s not found in project %(project)s"
@@ -69,10 +59,6 @@ msgid ""
 msgstr ""
 "Alarma quando %(meter_name)s é %(comparison_operator)s que %(statistic)s de "
 "%(threshold)s durante %(period)s segundos"
-
-#, python-format
-msgid "Alarm with name='%s' exists"
-msgstr "Alarme com o name='%s' existe"
 
 #, python-format
 msgid "Alarms %(alarm_ids)s are in unknown state"
@@ -194,17 +180,6 @@ msgid ""
 msgstr ""
 "Não é possível converter o valor %(value)s para o tipo de dados esperado "
 "%(type)s."
-
-#, python-format
-msgid "Unable to notify alarm %s"
-msgstr "Não é possível notificar alarme %s"
-
-msgid "Unable to notify for an alarm with no action"
-msgstr "Não é possível notificar um alarme sem ações"
-
-#, python-format
-msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
-msgstr "Não é possível avaliar a ação %(action)s para o alarme %(alarm_id)s"
 
 #, python-format
 msgid "Unable to parse action %s"

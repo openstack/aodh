@@ -7,9 +7,9 @@
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev37\n"
+"Project-Id-Version: aodh 2.0.1.dev110\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-04-21 02:26+0000\n"
+"POT-Creation-Date: 2016-05-24 07:52+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -20,10 +20,6 @@ msgstr ""
 "Generated-By: Babel 2.0\n"
 "X-Generator: Zanata 3.7.3\n"
 "Language-Team: Portuguese\n"
-
-#, python-format
-msgid "%(entity)s %(id)s Not Found"
-msgstr "%(entity)s %(id)s Não Encontrado"
 
 #, python-format
 msgid "%(name)s count exceeds maximum value %(maximum)d"
@@ -40,12 +36,6 @@ msgstr "%(rule1)s e %(rule2)s não podem ser programadas ao mesmo tempo"
 #, python-format
 msgid "%d datapoints are unknown"
 msgstr "endereços de grupo %d desconhecidos"
-
-#, python-format
-msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
-msgstr ""
-"A ação %(scheme)s para o alarme %(alarm_id)s é desconhecida, impossível "
-"notificar."
 
 #, python-format
 msgid "Alarm %(alarm_id)s not found in project %(project)s"
@@ -78,10 +68,6 @@ msgstr ""
 #, python-format
 msgid "Alarm when %s event occurred."
 msgstr "Alarme quando evento %s ocorreu."
-
-#, python-format
-msgid "Alarm with name='%s' exists"
-msgstr "Alarme com o nome='%s' já existe"
 
 #, python-format
 msgid "Alarms %(alarm_ids)s are in unknown state"
@@ -140,16 +126,6 @@ msgid ""
 msgstr ""
 "Notificar alarme %(alarm_name)s %(alarm_id)s de %(severity)s prioridade de "
 "%(previous)s a %(current)s com a ação %(action)s devido a %(reason)s."
-
-#, python-format
-msgid ""
-"Notifying alarm %(alarm_name)s %(alarm_id)s with severity %(severity)s from "
-"%(previous)s to %(current)s with action %(action)s because %(reason)s. "
-"request-id: %(request_id)s "
-msgstr ""
-"Notificar alarme %(alarm_name)s %(alarm_id)s de gravidade  %(severity)s de "
-"%(previous)s a %(current)s com a ação %(action)s devido a %(reason)s. "
-"request-id: %(request_id)s "
 
 #, python-format
 msgid "Order-by expression not valid: %s"
@@ -215,17 +191,6 @@ msgid ""
 msgstr ""
 "Incapaz de converter o valor %(value)s para o tipo de dados esperados "
 "%(type)s."
-
-#, python-format
-msgid "Unable to notify alarm %s"
-msgstr "Incampaz de notificar o alarme %s"
-
-msgid "Unable to notify for an alarm with no action"
-msgstr "Incapaz de notificar um alarme sem ação"
-
-#, python-format
-msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
-msgstr "Incapaz de analisar a ação %(action)s para o alarme %(alarm_id)s"
 
 #, python-format
 msgid "Unable to parse action %s"

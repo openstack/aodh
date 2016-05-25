@@ -4,9 +4,9 @@
 # Sungjin Kang <gang.sungjin@gmail.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev37\n"
+"Project-Id-Version: aodh 2.0.1.dev110\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-04-21 02:26+0000\n"
+"POT-Creation-Date: 2016-05-24 07:52+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -16,10 +16,6 @@ msgstr ""
 "Language: ko-KR\n"
 "X-Generator: Zanata 3.7.3\n"
 "Plural-Forms: nplurals=1; plural=0\n"
-
-#, python-format
-msgid "%(entity)s %(id)s Not Found"
-msgstr "%(entity)s %(id)s을(를) 찾을 수 없음"
 
 #, python-format
 msgid "%(rule)s must be set for %(type)s type alarm"
@@ -36,12 +32,6 @@ msgstr "%d 데이터포인트를 알 수 없습니다. "
 #, python-format
 msgid "%s is not JSON serializable"
 msgstr "%s은(는) JSON 직렬화 할 수 없음"
-
-#, python-format
-msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
-msgstr ""
-"%(alarm_id)s 알람에 대한 %(scheme)s 조치를 알 수 없어 알림을 전송할 수 없습니"
-"다. "
 
 #, python-format
 msgid "Alarm %(alarm_id)s not found in project %(project)s"
@@ -68,10 +58,6 @@ msgid ""
 msgstr ""
 "%(meter_name)s이(가) %(comparison_operator)s %(statistic)s %(threshold)s인 경"
 "우 알람(%(period)s초 동안)"
-
-#, python-format
-msgid "Alarm with name='%s' exists"
-msgstr "이름='%s'인 알람이 존재함"
 
 #, python-format
 msgid "Alarms %(alarm_ids)s are in unknown state"
@@ -189,17 +175,6 @@ msgstr "데이터베이스 서버에 연결할 수 없음: %(errmsg)s."
 msgid ""
 "Unable to convert the value %(value)s to the expected data type %(type)s."
 msgstr "%(value)s 값을 예상 데이터 유형 %(type)s(으)로 변환할 수 없습니다."
-
-#, python-format
-msgid "Unable to notify alarm %s"
-msgstr "%s 알람에 대한 알림을 전송할 수 없습니다. "
-
-msgid "Unable to notify for an alarm with no action"
-msgstr "조치없이 알람을 전송할 수 없습니다. "
-
-#, python-format
-msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
-msgstr "%(alarm_id)s에 대한 %(action)s 조치를 구문 분석할 수 없습니다. "
 
 #, python-format
 msgid "Unable to parse action %s"
