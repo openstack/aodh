@@ -25,15 +25,10 @@ from oslo_config import cfg
 from oslo_config import fixture as fixture_config
 from oslo_policy import opts
 from six.moves.urllib import parse as urlparse
+import sqlalchemy_utils
 
 from aodh import service
 from aodh import storage
-
-
-# TODO(chdent): For now only MongoDB is supported, because of easy
-# database name handling and intentional focus on the API, not the
-# data store.
-ENGINES = ['mongodb']
 
 
 class ConfigFixture(fixture.GabbiFixture):
@@ -43,6 +38,7 @@ class ConfigFixture(fixture.GabbiFixture):
         """Set up config."""
 
         self.conf = None
+        self.conn = None
 
         # Determine the database connection.
         db_url = os.environ.get(
@@ -52,10 +48,6 @@ class ConfigFixture(fixture.GabbiFixture):
                     "mysql://", "mysql+pymysql://"))
         if not db_url:
             raise case.SkipTest('No database connection configured')
-
-        engine = urlparse.urlparse(db_url).scheme
-        if engine not in ENGINES:
-            raise case.SkipTest('Database engine not supported')
 
         conf = service.prepare_service([], config_files=[])
         # NOTE(jd): prepare_service() is called twice: first by load_app() for
@@ -83,17 +75,28 @@ class ConfigFixture(fixture.GabbiFixture):
             group='api',
         )
 
-        database_name = '%s-%s' % (db_url, str(uuid.uuid4()))
-        conf.set_override('connection', database_name, group='database',
-                          enforce_type=True)
-
         conf.set_override('pecan_debug', True, group='api',
                           enforce_type=True)
 
+        parsed_url = list(urlparse.urlparse(db_url))
+        parsed_url[2] += '-%s' % str(uuid.uuid4()).replace('-', '')
+        db_url = urlparse.urlunparse(parsed_url)
+
+        conf.set_override('connection', db_url, group='database',
+                          enforce_type=True)
+
+        if (parsed_url[0].startswith("mysql")
+           or parsed_url[0].startswith("postgresql")):
+            sqlalchemy_utils.create_database(conf.database.connection)
+
+        self.conn = storage.get_connection_from_config(self.conf)
+        self.conn.upgrade()
+
     def stop_fixture(self):
         """Reset the config and remove data."""
+        if self.conn:
+            self.conn.clear()
         if self.conf:
-            storage.get_connection_from_config(self.conf).clear()
             self.conf.reset()
         service.prepare_service = self.prepare_service
 
