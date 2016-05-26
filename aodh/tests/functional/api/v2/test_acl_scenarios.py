@@ -34,11 +34,11 @@ class TestAPIACL(v2.FunctionalTest):
             return webtest.TestApp(app.load_app(conf=self.CONF))
 
     def test_non_authenticated(self):
-        response = self.get_json('/meters', expect_errors=True)
+        response = self.get_json('/alarms', expect_errors=True)
         self.assertEqual(401, response.status_int)
 
     def test_authenticated_wrong_role(self):
-        response = self.get_json('/meters',
+        response = self.get_json('/alarms',
                                  expect_errors=True,
                                  headers={
                                      "X-Roles": "Member",

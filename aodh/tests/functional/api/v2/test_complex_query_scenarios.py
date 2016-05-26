@@ -12,7 +12,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-"""Tests complex queries for samples
+"""Tests complex queries for alarms
 """
 
 import datetime
@@ -165,8 +165,8 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
                                       '{"=": {"project": "project-id2"}}'})
 
         self.assertEqual(6, len(data.json))
-        for sample_item in data.json:
-            self.assertIn(sample_item['project_id'], set(["project-id2"]))
+        for alarm_item in data.json:
+            self.assertIn(alarm_item['project_id'], set(["project-id2"]))
 
     def test_query_with_field_user_in_orderby(self):
         data = self.post_json(self.alarm_url,

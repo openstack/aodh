@@ -35,13 +35,6 @@ class FakeComplexQuery(query.ValidatedComplexQuery):
                                                metadata_allowed=metadata)
 
 
-sample_name_mapping = {"resource": "resource_id",
-                       "meter": "counter_name",
-                       "type": "counter_type",
-                       "unit": "counter_unit",
-                       "volume": "counter_volume"}
-
-
 class TestComplexQuery(base.BaseTestCase):
     def setUp(self):
         super(TestComplexQuery, self).setUp()
