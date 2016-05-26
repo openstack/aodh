@@ -21,7 +21,7 @@ Aodh allows users to define alarms which can be evaluated based on events
 passed from other OpenStack services. The events can be emitted when the
 resources from other OpenStack services have been updated, created or deleted,
 such as 'compute.instance.reboot.end', 'scheduler.select_destinations.end'.
-When creating a alarm with type of "event", an event_type can be specified to
+When creating an alarm with type of "event", an event_type can be specified to
 identify the type of evernt that will trigger the alarm. The event_type field
 support fuzzy matching with wildcard. Additionally, users can also specify
 query conditions to filter specific events used to trigger the alarm.
