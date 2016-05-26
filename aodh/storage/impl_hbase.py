@@ -128,8 +128,10 @@ class Connection(hbase_base.Connection, base.Connection):
 
     def get_alarms(self, name=None, user=None, state=None, meter=None,
                    project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None, exclude=None):
-
+                   alarm_type=None, severity=None, exclude=None,
+                   pagination=None):
+        if pagination:
+            raise aodh.NotImplementedError('Pagination query not implemented')
         if meter:
             raise aodh.NotImplementedError(
                 'Filter by meter not implemented')
@@ -155,7 +157,9 @@ class Connection(hbase_base.Connection, base.Connection):
                           user=None, project=None, alarm_type=None,
                           severity=None, start_timestamp=None,
                           start_timestamp_op=None, end_timestamp=None,
-                          end_timestamp_op=None):
+                          end_timestamp_op=None, pagination=None):
+        if pagination:
+            raise aodh.NotImplementedError('Pagination query not implemented')
         q = hbase_utils.make_query(alarm_id=alarm_id,
                                    on_behalf_of=on_behalf_of, type=alarm_type,
                                    user_id=user, project_id=project,

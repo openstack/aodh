@@ -90,7 +90,8 @@ class Connection(object):
     @staticmethod
     def get_alarms(name=None, user=None, state=None, meter=None,
                    project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None, exclude=None):
+                   alarm_type=None, severity=None, exclude=None,
+                   pagination=None):
         """Yields a lists of alarms that match filters.
 
         :param name: Optional name for alarm.
@@ -103,6 +104,7 @@ class Connection(object):
         :param alarm_type: Optional alarm type.
         :param severity: Optional alarm severity.
         :param exclude: Optional dict for inequality constraint.
+        :param pagination: Pagination parameters.
         """
         raise aodh.NotImplementedError('Alarms not implemented')
 
@@ -129,7 +131,7 @@ class Connection(object):
                           user=None, project=None, alarm_type=None,
                           severity=None, start_timestamp=None,
                           start_timestamp_op=None, end_timestamp=None,
-                          end_timestamp_op=None):
+                          end_timestamp_op=None, pagination=None):
         """Yields list of AlarmChanges describing alarm history
 
         Changes are always sorted in reverse order of occurrence, given
@@ -153,6 +155,7 @@ class Connection(object):
         :param start_timestamp_op: Optional timestamp start range operation
         :param end_timestamp: Optional modified timestamp end range
         :param end_timestamp_op: Optional timestamp end range operation
+        :param pagination: Pagination parameters.
         """
         raise aodh.NotImplementedError('Alarm history not implemented')
 
