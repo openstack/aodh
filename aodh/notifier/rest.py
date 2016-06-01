@@ -36,6 +36,9 @@ OPTS = [
                default='',
                help='SSL Client private key for REST notifier.'
                ),
+    cfg.StrOpt('rest_notifier_ca_bundle_certificate_path',
+               help='SSL CA_BUNDLE certificate for REST notifier',
+               ),
     cfg.BoolOpt('rest_notifier_ssl_verify',
                 default=True,
                 help='Whether to verify the SSL Server certificate when '
@@ -84,6 +87,8 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
             options = urlparse.parse_qs(action.query)
             verify = bool(int(options.get('aodh-alarm-ssl-verify',
                                           [default_verify])[-1]))
+            if verify and self.conf.rest_notifier_ca_bundle_certificate_path:
+                verify = self.conf.rest_notifier_ca_bundle_certificate_path
             kwargs['verify'] = verify
 
             cert = self.conf.rest_notifier_certificate_file

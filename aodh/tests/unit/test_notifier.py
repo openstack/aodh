@@ -257,6 +257,24 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                 kwargs['headers'])
             self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
 
+    def test_notify_alarm_rest_action_with_ssl_server_verify_enable(self):
+        action = 'https://host/action'
+        ca_bundle = "/path/to/custom_cert.pem"
+
+        self.CONF.set_override("rest_notifier_ca_bundle_certificate_path",
+                               ca_bundle)
+
+        with mock.patch.object(requests.Session, 'post') as poster:
+            self._msg_notifier.sample({},
+                                      'alarm.update',
+                                      self._notification(action))
+            time.sleep(1)
+            poster.assert_called_with(action, data=mock.ANY,
+                                      headers=mock.ANY,
+                                      verify=ca_bundle)
+            args, kwargs = poster.call_args
+            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+
     def test_notify_alarm_rest_action_with_ssl_verify_disable(self):
         action = 'https://host/action?aodh-alarm-ssl-verify=0'
 

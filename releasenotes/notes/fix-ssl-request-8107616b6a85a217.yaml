@@ -1,0 +1,13 @@
+---
+fixes:
+  - >
+    [`bug 1582131 <https://bugs.launchpad.net/aodh/+bug/1582131>`_]
+    Fix an issue with adding CA_BUNDLE certificate parth as value of "verify"
+    parameter in SSL requests.
+
+features:
+  - >
+    A new option “rest_notifier_ca_bundle_certificate_path” has been added
+    in the configuration file, set None as default value. If this option is
+    present and SSL is used for alarm action the certificate path provided
+    will be used as value of verify parameter in action request.
