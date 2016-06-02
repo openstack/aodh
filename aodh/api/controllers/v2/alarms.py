@@ -25,7 +25,6 @@ import uuid
 
 import croniter
 from oslo_config import cfg
-from oslo_context import context
 from oslo_log import log
 from oslo_utils import netutils
 from oslo_utils import timeutils
@@ -491,7 +490,7 @@ def _send_notification(event, payload):
     notifier = messaging.get_notifier(transport, publisher_id="aodh.api")
     # FIXME(sileht): perhaps we need to copy some infos from the
     # pecan request headers like nova does
-    notifier.info(context.RequestContext(), notification, payload)
+    notifier.info({}, notification, payload)
 
 
 class AlarmController(rest.RestController):

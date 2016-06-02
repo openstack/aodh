@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2014 eNovance
+# Copyright 2013-2015 eNovance
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,7 +15,6 @@
 
 import mock
 from oslo_config import fixture as fixture_config
-from oslo_context import context
 from oslo_serialization import jsonutils
 from oslotest import mockpatch
 import requests
@@ -68,7 +67,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             'reason': 'Everything is on fire',
             'reason_data': {'fire': 'everywhere'}
         }
-        self.service.notify_alarm(context.get_admin_context(), data)
+        self.service.notify_alarm({}, data)
         notifications = self.service.notifiers['test'].obj.notifications
         self.assertEqual(1, len(notifications))
         self.assertEqual((urlparse.urlsplit(data['actions'][0]),
@@ -82,10 +81,10 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                          notifications[0])
 
     def test_notify_alarm_no_action(self):
-        self.service.notify_alarm(context.get_admin_context(), {})
+        self.service.notify_alarm({}, {})
 
     def test_notify_alarm_log_action(self):
-        self.service.notify_alarm(context.get_admin_context(),
+        self.service.notify_alarm({},
                                   {
                                       'actions': ['log://'],
                                       'alarm_id': 'foobar',
@@ -113,7 +112,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
+                self.service.notify_alarm({},
                                           self._notification(action))
                 poster.assert_called_with(action, data=mock.ANY,
                                           headers=mock.ANY)
@@ -129,7 +128,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
+                self.service.notify_alarm({},
                                           self._notification(action))
                 poster.assert_called_with(action, data=mock.ANY,
                                           headers=mock.ANY,
@@ -148,7 +147,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
+                self.service.notify_alarm({},
                                           self._notification(action))
                 poster.assert_called_with(action, data=mock.ANY,
                                           headers=mock.ANY,
@@ -164,7 +163,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
+                self.service.notify_alarm({},
                                           self._notification(action))
                 poster.assert_called_with(action, data=mock.ANY,
                                           headers=mock.ANY,
@@ -178,7 +177,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
+                self.service.notify_alarm({},
                                           self._notification(action))
                 poster.assert_called_with(action, data=mock.ANY,
                                           headers=mock.ANY,
@@ -194,7 +193,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
+                self.service.notify_alarm({},
                                           self._notification(action))
                 poster.assert_called_with(action, data=mock.ANY,
                                           headers=mock.ANY,
@@ -213,7 +212,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             LOG = mock.MagicMock()
             with mock.patch('aodh.notifier.LOG', LOG):
                 self.service.notify_alarm(
-                    context.get_admin_context(),
+                    {},
                     {
                         'actions': ['no-such-action-i-am-sure'],
                         'alarm_id': 'foobar',
@@ -225,7 +224,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         LOG = mock.MagicMock()
         with mock.patch('aodh.notifier.LOG', LOG):
             self.service.notify_alarm(
-                context.get_admin_context(),
+                {},
                 {
                     'actions': ['no-such-action-i-am-sure://'],
                     'alarm_id': 'foobar',
@@ -247,7 +246,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
 
         with mock.patch('eventlet.spawn_n', self._fake_spawn_n):
             with mock.patch.object(requests.Session, 'post') as poster:
-                self.service.notify_alarm(context.get_admin_context(),
+                self.service.notify_alarm({},
                                           self._notification(action))
                 headers = {'X-Auth-Token': 'token_1234'}
                 headers.update(self.HTTP_HEADERS)

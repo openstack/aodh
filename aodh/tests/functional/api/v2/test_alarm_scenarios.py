@@ -1675,18 +1675,7 @@ class TestAlarms(TestAlarmsBase):
                              'user_id']).issubset(payload.keys()))
 
         endpoint.info.assert_called_once_with(
-            {'resource_uuid': None,
-             'domain': None,
-             'project_domain': None,
-             'auth_token': None,
-             'is_admin': False,
-             'user': None,
-             'tenant': None,
-             'read_only': False,
-             'show_deleted': False,
-             'user_identity': '- - - - -',
-             'request_id': mock.ANY,
-             'user_domain': None},
+            {},
             'aodh.api', 'alarm.creation',
             PayloadMatcher(), mock.ANY)
 

@@ -240,8 +240,7 @@ class TestEvaluate(base.TestEvaluatorBase):
     def test_alarm_change_record(self, get_notifier, utcnow, mock_uuid):
         # the context.RequestContext() method need to generate uuid,
         # so we need to provide 'fake_uuid_0' and 'fake_uuid_1' for that.
-        mock_uuid.side_effect = ['fake_event_id_0', 'fake_uuid_0',
-                                 'fake_event_id_1', 'fake_uuid_1']
+        mock_uuid.side_effect = ['fake_event_id_0', 'fake_event_id_1']
         change_notifier = mock.MagicMock()
         get_notifier.return_value = change_notifier
         utcnow.return_value = datetime.datetime(2015, 7, 26, 3, 33, 21, 876795)
