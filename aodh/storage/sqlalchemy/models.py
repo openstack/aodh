@@ -116,6 +116,8 @@ class Alarm(Base):
     __table_args__ = (
         Index('ix_alarm_user_id', 'user_id'),
         Index('ix_alarm_project_id', 'project_id'),
+        Index('ix_alarm_enabled', 'enabled'),
+        Index('ix_alarm_type', 'type'),
     )
     alarm_id = Column(String(128), primary_key=True)
     enabled = Column(Boolean)
