@@ -21,6 +21,7 @@ from oslo_utils import timeutils
 
 from aodh.storage import models
 from aodh.tests.functional.api import v2 as tests_api
+from aodh.tests.functional import db as tests_db
 
 
 admin_header = {"X-Roles": "admin",
@@ -193,6 +194,28 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
                          [a["state_timestamp"] for a in data.json])
         for alarm in data.json:
             self.assertEqual("alarm", alarm["state"])
+
+    @tests_db.run_with('mysql', 'pgsql', 'sqlite')
+    def test_query_with_orderby_severity(self):
+        orderby = '[{"severity": "ASC"}]'
+        data = self.post_json(self.alarm_url,
+                              headers=admin_header,
+                              params={"orderby": orderby})
+        alarms = list(data.json)
+        severities = [a['severity'] for a in alarms]
+        severity_choices = ['low', 'moderate', 'critical']
+        sorted_severities = sorted(severities, key=severity_choices.index)
+        self.assertEqual(sorted_severities, severities)
+
+        orderby = '[{"severity": "DESC"}]'
+        data = self.post_json(self.alarm_url,
+                              headers=admin_header,
+                              params={"orderby": orderby})
+        alarms = list(data.json)
+        severities = [a['severity'] for a in alarms]
+        sorted_severities = sorted(severities, key=severity_choices.index,
+                                   reverse=True)
+        self.assertEqual(sorted_severities, severities)
 
     def test_limit_should_be_positive(self):
         data = self.post_json(self.alarm_url,
