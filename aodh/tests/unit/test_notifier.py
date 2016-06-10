@@ -251,8 +251,9 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         headers = {'X-Auth-Token': 'token_1234'}
         headers.update(self.HTTP_HEADERS)
 
-        self.useFixture(mockpatch.Patch('keystoneclient.v3.client.Client',
-                                        lambda **kwargs: client))
+        self.useFixture(
+            mockpatch.Patch('aodh.keystone_client.get_trusted_client',
+                            lambda *args: client))
 
         with mock.patch.object(requests.Session, 'post') as poster:
             self.service.notify_alarm({},
