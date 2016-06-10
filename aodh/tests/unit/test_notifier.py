@@ -340,8 +340,9 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         client = mock.MagicMock()
         client.session.auth.get_access.return_value.auth_token = 'token_1234'
 
-        self.useFixture(mockpatch.Patch('keystoneclient.v3.client.Client',
-                                        lambda **kwargs: client))
+        self.useFixture(
+            mockpatch.Patch('aodh.keystone_client.get_trusted_client',
+                            lambda *args: client))
 
         with mock.patch.object(requests.Session, 'post') as poster:
             self._msg_notifier.sample({}, 'alarm.update',

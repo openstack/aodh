@@ -434,8 +434,7 @@ class Alarm(base.Base):
         auth_plugin = pecan.request.environ.get('keystone.token_auth')
         url = netutils.urlsplit(action)
         if self._is_trust_url(url) and url.password:
-            keystone_client.delete_trust_id(pecan.request.cfg,
-                                            url.username, auth_plugin)
+            keystone_client.delete_trust_id(url.username, auth_plugin)
 
 
 Alarm.add_attributes(**{"%s_rule" % ext.name: ext.plugin
