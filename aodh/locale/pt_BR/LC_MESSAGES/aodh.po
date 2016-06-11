@@ -1,16 +1,17 @@
 # Lucas Palm <lapalm@us.ibm.com>, 2015. #zanata
 # OpenStack Infra <zanata@openstack.org>, 2015. #zanata
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
+# KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev110\n"
+"Project-Id-Version: aodh 2.0.1.dev135\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-05-24 07:52+0000\n"
+"POT-Creation-Date: 2016-06-07 13:47+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2016-06-09 11:52+0000\n"
+"Last-Translator: KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>\n"
 "Language-Team: Portuguese (Brazil)\n"
 "Language: pt-BR\n"
 "X-Generator: Zanata 3.7.3\n"
@@ -208,6 +209,10 @@ msgstr "atualização do estado de alarme falhou"
 
 msgid "alarm stats retrieval failed"
 msgstr "recuperação das estatísticas de alarme falhou"
+
+#, python-format
+msgid "duplicate actions are found: %s, remove duplicate ones"
+msgstr "duplicate actions are found: %s, remove duplicate ones"
 
 #, python-format
 msgid "initiating evaluation cycle on %d alarms"
