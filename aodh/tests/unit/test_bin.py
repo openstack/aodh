@@ -26,9 +26,7 @@ from aodh.tests import base
 class BinTestCase(base.BaseTestCase):
     def setUp(self):
         super(BinTestCase, self).setUp()
-        content = ("[DEFAULT]\n"
-                   "rpc_backend=fake\n"
-                   "[database]\n"
+        content = ("[database]\n"
                    "connection=log://localhost\n")
         if six.PY3:
             content = content.encode('utf-8')
@@ -56,9 +54,7 @@ class BinTestCase(base.BaseTestCase):
                       b"time to live is disabled", err)
 
     def test_run_expirer_ttl_enabled(self):
-        content = ("[DEFAULT]\n"
-                   "rpc_backend=fake\n"
-                   "[database]\n"
+        content = ("[database]\n"
                    "alarm_history_time_to_live=1\n"
                    "connection=log://localhost\n")
         if six.PY3:
@@ -81,9 +77,7 @@ class BinTestCase(base.BaseTestCase):
 class BinEvaluatorTestCase(base.BaseTestCase):
     def setUp(self):
         super(BinEvaluatorTestCase, self).setUp()
-        content = ("[DEFAULT]\n"
-                   "rpc_backend=fake\n"
-                   "[database]\n"
+        content = ("[database]\n"
                    "connection=log://localhost\n")
         if six.PY3:
             content = content.encode('utf-8')
