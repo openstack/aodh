@@ -35,7 +35,7 @@ class AlarmNotifier(object):
             messaging.get_transport(conf),
             driver='messagingv2',
             publisher_id="alarming.evaluator",
-            topic=conf.notifier_topic)
+            topics=[conf.notifier_topic])
 
     def notify(self, alarm, previous, reason, reason_data):
         actions = getattr(alarm, models.Alarm.ALARM_ACTIONS_MAP[alarm.state])
