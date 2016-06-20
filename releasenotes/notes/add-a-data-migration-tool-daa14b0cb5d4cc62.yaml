@@ -1,0 +1,7 @@
+---
+upgrade:
+  - >
+    Add a tool for migrating alarm and alarm history data from NoSQL storage
+    to SQL storage. The migration tool has been tested OK in devstack
+    environment, but users need to be cautious with this, because the data
+    migration between storage backends is a bit dangerous.
