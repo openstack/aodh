@@ -34,7 +34,7 @@ class TrustRestAlarmNotifier(rest.RestAlarmNotifier):
                reason, reason_data):
         trust_id = action.username
 
-        client = keystone_client.get_client(self.conf, trust_id)
+        client = keystone_client.get_trusted_client(self.conf, trust_id)
 
         # Remove the fake user
         netloc = action.netloc.split("@")[1]
