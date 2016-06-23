@@ -1,0 +1,6 @@
+---
+upgrade:
+  - >
+    Add a tool for converting combination alarms to composite alarms,
+    since we have deprecated the combination alarm support and recommend
+    to use composite alarm to perform multiple conditions alarming.
