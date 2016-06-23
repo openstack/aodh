@@ -25,6 +25,9 @@ from oslo_db.sqlalchemy import utils as oslo_sql_utils
 from oslo_log import log
 from oslo_utils import timeutils
 import six
+from sqlalchemy import asc
+from sqlalchemy import desc
+from sqlalchemy import func
 from sqlalchemy.orm import exc
 
 from aodh.i18n import _LI
@@ -161,6 +164,16 @@ class Connection(base.Connection):
                 raise storage.InvalidMarker(
                     'Marker %s not found.' % pagination['marker'])
         limit = pagination.get('limit')
+        # we sort by "severity" by its semantic than its alphabetical
+        # order when "severity" specified in sorts.
+        for sort_key, sort_dir in pagination['sort'][::-1]:
+            if sort_key == 'severity':
+                sort_dir_func = {'asc': asc, 'desc': desc}[sort_dir]
+                query = query.order_by(sort_dir_func(
+                    func.field(getattr(model, sort_key), 'low',
+                               'moderate', 'critical')))
+                pagination['sort'].remove((sort_key, sort_dir))
+
         sort_keys = [s[0] for s in pagination['sort']]
         sort_dirs = [s[1] for s in pagination['sort']]
         return oslo_sql_utils.paginate_query(

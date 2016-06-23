@@ -3313,6 +3313,18 @@ class TestPaginationQuery(TestAlarmsBase):
         names = [a['name'] for a in data]
         self.assertEqual(['name1', 'name2', 'name3', 'name4'], names)
 
+    def test_sort_by_severity_with_its_value(self):
+        data = self.get_json('/alarms?sort=severity:asc',
+                             headers=self.auth_headers)
+        severities = [a['severity'] for a in data]
+        self.assertEqual(['low', 'moderate', 'critical', 'critical'],
+                         severities)
+        data = self.get_json('/alarms?sort=severity:desc',
+                             headers=self.auth_headers)
+        severities = [a['severity'] for a in data]
+        self.assertEqual(['critical', 'critical', 'moderate', 'low'],
+                         severities)
+
     def test_pagination_query_limit(self):
         data = self.get_json('/alarms?limit=2',  headers=self.auth_headers)
         self.assertEqual(2, len(data))
