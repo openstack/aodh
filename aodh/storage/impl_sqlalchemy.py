@@ -20,6 +20,7 @@ import os.path
 from alembic import command
 from alembic import config
 from alembic import migration
+from oslo_db import exception
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as oslo_sql_utils
 from oslo_log import log
@@ -94,8 +95,15 @@ class Connection(base.Connection):
             ctxt = migration.MigrationContext.configure(engine.connect())
             current_version = ctxt.get_current_revision()
             if current_version is None:
-                models.Base.metadata.create_all(engine)
-                command.stamp(cfg, "head")
+                try:
+                    models.Base.metadata.create_all(engine, checkfirst=False)
+                except exception.DBError:
+                    # Assume tables exist from Ceilometer, take control
+                    # FIXME(jd) Remove in Ocata
+                    command.stamp(cfg, "12fe8fac9fe4")
+                    command.upgrade(cfg, "head")
+                else:
+                    command.stamp(cfg, "head")
             else:
                 command.upgrade(cfg, "head")
 
