@@ -30,11 +30,11 @@ LOG = log.getLogger(__name__)
 OPTS = [
     cfg.StrOpt('rest_notifier_certificate_file',
                default='',
-               help='SSL Client certificate for REST notifier.'
+               help='SSL Client certificate file for REST notifier.'
                ),
     cfg.StrOpt('rest_notifier_certificate_key',
                default='',
-               help='SSL Client private key for REST notifier.'
+               help='SSL Client private key file for REST notifier.'
                ),
     cfg.StrOpt('rest_notifier_ca_bundle_certificate_path',
                help='SSL CA_BUNDLE certificate for REST notifier',
