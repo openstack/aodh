@@ -1735,6 +1735,9 @@ class TestAlarms(TestAlarmsBase):
                              'project_id', 'timestamp',
                              'user_id']).issubset(payload.keys()))
 
+            def __ne__(self, other):
+                return not self.__eq__(other)
+
         endpoint.info.assert_called_once_with(NotificationsMatcher())
 
     def test_alarm_sends_notification(self):
