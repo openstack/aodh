@@ -78,11 +78,12 @@ class Evaluator(object):
             self.storage_conn = storage.get_connection_from_config(self.conf)
         return self.storage_conn
 
-    def _record_change(self, alarm):
+    def _record_change(self, alarm, reason):
         if not self.conf.record_history:
             return
         type = models.AlarmChange.STATE_TRANSITION
-        detail = json.dumps({'state': alarm.state})
+        detail = json.dumps({'state': alarm.state,
+                             'transition_reason': reason})
         user_id, project_id = self.ks_client.user_id, self.ks_client.project_id
         on_behalf_of = alarm.project_id
         now = timeutils.utcnow()
@@ -124,7 +125,7 @@ class Evaluator(object):
                                     "alarm: %s has been deleted"),
                                 alarm.alarm_id)
                 else:
-                    self._record_change(alarm)
+                    self._record_change(alarm, reason)
                 self.notifier.notify(alarm, previous, reason, reason_data)
             elif alarm.repeat_actions:
                 self.notifier.notify(alarm, previous, reason, reason_data)

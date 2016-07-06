@@ -218,12 +218,18 @@ class TestEvaluate(base.TestEvaluatorBase):
 
     def _construct_payloads(self):
         payloads = []
+        reasons = ["Transition to alarm due to 5 samples outside threshold, "
+                   "most recent: 85.0",
+                   "Transition to alarm due to 4 samples outside threshold, "
+                   "most recent: 7.0"]
         for alarm in self.alarms:
+            num = self.alarms.index(alarm)
             type = models.AlarmChange.STATE_TRANSITION
-            detail = json.dumps({'state': alarm.state})
+            detail = json.dumps({'state': alarm.state,
+                                 'transition_reason': reasons[num]})
             on_behalf_of = alarm.project_id
             payload = dict(
-                event_id='fake_event_id_%s' % self.alarms.index(alarm),
+                event_id='fake_event_id_%s' % num,
                 alarm_id=alarm.alarm_id,
                 type=type,
                 detail=detail,
