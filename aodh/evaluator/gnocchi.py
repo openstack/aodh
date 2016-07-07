@@ -73,10 +73,19 @@ class GnocchiResourceThresholdEvaluator(GnocchiBase):
 class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
     def _statistics(self, rule, start, end):
         try:
+            # FIXME(sileht): In case of a heat autoscaling stack decide to
+            # delete an instance, the gnocchi metrics associated to this
+            # instance will be no more updated and when the alarm will ask
+            # for the aggregation, gnocchi will raise a 'No overlap'
+            # exception.
+            # So temporary set 'needed_overlap' to 0 to disable the
+            # gnocchi checks about missing points. For more detail see:
+            #   https://bugs.launchpad.net/gnocchi/+bug/1479429
             return self._gnocchi_client.metric.aggregation(
                 metrics=rule['metrics'],
                 start=start, stop=end,
-                aggregation=rule['aggregation_method'])
+                aggregation=rule['aggregation_method'],
+                needed_overlap=0)
         except Exception:
             LOG.exception(_('alarm stats retrieval failed'))
             return []

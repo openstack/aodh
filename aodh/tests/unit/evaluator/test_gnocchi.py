@@ -326,6 +326,7 @@ class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
                                    metrics=[
                                        '0bb1604d-1193-4c0a-b4b8-74b170e35e83',
                                        '9ddc209f-42f8-41e1-b8f1-8804f59c4053'],
+                                   needed_overlap=0,
                                    start=start_alarm, stop=end)],
             self.client.metric.mock_calls)
         self._assert_all_alarms('alarm')
