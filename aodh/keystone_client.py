@@ -21,9 +21,7 @@ from keystoneauth1 import loading as ka_loading
 from keystoneclient import session
 from keystoneclient.v3 import client as ks_client_v3
 from oslo_config import cfg
-from oslo_log import log
 
-LOG = log.getLogger(__name__)
 
 CFG_GROUP = "service_credentials"
 
