@@ -2,13 +2,13 @@
 # Andi Chandler <andi@gowling.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev132\n"
+"Project-Id-Version: aodh 2.0.1.dev159\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-06-03 17:01+0000\n"
+"POT-Creation-Date: 2016-07-07 08:45+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2016-06-03 09:24+0000\n"
+"PO-Revision-Date: 2016-06-28 05:33+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>\n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en-GB\n"
@@ -23,12 +23,26 @@ msgstr "    Migrated %(count)s history data of alarm %(alarm_id)s"
 msgid "%d alarm histories are removed from database"
 msgstr "%d alarm histories are removed from database"
 
+#, python-format
+msgid "%s combination alarms have been converted to composite alarms."
+msgstr "%s combination alarms have been converted to composite alarms."
+
 msgid "Coordination backend started successfully."
 msgstr "Coordination backend started successfully."
 
 #, python-format
+msgid "Deleting the combination alarm %s..."
+msgstr "Deleting the combination alarm %s..."
+
+#, python-format
 msgid "Dropping alarm history data with TTL %d"
 msgstr "Dropping alarm history data with TTL %d"
+
+#, python-format
+msgid ""
+"End Converting combination alarm %(s_alarm)s to composite alarm %(d_alarm)s"
+msgstr ""
+"End Converting combination alarm %(s_alarm)s to composite alarm %(d_alarm)s"
 
 #, python-format
 msgid ""
@@ -68,6 +82,14 @@ msgstr ""
 #, python-format
 msgid "Notifying alarm <%(id)s> gets response: %(status_code)s %(reason)s."
 msgstr "Notifying alarm <%(id)s> gets response: %(status_code)s %(reason)s."
+
+#, python-format
+msgid ""
+"Start converting combination alarm %(alarm)s, it depends on alarms: "
+"%(alarm_ids)s"
+msgstr ""
+"Start converting combination alarm %(alarm)s, it depends on alarms: "
+"%(alarm_ids)s"
 
 msgid "Starting to migrate alarms data from NoSQL to SQL..."
 msgstr "Starting to migrate alarms data from NoSQL to SQL..."
