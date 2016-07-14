@@ -15,7 +15,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_service import service as os_service
+import cotyledon
 
 from aodh import evaluator as evaluator_svc
 from aodh import event as event_svc
@@ -25,17 +25,23 @@ from aodh import service
 
 def notifier():
     conf = service.prepare_service()
-    os_service.launch(conf, notifier_svc.AlarmNotifierService(conf),
-                      workers=conf.notifier.workers).wait()
+    sm = cotyledon.ServiceManager()
+    sm.add(notifier_svc.AlarmNotifierService,
+           workers=conf.notifier.workers, args=(conf,))
+    sm.run()
 
 
 def evaluator():
     conf = service.prepare_service()
-    os_service.launch(conf, evaluator_svc.AlarmEvaluationService(conf),
-                      workers=conf.evaluator.workers).wait()
+    sm = cotyledon.ServiceManager()
+    sm.add(evaluator_svc.AlarmEvaluationService,
+           workers=conf.evaluator.workers, args=(conf,))
+    sm.run()
 
 
 def listener():
     conf = service.prepare_service()
-    os_service.launch(conf, event_svc.EventAlarmEvaluationService(conf),
-                      workers=conf.listener.workers).wait()
+    sm = cotyledon.ServiceManager()
+    sm.add(event_svc.EventAlarmEvaluationService,
+           workers=conf.listener.workers, args=(conf,))
+    sm.run()

@@ -13,10 +13,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import cotyledon
 from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging
-from oslo_service import service
 
 from aodh.evaluator import event
 from aodh import messaging
@@ -51,14 +51,10 @@ class EventAlarmEndpoint(object):
             self.evaluator.evaluate_events(notification['payload'])
 
 
-class EventAlarmEvaluationService(service.Service):
-
-    def __init__(self, conf):
-        super(EventAlarmEvaluationService, self).__init__()
+class EventAlarmEvaluationService(cotyledon.Service):
+    def __init__(self, worker_id, conf):
+        super(EventAlarmEvaluationService, self).__init__(worker_id)
         self.conf = conf
-
-    def start(self):
-        super(EventAlarmEvaluationService, self).start()
         self.storage_conn = storage.get_connection_from_config(self.conf)
         self.evaluator = event.EventAlarmEvaluator(self.conf)
         self.listener = messaging.get_batch_notification_listener(
@@ -69,11 +65,7 @@ class EventAlarmEvaluationService(service.Service):
             self.conf.listener.batch_size,
             self.conf.listener.batch_timeout)
         self.listener.start()
-        # Add a dummy thread to have wait() working
-        self.tg.add_timer(604800, lambda: None)
 
-    def stop(self):
-        if getattr(self, 'listener', None):
-            self.listener.stop()
-            self.listener.wait()
-        super(EventAlarmEvaluationService, self).stop()
+    def terminate(self):
+        self.listener.stop()
+        self.listener.wait()

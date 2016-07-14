@@ -51,9 +51,8 @@ class TestAlarmNotifierService(tests_base.BaseTestCase):
         self.setup_messaging(self.CONF)
 
     def test_init_host_queue(self):
-        self.service = notifier.AlarmNotifierService(self.CONF)
-        self.service.start()
-        self.service.stop()
+        self.service = notifier.AlarmNotifierService(0, self.CONF)
+        self.service.terminate()
 
 
 class TestAlarmNotifier(tests_base.BaseTestCase):
@@ -69,9 +68,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.useFixture(mockpatch.Patch(
             'aodh.notifier.zaqar.ZaqarAlarmNotifier.get_zaqar_client',
             return_value=self.zaqar))
-        self.service = notifier.AlarmNotifierService(self.CONF)
-        self.service.start()
-        self.addCleanup(self.service.stop)
+        self.service = notifier.AlarmNotifierService(0, self.CONF)
+        self.addCleanup(self.service.terminate)
 
     def test_notify_alarm(self):
         data = {
@@ -120,11 +118,11 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             'reason': 'Everything is fine',
             'reason_data': {'fine': 'fine'}
         }
-        self.service.stop()
+        self.service.terminate()
         self.CONF.set_override("batch_size", 2, 'notifier')
         # Init a new service with new configuration
-        self.svc = notifier.AlarmNotifierService(self.CONF)
-        self.svc.start()
+        self.svc = notifier.AlarmNotifierService(0, self.CONF)
+        self.addCleanup(self.svc.terminate)
         self._msg_notifier.sample({}, 'alarm.update', data1)
         self._msg_notifier.sample({}, 'alarm.update', data2)
         time.sleep(1)
@@ -150,7 +148,6 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                          notifications[1])
         self.assertEqual(mock.call('Received %s messages in batch.', 2),
                          logger.call_args_list[0])
-        self.svc.stop()
 
     @staticmethod
     def _notification(action):

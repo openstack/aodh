@@ -20,11 +20,11 @@ import json
 import threading
 
 from concurrent import futures
+import cotyledon
 import croniter
 from futurist import periodics
 from oslo_config import cfg
 from oslo_log import log
-from oslo_service import service as os_service
 from oslo_utils import timeutils
 import pytz
 import six
@@ -182,67 +182,33 @@ class Evaluator(object):
         """
 
 
-class AlarmEvaluationService(os_service.Service):
+class AlarmEvaluationService(cotyledon.Service):
 
     PARTITIONING_GROUP_NAME = "alarm_evaluator"
     EVALUATOR_EXTENSIONS_NAMESPACE = "aodh.evaluator"
 
-    def __init__(self, conf):
-        super(AlarmEvaluationService, self).__init__()
+    def __init__(self, worker_id, conf):
+        super(AlarmEvaluationService, self).__init__(worker_id)
         self.conf = conf
 
-    @property
-    def _storage_conn(self):
-        if not self.storage_conn:
-            self.storage_conn = storage.get_connection_from_config(self.conf)
-        return self.storage_conn
+        ef = lambda: futures.ThreadPoolExecutor(max_workers=10)
+        self.periodic = periodics.PeriodicWorker.create(
+            [], executor_factory=ef)
 
-    def _load_evaluators(self):
         self.evaluators = extension.ExtensionManager(
             namespace=self.EVALUATOR_EXTENSIONS_NAMESPACE,
             invoke_on_load=True,
             invoke_args=(self.conf,)
         )
+        self.storage_conn = storage.get_connection_from_config(self.conf)
 
-    def _evaluate_assigned_alarms(self):
-        try:
-            alarms = self._assigned_alarms()
-            LOG.info(_('initiating evaluation cycle on %d alarms') %
-                     len(alarms))
-            for alarm in alarms:
-                self._evaluate_alarm(alarm)
-        except Exception:
-            LOG.exception(_('alarm evaluation cycle failed'))
-
-    def _evaluate_alarm(self, alarm):
-        """Evaluate the alarms assigned to this evaluator."""
-        if alarm.type not in self.evaluators:
-            LOG.debug('skipping alarm %s: type unsupported', alarm.alarm_id)
-            return
-
-        LOG.debug('evaluating alarm %s', alarm.alarm_id)
-        try:
-            self.evaluators[alarm.type].obj.evaluate(alarm)
-        except Exception:
-            LOG.exception(_('Failed to evaluate alarm %s'), alarm.alarm_id)
-
-    def start(self):
-        super(AlarmEvaluationService, self).start()
-
-        self.storage_conn = None
-        self._load_evaluators()
         self.partition_coordinator = coordination.PartitionCoordinator(
             self.conf)
-
         self.partition_coordinator.start()
         self.partition_coordinator.join_group(self.PARTITIONING_GROUP_NAME)
 
         # allow time for coordination if necessary
         delay_start = self.partition_coordinator.is_active()
-
-        ef = lambda: futures.ThreadPoolExecutor(max_workers=10)
-        self.periodic = periodics.PeriodicWorker.create(
-            [], executor_factory=ef)
 
         if self.evaluators:
             @periodics.periodic(spacing=self.conf.evaluation_interval,
@@ -267,25 +233,39 @@ class AlarmEvaluationService(os_service.Service):
         t.daemon = True
         t.start()
 
-        # NOTE(sileht): We have to drop eventlet to drop this last eventlet
-        # thread
-        # Add a dummy thread to have wait() working
-        self.tg.add_timer(604800, lambda: None)
+    def terminate(self):
+        self.periodic.stop()
+        self.partition_coordinator.stop()
+        self.periodic.wait()
 
-    def stop(self):
-        if getattr(self, 'periodic', None):
-            self.periodic.stop()
-            self.periodic.wait()
-        if getattr(self, 'partition_coordinator', None):
-            self.partition_coordinator.stop()
-        super(AlarmEvaluationService, self).stop()
+    def _evaluate_assigned_alarms(self):
+        try:
+            alarms = self._assigned_alarms()
+            LOG.info(_('initiating evaluation cycle on %d alarms') %
+                     len(alarms))
+            for alarm in alarms:
+                self._evaluate_alarm(alarm)
+        except Exception:
+            LOG.exception(_('alarm evaluation cycle failed'))
+
+    def _evaluate_alarm(self, alarm):
+        """Evaluate the alarms assigned to this evaluator."""
+        if alarm.type not in self.evaluators:
+            LOG.debug('skipping alarm %s: type unsupported', alarm.alarm_id)
+            return
+
+        LOG.debug('evaluating alarm %s', alarm.alarm_id)
+        try:
+            self.evaluators[alarm.type].obj.evaluate(alarm)
+        except Exception:
+            LOG.exception(_('Failed to evaluate alarm %s'), alarm.alarm_id)
 
     def _assigned_alarms(self):
         # NOTE(r-mibu): The 'event' type alarms will be evaluated by the
         # event-driven alarm evaluator, so this periodical evaluator skips
         # those alarms.
-        all_alarms = self._storage_conn.get_alarms(enabled=True,
-                                                   exclude=dict(type='event'))
+        all_alarms = self.storage_conn.get_alarms(enabled=True,
+                                                  exclude=dict(type='event'))
         all_alarms = list(all_alarms)
         all_alarm_ids = [a.alarm_id for a in all_alarms]
         selected = self.partition_coordinator.extract_my_subset(

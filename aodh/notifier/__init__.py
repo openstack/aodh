@@ -15,10 +15,10 @@
 
 import abc
 
+import cotyledon
 from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging
-from oslo_service import service as os_service
 from oslo_utils import netutils
 import six
 from stevedore import extension
@@ -66,15 +66,11 @@ class AlarmNotifier(object):
         """
 
 
-class AlarmNotifierService(os_service.Service):
+class AlarmNotifierService(cotyledon.Service):
     NOTIFIER_EXTENSIONS_NAMESPACE = "aodh.notifier"
 
-    def __init__(self, conf):
-        super(AlarmNotifierService, self).__init__()
+    def __init__(self, worker_id, conf):
         self.conf = conf
-
-    def start(self):
-        super(AlarmNotifierService, self).start()
         transport = messaging.get_transport(self.conf)
         self.notifiers = extension.ExtensionManager(
             self.NOTIFIER_EXTENSIONS_NAMESPACE,
@@ -86,14 +82,10 @@ class AlarmNotifierService(os_service.Service):
             transport, [target], [AlarmEndpoint(self.notifiers)], False,
             self.conf.notifier.batch_size, self.conf.notifier.batch_timeout)
         self.listener.start()
-        # Add a dummy thread to have wait() working
-        self.tg.add_timer(604800, lambda: None)
 
-    def stop(self):
-        if getattr(self, 'listener', None):
-            self.listener.stop()
-            self.listener.wait()
-        super(AlarmNotifierService, self).stop()
+    def terminate(self):
+        self.listener.stop()
+        self.listener.wait()
 
 
 class AlarmEndpoint(object):

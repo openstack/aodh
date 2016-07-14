@@ -18,6 +18,7 @@ import time
 
 import mock
 from oslo_config import fixture as fixture_config
+from oslotest import mockpatch
 from stevedore import extension
 
 from aodh import evaluator
@@ -34,7 +35,9 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         self.setup_messaging(self.CONF)
 
         self.threshold_eval = mock.MagicMock()
-        self.evaluators = extension.ExtensionManager.make_test_instance(
+        self._fake_conn = mock.Mock()
+        self._fake_pc = mock.Mock()
+        self._fake_em = extension.ExtensionManager.make_test_instance(
             [
                 extension.Extension(
                     'threshold',
@@ -44,14 +47,23 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
             ]
         )
 
-        self.svc = evaluator.AlarmEvaluationService(self.CONF)
-        self.svc.tg = mock.Mock()
+        self.useFixture(mockpatch.Patch(
+            'stevedore.extension.ExtensionManager',
+            return_value=self._fake_em
+        ))
+        self.useFixture(mockpatch.Patch(
+            'aodh.coordination.PartitionCoordinator',
+            return_value=self._fake_pc
+        ))
+        self.useFixture(mockpatch.Patch(
+            'aodh.storage.get_connection_from_config',
+            return_value=self._fake_conn
+        ))
 
-    @mock.patch('aodh.storage.get_connection_from_config',
-                mock.MagicMock())
     def _do_test_start(self, test_interval=120,
                        coordination_heartbeat=1.0,
                        coordination_active=False):
+
         self.CONF.set_override('evaluation_interval',
                                test_interval)
         self.CONF.set_override('heartbeat',
@@ -59,18 +71,14 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
                                group='coordination',
                                enforce_type=True)
 
-        with mock.patch('aodh.coordination.PartitionCoordinator') as m_pc:
-            m_pc.return_value.is_active.return_value = coordination_active
+        self._fake_pc.is_active.return_value = coordination_active
 
-            self.svc.start()
-            self.svc.stop()
-
-        self.svc.partition_coordinator.start.assert_called_once_with()
-        self.svc.partition_coordinator.join_group.assert_called_once_with(
-            self.svc.PARTITIONING_GROUP_NAME)
-
-        actual = self.svc.tg.add_timer.call_args_list
-        self.assertEqual([mock.call(604800, mock.ANY)], actual)
+        svc = evaluator.AlarmEvaluationService(0, self.CONF)
+        self.addCleanup(svc.terminate)
+        svc.terminate()
+        svc.partition_coordinator.start.assert_called_once_with()
+        svc.partition_coordinator.join_group.assert_called_once_with(
+            svc.PARTITIONING_GROUP_NAME)
 
     def test_start_singleton(self):
         self._do_test_start(coordination_active=False)
@@ -82,78 +90,62 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         self._do_test_start(coordination_active=True, test_interval=10,
                             coordination_heartbeat=5)
 
-    @mock.patch('stevedore.extension.ExtensionManager')
-    @mock.patch('aodh.storage.get_connection_from_config')
-    @mock.patch('aodh.coordination.PartitionCoordinator')
-    def test_evaluation_cycle(self, m_pc, m_conn, m_em):
+    def test_evaluation_cycle(self):
         alarm = mock.Mock(type='threshold', alarm_id="alarm_id1")
-        m_pc.return_value.extract_my_subset.return_value = ["alarm_id1"]
-        m_pc.return_value.is_active.return_value = False
-        m_conn.return_value.get_alarms.return_value = [alarm]
-        m_em.return_value = self.evaluators
+        self._fake_pc.extract_my_subset.return_value = ["alarm_id1"]
+        self._fake_pc.is_active.return_value = False
+        self._fake_conn.get_alarms.return_value = [alarm]
         self.threshold_eval.evaluate.side_effect = [Exception('Boom!'), None]
 
-        self.addCleanup(self.svc.stop)
-        self.svc.start()
-
+        svc = evaluator.AlarmEvaluationService(0, self.CONF)
+        self.addCleanup(svc.terminate)
         time.sleep(1)
-
-        target = self.svc.partition_coordinator.extract_my_subset
-        target.assert_called_once_with(self.svc.PARTITIONING_GROUP_NAME,
+        target = svc.partition_coordinator.extract_my_subset
+        target.assert_called_once_with(svc.PARTITIONING_GROUP_NAME,
                                        ["alarm_id1"])
         self.threshold_eval.evaluate.assert_called_once_with(alarm)
 
-    @mock.patch('stevedore.extension.ExtensionManager')
-    @mock.patch('aodh.coordination.PartitionCoordinator')
-    def test_evaluation_cycle_with_bad_alarm(self, m_pc, m_em):
-        m_pc.return_value.is_active.return_value = False
-        m_em.return_value = self.evaluators
+    def test_evaluation_cycle_with_bad_alarm(self):
 
         alarms = [
-            mock.Mock(type='threshold', name='bad'),
-            mock.Mock(type='threshold', name='good'),
+            mock.Mock(type='threshold', name='bad', alarm_id='a'),
+            mock.Mock(type='threshold', name='good', alarm_id='b'),
         ]
         self.threshold_eval.evaluate.side_effect = [Exception('Boom!'), None]
 
-        with mock.patch.object(self.svc, '_assigned_alarms',
-                               return_value=alarms):
-            self.addCleanup(self.svc.stop)
-            self.svc.start()
+        self._fake_pc.is_active.return_value = False
+        self._fake_pc.extract_my_subset.return_value = ['a', 'b']
+        self._fake_conn.get_alarms.return_value = alarms
 
-            time.sleep(1)
-
+        svc = evaluator.AlarmEvaluationService(0, self.CONF)
+        self.addCleanup(svc.terminate)
+        time.sleep(1)
         self.assertEqual([mock.call(alarms[0]), mock.call(alarms[1])],
                          self.threshold_eval.evaluate.call_args_list)
 
-    @mock.patch('stevedore.extension.ExtensionManager')
-    def test_unknown_extension_skipped(self, m_em):
-        m_em.return_value = self.evaluators
+    def test_unknown_extension_skipped(self):
         alarms = [
-            mock.Mock(type='not_existing_type'),
-            mock.Mock(type='threshold')
+            mock.Mock(type='not_existing_type', alarm_id='a'),
+            mock.Mock(type='threshold', alarm_id='b')
         ]
 
-        with mock.patch.object(self.svc, '_assigned_alarms',
-                               return_value=alarms):
-            self.addCleanup(self.svc.stop)
-            self.svc.start()
-            time.sleep(1)
-            self.threshold_eval.evaluate.assert_called_once_with(alarms[1])
+        self._fake_pc.is_active.return_value = False
+        self._fake_pc.extract_my_subset.return_value = ['a', 'b']
+        self._fake_conn.get_alarms.return_value = alarms
 
-    @mock.patch('stevedore.extension.ExtensionManager')
-    @mock.patch('aodh.coordination.PartitionCoordinator')
-    @mock.patch('aodh.storage.get_connection_from_config')
-    def test_check_alarm_query_constraints(self, m_conn, m_pc, m_em):
-        m_conn.return_value.get_alarms.return_value = []
-        m_pc.return_value.extract_my_subset.return_value = []
-        m_pc.return_value.is_active.return_value = False
-        m_em.return_value = self.evaluators
-
-        self.addCleanup(self.svc.stop)
-        self.svc.start()
-
+        svc = evaluator.AlarmEvaluationService(0, self.CONF)
+        self.addCleanup(svc.terminate)
         time.sleep(1)
+        self.threshold_eval.evaluate.assert_called_once_with(alarms[1])
 
+    def test_check_alarm_query_constraints(self):
+        self._fake_conn.get_alarms.return_value = []
+        self._fake_pc.extract_my_subset.return_value = []
+        self._fake_pc.is_active.return_value = False
+
+        svc = evaluator.AlarmEvaluationService(0, self.CONF)
+        self.addCleanup(svc.terminate)
+        time.sleep(1)
         expected = [({'enabled': True, 'exclude': {'type': 'event'}},)]
         self.assertEqual(expected,
-                         self.svc.storage_conn.get_alarms.call_args_list)
+                         svc.storage_conn.get_alarms.call_args_list)
