@@ -23,7 +23,7 @@ AODH_SERVICE_PORT=${AODH_SERVICE_PORT:-8042}
 
 # AODH_DEPLOY defines how Aodh is deployed, allowed values:
 # - mod_wsgi : Run Aodh under Apache HTTPd mod_wsgi
-# - werkzeug : Run aodh-api
+# - simple : Run aodh-api
 # - uwsgi : Run Aodh under uwsgi
 # - <empty>: Fallback to AODH_USE_MOD_WSGI or ENABLE_HTTPD_MOD_WSGI_SERVICES
 AODH_DEPLOY=${AODH_DEPLOY}

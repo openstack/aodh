@@ -19,9 +19,5 @@
 See http://pecan.readthedocs.org/en/latest/deployment.html for details.
 """
 from aodh.api import app
-from aodh import service
 
-
-# Initialize the oslo configuration library and logging
-conf = service.prepare_service([])
-application = app.load_app(conf)
+application = app.build_wsgi_app(argv=[])

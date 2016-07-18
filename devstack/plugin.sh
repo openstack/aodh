@@ -23,7 +23,7 @@ fi
 
 if [ -z "$AODH_DEPLOY" ]; then
     # Default
-    AODH_DEPLOY=werkzeug
+    AODH_DEPLOY=simple
 
     # Fallback to common wsgi devstack configuration
     if [ "$ENABLE_HTTPD_MOD_WSGI_SERVICES" == "True" ]; then
