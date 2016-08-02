@@ -19,6 +19,7 @@ import operator
 import six
 
 from ceilometerclient import client as ceiloclient
+from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
 
@@ -38,11 +39,20 @@ COMPARATORS = {
     'ne': operator.ne,
 }
 
+OPTS = [
+    cfg.IntOpt('additional_ingestion_lag',
+               min=0,
+               default=0,
+               help='The number of seconds to extend the evaluation windows '
+               'to compensate the reporting/ingestion lag.')
+]
+
 
 class ThresholdEvaluator(evaluator.Evaluator):
 
     # the sliding evaluation window is extended to allow
-    # for reporting/ingestion lag
+    # the reporting/ingestion lag this can be increased
+    # with 'additional_ingestion_lag' seconds if needed.
     look_back = 1
 
     def __init__(self, conf):
@@ -63,17 +73,17 @@ class ThresholdEvaluator(evaluator.Evaluator):
 
         return self._cm_client
 
-    @classmethod
-    def _bound_duration(cls, rule):
+    def _bound_duration(self, rule):
         """Bound the duration of the statistics query."""
         now = timeutils.utcnow()
         # when exclusion of weak datapoints is enabled, we extend
         # the look-back period so as to allow a clearer sample count
         # trend to be established
-        look_back = (cls.look_back if not rule.get('exclude_outliers')
+        look_back = (self.look_back if not rule.get('exclude_outliers')
                      else rule['evaluation_periods'])
         window = ((rule.get('period', None) or rule['granularity'])
-                  * (rule['evaluation_periods'] + look_back))
+                  * (rule['evaluation_periods'] + look_back) +
+                  self.conf.additional_ingestion_lag)
         start = now - datetime.timedelta(seconds=window)
         LOG.debug('query stats from %(start)s to '
                   '%(now)s', {'start': start, 'now': now})
