@@ -47,12 +47,19 @@ def get_client(conf):
 def get_trusted_client(conf, trust_id):
     # Ideally we would use load_session_from_conf_options, but we can't do that
     # *and* specify a trust, so let's create the object manually.
-    auth_plugin = password.Password(
-        username=conf[CFG_GROUP].username,
-        password=conf[CFG_GROUP].password,
-        auth_url=conf[CFG_GROUP].auth_url,
-        user_domain_id=conf[CFG_GROUP].user_domain_id,
-        trust_id=trust_id)
+    if conf[CFG_GROUP].auth_type == "password-aodh-legacy":
+        auth_plugin = password.Password(
+            username=conf[CFG_GROUP].os_username,
+            password=conf[CFG_GROUP].os_password,
+            auth_url=conf[CFG_GROUP].os_auth_url,
+            trust_id=trust_id)
+    else:
+        auth_plugin = password.Password(
+            username=conf[CFG_GROUP].username,
+            password=conf[CFG_GROUP].password,
+            auth_url=conf[CFG_GROUP].auth_url,
+            user_domain_id=conf[CFG_GROUP].user_domain_id,
+            trust_id=trust_id)
 
     sess = session.Session(auth=auth_plugin)
     return ks_client_v3.Client(session=sess)
