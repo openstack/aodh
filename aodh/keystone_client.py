@@ -51,6 +51,8 @@ def get_trusted_client(conf, trust_id):
         auth_plugin = password.Password(
             username=conf[CFG_GROUP].os_username,
             password=conf[CFG_GROUP].os_password,
+            project_id=conf[CFG_GROUP].os_tenant_id,
+            project_name=conf[CFG_GROUP].os_tenant_name,
             auth_url=conf[CFG_GROUP].os_auth_url,
             trust_id=trust_id)
     else:
