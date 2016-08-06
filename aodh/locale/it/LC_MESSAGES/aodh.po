@@ -3,9 +3,9 @@
 # KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev159\n"
+"Project-Id-Version: aodh 3.0.0.0b3.dev7\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-07-07 08:45+0000\n"
+"POT-Creation-Date: 2016-08-05 09:48+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -73,9 +73,6 @@ msgstr ""
 msgid "Combined state of alarms %s"
 msgstr "Stato combinato di segnalazioni %s"
 
-msgid "Configuration:"
-msgstr "Configurazione:"
-
 #, python-format
 msgid "Connecting to %(db)s on %(nodelist)s"
 msgstr "Connessione a %(db)s su %(nodelist)s in corso"
@@ -133,10 +130,6 @@ msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr ""
 "Convalida di %(state)s a causa di segnalazioni %(alarm_ids)s nello stato "
 "%(state)s"
-
-#, python-format
-msgid "Starting server in PID %s"
-msgstr "Avvio server in PID %s"
 
 #, python-format
 msgid "String %s is not a valid isotime"
@@ -214,16 +207,6 @@ msgstr "segnalazione richiamo statistiche non riuscito"
 #, python-format
 msgid "initiating evaluation cycle on %d alarms"
 msgstr "avvio ciclo di valutazione sulle segnalazioni %d"
-
-#, python-format
-msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
-msgstr ""
-"utilizzo su 0.0.0.0:%(sport)s, visualizzare all'indirizzo http://127.0.0.1:"
-"%(vport)s"
-
-#, python-format
-msgid "serving on http://%(host)s:%(port)s"
-msgstr "utilizzo su http://%(host)s:%(port)s"
 
 msgid "state invalid"
 msgstr "stato non valido"
