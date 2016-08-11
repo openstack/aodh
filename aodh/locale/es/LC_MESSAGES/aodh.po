@@ -5,9 +5,9 @@
 # Eugènia Torrella <tester03@es.ibm.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev110\n"
+"Project-Id-Version: aodh 3.0.0.0b3.dev7\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-05-24 07:52+0000\n"
+"POT-Creation-Date: 2016-08-05 09:48+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -75,9 +75,6 @@ msgstr "No se puede especificar la propia alarma %s en la regla de combinación"
 msgid "Combined state of alarms %s"
 msgstr "Estado combinado de alarmas %s"
 
-msgid "Configuration:"
-msgstr "Configuración:"
-
 #, python-format
 msgid "Connecting to %(db)s on %(nodelist)s"
 msgstr "Se está estableciendo conexión con %(db)s en %(nodelist)s"
@@ -135,10 +132,6 @@ msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr ""
 "Permaneciendo como %(state)s debido a las alarmas %(alarm_ids)s en el estado "
 "%(state)s"
-
-#, python-format
-msgid "Starting server in PID %s"
-msgstr "Iniciando servidor en PID %s"
 
 #, python-format
 msgid "String %s is not a valid isotime"
@@ -216,14 +209,6 @@ msgstr "ha fallado la recuperación de estadísticas de la alarma"
 #, python-format
 msgid "initiating evaluation cycle on %d alarms"
 msgstr "inicio del ciclo de evaluación en %d alarmas"
-
-#, python-format
-msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
-msgstr "sirviendo en 0.0.0.0:%(sport)s, vista en http://127.0.0.1:%(vport)s"
-
-#, python-format
-msgid "serving on http://%(host)s:%(port)s"
-msgstr "sirviendo en http://%(host)s:%(port)s"
 
 msgid "state invalid"
 msgstr "estado no válido"

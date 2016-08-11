@@ -3,9 +3,9 @@
 # KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev159\n"
+"Project-Id-Version: aodh 3.0.0.0b3.dev7\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-07-07 08:45+0000\n"
+"POT-Creation-Date: 2016-08-05 09:48+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -70,9 +70,6 @@ msgstr "無法在組合規則中指定警示 %s 本身"
 msgid "Combined state of alarms %s"
 msgstr "警示 %s 的合併狀態"
 
-msgid "Configuration:"
-msgstr "配置："
-
 #, python-format
 msgid "Connecting to %(db)s on %(nodelist)s"
 msgstr "正在連接至 %(nodelist)s 上的 %(db)s"
@@ -128,10 +125,6 @@ msgstr ""
 #, python-format
 msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr "保持 %(state)s，因為警示 %(alarm_ids)s 處於狀態 %(state)s"
-
-#, python-format
-msgid "Starting server in PID %s"
-msgstr "正在以 PID %s 啟動伺服器"
 
 #, python-format
 msgid "String %s is not a valid isotime"
@@ -200,15 +193,6 @@ msgstr "警示統計資料擷取失敗"
 #, python-format
 msgid "initiating evaluation cycle on %d alarms"
 msgstr "正在 %d 個警示上起始評估週期"
-
-#, python-format
-msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
-msgstr ""
-"正在於 0.0.0.0:%(sport)s 提供服務，可在 http://127.0.0.1:%(vport)s 檢視"
-
-#, python-format
-msgid "serving on http://%(host)s:%(port)s"
-msgstr "正在於 http://%(host)s:%(port)s 提供服務"
 
 msgid "state invalid"
 msgstr "狀態無效"

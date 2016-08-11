@@ -1,13 +1,12 @@
 # Lucas Palm <lapalm@us.ibm.com>, 2015. #zanata
 # OpenStack Infra <zanata@openstack.org>, 2015. #zanata
-# Alex Eng <loones1595@gmail.com>, 2016. #zanata
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
 # KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev159\n"
+"Project-Id-Version: aodh 3.0.0.0b3.dev7\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-07-07 08:45+0000\n"
+"POT-Creation-Date: 2016-08-05 09:48+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -76,9 +75,6 @@ msgstr "无法在组合规则中指定告警%s自身"
 msgid "Combined state of alarms %s"
 msgstr "将告警%s的状态进行组合"
 
-msgid "Configuration:"
-msgstr "配置"
-
 #, python-format
 msgid "Connecting to %(db)s on %(nodelist)s"
 msgstr "连接到%(nodelist)s节点的数据库%(db)s。"
@@ -134,10 +130,6 @@ msgstr ""
 #, python-format
 msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr "停留在状态%(state)s因为告警%(alarm_ids)s处于状态%(state)s"
-
-#, python-format
-msgid "Starting server in PID %s"
-msgstr "正在启动服务进程PID %s"
 
 #, python-format
 msgid "String %s is not a valid isotime"
@@ -214,15 +206,6 @@ msgstr "检测到重复的动作：%s，已去除重复的内容"
 #, python-format
 msgid "initiating evaluation cycle on %d alarms"
 msgstr "在 %d 个警报上初始化评估周期"
-
-#, python-format
-msgid "serving on 0.0.0.0:%(sport)s, view at http://127.0.0.1:%(vport)s"
-msgstr ""
-"服务在0.0.0.0:%(sport)s上运行，可以通过http://127.0.0.1:%(vport)s来查看"
-
-#, python-format
-msgid "serving on http://%(host)s:%(port)s"
-msgstr "在 http://%(host)s:%(port)s上服务"
 
 msgid "state invalid"
 msgstr "状态无效"
