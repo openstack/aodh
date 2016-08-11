@@ -23,7 +23,7 @@ from oslo_utils import netutils
 import pymongo
 import retrying
 
-from aodh.i18n import _
+from aodh.i18n import _LI, _LW
 
 LOG = log.getLogger(__name__)
 
@@ -74,7 +74,7 @@ class ConnectionPool(object):
         splitted_url = netutils.urlsplit(url)
         log_data = {'db': splitted_url.scheme,
                     'nodelist': connection_options['nodelist']}
-        LOG.info(_('Connecting to %(db)s on %(nodelist)s') % log_data)
+        LOG.info(_LI('Connecting to %(db)s on %(nodelist)s'), log_data)
         try:
             client = MongoProxy(
                 pymongo.MongoClient(url),
@@ -82,8 +82,8 @@ class ConnectionPool(object):
                 retry_interval,
             )
         except pymongo.errors.ConnectionFailure as e:
-            LOG.warning(_('Unable to connect to the database server: '
-                        '%(errmsg)s.') % {'errmsg': e})
+            LOG.warning(_LW('Unable to connect to the database server: '
+                            '%(errmsg)s.'), {'errmsg': e})
             raise
         self._pool[pool_key] = weakref.ref(client)
         return client

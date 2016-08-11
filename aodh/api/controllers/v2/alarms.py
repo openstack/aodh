@@ -43,7 +43,7 @@ from aodh.api.controllers.v2.alarm_rules import combination
 from aodh.api.controllers.v2 import base
 from aodh.api.controllers.v2 import utils as v2_utils
 from aodh.api import rbac
-from aodh.i18n import _
+from aodh.i18n import _, _LI, _LE
 from aodh import keystone_client
 from aodh import messaging
 from aodh import notifier
@@ -321,8 +321,8 @@ class Alarm(base.Base):
 
             action_set = set(actions)
             if len(actions) != len(action_set):
-                LOG.info(_('duplicate actions are found: %s, '
-                           'remove duplicate ones') % actions)
+                LOG.info(_LI('duplicate actions are found: %s, '
+                             'remove duplicate ones'), actions)
                 actions = list(action_set)
                 setattr(alarm, actions_name, actions)
 
@@ -604,7 +604,7 @@ class AlarmController(rest.RestController):
         try:
             alarm_in = models.Alarm(**updated_alarm)
         except Exception:
-            LOG.exception(_("Error while putting alarm: %s") % updated_alarm)
+            LOG.exception(_LE("Error while putting alarm: %s"), updated_alarm)
             raise base.ClientSideError(_("Alarm incorrect"))
 
         alarm = pecan.request.storage.update_alarm(alarm_in)
@@ -767,7 +767,7 @@ class AlarmsController(rest.RestController):
         try:
             alarm_in = models.Alarm(**change)
         except Exception:
-            LOG.exception(_("Error while posting alarm: %s") % change)
+            LOG.exception(_LE("Error while posting alarm: %s"), change)
             raise base.ClientSideError(_("Alarm incorrect"))
 
         alarm = conn.create_alarm(alarm_in)

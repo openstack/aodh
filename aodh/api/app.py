@@ -23,6 +23,7 @@ import pecan
 
 from aodh.api import hooks
 from aodh.api import middleware
+from aodh.i18n import _LI
 from aodh import service
 from aodh import storage
 
@@ -70,7 +71,7 @@ def load_app(conf):
 
     if not cfg_file:
         raise cfg.ConfigFilesNotFoundError([conf.api.paste_config])
-    LOG.info("Full WSGI config used: %s" % cfg_file)
+    LOG.info(_LI("Full WSGI config used: %s"), cfg_file)
     return deploy.loadapp("config:" + cfg_file)
 
 
