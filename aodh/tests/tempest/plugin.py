@@ -40,5 +40,8 @@ class AodhTempestPlugin(plugins.TempestPlugin):
                                   tempest_config.AlarmingGroup)
 
     def get_opt_lists(self):
-        return [(tempest_config.alarming_group.name,
-                 tempest_config.AlarmingGroup)]
+        return [
+            (tempest_config.alarming_group.name,
+             tempest_config.AlarmingGroup),
+            ('service_available', tempest_config.ServiceAvailableGroup)
+        ]
