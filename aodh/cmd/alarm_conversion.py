@@ -15,7 +15,6 @@
 """
 
 import datetime
-from six import moves
 import uuid
 
 import argparse
@@ -89,12 +88,6 @@ def get_parser():
 
 
 def conversion():
-    confirm = moves.input("This tool is used for converting the combination "
-                          "alarms to composite alarms, please type 'yes' to "
-                          "confirm: ")
-    if confirm != 'yes':
-        print("Alarm conversion aborted!")
-        return
     args = get_parser().parse_args()
     conf = service.prepare_service()
     conn = storage.get_connection_from_config(conf)
