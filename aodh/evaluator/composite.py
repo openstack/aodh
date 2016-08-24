@@ -14,7 +14,7 @@
 
 from oslo_log import log
 import six
-from stevedore import NamedExtensionManager
+import stevedore
 
 from aodh import evaluator
 from aodh.i18n import _
@@ -115,7 +115,7 @@ class CompositeEvaluator(evaluator.Evaluator):
             threshold_types = ('threshold', 'gnocchi_resources_threshold',
                                'gnocchi_aggregation_by_metrics_threshold',
                                'gnocchi_aggregation_by_resources_threshold')
-            self._threshold_evaluators = NamedExtensionManager(
+            self._threshold_evaluators = stevedore.NamedExtensionManager(
                 'aodh.evaluator', threshold_types, invoke_on_load=True,
                 invoke_args=(self.conf,))
         return self._threshold_evaluators
