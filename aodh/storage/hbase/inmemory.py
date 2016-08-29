@@ -114,7 +114,7 @@ class MTable(object):
                 else:
                     raise aodh.NotImplementedError(
                         "%s filter is not implemented, "
-                        "you may want to add it!")
+                        "you may want to add it!" % filter)
         for k in sorted(rows)[:limit]:
             yield k, rows[k]
 
