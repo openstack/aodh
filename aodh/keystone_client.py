@@ -16,6 +16,7 @@
 import os
 
 
+from keystoneauth1 import discover as ka_discover
 from keystoneauth1 import exceptions as ka_exception
 from keystoneauth1 import identity as ka_identity
 from keystoneauth1.identity.generic import password
@@ -48,12 +49,22 @@ def get_trusted_client(conf, trust_id):
     # Ideally we would use load_session_from_conf_options, but we can't do that
     # *and* specify a trust, so let's create the object manually.
     if conf[CFG_GROUP].auth_type == "password-aodh-legacy":
+        auth_url = conf[CFG_GROUP].os_auth_url
+        try:
+            auth_url_noneversion = auth_url.replace('/v2.0', '/')
+            discover = ka_discover.Discover(auth_url=auth_url_noneversion)
+            v3_auth_url = discover.url_for('3.0')
+            if v3_auth_url:
+                auth_url = v3_auth_url
+            else:
+                auth_url = auth_url
+        except Exception:
+            auth_url = auth_url.replace('/v2.0', '/v3')
         auth_plugin = password.Password(
             username=conf[CFG_GROUP].os_username,
             password=conf[CFG_GROUP].os_password,
-            project_id=conf[CFG_GROUP].os_tenant_id,
-            project_name=conf[CFG_GROUP].os_tenant_name,
-            auth_url=conf[CFG_GROUP].os_auth_url,
+            auth_url=auth_url,
+            user_domain_id='default',
             trust_id=trust_id)
     else:
         auth_plugin = password.Password(
