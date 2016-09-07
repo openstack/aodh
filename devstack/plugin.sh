@@ -324,7 +324,7 @@ function start_aodh {
     elif [ "$AODH_DEPLOY" == "uwsgi" ]; then
         run_process aodh-api "$AODH_BIN_DIR/uwsgi $AODH_UWSGI_FILE"
     else
-        run_process aodh-api "$AODH_BIN_DIR/aodh-api -d -v --config-file $AODH_CONF"
+        run_process aodh-api "$AODH_BIN_DIR/aodh-api"
     fi
 
     # Only die on API if it was actually intended to be turned on
