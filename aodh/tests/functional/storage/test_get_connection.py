@@ -18,7 +18,6 @@
 import mock
 from oslo_config import fixture as fixture_config
 from oslotest import base
-import retrying
 
 from aodh import service
 from aodh import storage
@@ -59,27 +58,25 @@ class ConnectionRetryTest(base.BaseTestCase):
     def test_retries(self):
         max_retries = 5
         with mock.patch.object(
-                retrying.Retrying, 'should_reject') as retry_reject:
-            with mock.patch.object(
-                    storage.impl_log.Connection, '__init__') as log_init:
+                storage.impl_log.Connection, '__init__') as log_init:
 
-                class ConnectionError(Exception):
-                    pass
+            class ConnectionError(Exception):
+                pass
 
-                def x(a, b):
-                    raise ConnectionError
+            def x(a, b):
+                raise ConnectionError
 
-                log_init.side_effect = x
-                self.CONF.set_override("connection", "log://", "database",
-                                       enforce_type=True)
-                self.CONF.set_override("retry_interval", 0.00001, "database",
-                                       enforce_type=True)
-                self.CONF.set_override("max_retries", max_retries, "database",
-                                       enforce_type=True)
-                self.assertRaises(ConnectionError,
-                                  storage.get_connection_from_config,
-                                  self.CONF)
-                self.assertEqual(max_retries, retry_reject.call_count)
+            log_init.side_effect = x
+            self.CONF.set_override("connection", "log://", "database",
+                                   enforce_type=True)
+            self.CONF.set_override("retry_interval", 0.00001, "database",
+                                   enforce_type=True)
+            self.CONF.set_override("max_retries", max_retries, "database",
+                                   enforce_type=True)
+            self.assertRaises(ConnectionError,
+                              storage.get_connection_from_config,
+                              self.CONF)
+            self.assertEqual(max_retries, log_init.call_count)
 
 
 class ConnectionConfigTest(base.BaseTestCase):
