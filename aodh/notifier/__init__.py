@@ -69,6 +69,7 @@ class AlarmNotifierService(cotyledon.Service):
     NOTIFIER_EXTENSIONS_NAMESPACE = "aodh.notifier"
 
     def __init__(self, worker_id, conf):
+        super(AlarmNotifierService, self).__init__(worker_id)
         self.conf = conf
         transport = messaging.get_transport(self.conf)
         self.notifiers = extension.ExtensionManager(
