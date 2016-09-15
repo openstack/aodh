@@ -386,6 +386,25 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.assertEqual(self.zaqar,
                          self.service.notifiers['zaqar'].obj.client)
 
+    def test_presigned_zaqar_notifier_action(self):
+        with mock.patch.object(notifier.zaqar.ZaqarAlarmNotifier,
+                               'get_presigned_client') as zaqar_client:
+            zaqar_client.return_value = self.zaqar, 'foobar-critical'
+            action = 'zaqar://?topic=critical&' \
+                     'subscriber=http://example.com/data' \
+                     '&subscriber=mailto:foo@example.com&ttl=7200' \
+                     '&signature=mysignature&expires=2016-06-29T01:49:56' \
+                     '&paths=/v2/queues/beijing/messages' \
+                     '&methods=GET,PATCH,POST,PUT&queue_name=foobar-critical' \
+                     '&project_id=my_project_id'
+            self._msg_notifier.sample({}, 'alarm.update',
+                                      self._notification(action))
+            time.sleep(1)
+            self.assertEqual(zaqar_client.return_value[0],
+                             self.service.notifiers['zaqar'].obj.client)
+            queue_info = urlparse.parse_qs(urlparse.urlparse(action).query)
+            zaqar_client.assert_called_with(queue_info)
+
 
 class FakeZaqarClient(object):
 
