@@ -3,12 +3,13 @@
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 3.0.0.0b3.dev7\n"
+"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-08-05 09:48+0000\n"
+"POT-Creation-Date: 2016-09-14 17:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -73,26 +74,6 @@ msgid "Combined state of alarms %s"
 msgstr "Etat combiné des alarmes %s"
 
 #, python-format
-msgid "Connecting to %(db)s on %(nodelist)s"
-msgstr "Connexion à %(db)s sur %(nodelist)s"
-
-#, python-format
-msgid "Error parsing HTTP response: %s"
-msgstr "Erreur lors de l'analyse syntaxique de la réponse: %s"
-
-#, python-format
-msgid "Error while posting alarm: %s"
-msgstr "Erreur lors de l'envoi de l'alarme : %s"
-
-#, python-format
-msgid "Error while putting alarm: %s"
-msgstr "Erreur lors du placement de l'alarme: %s"
-
-#, python-format
-msgid "Failed to evaluate alarm %s"
-msgstr "Echec de l'évaluation de l'alarme %s"
-
-#, python-format
 msgid "Failed to parse the timestamp value %s"
 msgstr "Echec de l'analyse syntaxique de la valeur d'horodatage %s"
 
@@ -132,10 +113,6 @@ msgstr ""
 "l'état %(state)s."
 
 #, python-format
-msgid "String %s is not a valid isotime"
-msgstr "La chaine de caractère %s n'est pas valide isotime"
-
-#, python-format
 msgid ""
 "The data type %(type)s is not supported. The supported data type list is: "
 "%(supported)s"
@@ -166,10 +143,6 @@ msgstr ""
 "%(state)s"
 
 #, python-format
-msgid "Unable to connect to the database server: %(errmsg)s."
-msgstr "Impossible de se connecter au serveur de base de données : %(errmsg)s."
-
-#, python-format
 msgid ""
 "Unable to convert the value %(value)s to the expected data type %(type)s."
 msgstr ""
@@ -191,22 +164,8 @@ msgstr ""
 msgid "Unsupported action %s"
 msgstr "Action non supporté %s"
 
-#, python-format
-msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
-msgstr "alerte %(id)s en transition vers %(state)s parce que %(reason)s"
-
-msgid "alarm evaluation cycle failed"
-msgstr "Échec du cycle d'évaluation de l'alarme"
-
-msgid "alarm state update failed"
-msgstr "Échec de la mise à jour de l'état de l'alerte"
-
 msgid "alarm stats retrieval failed"
 msgstr "Échec de la récupération de l'état de l'alerte"
-
-#, python-format
-msgid "initiating evaluation cycle on %d alarms"
-msgstr "Initialisation du cycle d'évaluation sur les alertes %d"
 
 msgid "state invalid"
 msgstr "Etat non valide"

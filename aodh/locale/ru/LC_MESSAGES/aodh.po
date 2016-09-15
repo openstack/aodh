@@ -8,9 +8,9 @@
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 3.0.0.0b3.dev7\n"
+"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-08-05 09:48+0000\n"
+"POT-Creation-Date: 2016-09-14 17:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -86,26 +86,6 @@ msgid "Combined state of alarms %s"
 msgstr "смешанное  состояние тревоги %s"
 
 #, python-format
-msgid "Connecting to %(db)s on %(nodelist)s"
-msgstr "Подключение к %(db)s  на %(nodelist)s"
-
-#, python-format
-msgid "Error parsing HTTP response: %s"
-msgstr "Ошибка ввода HTTP кода: %s"
-
-#, python-format
-msgid "Error while posting alarm: %s"
-msgstr "Ошибка при отправке сигнала  тревоги: %s"
-
-#, python-format
-msgid "Error while putting alarm: %s"
-msgstr "Ошибка во время установки  тревоги: %s"
-
-#, python-format
-msgid "Failed to evaluate alarm %s"
-msgstr "не удалось определить тип тревоги %s"
-
-#, python-format
 msgid "Failed to parse the timestamp value %s"
 msgstr "Не удалось разобрать значение временной метки %s"
 
@@ -148,10 +128,6 @@ msgstr ""
 "%(alarm_ids)s"
 
 #, python-format
-msgid "String %s is not a valid isotime"
-msgstr "Строка %s  временно не активна"
-
-#, python-format
 msgid ""
 "The data type %(type)s is not supported. The supported data type list is: "
 "%(supported)s"
@@ -180,10 +156,6 @@ msgstr ""
 "Переход  %(state)s из состояния тревоги %(alarm_ids)s в  положение %(state)s"
 
 #, python-format
-msgid "Unable to connect to the database server: %(errmsg)s."
-msgstr "Не удается подключиться к серверу базы данных: %(errmsg)s. "
-
-#, python-format
 msgid ""
 "Unable to convert the value %(value)s to the expected data type %(type)s."
 msgstr ""
@@ -209,27 +181,8 @@ msgstr "не поддерживается действие %s"
 msgid "You are not authorized to create action: %s"
 msgstr "Вы не авторизованы, чтобы деиствовать: %s"
 
-#, python-format
-msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
-msgstr ""
-"Сигнализация %(id)s приводится в действие %(state)s потому что %(reason)s"
-
-msgid "alarm evaluation cycle failed"
-msgstr "Оценка цикла тревог не удался"
-
-msgid "alarm state update failed"
-msgstr "сигнал тревоги определить не удалось  "
-
 msgid "alarm stats retrieval failed"
 msgstr "Статистика сигнал оповещения  не получен"
-
-#, python-format
-msgid "duplicate actions are found: %s, remove duplicate ones"
-msgstr "дублирующие действия найдены в: %s, удалить дубликаты из них"
-
-#, python-format
-msgid "initiating evaluation cycle on %d alarms"
-msgstr "приступим к оценке цикла  %d alarms"
 
 msgid "state invalid"
 msgstr "Неправильное состояние"

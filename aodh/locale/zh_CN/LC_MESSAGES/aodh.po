@@ -4,9 +4,9 @@
 # KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 3.0.0.0b3.dev7\n"
+"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-08-05 09:48+0000\n"
+"POT-Creation-Date: 2016-09-14 17:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -76,26 +76,6 @@ msgid "Combined state of alarms %s"
 msgstr "将告警%s的状态进行组合"
 
 #, python-format
-msgid "Connecting to %(db)s on %(nodelist)s"
-msgstr "连接到%(nodelist)s节点的数据库%(db)s。"
-
-#, python-format
-msgid "Error parsing HTTP response: %s"
-msgstr "解析HTTP响应失败: %s"
-
-#, python-format
-msgid "Error while posting alarm: %s"
-msgstr "创建告警%s时遇到错误"
-
-#, python-format
-msgid "Error while putting alarm: %s"
-msgstr "修改告警%s时遇到错误"
-
-#, python-format
-msgid "Failed to evaluate alarm %s"
-msgstr "评估告警%s时失败了"
-
-#, python-format
 msgid "Failed to parse the timestamp value %s"
 msgstr "解析时间戳%s失败"
 
@@ -132,10 +112,6 @@ msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr "停留在状态%(state)s因为告警%(alarm_ids)s处于状态%(state)s"
 
 #, python-format
-msgid "String %s is not a valid isotime"
-msgstr "字符串%s不是个合法的标准时间格式"
-
-#, python-format
 msgid ""
 "The data type %(type)s is not supported. The supported data type list is: "
 "%(supported)s"
@@ -161,10 +137,6 @@ msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr "迁移到状态%(state)s，因为告警%(alarm_ids)s处于状态%(state)s"
 
 #, python-format
-msgid "Unable to connect to the database server: %(errmsg)s."
-msgstr "无法连接到数据库服务器：%(errmsg)s。"
-
-#, python-format
 msgid ""
 "Unable to convert the value %(value)s to the expected data type %(type)s."
 msgstr "无法转换%(value)s到预期的数据类型%(type)s。"
@@ -186,26 +158,8 @@ msgstr "动作%s不支持"
 msgid "You are not authorized to create action: %s"
 msgstr "你没有权限创建动作：%s"
 
-#, python-format
-msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
-msgstr "因为 %(reason)s, 警报 %(id)s 转换至 %(state)s "
-
-msgid "alarm evaluation cycle failed"
-msgstr "警报周期评估失败"
-
-msgid "alarm state update failed"
-msgstr "警报状态更新失败"
-
 msgid "alarm stats retrieval failed"
 msgstr "警报统计信息获取失败"
-
-#, python-format
-msgid "duplicate actions are found: %s, remove duplicate ones"
-msgstr "检测到重复的动作：%s，已去除重复的内容"
-
-#, python-format
-msgid "initiating evaluation cycle on %d alarms"
-msgstr "在 %d 个警报上初始化评估周期"
 
 msgid "state invalid"
 msgstr "状态无效"

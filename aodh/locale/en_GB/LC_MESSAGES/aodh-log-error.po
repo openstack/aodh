@@ -2,13 +2,13 @@
 # Andi Chandler <andi@gowling.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 2.0.1.dev132\n"
+"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-06-03 17:01+0000\n"
+"POT-Creation-Date: 2016-09-14 17:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2016-06-03 09:23+0000\n"
+"PO-Revision-Date: 2016-09-07 11:09+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>\n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en-GB\n"
@@ -39,11 +39,27 @@ msgstr "Error joining partitioning group %s, re-trying"
 msgid "Error occurred when joining partitioning group"
 msgstr "Error occurred when joining partitioning group"
 
+#, python-format
+msgid "Error parsing HTTP response: %s"
+msgstr "Error parsing HTTP response: %s"
+
 msgid "Error sending a heartbeat to coordination backend."
 msgstr "Error sending a heartbeat to coordination backend."
 
+#, python-format
+msgid "Error while posting alarm: %s"
+msgstr "Error while posting alarm: %s"
+
+#, python-format
+msgid "Error while putting alarm: %s"
+msgstr "Error while putting alarm: %s"
+
 msgid "Failed to connect to Zaqar service "
 msgstr "Failed to connect to Zaqar service "
+
+#, python-format
+msgid "Failed to evaluate alarm %s"
+msgstr "Failed to evaluate alarm %s"
 
 #, python-format
 msgid "Failed to evaluate alarm (id=%(a)s) triggered by event = %(e)s."
@@ -57,11 +73,12 @@ msgstr "Failed to extract event_type from event = %s"
 msgid "Failed to extract message_id from event = %s"
 msgstr "Failed to extract message_id from event = %s"
 
+#, python-format
 msgid ""
-"Group ID: %{group_id}s, Members: %{members}s, Me: %{me}s: Current agent is "
+"Group ID: %(group_id)s, Members: %(members)s, Me: %(me)s: Current agent is "
 "not part of group and cannot take tasks"
 msgstr ""
-"Group ID: %{group_id}s, Members: %{members}s, Me: %{me}s: Current agent is "
+"Group ID: %(group_id)s, Members: %(members)s, Me: %(me)s: Current agent is "
 "not part of group and cannot take tasks"
 
 #, python-format
@@ -88,6 +105,10 @@ msgid "Required topic query option missing in action %s"
 msgstr "Required topic query option missing in action %s"
 
 #, python-format
+msgid "String %s is not a valid isotime"
+msgstr "String %s is not a valid isotime"
+
+#, python-format
 msgid "Unable to notify alarm %s"
 msgstr "Unable to notify alarm %s"
 
@@ -108,3 +129,9 @@ msgstr "alarm %s doesn't exist anymore"
 #, python-format
 msgid "alarm %s retrieval failed"
 msgstr "alarm %s retrieval failed"
+
+msgid "alarm evaluation cycle failed"
+msgstr "alarm evaluation cycle failed"
+
+msgid "alarm state update failed"
+msgstr "alarm state update failed"

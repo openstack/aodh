@@ -3,13 +3,13 @@
 # KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 3.0.0.0b3.dev7\n"
+"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-08-05 09:48+0000\n"
+"POT-Creation-Date: 2016-09-14 17:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2016-06-17 02:25+0000\n"
+"PO-Revision-Date: 2016-06-03 07:04+0000\n"
 "Last-Translator: KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>\n"
 "Language-Team: Chinese (Taiwan)\n"
 "Language: zh-TW\n"
@@ -71,26 +71,6 @@ msgid "Combined state of alarms %s"
 msgstr "警示 %s 的合併狀態"
 
 #, python-format
-msgid "Connecting to %(db)s on %(nodelist)s"
-msgstr "正在連接至 %(nodelist)s 上的 %(db)s"
-
-#, python-format
-msgid "Error parsing HTTP response: %s"
-msgstr "剖析 HTTP 回應時發生錯誤：%s"
-
-#, python-format
-msgid "Error while posting alarm: %s"
-msgstr "公佈警示時發生錯誤：%s"
-
-#, python-format
-msgid "Error while putting alarm: %s"
-msgstr "放置警示時發生錯誤：%s"
-
-#, python-format
-msgid "Failed to evaluate alarm %s"
-msgstr "無法評估警示 %s"
-
-#, python-format
 msgid "Failed to parse the timestamp value %s"
 msgstr "無法剖析時間戳記值 %s"
 
@@ -127,10 +107,6 @@ msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr "保持 %(state)s，因為警示 %(alarm_ids)s 處於狀態 %(state)s"
 
 #, python-format
-msgid "String %s is not a valid isotime"
-msgstr "字串 %s 不是有效的 ISO 時間"
-
-#, python-format
 msgid ""
 "The data type %(type)s is not supported. The supported data type list is: "
 "%(supported)s"
@@ -156,10 +132,6 @@ msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 msgstr "轉移至 %(state)s，因為警示 %(alarm_ids)s 處於狀態 %(state)s"
 
 #, python-format
-msgid "Unable to connect to the database server: %(errmsg)s."
-msgstr "無法連接至資料庫伺服器：%(errmsg)s。"
-
-#, python-format
 msgid ""
 "Unable to convert the value %(value)s to the expected data type %(type)s."
 msgstr "無法將值 %(value)s 轉換成預期的資料類型 %(type)s。"
@@ -177,22 +149,8 @@ msgstr "將 %(value)s 轉換為預期的資料類型%(type)s 時發生非預期�
 msgid "Unsupported action %s"
 msgstr "不受支援的動作 %s"
 
-#, python-format
-msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"
-msgstr "警示 %(id)s 正在轉移到 %(state)s，原因：%(reason)s"
-
-msgid "alarm evaluation cycle failed"
-msgstr "警示評估週期失敗"
-
-msgid "alarm state update failed"
-msgstr "警示狀態更新失敗"
-
 msgid "alarm stats retrieval failed"
 msgstr "警示統計資料擷取失敗"
-
-#, python-format
-msgid "initiating evaluation cycle on %d alarms"
-msgstr "正在 %d 個警示上起始評估週期"
 
 msgid "state invalid"
 msgstr "狀態無效"
