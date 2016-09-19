@@ -13,16 +13,12 @@
 """
 SQLAlchemy models for aodh data.
 """
-import calendar
-import datetime
-import decimal
 import json
 
 from oslo_utils import timeutils
-from oslo_utils import units
 import six
 from sqlalchemy import Column, String, Index, Boolean, Text, DateTime
-from sqlalchemy.dialects.mysql import DECIMAL
+from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import TypeDecorator
 
@@ -45,48 +41,15 @@ class JSONEncodedDict(TypeDecorator):
         return value
 
 
-class PreciseTimestamp(TypeDecorator):
+class TimestampUTC(TypeDecorator):
     """Represents a timestamp precise to the microsecond."""
 
     impl = DateTime
 
     def load_dialect_impl(self, dialect):
         if dialect.name == 'mysql':
-            return dialect.type_descriptor(DECIMAL(precision=20,
-                                                   scale=6,
-                                                   asdecimal=True))
-        return dialect.type_descriptor(self.impl)
-
-    @staticmethod
-    def process_bind_param(value, dialect):
-        if value is None:
-            return value
-        elif dialect.name == 'mysql':
-            decimal.getcontext().prec = 30
-            return (
-                decimal.Decimal(
-                    str(calendar.timegm(value.utctimetuple()))) +
-                (decimal.Decimal(str(value.microsecond)) /
-                 decimal.Decimal("1000000.0"))
-            )
-        return value
-
-    def compare_against_backend(self, dialect, conn_type):
-        if dialect.name == 'mysql':
-            return issubclass(type(conn_type), DECIMAL)
-        return issubclass(type(conn_type), DateTime)
-
-    @staticmethod
-    def process_result_value(value, dialect):
-        if value is None:
-            return value
-        elif dialect.name == 'mysql':
-            integer = int(value)
-            micro = (value
-                     - decimal.Decimal(integer)) * decimal.Decimal(units.M)
-            daittyme = datetime.datetime.utcfromtimestamp(integer)
-            return daittyme.replace(microsecond=int(round(micro)))
-        return value
+            return dialect.type_descriptor(mysql.DATETIME(fsp=6))
+        return self.impl
 
 
 class AodhBase(object):
@@ -125,13 +88,13 @@ class Alarm(Base):
     type = Column(String(50))
     severity = Column(String(50))
     description = Column(Text)
-    timestamp = Column(PreciseTimestamp, default=lambda: timeutils.utcnow())
+    timestamp = Column(TimestampUTC, default=lambda: timeutils.utcnow())
 
     user_id = Column(String(128))
     project_id = Column(String(128))
 
     state = Column(String(255))
-    state_timestamp = Column(PreciseTimestamp,
+    state_timestamp = Column(TimestampUTC,
                              default=lambda: timeutils.utcnow())
 
     ok_actions = Column(JSONEncodedDict)
@@ -156,5 +119,5 @@ class AlarmChange(Base):
     user_id = Column(String(128))
     type = Column(String(20))
     detail = Column(Text)
-    timestamp = Column(PreciseTimestamp, default=lambda: timeutils.utcnow())
+    timestamp = Column(TimestampUTC, default=lambda: timeutils.utcnow())
     severity = Column(String(50))
