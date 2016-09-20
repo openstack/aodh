@@ -22,7 +22,6 @@ from oslo_utils import timeutils
 import retrying
 import six.moves.urllib.parse as urlparse
 from stevedore import driver
-import warnings
 
 _NAMESPACE = 'aodh.storage'
 
@@ -58,12 +57,6 @@ def get_connection_from_config(conf):
     retries = conf.database.max_retries
     url = conf.database.connection
     connection_scheme = urlparse.urlparse(url).scheme
-    if connection_scheme not in ('mysql', 'mysql+pymysql', 'postgresql',
-                                 'sqlite'):
-        msg = ('Storage backend %s is deprecated, and all the NoSQL backends '
-               'will be removed in Aodh 4.0, please use SQL backend.' %
-               connection_scheme)
-        warnings.warn(msg)
     LOG.debug('looking for %(name)r driver in %(namespace)r',
               {'name': connection_scheme, 'namespace': _NAMESPACE})
     mgr = driver.DriverManager(_NAMESPACE, connection_scheme)

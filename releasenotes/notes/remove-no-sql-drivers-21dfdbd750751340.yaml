@@ -1,0 +1,3 @@
+---
+upgrade:
+  - All the deprecated non-SQL drivers have been removed.

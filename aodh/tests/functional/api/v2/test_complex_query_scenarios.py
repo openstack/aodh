@@ -21,7 +21,6 @@ from oslo_utils import timeutils
 
 from aodh.storage import models
 from aodh.tests.functional.api import v2 as tests_api
-from aodh.tests.functional import db as tests_db
 
 
 admin_header = {"X-Roles": "admin",
@@ -195,8 +194,9 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
         for alarm in data.json:
             self.assertEqual("alarm", alarm["state"])
 
-    @tests_db.run_with('mysql', 'pgsql', 'sqlite')
     def test_query_with_orderby_severity(self):
+        if self.engine != "mysql":
+            self.skipTest("This is only implemented for MySQL")
         orderby = '[{"severity": "ASC"}]'
         data = self.post_json(self.alarm_url,
                               headers=admin_header,

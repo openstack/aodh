@@ -30,6 +30,7 @@ from sqlalchemy import desc
 from sqlalchemy import func
 from sqlalchemy.orm import exc
 
+import aodh
 from aodh.i18n import _LI
 from aodh import storage
 from aodh.storage import base
@@ -149,7 +150,7 @@ class Connection(base.Connection):
         return (self._row_to_alarm_model(x) for x in query.all())
 
     @staticmethod
-    def _get_pagination_query(query, pagination, api_model, model):
+    def _get_pagination_query(session, query, pagination, api_model, model):
         if not pagination.get('sort'):
             pagination['sort'] = api_model.DEFAULT_SORT
         marker = None
@@ -168,6 +169,9 @@ class Connection(base.Connection):
         # order when "severity" specified in sorts.
         for sort_key, sort_dir in pagination['sort'][::-1]:
             if sort_key == 'severity':
+                engine = session.connection()
+                if engine.dialect.name != "mysql":
+                    raise aodh.NotImplementedError
                 sort_dir_func = {'asc': asc, 'desc': desc}[sort_dir]
                 query = query.order_by(sort_dir_func(
                     func.field(getattr(model, sort_key), 'low',
@@ -222,7 +226,7 @@ class Connection(base.Connection):
                 query = query.filter(getattr(models.Alarm, key) != value)
 
         query = self._get_pagination_query(
-            query, pagination, alarm_api_models.Alarm, models.Alarm)
+            session, query, pagination, alarm_api_models.Alarm, models.Alarm)
         alarms = self._retrieve_alarms(query)
 
         # TODO(cmart): improve this by using sqlalchemy.func factory
@@ -360,7 +364,7 @@ class Connection(base.Connection):
                     models.AlarmChange.timestamp < end_timestamp)
 
         query = self._get_pagination_query(
-            query, pagination, alarm_api_models.AlarmChange,
+            session, query, pagination, alarm_api_models.AlarmChange,
             models.AlarmChange)
         return self._retrieve_alarm_history(query)
 
