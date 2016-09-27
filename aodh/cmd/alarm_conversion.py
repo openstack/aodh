@@ -81,7 +81,6 @@ def get_parser():
     )
     parser.add_argument(
         '--alarm-id',
-        default=None,
         type=str,
         help='Only convert the alarm specified by this option.',
     )
