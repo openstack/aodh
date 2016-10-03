@@ -49,6 +49,18 @@ Or start in background with::
 
     uwsgi -d ./aodh-uwsgi.ini
 
+Configuring with uwsgi-plugin-python on Debian/Ubuntu
+=====================================================
+
+Install the Python plugin for uwsgi:
+
+    apt-get install uwsgi-plugin-python
+
+Run the server:
+
+    uwsgi_python --master --die-on-term --logto /var/log/aodh/aodh-api.log \
+        --http-socket :8042 --wsgi-file /usr/share/aodh-common/app.wsgi
+
 Limitation
 ==========
 
