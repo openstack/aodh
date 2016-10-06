@@ -11,13 +11,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from ceilometerclient import client as ceiloclient
+from ceilometerclient import exc as ceiloexc
+from oslo_log import log
+import pecan
 import wsme
 from wsme import types as wtypes
 
 from aodh.api.controllers.v2 import base
 from aodh.api.controllers.v2 import utils as v2_utils
 from aodh.i18n import _
+from aodh import keystone_client
 from aodh import storage
+
+LOG = log.getLogger(__name__)
 
 
 class AlarmThresholdRule(base.AlarmRule):
@@ -57,9 +64,46 @@ class AlarmThresholdRule(base.AlarmRule):
     exclude_outliers = wsme.wsattr(bool, default=False)
     "Whether datapoints with anomalously low sample counts are excluded"
 
+    ceilometer_sample_api_is_supported = None
+
     def __init__(self, query=None, **kwargs):
         query = [base.Query(**q) for q in query] if query else []
         super(AlarmThresholdRule, self).__init__(query=query, **kwargs)
+
+    @classmethod
+    def _check_ceilometer_sample_api(cls):
+        # Check it only once
+        if cls.ceilometer_sample_api_is_supported is None:
+
+            auth_config = pecan.request.cfg.service_credentials
+            client = ceiloclient.get_client(
+                version=2,
+                session=keystone_client.get_session(pecan.request.cfg),
+                # ceiloclient adapter options
+                region_name=auth_config.region_name,
+                interface=auth_config.interface,
+            )
+            try:
+                client.statistics.list(
+                    meter_name="idontthinkthatexistsbutwhatever")
+            except Exception as e:
+                if isinstance(e, ceiloexc.HTTPException):
+                    if e.code == 410:
+                        cls.ceilometer_sample_api_is_supported = False
+                    elif e.code < 500:
+                        cls.ceilometer_sample_api_is_supported = True
+                    else:
+                        raise
+                else:
+                    raise
+            else:
+                # I don't think this meter can exists but how known
+                cls.ceilometer_sample_api_is_supported = True
+
+        if cls.ceilometer_sample_api_is_supported is False:
+            raise base.ClientSideError(
+                "This telemetry installation is not configured to support"
+                "alarm of type 'threshold")
 
     @staticmethod
     def validate(threshold_rule):
@@ -77,8 +121,9 @@ class AlarmThresholdRule(base.AlarmRule):
                                 allow_timestamps=False)
         return threshold_rule
 
-    @staticmethod
-    def validate_alarm(alarm):
+    @classmethod
+    def validate_alarm(cls, alarm):
+        cls._check_ceilometer_sample_api()
         # ensure an implicit constraint on project_id is added to
         # the query if not already present
         alarm.threshold_rule.query = v2_utils.sanitize_query(
