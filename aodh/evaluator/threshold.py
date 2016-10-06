@@ -19,6 +19,7 @@ import operator
 import six
 
 from ceilometerclient import client as ceiloclient
+from ceilometerclient import exc as ceiloexc
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
@@ -126,8 +127,13 @@ class ThresholdEvaluator(evaluator.Evaluator):
             return self.cm_client.statistics.list(
                 meter_name=rule['meter_name'], q=query,
                 period=rule['period'])
-        except Exception:
-            LOG.exception(_('alarm stats retrieval failed'))
+        except Exception as e:
+            if isinstance(e, ceiloexc.HTTPException) and e.code == 410:
+                LOG.warning("This telemetry installation is not configured to "
+                            "support alarm of type 'threshold', they should "
+                            "be disabled or removed.")
+            else:
+                LOG.exception(_('alarm stats retrieval failed'))
             return []
 
     @staticmethod
