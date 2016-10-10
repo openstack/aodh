@@ -51,7 +51,6 @@ def setup_app(pecan_config=PECAN_CONFIG, conf=None):
 
     app = pecan.make_app(
         pecan_config['app']['root'],
-        debug=conf.api.pecan_debug,
         hooks=app_hooks,
         wrap_app=middleware.ParsableErrorMiddleware,
         guess_content_type_from_ext=False
