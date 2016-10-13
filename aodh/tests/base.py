@@ -17,13 +17,13 @@
 """
 import functools
 import os.path
+import unittest
 
 import oslo_messaging.conffixture
 from oslo_utils import timeutils
 from oslotest import base
 from oslotest import mockpatch
 import six
-from testtools import testcase
 import webtest
 
 import aodh
@@ -90,10 +90,10 @@ def _skip_decorator(func):
         try:
             return func(*args, **kwargs)
         except aodh.NotImplementedError as e:
-            raise testcase.TestSkipped(six.text_type(e))
+            raise unittest.SkipTest(six.text_type(e))
         except webtest.app.AppError as e:
             if 'not implemented' in six.text_type(e):
-                raise testcase.TestSkipped(six.text_type(e))
+                raise unittest.SkipTest(six.text_type(e))
             raise
     return skip_if_not_implemented
 
