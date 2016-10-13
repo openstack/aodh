@@ -72,9 +72,6 @@ class ConfigFixture(fixture.GabbiFixture):
             group='api',
         )
 
-        conf.set_override('pecan_debug', True, group='api',
-                          enforce_type=True)
-
         parsed_url = urlparse.urlparse(db_url)
         if parsed_url.scheme != 'sqlite':
             parsed_url = list(parsed_url)

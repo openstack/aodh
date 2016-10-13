@@ -238,7 +238,6 @@ function configure_aodh {
     # NOTE: This must come after database configuration as those can
     # call cleanup_aodh which will wipe the WSGI config.
     if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
-        iniset $AODH_CONF api pecan_debug "False"
         _aodh_config_apache_wsgi
     elif [ "$AODH_DEPLOY" == "uwsgi" ]; then
         # iniset creates these files when it's called if they don't exist.

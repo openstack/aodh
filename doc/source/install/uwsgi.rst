@@ -60,15 +60,3 @@ Run the server:
 
     uwsgi_python --master --die-on-term --logto /var/log/aodh/aodh-api.log \
         --http-socket :8042 --wsgi-file /usr/share/aodh-common/app.wsgi
-
-Limitation
-==========
-
-As Aodh is using Pecan and Pecan's DebugMiddleware doesn't support
-multiple processes, there is no way to set debug mode in the multiprocessing
-case. To allow multiple processes the DebugMiddleware may be turned off by
-setting ``pecan_debug`` to ``False`` in the ``api`` section of
-``aodh.conf``.
-
-For other WSGI setup you can refer to the `pecan deployment`_ documentation.
-.. _`pecan deployment`: http://pecan.readthedocs.org/en/latest/deployment.html#deployment
