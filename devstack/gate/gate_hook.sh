@@ -14,7 +14,7 @@
 
 # This script is executed inside gate_hook function in devstack gate.
 
-ENABLED_SERVICES="key,aodi-api,aodh-notifier,aodh-evaluator"
+ENABLED_SERVICES="key,aodh-api,aodh-notifier,aodh-evaluator"
 ENABLED_SERVICES+="ceilometer-acompute,ceilometer-acentral,ceilometer-anotification,"
 ENABLED_SERVICES+="ceilometer-collector,ceilometer-api,"
 
