@@ -265,7 +265,6 @@ class AlarmTest(AlarmTestBase):
             self.assertNotEqual(victim.name, s.name)
 
 
-@tests_db.run_with('sqlite', 'mysql', 'pgsql', 'hbase')
 class AlarmHistoryTest(AlarmTestBase):
 
     def setUp(self):

@@ -27,7 +27,6 @@ class ABCSkip(base.SkipNotImplementedMeta, abc.ABCMeta):
     pass
 
 
-@tests_db.run_with('mysql', 'pgsql', 'sqlite')
 class ModelsMigrationsSync(
         six.with_metaclass(ABCSkip,
                            tests_db.TestBase,

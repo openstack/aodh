@@ -9,7 +9,7 @@
 # By default all aodh services are started (see
 # devstack/settings).
 #
-#   AODH_BACKEND:            Database backend (e.g. 'mysql', 'mongodb')
+#   AODH_BACKEND:            Database backend (e.g. 'mysql')
 #   AODH_COORDINATION_URL:   URL for group membership service provided by tooz.
 
 # Support potential entry-points console scripts in VENV or not
@@ -50,28 +50,6 @@ function aodh_service_url {
 }
 
 
-# _install_mongdb - Install mongodb and python lib.
-function _aodh_install_mongodb {
-    # Server package is the same on all
-    local packages=mongodb-server
-
-    if is_fedora; then
-        # mongodb client
-        packages="${packages} mongodb"
-    fi
-
-    install_package ${packages}
-
-    if is_fedora; then
-        restart_service mongod
-    else
-        restart_service mongodb
-    fi
-
-    # give time for service to restart
-    sleep 5
-}
-
 # _install_redis() - Install the redis server and python lib.
 function _aodh_install_redis {
     if is_ubuntu; then
@@ -102,18 +80,12 @@ function _aodh_config_apache_wsgi {
     fi
 
     sudo cp $AODH_DIR/devstack/apache-aodh.template $aodh_apache_conf
-    if [ "$AODH_BACKEND" = 'hbase' ] ; then
-        # Use one process to have single in-memory DB instance for data consistency
-        AODH_API_WORKERS=1
-    else
-        AODH_API_WORKERS=$API_WORKERS
-    fi
     sudo sed -e "
         s|%PORT%|$AODH_SERVICE_PORT|g;
         s|%APACHE_NAME%|$APACHE_NAME|g;
         s|%WSGIAPP%|$AODH_WSGI_DIR/app|g;
         s|%USER%|$STACK_USER|g;
-        s|%APIWORKERS%|$AODH_API_WORKERS|g;
+        s|%APIWORKERS%|$API_WORKERS|g;
         s|%VIRTUALENV%|$venv_path|g
     " -i $aodh_apache_conf
 }
@@ -124,14 +96,6 @@ function _aodh_prepare_coordination {
         install_package memcached
     elif echo $AODH_COORDINATION_URL | grep -q '^redis:'; then
         _aodh_install_redis
-    fi
-}
-
-# Install required services for storage backends
-function _aodh_prepare_storage_backend {
-    if [ "$AODH_BACKEND" = 'mongodb' ] ; then
-        pip_install_gr pymongo
-        _aodh_install_mongodb
     fi
 }
 
@@ -170,9 +134,6 @@ function _aodh_cleanup_apache_wsgi {
 # cleanup_aodh() - Remove residual data files, anything left over
 # from previous runs that a clean run would need to clean up
 function cleanup_aodh {
-    if [ "$AODH_BACKEND" = 'mongodb' ] ; then
-        mongo aodh --eval "db.dropDatabase();"
-    fi
     if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
         _aodh_cleanup_apache_wsgi
     fi
@@ -182,11 +143,6 @@ function cleanup_aodh {
 function _aodh_configure_storage_backend {
     if [ "$AODH_BACKEND" = 'mysql' ] || [ "$AODH_BACKEND" = 'postgresql' ] ; then
         iniset $AODH_CONF database connection $(database_connection_url aodh)
-    elif [ "$AODH_BACKEND" = 'mongodb' ] ; then
-        iniset $AODH_CONF database connection mongodb://localhost:27017/aodh
-        cleanup_aodh
-    elif [ "$AODH_BACKEND" = 'hbase' ] ; then
-        iniset $AODH_CONF database connection hbase://__test__
     else
         die $LINENO "Unable to configure unknown AODH_BACKEND $AODH_BACKEND"
     fi
@@ -290,7 +246,6 @@ function init_aodh {
 # otherwise makes sense to do the backend services).
 function install_aodh {
     _aodh_prepare_coordination
-    _aodh_prepare_storage_backend
     install_aodhclient
     sudo -H pip install -e "$AODH_DIR"[test,$AODH_BACKEND]
     sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR

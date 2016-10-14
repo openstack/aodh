@@ -30,7 +30,6 @@ from aodh import messaging
 from aodh.storage import models
 from aodh.tests import constants
 from aodh.tests.functional.api import v2
-from aodh.tests.functional import db as tests_db
 
 
 def default_alarms(auth_headers):
@@ -1365,7 +1364,7 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(1, len(alarms))
 
         # FIXME(sileht): This should really returns [] not None
-        # but the mongodb and sql just store the json dict as is...
+        # but SQL just stores the json dict as is...
         # migration script for sql will be a mess because we have
         # to parse all JSON :(
         # I guess we assume that wsme convert the None input to []
@@ -3300,7 +3299,6 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
                          response.json['error_message']['faultstring'])
 
 
-@tests_db.run_with('mysql', 'pgsql', 'sqlite')
 class TestPaginationQuery(TestAlarmsBase):
     def setUp(self):
         super(TestPaginationQuery, self).setUp()
@@ -3318,6 +3316,8 @@ class TestPaginationQuery(TestAlarmsBase):
         self.assertEqual(['name1', 'name2', 'name3', 'name4'], names)
 
     def test_sort_by_severity_with_its_value(self):
+        if self.engine != "mysql":
+            self.skipTest("This is only implemented for MySQL")
         data = self.get_json('/alarms?sort=severity:asc',
                              headers=self.auth_headers)
         severities = [a['severity'] for a in data]
