@@ -46,10 +46,12 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
         if self._zendpoint is None:
             try:
                 ks_client = keystone_client.get_client(self.conf)
+                z_srv = ks_client.services.find(
+                    type=self.conf.service_types.zaqar)
                 endpoint_type = self.conf.service_credentials.os_endpoint_type
-                self._zendpoint = ks_client.service_catalog.url_for(
-                    service_type=self.conf.service_types.zaqar,
-                    endpoint_type=endpoint_type)
+                z_endpoint = ks_client.endpoints.find(service_id=z_srv.id,
+                                                      interface=endpoint_type)
+                self._zendpoint = z_endpoint.url
             except Exception:
                 LOG.error(_LE("Aodh was configured to use zaqar:// action,"
                               " but Zaqar endpoint could not be found in"
