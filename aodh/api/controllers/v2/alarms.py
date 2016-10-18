@@ -560,6 +560,26 @@ class AlarmController(rest.RestController):
         payload['detail'] = scrubbed_data
         _send_notification(type, payload)
 
+    def _record_delete(self, alarm):
+        if not alarm:
+            return
+        type = models.AlarmChange.DELETION
+        detail = {'state': alarm.state}
+        user_id = pecan.request.headers.get('X-User-Id')
+        project_id = pecan.request.headers.get('X-Project-Id')
+        payload = dict(event_id=str(uuid.uuid4()),
+                       alarm_id=self._id,
+                       type=type,
+                       detail=detail,
+                       user_id=user_id,
+                       project_id=project_id,
+                       on_behalf_of=project_id,
+                       timestamp=timeutils.utcnow(),
+                       severity=alarm.severity)
+
+        pecan.request.storage.delete_alarm(alarm.alarm_id)
+        _send_notification(type, payload)
+
     @wsme_pecan.wsexpose(Alarm)
     def get(self):
         """Return this alarm."""
@@ -621,7 +641,7 @@ class AlarmController(rest.RestController):
 
         # ensure alarm exists before deleting
         alarm = self._enforce_rbac('delete_alarm')
-        pecan.request.storage.delete_alarm(alarm.alarm_id)
+        self._record_delete(alarm)
         alarm_object = Alarm.from_db_model(alarm)
         alarm_object.delete_actions()
 

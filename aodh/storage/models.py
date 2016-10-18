@@ -115,6 +115,7 @@ class AlarmChange(base.Model):
     CREATION = 'creation'
     RULE_CHANGE = 'rule change'
     STATE_TRANSITION = 'state transition'
+    DELETION = 'deletion'
 
     SUPPORT_SORT_KEYS = (
         'event_id', 'alarm_id', 'on_behalf_of', 'project_id', 'user_id',

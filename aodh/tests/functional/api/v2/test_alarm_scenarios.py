@@ -186,8 +186,8 @@ class TestAlarmsBase(v2.FunctionalTest):
                       params=data,
                       headers=auth_headers or self.auth_headers)
 
-    def _delete_alarm(self, alarm, auth_headers=None):
-        self.delete('/alarms/%s' % alarm['alarm_id'],
+    def _delete_alarm(self, id, auth_headers=None):
+        self.delete('/alarms/%s' % id,
                     headers=auth_headers or self.auth_headers,
                     status=204)
 
@@ -1753,6 +1753,22 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual('new_name', payload['detail']['name'])
         self.assertTrue(set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
                              'project_id', 'timestamp', 'type',
+                             'user_id']).issubset(payload.keys()))
+
+    def test_delete_alarm_sends_notification(self):
+        with mock.patch.object(messaging, 'get_notifier') as get_notifier:
+            notifier = get_notifier.return_value
+            self._delete_alarm(default_alarms(self.auth_headers)[1].alarm_id)
+            get_notifier.assert_called_once_with(mock.ANY,
+                                                 publisher_id='aodh.api')
+        calls = notifier.info.call_args_list
+        self.assertEqual(1, len(calls))
+        args, _ = calls[0]
+        context, event_type, payload = args
+        self.assertEqual('alarm.deletion', event_type)
+        self.assertEqual('insufficient data', payload['detail']['state'])
+        self.assertTrue(set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
+                             'project_id', 'timestamp', 'type', 'severity',
                              'user_id']).issubset(payload.keys()))
 
 
