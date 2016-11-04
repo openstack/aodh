@@ -1,19 +1,25 @@
 # OpenStack Infra <zanata@openstack.org>, 2015. #zanata
 # Tom Cocozzello <tjcocozz@us.ibm.com>, 2015. #zanata
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
+# Robert Simai <robert.simai@suse.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
+"Project-Id-Version: aodh 3.0.1.dev28\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-09-14 17:53+0000\n"
+"POT-Creation-Date: 2016-10-20 22:23+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2016-10-07 06:30+0000\n"
+"Last-Translator: Robert Simai <robert.simai@suse.com>\n"
 "Language-Team: German\n"
 "Language: de\n"
 "X-Generator: Zanata 3.7.3\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#, python-format
+msgid "%(name)s count exceeds maximum value %(maximum)d"
+msgstr "%(name)s Anzahl überschreitet den Maximalwert %(maximum)d"
 
 #, python-format
 msgid "%(rule)s must be set for %(type)s type alarm"
@@ -60,6 +66,10 @@ msgstr ""
 "%(threshold)s über %(period)s Sekunden ist"
 
 #, python-format
+msgid "Alarm when %s event occurred."
+msgstr "Alarm wenn %s Ereignis auftritt."
+
+#, python-format
 msgid "Alarms %(alarm_ids)s are in unknown state"
 msgstr "Alarme %(alarm_ids)s sind in unbekanntem Status"
 
@@ -79,6 +89,9 @@ msgstr "Zeitmarkenwert %s konnte nicht analysiert werden"
 #, python-format
 msgid "Filter expression not valid: %s"
 msgstr "Filterausdruck nicht gültig: %s"
+
+msgid "Limit should be positive"
+msgstr "Begrenzung muss positiv sein"
 
 #, python-format
 msgid "Not Authorized to access %(aspect)s %(id)s"
@@ -118,6 +131,9 @@ msgid ""
 msgstr ""
 "Der Datentyp %(type)s wird nicht unterstützt. Die Liste der unterstützten "
 "Datentypen lautet: %(supported)s"
+
+msgid "Threshold rules should be combined with \"and\" or \"or\""
+msgstr "Schwellenregeln sollten mit \"und\" oder \"oder\" kombiniert werden."
 
 msgid "Time constraint names must be unique for a given alarm."
 msgstr "Zeitvorgabennamen müssen für einen angegebenen Alarm eindeutig sein."
@@ -161,6 +177,10 @@ msgstr ""
 msgid "Unsupported action %s"
 msgstr "Nicht unterstützte Aktion %s"
 
+#, python-format
+msgid "You are not authorized to create action: %s"
+msgstr "Sie sind nicht zur Erstellung der Aktion berechtigt: %s"
+
 msgid "alarm stats retrieval failed"
 msgstr "Abrufen der Alarmstatistiken ist fehlgeschlagen"
 
@@ -172,3 +192,6 @@ msgstr "state_timestamp sollte ein datetime-Objekt sein"
 
 msgid "timestamp should be datetime object"
 msgstr "timestamp sollte ein datetime-Objekt sein"
+
+msgid "type must be set in every rule"
+msgstr "Typ muss in jeder Regel gesetzt werden"

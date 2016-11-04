@@ -1,13 +1,13 @@
 # Andi Chandler <andi@gowling.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
+"Project-Id-Version: aodh 3.0.1.dev28\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-09-14 17:53+0000\n"
+"POT-Creation-Date: 2016-10-20 22:23+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2016-09-07 11:10+0000\n"
+"PO-Revision-Date: 2016-06-28 05:34+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>\n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en-GB\n"
@@ -15,10 +15,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 #, python-format
-msgid "    Duplicated alarm history %s found, skipped."
-msgstr "    Duplicated alarm history %s found, skipped."
-
-#, python-format
 msgid ""
 "Alarm %(alarm)s has been already converted as composite alarm: "
 "%(n_alarm_id)s, skipped."
@@ -36,20 +32,12 @@ msgstr ""
 "alarms depending threshold alarms, the type of alarm %(alarm)s is: %(type)s, "
 "skipped."
 
-#, python-format
-msgid "Cannot create table %s because it already exists. Ignoring error"
-msgstr "Cannot create table %s because it already exists. Ignoring error"
-
 msgid ""
 "Cannot extract tasks because agent failed to join group properly. Rejoining "
 "group."
 msgstr ""
 "Cannot extract tasks because agent failed to join group properly. Rejoining "
 "group."
-
-#, python-format
-msgid "Duplicated alarm %s found, skipped."
-msgstr "Duplicated alarm %s found, skipped."
 
 #, python-format
 msgid "Event <%s> is invalid, aborting evaluation for it."
@@ -68,10 +56,6 @@ msgid ""
 "The dependent alarm %(dep_alarm)s of alarm %(com_alarm)s not found, skipped."
 msgstr ""
 "The dependent alarm %(dep_alarm)s of alarm %(com_alarm)s not found, skipped."
-
-#, python-format
-msgid "Unable to connect to the database server: %(errmsg)s."
-msgstr "Unable to connect to the database server: %(errmsg)s."
 
 #, python-format
 msgid "alarm stats retrieval failed: %s"

@@ -2,22 +2,18 @@
 # Andi Chandler <andi@gowling.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
+"Project-Id-Version: aodh 3.0.1.dev28\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-09-14 17:53+0000\n"
+"POT-Creation-Date: 2016-10-20 22:23+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2016-09-07 11:10+0000\n"
-"Last-Translator: Andi Chandler <andi@gowling.com>\n"
+"Last-Translator: \n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en-GB\n"
 "X-Generator: Zanata 3.7.3\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-
-#, python-format
-msgid "    Migrated %(count)s history data of alarm %(alarm_id)s"
-msgstr "    Migrated %(count)s history data of alarm %(alarm_id)s"
 
 #, python-format
 msgid "%d alarm histories are removed from database"
@@ -26,10 +22,6 @@ msgstr "%d alarm histories are removed from database"
 #, python-format
 msgid "%s combination alarms have been converted to composite alarms."
 msgstr "%s combination alarms have been converted to composite alarms."
-
-#, python-format
-msgid "Connecting to %(db)s on %(nodelist)s"
-msgstr "Connecting to %(db)s on %(nodelist)s"
 
 msgid "Coordination backend started successfully."
 msgstr "Coordination backend started successfully."
@@ -47,12 +39,6 @@ msgid ""
 "End Converting combination alarm %(s_alarm)s to composite alarm %(d_alarm)s"
 msgstr ""
 "End Converting combination alarm %(s_alarm)s to composite alarm %(d_alarm)s"
-
-#, python-format
-msgid ""
-"End alarms data migration from NoSQL to SQL, %s alarms have been migrated."
-msgstr ""
-"End alarms data migration from NoSQL to SQL, %s alarms have been migrated."
 
 #, python-format
 msgid "Full WSGI config used: %s"
@@ -98,9 +84,6 @@ msgid ""
 msgstr ""
 "Start converting combination alarm %(alarm)s, it depends on alarms: "
 "%(alarm_ids)s"
-
-msgid "Starting to migrate alarms data from NoSQL to SQL..."
-msgstr "Starting to migrate alarms data from NoSQL to SQL..."
 
 #, python-format
 msgid "alarm %(id)s transitioning to %(state)s because %(reason)s"

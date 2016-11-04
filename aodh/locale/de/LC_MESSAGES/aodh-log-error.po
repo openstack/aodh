@@ -1,0 +1,132 @@
+# Monika Wolf <vcomas3@de.ibm.com>, 2016. #zanata
+# Robert Simai <robert.simai@suse.com>, 2016. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: aodh 3.0.1.dev28\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
+"POT-Creation-Date: 2016-10-20 22:24+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2016-10-07 06:49+0000\n"
+"Last-Translator: Robert Simai <robert.simai@suse.com>\n"
+"Language-Team: German\n"
+"Language: de\n"
+"X-Generator: Zanata 3.7.3\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#, python-format
+msgid "Action %(scheme)s for alarm %(alarm_id)s is unknown, cannot notify"
+msgstr ""
+"Aktion %(scheme)s für Alarm %(alarm_id)s ist unbekannt. Benachrichtigung "
+"nicht möglich"
+
+msgid ""
+"Aodh was configured to use zaqar:// action, but Zaqar endpoint could not be "
+"found in Keystone service catalog."
+msgstr ""
+"Aodh wurde zur Verwendung der zaqar:// Aktion konfiguriert, aber der Zaqar "
+"Endpunkt kann nicht im Keystone Dienst Katalog gefunden werden."
+
+msgid "Error connecting to coordination backend."
+msgstr "Fehler beim Herstellen einer Verbindung zum Koordinierungs-Back-End."
+
+msgid "Error getting group membership info from coordination backend."
+msgstr ""
+"Fehler beim Abrufen von Mitgliedschaftsinformationen vom Koordinierungs-Back-"
+"End."
+
+#, python-format
+msgid "Error joining partitioning group %s, re-trying"
+msgstr ""
+"Fehler beim Beitreten zur Partitionierungsgruppe %s. Operation wird "
+"wiederholt."
+
+msgid "Error occurred when joining partitioning group"
+msgstr "Fehler beim Beitritt zur Partitionierungsgruppe"
+
+#, python-format
+msgid "Error parsing HTTP response: %s"
+msgstr "Fehler beim analysieren der HTTP-Antwort: %s"
+
+msgid "Error sending a heartbeat to coordination backend."
+msgstr ""
+"Fehler beim Senden eines Überwachungssignals an das Koordinierungs-Back-End."
+
+#, python-format
+msgid "Error while posting alarm: %s"
+msgstr "Fehler beim Zuweisen des Alarms: %s"
+
+#, python-format
+msgid "Error while putting alarm: %s"
+msgstr "Fehler beim setzen des Alarms: %s"
+
+msgid "Failed to connect to Zaqar service "
+msgstr "Fehler beim Verbinden mit dem Zaqar-Dienst"
+
+#, python-format
+msgid "Failed to evaluate alarm %s"
+msgstr "Untersuchung des Alarms %s fehlgeschlagen"
+
+#, python-format
+msgid "Failed to evaluate alarm (id=%(a)s) triggered by event = %(e)s."
+msgstr ""
+"Fehler beim Analysieren des Alarms (id=%(a)s), ausgelöst durch das Ereignis"
+"%(e)s."
+
+#, python-format
+msgid "Failed to extract event_type from event = %s"
+msgstr "Fehler beim extrahieren des event_type aus dem Ereignis %s"
+
+#, python-format
+msgid "Failed to extract message_id from event = %s"
+msgstr "Fehler beim extrahieren der message_id aus dem Ereignis %s"
+
+#, python-format
+msgid ""
+"Group ID: %(group_id)s, Members: %(members)s, Me: %(me)s: Current agent is "
+"not part of group and cannot take tasks"
+msgstr ""
+"Gruppen ID: %(group_id)s, Mitglied: %(members)s, Ich: %(me)s: der aktuelle "
+"Agent ist kein Teil der Gruppe und kann keine Aufgaben übernehmen"
+
+msgid "Received invalid event (empty or None)"
+msgstr "Ungültiges Ereignis empfangen (leer oder Keines)"
+
+#, python-format
+msgid "Required topic query option missing in action %s"
+msgstr "Die erforderliche Themenabfrageoption fehlt für Aktion: %s"
+
+#, python-format
+msgid "String %s is not a valid isotime"
+msgstr "Zeichenkette %s ist kein gültiges ISO-Zeitformat"
+
+#, python-format
+msgid "Unable to notify alarm %s"
+msgstr "Für Alarm %s kann nicht benachrichtigt werden"
+
+msgid "Unable to notify for an alarm with no action"
+msgstr "Für einem Alarm ohne Aktion kann keine Benachrichtigung erfolgen."
+
+#, python-format
+msgid "Unable to parse action %(action)s for alarm %(alarm_id)s"
+msgstr "Aktion %(action)s für Alarm %(alarm_id)s kann nicht analysiert werden"
+
+msgid "Unknown error occurred; Failed to post message to Zaqar queue"
+msgstr ""
+"Unbekannter Fehler; Fehler beim zuweisen der Nachricht in die Zaqar-"
+"Warteschlange"
+
+#, python-format
+msgid "alarm %s doesn't exist anymore"
+msgstr "Alarm %s existiert nicht mehr"
+
+#, python-format
+msgid "alarm %s retrieval failed"
+msgstr "Abrufen des Alarms %s fehlgeschlagen"
+
+msgid "alarm evaluation cycle failed"
+msgstr "Alarmuntersuchungszyklus fehlgeschlagen"
+
+msgid "alarm state update failed"
+msgstr "Fehler beim aktualisieren des Alarmstatus"
