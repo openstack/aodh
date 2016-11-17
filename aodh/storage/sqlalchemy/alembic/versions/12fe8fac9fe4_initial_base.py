@@ -29,8 +29,23 @@ depends_on = None
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import types
 
 import aodh.storage.sqlalchemy.models
+
+
+class PreciseTimestamp(types.TypeDecorator):
+    """Represents a timestamp precise to the microsecond."""
+
+    impl = sa.DateTime
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'mysql':
+            return dialect.type_descriptor(
+                types.DECIMAL(precision=20,
+                              scale=6,
+                              asdecimal=True))
+        return dialect.type_descriptor(self.impl)
 
 
 def upgrade():
@@ -44,7 +59,7 @@ def upgrade():
         sa.Column('type', sa.String(length=20), nullable=True),
         sa.Column('detail', sa.Text(), nullable=True),
         sa.Column('timestamp',
-                  aodh.storage.sqlalchemy.models.PreciseTimestamp(),
+                  PreciseTimestamp(),
                   nullable=True),
         sa.PrimaryKeyConstraint('event_id')
     )
@@ -60,13 +75,13 @@ def upgrade():
         sa.Column('severity', sa.String(length=50), nullable=True),
         sa.Column('description', sa.Text(), nullable=True),
         sa.Column('timestamp',
-                  aodh.storage.sqlalchemy.models.PreciseTimestamp(),
+                  PreciseTimestamp(),
                   nullable=True),
         sa.Column('user_id', sa.String(length=128), nullable=True),
         sa.Column('project_id', sa.String(length=128), nullable=True),
         sa.Column('state', sa.String(length=255), nullable=True),
         sa.Column('state_timestamp',
-                  aodh.storage.sqlalchemy.models.PreciseTimestamp(),
+                  PreciseTimestamp(),
                   nullable=True),
         sa.Column('ok_actions',
                   aodh.storage.sqlalchemy.models.JSONEncodedDict(),
