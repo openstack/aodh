@@ -48,7 +48,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
                 ks_client = keystone_client.get_client(self.conf)
                 z_srv = ks_client.services.find(
                     type=self.conf.service_types.zaqar)
-                endpoint_type = self.conf.service_credentials.os_endpoint_type
+                endpoint_type = self.conf.service_credentials.interface
                 z_endpoint = ks_client.endpoints.find(service_id=z_srv.id,
                                                       interface=endpoint_type)
                 self._zendpoint = z_endpoint.url
