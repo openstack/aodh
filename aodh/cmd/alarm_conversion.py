@@ -88,7 +88,7 @@ def get_parser():
 
 def conversion():
     args = get_parser().parse_args()
-    conf = service.prepare_service()
+    conf = service.prepare_service([])
     conn = storage.get_connection_from_config(conf)
     combination_alarms = list(conn.get_alarms(alarm_type='combination',
                                               alarm_id=args.alarm_id or None))
