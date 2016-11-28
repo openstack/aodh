@@ -181,13 +181,16 @@ class CompositeEvaluator(evaluator.Evaluator):
 
     def _evaluate_sufficient(self, alarm, rule_target_alarm, rule_target_ok):
         # Some of evaluated rules are unknown states or trending states.
-        unknown = alarm.state == evaluator.UNKNOWN
-        continuous = alarm.repeat_actions
-        if unknown or continuous:
-            for rule in self.rule_targets:
-                if rule.trending_state:
-                    rule.state = (rule.trending_state if unknown
-                                  else alarm.state)
+        for rule in self.rule_targets:
+            if rule.trending_state is not None:
+                if alarm.state == evaluator.UNKNOWN:
+                    rule.state = rule.trending_state
+                elif rule.trending_state == evaluator.ALARM:
+                    rule.state = evaluator.OK
+                elif rule.trending_state == evaluator.OK:
+                    rule.state = evaluator.ALARM
+                else:
+                    rule.state = alarm.state
 
         alarm_triggered = bool(rule_target_alarm)
         if alarm_triggered:
