@@ -29,9 +29,55 @@ from aodh.tests import constants
 from aodh.tests.unit.evaluator import base
 
 
-class TestEvaluate(base.TestEvaluatorBase):
+class BaseCompositeEvaluate(base.TestEvaluatorBase):
     EVALUATOR = composite.CompositeEvaluator
 
+    def setUp(self):
+        self.client = self.useFixture(mockpatch.Patch(
+            'aodh.evaluator.gnocchi.client'
+        )).mock.Client.return_value
+        super(BaseCompositeEvaluate, self).setUp()
+
+    @staticmethod
+    def _get_stats(attr, value, count=1):
+        return statistics.Statistics(None, {attr: value, 'count': count})
+
+    @staticmethod
+    def _get_gnocchi_stats(granularity, values):
+        now = timeutils.utcnow_ts()
+        return [[six.text_type(now - len(values) * granularity),
+                 granularity, value] for value in values]
+
+    @staticmethod
+    def _reason(new_state, user_expression, causative_rules=(),
+                transition=True):
+        root_cause_rules = {}
+        for index, rule in causative_rules:
+            name = 'rule%s' % index
+            root_cause_rules.update({name: rule})
+        description = {evaluator.ALARM: 'outside their threshold.',
+                       evaluator.OK: 'inside their threshold.',
+                       evaluator.UNKNOWN: 'state evaluated to unknown.'}
+        params = {'state': new_state,
+                  'expression': user_expression,
+                  'rules': ', '.join(sorted(six.iterkeys(root_cause_rules))),
+                  'description': description[new_state]}
+        reason_data = {
+            'type': 'composite',
+            'composition_form': user_expression}
+        reason_data.update(causative_rules=root_cause_rules)
+        if transition:
+            reason = ('Composite rule alarm with composition form: '
+                      '%(expression)s transition to %(state)s, due to '
+                      'rules: %(rules)s %(description)s' % params)
+        else:
+            reason = ('Composite rule alarm with composition form: '
+                      '%(expression)s remaining as %(state)s, due to '
+                      'rules: %(rules)s %(description)s' % params)
+        return reason, reason_data
+
+
+class CompositeTest(BaseCompositeEvaluate):
     sub_rule1 = {
         "type": "threshold",
         "meter_name": "cpu_util",
@@ -204,50 +250,6 @@ class TestEvaluate(base.TestEvaluatorBase):
                          ),
         ]
 
-    def setUp(self):
-        self.client = self.useFixture(mockpatch.Patch(
-            'aodh.evaluator.gnocchi.client'
-        )).mock.Client.return_value
-        super(TestEvaluate, self).setUp()
-
-    @staticmethod
-    def _get_stats(attr, value, count=1):
-        return statistics.Statistics(None, {attr: value, 'count': count})
-
-    @staticmethod
-    def _get_gnocchi_stats(granularity, values):
-        now = timeutils.utcnow_ts()
-        return [[six.text_type(now - len(values) * granularity),
-                 granularity, value] for value in values]
-
-    @staticmethod
-    def _reason(new_state, user_expression, causative_rules=(),
-                transition=True):
-        root_cause_rules = {}
-        for index, rule in causative_rules:
-            name = 'rule%s' % index
-            root_cause_rules.update({name: rule})
-        description = {evaluator.ALARM: 'outside their threshold.',
-                       evaluator.OK: 'inside their threshold.',
-                       evaluator.UNKNOWN: 'state evaluated to unknown.'}
-        params = {'state': new_state,
-                  'expression': user_expression,
-                  'rules': ', '.join(sorted(six.iterkeys(root_cause_rules))),
-                  'description': description[new_state]}
-        reason_data = {
-            'type': 'composite',
-            'composition_form': user_expression}
-        reason_data.update(causative_rules=root_cause_rules)
-        if transition:
-            reason = ('Composite rule alarm with composition form: '
-                      '%(expression)s transition to %(state)s, due to '
-                      'rules: %(rules)s %(description)s' % params)
-        else:
-            reason = ('Composite rule alarm with composition form: '
-                      '%(expression)s remaining as %(state)s, due to '
-                      'rules: %(rules)s %(description)s' % params)
-        return reason, reason_data
-
     def test_simple_insufficient(self):
         self._set_all_alarms('ok')
         self.api_client.statistics.list.return_value = []
@@ -419,3 +421,84 @@ class TestEvaluate(base.TestEvaluatorBase):
         self.evaluator.evaluate(alarm)
         self.assertEqual('ok', alarm.state)
         self.assertEqual([], self.notifier.notify.mock_calls)
+
+
+class OtherCompositeTest(BaseCompositeEvaluate):
+    sub_rule1 = {
+        'evaluation_periods': 3,
+        'metric': 'radosgw.objects.containers',
+        'resource_id': 'alarm-resource-1',
+        'aggregation_method': 'mean',
+        'granularity': 60,
+        'threshold': 5.0,
+        'type': 'gnocchi_resources_threshold',
+        'comparison_operator': 'ge',
+        'resource_type': 'ceph_account'
+    }
+
+    sub_rule2 = {
+        'evaluation_periods': 3,
+        'metric': 'radosgw.objects.containers',
+        'resource_id': 'alarm-resource-2',
+        'aggregation_method': 'mean',
+        'granularity': 60,
+        'threshold': 5.0,
+        'type': 'gnocchi_resources_threshold',
+        'comparison_operator': 'ge',
+        'resource_type': 'ceph_account'
+    }
+
+    def prepare_alarms(self):
+        self.alarms = [
+            models.Alarm(name='composite-GRT-OR-GRT',
+                         description='composite alarm converted',
+                         type='composite',
+                         enabled=True,
+                         user_id='fake_user',
+                         project_id='fake_project',
+                         state='insufficient data',
+                         state_timestamp=constants.MIN_DATETIME,
+                         timestamp=constants.MIN_DATETIME,
+                         insufficient_data_actions=['log://'],
+                         ok_actions=['log://'],
+                         alarm_actions=['log://'],
+                         repeat_actions=False,
+                         alarm_id=str(uuid.uuid4()),
+                         time_constraints=[],
+                         rule={
+                             "or": [self.sub_rule1, self.sub_rule2]
+                         },
+                         severity='critical'
+                         ),
+        ]
+
+    def test_simple_ok(self):
+        self._set_all_alarms('alarm')
+
+        gavgs1 = [['2016-11-24T10:00:00+00:00', 3600.0, 3.0],
+                  ['2016-11-24T10:00:00+00:00', 900.0, 3.0],
+                  ['2016-11-24T10:00:00+00:00', 300.0, 3.0],
+                  ['2016-11-24T10:01:00+00:00', 60.0, 2.0],
+                  ['2016-11-24T10:02:00+00:00', 60.0, 3.0],
+                  ['2016-11-24T10:03:00+00:00', 60.0, 4.0],
+                  ['2016-11-24T10:04:00+00:00', 60.0, 5.0]]
+
+        gavgs2 = [['2016-11-24T10:00:00+00:00', 3600.0, 3.0],
+                  ['2016-11-24T10:00:00+00:00', 900.0, 3.0],
+                  ['2016-11-24T10:00:00+00:00', 300.0, 3.0],
+                  ['2016-11-24T10:01:00+00:00', 60.0, 2.0],
+                  ['2016-11-24T10:02:00+00:00', 60.0, 3.0],
+                  ['2016-11-24T10:03:00+00:00', 60.0, 4.0],
+                  ['2016-11-24T10:04:00+00:00', 60.0, 5.0]]
+
+        self.client.metric.get_measures.side_effect = [gavgs1, gavgs2]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('ok')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+        expected = [mock.call(self.alarms[0], 'alarm',
+                              *self._reason('ok', '(rule1 or rule2)',
+                                            ((1, self.sub_rule1),
+                                             (2, self.sub_rule2))))]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
