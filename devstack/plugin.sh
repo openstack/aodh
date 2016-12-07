@@ -314,7 +314,7 @@ if is_service_enabled aodh; then
         preinstall_aodh
     elif [[ "$1" == "stack" && "$2" == "install" ]]; then
         echo_summary "Installing Aodh"
-        # Use stack_install_service here to account for vitualenv
+        # Use stack_install_service here to account for virtualenv
         stack_install_service aodh
     elif [[ "$1" == "stack" && "$2" == "post-config" ]]; then
         echo_summary "Configuring Aodh"
