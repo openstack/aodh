@@ -15,10 +15,10 @@
 """
 
 import datetime
-import uuid
 
 import argparse
 from oslo_log import log
+from oslo_utils import uuidutils
 
 from aodh.i18n import _LI, _LW
 from aodh import service
@@ -118,7 +118,7 @@ def conversion():
                         {'alarm': e.sub_alarm_id, 'type': e.sub_alarm_type})
             continue
         new_alarm = models.Alarm(**alarm.as_dict())
-        new_alarm.alarm_id = str(uuid.uuid4())
+        new_alarm.alarm_id = uuidutils.generate_uuid()
         new_alarm.name = new_name
         new_alarm.type = 'composite'
         new_alarm.description = ('composite alarm converted from combination '

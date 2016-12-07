@@ -17,10 +17,10 @@
 
 """Base classes for API tests."""
 import os
-import uuid
 
 import fixtures
 from oslo_config import fixture as fixture_config
+from oslo_utils import uuidutils
 from oslotest import mockpatch
 import six
 from six.moves.urllib import parse as urlparse
@@ -33,7 +33,7 @@ from aodh.tests import base as test_base
 class SQLManager(fixtures.Fixture):
     def __init__(self, conf):
         self.conf = conf
-        db_name = 'aodh_%s' % uuid.uuid4().hex
+        db_name = 'aodh_%s' % uuidutils.generate_uuid(dashed=False)
         import sqlalchemy
         self._engine = sqlalchemy.create_engine(conf.database.connection)
         self._conn = self._engine.connect()

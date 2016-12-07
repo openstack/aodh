@@ -14,11 +14,10 @@
 # under the License.
 """Rest alarm notifier."""
 
-import uuid
-
 from oslo_config import cfg
 from oslo_log import log
 from oslo_serialization import jsonutils
+from oslo_utils import uuidutils
 import requests
 import six.moves.urllib.parse as urlparse
 
@@ -63,8 +62,8 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
                current, reason, reason_data, headers=None):
         headers = headers or {}
         if 'x-openstack-request-id' not in headers:
-            headers['x-openstack-request-id'] = b'req-' + str(
-                uuid.uuid4()).encode('ascii')
+            headers['x-openstack-request-id'] = b'req-' + \
+                uuidutils.generate_uuid().encode('ascii')
 
         LOG.info(_LI(
             "Notifying alarm %(alarm_name)s %(alarm_id)s with severity"

@@ -17,12 +17,12 @@
 import copy
 import datetime
 import json
-import uuid
 
 from ceilometerclient import exc
 from ceilometerclient.v2 import statistics
 import mock
 from oslo_utils import timeutils
+from oslo_utils import uuidutils
 import pytz
 from six import moves
 
@@ -44,7 +44,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                          enabled=True,
                          user_id='foobar',
                          project_id='snafu',
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          state='insufficient data',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,
@@ -81,7 +81,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                          ok_actions=[],
                          alarm_actions=[],
                          repeat_actions=False,
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          time_constraints=[],
                          rule=dict(
                              comparison_operator='le',
@@ -290,7 +290,7 @@ class TestEvaluate(base.TestEvaluatorBase):
             payloads.append(payload)
         return payloads
 
-    @mock.patch.object(uuid, 'uuid4')
+    @mock.patch.object(uuidutils, 'generate_uuid')
     @mock.patch.object(timeutils, 'utcnow')
     @mock.patch.object(messaging, 'get_notifier')
     def test_alarm_change_record(self, get_notifier, utcnow, mock_uuid):

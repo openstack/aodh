@@ -16,13 +16,13 @@
 """Fixtures used during Gabbi-based test runs."""
 
 import os
-import uuid
 
 from gabbi import fixture
 import mock
 from oslo_config import cfg
 from oslo_config import fixture as fixture_config
 from oslo_policy import opts
+from oslo_utils import uuidutils
 from six.moves.urllib import parse as urlparse
 import sqlalchemy_utils
 
@@ -75,7 +75,7 @@ class ConfigFixture(fixture.GabbiFixture):
         parsed_url = urlparse.urlparse(db_url)
         if parsed_url.scheme != 'sqlite':
             parsed_url = list(parsed_url)
-            parsed_url[2] += '-%s' % str(uuid.uuid4()).replace('-', '')
+            parsed_url[2] += '-%s' % uuidutils.generate_uuid(dashed=False)
             db_url = urlparse.urlunparse(parsed_url)
 
         conf.set_override('connection', db_url, group='database',
