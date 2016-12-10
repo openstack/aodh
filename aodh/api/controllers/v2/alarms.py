@@ -384,7 +384,7 @@ class Alarm(base.Base):
 
     @staticmethod
     def _is_trust_url(url):
-        return url.scheme in ('trust+http', 'trust+https')
+        return url.scheme.startswith('trust+')
 
     def update_actions(self, old_alarm=None):
         trustor_user_id = pecan.request.headers.get('X-User-Id')

@@ -20,14 +20,12 @@ from aodh import keystone_client
 from aodh.notifier import rest
 
 
-class TrustRestAlarmNotifier(rest.RestAlarmNotifier):
-    """Notifier supporting keystone trust authentication.
+class TrustAlarmNotifierMixin(object):
+    """Mixin class to add Keystone trust support to an AlarmNotifier.
 
-    This alarm notifier is intended to be used to call an endpoint using
-    keystone authentication. It uses the aodh service user to
-    authenticate using the trust ID provided.
-
-    The URL must be in the form trust+http://trust-id@host/action.
+    Provides a notify() method that interprets the trust ID and then calls
+    the parent class's notify(), passing the necessary authentication data in
+    the headers.
     """
 
     def notify(self, action, alarm_id, alarm_name, severity, previous, current,
@@ -45,6 +43,17 @@ class TrustRestAlarmNotifier(rest.RestAlarmNotifier):
                                    action.fragment)
 
         headers = {'X-Auth-Token': keystone_client.get_auth_token(client)}
-        super(TrustRestAlarmNotifier, self).notify(
+        super(TrustAlarmNotifierMixin, self).notify(
             action, alarm_id, alarm_name, severity, previous, current, reason,
             reason_data, headers)
+
+
+class TrustRestAlarmNotifier(TrustAlarmNotifierMixin, rest.RestAlarmNotifier):
+    """Notifier supporting keystone trust authentication.
+
+    This alarm notifier is intended to be used to call an endpoint using
+    keystone authentication. It uses the aodh service user to
+    authenticate using the trust ID provided.
+
+    The URL must be in the form ``trust+http://trust-id@host/action``.
+    """

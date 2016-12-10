@@ -22,6 +22,7 @@ import six.moves.urllib.parse as urlparse
 from aodh.i18n import _LE, _LI
 from aodh import keystone_client
 from aodh import notifier
+from aodh.notifier import trust
 
 LOG = log.getLogger(__name__)
 
@@ -144,7 +145,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
                 'current': current, 'reason': reason,
                 'reason_data': reason_data}
         message = dict(body=body)
-        self.notify_zaqar(action, message)
+        self.notify_zaqar(action, message, headers)
 
     @property
     def client(self):
@@ -152,7 +153,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
             self._zclient = self.get_zaqar_client(self._get_client_conf())
         return self._zclient
 
-    def notify_zaqar(self, action, message):
+    def notify_zaqar(self, action, message, headers=None):
         queue_info = urlparse.parse_qs(action.query)
         try:
             # NOTE(flwang): Try to get build a pre-signed client if user has
@@ -183,6 +184,44 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
         except IndexError:
             LOG.error(_LE("Required query option missing in action %s"),
                       action)
+        except Exception:
+            LOG.error(_LE("Unknown error occurred; Failed to post message to"
+                          " Zaqar queue"),
+                      exc_info=True)
+
+
+class TrustZaqarAlarmNotifier(trust.TrustAlarmNotifierMixin,
+                              ZaqarAlarmNotifier):
+    """Zaqar notifier using a Keystone trust to post to user-defined queues.
+
+    The URL must be in the form ``trust+zaqar://trust_id@?queue_name=example``.
+    """
+
+    def _get_client_conf(self, auth_token):
+        return {
+            'auth_opts': {
+                'backend': 'keystone',
+                'options': {
+                    'os_auth_token': auth_token,
+                }
+            }
+        }
+
+    def notify_zaqar(self, action, message, headers):
+        queue_info = urlparse.parse_qs(action.query)
+        try:
+            queue_name = queue_info.get('queue_name')[-1]
+        except IndexError:
+            LOG.error(_LE("Required 'queue_name' query option missing in"
+                          " action %s"),
+                      action)
+            return
+
+        try:
+            conf = self._get_client_conf(headers['X-Auth-Token'])
+            client = self.get_zaqar_client(conf)
+            queue = client.queue(queue_name)
+            queue.post(message)
         except Exception:
             LOG.error(_LE("Unknown error occurred; Failed to post message to"
                           " Zaqar queue"),

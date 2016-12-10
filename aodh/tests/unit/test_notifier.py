@@ -405,6 +405,21 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.assertEqual(1, self.zaqar.subscriptions)
         self.assertEqual(1, self.zaqar.posts)
 
+    def test_trust_zaqar_notifier_action(self):
+        client = mock.MagicMock()
+        client.session.auth.get_access.return_value.auth_token = 'token_1234'
+
+        self.useFixture(
+            mockpatch.Patch('aodh.keystone_client.get_trusted_client',
+                            lambda *args: client))
+
+        action = 'trust+zaqar://trust-1234:delete@?queue_name=foobar-critical'
+        self._msg_notifier.sample({}, 'alarm.update',
+                                  self._notification(action))
+        time.sleep(1)
+        self.assertEqual(0, self.zaqar.subscriptions)
+        self.assertEqual(1, self.zaqar.posts)
+
 
 class FakeZaqarClient(object):
 
