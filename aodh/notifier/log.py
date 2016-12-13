@@ -36,5 +36,5 @@ class LogAlarmNotifier(notifier.AlarmNotifier):
                                         'severity': severity,
                                         'previous': previous,
                                         'current': current,
-                                        'action': action,
+                                        'action': action.geturl(),
                                         'reason': reason}))
