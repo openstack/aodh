@@ -79,9 +79,9 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
                               " Keystone service catalog."))
         return self._zendpoint
 
-    def get_zaqar_client(self):
+    def _get_client_conf(self):
         conf = self.conf.service_credentials
-        params = {
+        return {
             'auth_opts': {
                 'backend': 'keystone',
                 'options': {
@@ -93,15 +93,17 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
                 }
             }
         }
+
+    def get_zaqar_client(self, conf):
         try:
             from zaqarclient.queues import client as zaqar_client
             return zaqar_client.Client(self._get_endpoint(),
-                                       version=2, conf=params)
+                                       version=2, conf=conf)
         except Exception:
             LOG.error(_LE("Failed to connect to Zaqar service "),
                       exc_info=True)
 
-    def get_presigned_client(self, queue_info):
+    def _get_presigned_client_conf(self, queue_info):
         queue_name = queue_info.get('queue_name', [''])[0]
         if not queue_name:
             return None, None
@@ -111,7 +113,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
         paths = queue_info.get('paths', [''])[0].split(',')
         methods = queue_info.get('methods', [''])[0].split(',')
         project_id = queue_info.get('project_id', [''])[0]
-        params = {
+        conf = {
             'auth_opts': {
                 'backend': 'signed-url',
                 'options': {
@@ -123,14 +125,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
                 }
             }
         }
-        try:
-            from zaqarclient.queues import client as zaqar_client
-            return (zaqar_client.Client(self._get_endpoint(),
-                                        version=2, conf=params),
-                    queue_name)
-        except Exception:
-            LOG.error(_LE("Failed to connect to Zaqar service "),
-                      exc_info=True)
+        return conf, queue_name
 
     def notify(self, action, alarm_id, alarm_name, severity, previous,
                current, reason, reason_data, headers=None):
@@ -154,7 +149,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
     @property
     def client(self):
         if self._zclient is None:
-            self._zclient = self.get_zaqar_client()
+            self._zclient = self.get_zaqar_client(self._get_client_conf())
         return self._zclient
 
     def notify_zaqar(self, action, message):
@@ -163,9 +158,11 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
             # NOTE(flwang): Try to get build a pre-signed client if user has
             # provide enough information about that. Otherwise, go to build
             # a client with service account and queue name for this alarm.
-            zaqar_client, queue_name = self.get_presigned_client(queue_info)
+            conf, queue_name = self._get_presigned_client_conf(queue_info)
+            if conf is not None:
+                zaqar_client = self.get_zaqar_client(conf)
 
-            if not zaqar_client or not queue_name:
+            if conf is None or queue_name is None or zaqar_client is None:
                 zaqar_client = self.client
                 # queue_name is a combination of <alarm-id>-<topic>
                 queue_name = "%s-%s" % (message['body']['alarm_id'],
@@ -184,8 +181,8 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
             # post the message to the queue
             queue.post(message)
         except IndexError:
-            LOG.error(_LE("Required topic query option missing in action %s")
-                      % action)
+            LOG.error(_LE("Required query option missing in action %s"),
+                      action)
         except Exception:
             LOG.error(_LE("Unknown error occurred; Failed to post message to"
                           " Zaqar queue"),
