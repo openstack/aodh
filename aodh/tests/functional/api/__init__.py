@@ -19,9 +19,9 @@
 import os
 
 from oslo_config import fixture as fixture_config
-import pecan
-import pecan.testing
+import webtest
 
+from aodh.api import app
 from aodh import service
 from aodh.tests.functional import db as db_test_base
 
@@ -44,24 +44,11 @@ class FunctionalTest(db_test_base.TestBase):
         self.CONF.set_override('policy_file',
                                os.path.abspath('etc/aodh/policy.json'),
                                group='oslo_policy', enforce_type=True)
-        self.app = self._make_app()
-
-    def _make_app(self):
-        self.config = {
-            'app': {
-                'root': 'aodh.api.controllers.root.RootController',
-                'modules': ['aodh.api'],
-            },
-            'wsme': {
-                'debug': True,
-            },
-        }
-
-        return pecan.testing.load_test_app(self.config, conf=self.CONF)
-
-    def tearDown(self):
-        super(FunctionalTest, self).tearDown()
-        pecan.set_config({}, overwrite=True)
+        self.CONF.set_override('paste_config',
+                               os.path.abspath('etc/aodh/api_paste.ini'),
+                               group='api', enforce_type=True)
+        self.app = webtest.TestApp(app.load_app(
+            self.CONF, appname='aodh+noauth'))
 
     def put_json(self, path, params, expect_errors=False, headers=None,
                  extra_environ=None, status=None):

@@ -26,8 +26,21 @@ from oslo_policy import opts
 from six.moves.urllib import parse as urlparse
 import sqlalchemy_utils
 
+from aodh.api import app
 from aodh import service
 from aodh import storage
+
+
+# NOTE(chdent): Hack to restore semblance of global configuration to
+# pass to the WSGI app used per test suite. LOAD_APP_KWARGS are the olso
+# configuration, and the pecan application configuration of
+# which the critical part is a reference to the current indexer.
+LOAD_APP_KWARGS = None
+
+
+def setup_app():
+    global LOAD_APP_KWARGS
+    return app.load_app(**LOAD_APP_KWARGS)
 
 
 class ConfigFixture(fixture.GabbiFixture):
@@ -35,6 +48,8 @@ class ConfigFixture(fixture.GabbiFixture):
 
     def start_fixture(self):
         """Set up config."""
+
+        global LOAD_APP_KWARGS
 
         self.conf = None
         self.conn = None
@@ -68,7 +83,7 @@ class ConfigFixture(fixture.GabbiFixture):
                           enforce_type=True)
         conf.set_override(
             'paste_config',
-            os.path.abspath('aodh/tests/functional/gabbi/gabbi_paste.ini'),
+            os.path.abspath('etc/aodh/api_paste.ini'),
             group='api',
         )
 
@@ -87,6 +102,11 @@ class ConfigFixture(fixture.GabbiFixture):
 
         self.conn = storage.get_connection_from_config(self.conf)
         self.conn.upgrade()
+
+        LOAD_APP_KWARGS = {
+            'conf': conf,
+            'appname': 'aodh+noauth',
+        }
 
     def stop_fixture(self):
         """Reset the config and remove data."""
