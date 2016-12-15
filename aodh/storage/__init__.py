@@ -19,9 +19,9 @@ import datetime
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
-import retrying
 import six.moves.urllib.parse as urlparse
 from stevedore import driver
+import tenacity
 
 _NAMESPACE = 'aodh.storage'
 
@@ -61,9 +61,10 @@ def get_connection_from_config(conf):
               {'name': connection_scheme, 'namespace': _NAMESPACE})
     mgr = driver.DriverManager(_NAMESPACE, connection_scheme)
 
-    # Convert retry_interval secs to msecs for retry decorator
-    @retrying.retry(wait_fixed=conf.database.retry_interval * 1000,
-                    stop_max_attempt_number=retries if retries >= 0 else None)
+    @tenacity.retry(
+        wait=tenacity.wait_fixed(conf.database.retry_interval),
+        stop=tenacity.stop_after_attempt(retries if retries >= 0 else 5),
+        reraise=True)
     def _get_connection():
         """Return an open connection to the database."""
         return mgr.driver(conf, url)
