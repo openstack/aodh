@@ -52,11 +52,12 @@ class BinTestCase(base.BaseTestCase):
         subp = subprocess.Popen(['aodh-expirer',
                                  '-d',
                                  "--config-file=%s" % self.tempfile],
+                                stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
-        __, err = subp.communicate()
+        out, __ = subp.communicate()
         self.assertEqual(0, subp.poll())
         self.assertIn(b"Nothing to clean, database alarm history "
-                      b"time to live is disabled", err)
+                      b"time to live is disabled", out)
 
     def test_run_expirer_ttl_enabled(self):
         content = ("[DEFAULT]\n"
@@ -72,13 +73,14 @@ class BinTestCase(base.BaseTestCase):
         subp = subprocess.Popen(['aodh-expirer',
                                  '-d',
                                  "--config-file=%s" % self.tempfile],
+                                stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
-        __, err = subp.communicate()
+        out, __ = subp.communicate()
         self.assertEqual(0, subp.poll())
         msg = "Dropping alarm history data with TTL 1"
         if six.PY3:
             msg = msg.encode('utf-8')
-        self.assertIn(msg, err)
+        self.assertIn(msg, out)
 
 
 class BinApiTestCase(base.BaseTestCase):
