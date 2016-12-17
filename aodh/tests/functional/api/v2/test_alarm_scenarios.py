@@ -138,16 +138,6 @@ def default_alarms(auth_headers):
             ]
 
 
-class LegacyPolicyFileMixin(object):
-    def setUp(self):
-        super(LegacyPolicyFileMixin, self).setUp()
-        self.CONF.set_override(
-            'policy_file',
-            os.path.abspath('aodh/tests/policy.json-pre-mikita'),
-            group='oslo_policy')
-        self.app = self._make_app()
-
-
 class TestAlarmsBase(v2.FunctionalTest):
 
     def setUp(self):
@@ -1772,10 +1762,6 @@ class TestAlarms(TestAlarmsBase):
                              'user_id']).issubset(payload.keys()))
 
 
-class TestAlarmsLegacy(LegacyPolicyFileMixin, TestAlarms):
-    pass
-
-
 class TestAlarmsHistory(TestAlarmsBase):
 
     def setUp(self):
@@ -2144,10 +2130,6 @@ class TestAlarmsHistory(TestAlarmsBase):
 
     def test_get_nonexistent_alarm_history(self):
         self._get_alarm_history('foobar', expect_errors=True, status=404)
-
-
-class TestAlarmsHistoryLegacy(LegacyPolicyFileMixin, TestAlarmsHistory):
-    pass
 
 
 class TestAlarmsQuotas(TestAlarmsBase):
@@ -2836,11 +2818,6 @@ class TestAlarmsRuleCombination(TestAlarmsBase):
         self.assertEqual(['c', 'a', 'b'], alarms[0].rule.get('alarm_ids'))
 
 
-class TestAlarmsRuleCombinationLegacy(LegacyPolicyFileMixin,
-                                      TestAlarmsRuleCombination):
-    pass
-
-
 class TestAlarmsRuleGnocchi(TestAlarmsBase):
 
     def setUp(self):
@@ -3083,11 +3060,6 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
         json['gnocchi_aggregation_by_resources_threshold_rule']['query'] = (
             jsonutils.dumps(expected_query))
         self._verify_alarm(json, alarms[0])
-
-
-class TestAlarmsRuleGnocchiLegacy(LegacyPolicyFileMixin,
-                                  TestAlarmsRuleGnocchi):
-    pass
 
 
 class TestAlarmsEvent(TestAlarmsBase):
