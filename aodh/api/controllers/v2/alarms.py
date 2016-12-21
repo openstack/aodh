@@ -386,6 +386,16 @@ class Alarm(base.Base):
     def _is_trust_url(url):
         return url.scheme.startswith('trust+')
 
+    def _get_existing_trust_ids(self):
+        for action in itertools.chain(self.ok_actions or [],
+                                      self.alarm_actions or [],
+                                      self.insufficient_data_actions or []):
+            url = netutils.urlsplit(action)
+            if self._is_trust_url(url):
+                trust_id = url.username
+                if trust_id and url.password == 'delete':
+                    yield trust_id
+
     def update_actions(self, old_alarm=None):
         trustor_user_id = pecan.request.headers.get('X-User-Id')
         trustor_project_id = pecan.request.headers.get('X-Project-Id')
@@ -395,46 +405,48 @@ class Alarm(base.Base):
         else:
             roles = []
         auth_plugin = pecan.request.environ.get('keystone.token_auth')
+
+        if old_alarm:
+            prev_trust_ids = set(old_alarm._get_existing_trust_ids())
+        else:
+            prev_trust_ids = set()
+        trust_id = prev_trust_ids.pop() if prev_trust_ids else None
+        trust_id_used = False
+
         for actions in (self.ok_actions, self.alarm_actions,
                         self.insufficient_data_actions):
             if actions is not None:
                 for index, action in enumerate(actions[:]):
                     url = netutils.urlsplit(action)
                     if self._is_trust_url(url):
-                        if '@' not in url.netloc:
+                        if '@' in url.netloc:
+                            continue
+                        if trust_id is None:
                             # We have a trust action without a trust ID,
                             # create it
                             trust_id = keystone_client.create_trust_id(
                                 pecan.request.cfg,
                                 trustor_user_id, trustor_project_id, roles,
                                 auth_plugin)
-                            netloc = '%s:delete@%s' % (trust_id, url.netloc)
-                            url = list(url)
-                            url[1] = netloc
-                            actions[index] = urlparse.urlunsplit(url)
-        if old_alarm:
-            new_actions = list(itertools.chain(
-                self.ok_actions or [],
-                self.alarm_actions or [],
-                self.insufficient_data_actions or []))
-            for action in itertools.chain(
-                    old_alarm.ok_actions or [],
-                    old_alarm.alarm_actions or [],
-                    old_alarm.insufficient_data_actions or []):
-                if action not in new_actions:
-                    self.delete_trust(action)
+                        if trust_id_used:
+                            pw = ''
+                        else:
+                            pw = ':delete'
+                            trust_id_used = True
+                        netloc = '%s%s@%s' % (trust_id, pw, url.netloc)
+                        url = urlparse.SplitResult(url.scheme, netloc,
+                                                   url.path, url.query,
+                                                   url.fragment)
+                        actions[index] = url.geturl()
+        if trust_id is not None and not trust_id_used:
+            prev_trust_ids.add(trust_id)
+        for old_trust_id in prev_trust_ids:
+            keystone_client.delete_trust_id(old_trust_id, auth_plugin)
 
     def delete_actions(self):
-        for action in itertools.chain(self.ok_actions or [],
-                                      self.alarm_actions or [],
-                                      self.insufficient_data_actions or []):
-            self.delete_trust(action)
-
-    def delete_trust(self, action):
         auth_plugin = pecan.request.environ.get('keystone.token_auth')
-        url = netutils.urlsplit(action)
-        if self._is_trust_url(url) and url.password:
-            keystone_client.delete_trust_id(url.username, auth_plugin)
+        for trust_id in self._get_existing_trust_ids():
+            keystone_client.delete_trust_id(trust_id, auth_plugin)
 
 
 Alarm.add_attributes(**{"%s_rule" % ext.name: ext.plugin
