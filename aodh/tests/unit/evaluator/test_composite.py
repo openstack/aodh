@@ -13,11 +13,10 @@
 """Tests for aodh/evaluator/composite.py
 """
 
-import uuid
-
 from ceilometerclient.v2 import statistics
 import mock
 from oslo_utils import timeutils
+from oslo_utils import uuidutils
 from oslotest import mockpatch
 import six
 from six import moves
@@ -123,7 +122,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                          enabled=True,
                          user_id='fake_user',
                          project_id='fake_project',
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          state='insufficient data',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,
@@ -151,7 +150,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                          ok_actions=[],
                          alarm_actions=[],
                          repeat_actions=False,
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          time_constraints=[],
                          rule={
                              "or": [self.sub_rule1, self.sub_rule2,
@@ -172,7 +171,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                          ok_actions=[],
                          alarm_actions=[],
                          repeat_actions=False,
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          time_constraints=[],
                          rule={
                              "and": [self.sub_rule1, self.sub_rule2,
@@ -186,7 +185,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                          enabled=True,
                          user_id='fake_user',
                          project_id='fake_project',
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          state='insufficient data',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,

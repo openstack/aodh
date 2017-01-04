@@ -12,8 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
+from oslo_utils import uuidutils
 from tempest.common.utils import data_utils
 from tempest.lib import exceptions as lib_exc
 from tempest import test
@@ -34,7 +33,7 @@ class TelemetryAlarmingNegativeTest(base.BaseAlarmingTest):
     @test.idempotent_id('668743d5-08ad-4480-b2b8-15da34f81e7e')
     def test_get_non_existent_alarm(self):
         # get the non-existent alarm
-        non_existent_id = str(uuid.uuid4())
+        non_existent_id = uuidutils.generate_uuid()
         self.assertRaises(lib_exc.NotFound, self.alarming_client.show_alarm,
                           non_existent_id)
 

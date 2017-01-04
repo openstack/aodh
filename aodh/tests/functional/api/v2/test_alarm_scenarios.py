@@ -16,12 +16,12 @@
 
 import datetime
 import os
-import uuid
 
 from gnocchiclient import exceptions
 import mock
 import oslo_messaging.conffixture
 from oslo_serialization import jsonutils
+from oslo_utils import uuidutils
 import six
 from six import moves
 
@@ -142,8 +142,8 @@ class TestAlarmsBase(v2.FunctionalTest):
 
     def setUp(self):
         super(TestAlarmsBase, self).setUp()
-        self.auth_headers = {'X-User-Id': str(uuid.uuid4()),
-                             'X-Project-Id': str(uuid.uuid4())}
+        self.auth_headers = {'X-User-Id': uuidutils.generate_uuid(),
+                             'X-Project-Id': uuidutils.generate_uuid()}
 
     @staticmethod
     def _add_default_threshold_rule(alarm):
@@ -1957,8 +1957,8 @@ class TestAlarmsHistory(TestAlarmsBase):
     def test_get_recorded_alarm_history_state_transition_on_behalf_of(self):
         # credentials for new non-admin user, on who's behalf the alarm
         # is created
-        member_user = str(uuid.uuid4())
-        member_project = str(uuid.uuid4())
+        member_user = uuidutils.generate_uuid()
+        member_project = uuidutils.generate_uuid()
         member_auth = {'X-Roles': 'member',
                        'X-User-Id': member_user,
                        'X-Project-Id': member_project}
@@ -1983,8 +1983,8 @@ class TestAlarmsHistory(TestAlarmsBase):
         alarm = self.get_json('/alarms', headers=member_auth)[0]
 
         # effect a state transition as a new administrative user
-        admin_user = str(uuid.uuid4())
-        admin_project = str(uuid.uuid4())
+        admin_user = uuidutils.generate_uuid()
+        admin_project = uuidutils.generate_uuid()
         admin_auth = {'X-Roles': 'admin',
                       'X-User-Id': admin_user,
                       'X-Project-Id': admin_project}
@@ -2031,8 +2031,8 @@ class TestAlarmsHistory(TestAlarmsBase):
                                                            'rule change',
                                                            detail)
         auth = {'X-Roles': 'member',
-                'X-User-Id': str(uuid.uuid4()),
-                'X-Project-Id': str(uuid.uuid4())}
+                'X-User-Id': uuidutils.generate_uuid(),
+                'X-Project-Id': uuidutils.generate_uuid()}
         self._get_alarm_history('a', auth_headers=auth,
                                 expect_errors=True, status=404)
 
@@ -2228,7 +2228,7 @@ class TestAlarmsQuotas(TestAlarmsBase):
         self.assertEqual(201, resp.status_code)
         _test('project_id', self.auth_headers['X-Project-Id'])
 
-        self.auth_headers['X-Project-Id'] = str(uuid.uuid4())
+        self.auth_headers['X-Project-Id'] = uuidutils.generate_uuid()
         alarm['name'] = 'another_user_alarm'
         alarm['project_id'] = self.auth_headers['X-Project-Id']
         resp = self.post_json('/alarms', params=alarm,
@@ -2568,8 +2568,8 @@ class TestAlarmsRuleCombination(TestAlarmsBase):
                 'operator': 'and',
             }
         }
-        an_other_user_auth = {'X-User-Id': str(uuid.uuid4()),
-                              'X-Project-Id': str(uuid.uuid4())}
+        an_other_user_auth = {'X-User-Id': uuidutils.generate_uuid(),
+                              'X-Project-Id': uuidutils.generate_uuid()}
         resp = self.post_json('/alarms', params=json, status=404,
                               headers=an_other_user_auth)
         self.assertEqual("Alarm a not found in project "
@@ -2661,8 +2661,8 @@ class TestAlarmsRuleCombination(TestAlarmsBase):
                 'operator': 'and',
             }
         }
-        an_other_admin_auth = {'X-User-Id': str(uuid.uuid4()),
-                               'X-Project-Id': str(uuid.uuid4()),
+        an_other_admin_auth = {'X-User-Id': uuidutils.generate_uuid(),
+                               'X-Project-Id': uuidutils.generate_uuid(),
                                'X-Roles': 'admin'}
         if owner_is_set:
             json['project_id'] = an_other_admin_auth['X-Project-Id']

@@ -21,13 +21,13 @@
 import datetime
 import itertools
 import json
-import uuid
 
 import croniter
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import netutils
 from oslo_utils import timeutils
+from oslo_utils import uuidutils
 import pecan
 from pecan import rest
 import pytz
@@ -541,7 +541,7 @@ class AlarmController(rest.RestController):
         project_id = pecan.request.headers.get('X-Project-Id')
         on_behalf_of = on_behalf_of or project_id
         severity = scrubbed_data.get('severity')
-        payload = dict(event_id=str(uuid.uuid4()),
+        payload = dict(event_id=uuidutils.generate_uuid(),
                        alarm_id=self._id,
                        type=type,
                        detail=detail,
@@ -567,7 +567,7 @@ class AlarmController(rest.RestController):
         detail = {'state': alarm.state}
         user_id = pecan.request.headers.get('X-User-Id')
         project_id = pecan.request.headers.get('X-Project-Id')
-        payload = dict(event_id=str(uuid.uuid4()),
+        payload = dict(event_id=uuidutils.generate_uuid(),
                        alarm_id=self._id,
                        type=type,
                        detail=detail,
@@ -720,7 +720,7 @@ class AlarmsController(rest.RestController):
         user_id = pecan.request.headers.get('X-User-Id')
         project_id = pecan.request.headers.get('X-Project-Id')
         severity = scrubbed_data.get('severity')
-        payload = dict(event_id=str(uuid.uuid4()),
+        payload = dict(event_id=uuidutils.generate_uuid(),
                        alarm_id=alarm_id,
                        type=type,
                        detail=detail,
@@ -751,7 +751,7 @@ class AlarmsController(rest.RestController):
         conn = pecan.request.storage
         now = timeutils.utcnow()
 
-        data.alarm_id = str(uuid.uuid4())
+        data.alarm_id = uuidutils.generate_uuid()
         user_limit, project_limit = rbac.get_limited_to(pecan.request.headers,
                                                         pecan.request.enforcer)
 

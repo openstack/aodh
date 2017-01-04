@@ -15,10 +15,10 @@
 import bisect
 import hashlib
 import struct
-import uuid
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_utils import uuidutils
 import six
 import tenacity
 import tooz.coordination
@@ -116,7 +116,7 @@ class PartitionCoordinator(object):
         self.backend_url = self.conf.coordination.backend_url
         self._coordinator = None
         self._groups = set()
-        self._my_id = my_id or str(uuid.uuid4())
+        self._my_id = my_id or uuidutils.generate_uuid()
 
     def start(self):
         if self.backend_url:

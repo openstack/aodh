@@ -15,11 +15,11 @@
 
 import datetime
 import unittest
-import uuid
 
 from gnocchiclient import exceptions
 import mock
 from oslo_utils import timeutils
+from oslo_utils import uuidutils
 from oslotest import mockpatch
 import pytz
 import six
@@ -43,7 +43,7 @@ class TestGnocchiEvaluatorBase(base.TestEvaluatorBase):
                          enabled=True,
                          user_id='foobar',
                          project_id='snafu',
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          state='insufficient data',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,
@@ -75,7 +75,7 @@ class TestGnocchiEvaluatorBase(base.TestEvaluatorBase):
                          ok_actions=[],
                          alarm_actions=[],
                          repeat_actions=False,
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          time_constraints=[],
                          rule=dict(
                              comparison_operator='le',
@@ -92,7 +92,7 @@ class TestGnocchiEvaluatorBase(base.TestEvaluatorBase):
                          enabled=True,
                          user_id='foobar',
                          project_id='snafu',
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          state='insufficient data',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,

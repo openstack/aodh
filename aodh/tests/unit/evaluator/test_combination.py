@@ -17,12 +17,12 @@
 """
 
 import datetime
-import uuid
 
 from ceilometerclient import exc
 from ceilometerclient.v2 import alarms
 import mock
 from oslo_utils import timeutils
+from oslo_utils import uuidutils
 import pytz
 
 from aodh.evaluator import combination
@@ -42,7 +42,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                          enabled=True,
                          user_id='foobar',
                          project_id='snafu',
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          state='insufficient data',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,
@@ -64,7 +64,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                          enabled=True,
                          user_id='foobar',
                          project_id='snafu',
-                         alarm_id=str(uuid.uuid4()),
+                         alarm_id=uuidutils.generate_uuid(),
                          state='insufficient data',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,

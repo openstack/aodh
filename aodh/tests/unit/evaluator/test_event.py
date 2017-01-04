@@ -16,11 +16,11 @@
 import copy
 import datetime
 import six
-import uuid
 
 import mock
 from oslo_serialization import jsonutils
 from oslo_utils import timeutils
+from oslo_utils import uuidutils
 
 from aodh import evaluator
 from aodh.evaluator import event as event_evaluator
@@ -34,7 +34,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
 
     @staticmethod
     def _alarm(**kwargs):
-        alarm_id = kwargs.get('id') or str(uuid.uuid4())
+        alarm_id = kwargs.get('id') or uuidutils.generate_uuid()
         return models.Alarm(name=kwargs.get('name', alarm_id),
                             type='event',
                             enabled=True,
@@ -56,7 +56,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
 
     @staticmethod
     def _event(**kwargs):
-        return {'message_id': kwargs.get('id') or str(uuid.uuid4()),
+        return {'message_id': kwargs.get('id') or uuidutils.generate_uuid(),
                 'event_type': kwargs.get('event_type', 'type0'),
                 'traits': kwargs.get('traits', [])}
 
@@ -193,7 +193,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
 
     def test_skip_event_missing_event_type(self):
         alarm = self._alarm()
-        event = {'message_id': str(uuid.uuid4()), 'traits': []}
+        event = {'message_id': uuidutils.generate_uuid(), 'traits': []}
         self._do_test_event_alarm(
             [alarm], [event],
             expect_alarm_states={alarm.alarm_id: evaluator.UNKNOWN},

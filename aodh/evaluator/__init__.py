@@ -26,10 +26,10 @@ from futurist import periodics
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
+from oslo_utils import uuidutils
 import pytz
 import six
 from stevedore import extension
-import uuid
 
 import aodh
 from aodh import coordination
@@ -87,7 +87,7 @@ class Evaluator(object):
         user_id, project_id = self.ks_client.user_id, self.ks_client.project_id
         on_behalf_of = alarm.project_id
         now = timeutils.utcnow()
-        payload = dict(event_id=str(uuid.uuid4()),
+        payload = dict(event_id=uuidutils.generate_uuid(),
                        alarm_id=alarm.alarm_id,
                        type=type,
                        detail=detail,
