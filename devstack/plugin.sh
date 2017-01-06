@@ -248,11 +248,11 @@ function install_aodh {
     _aodh_prepare_coordination
     install_aodhclient
     if python3_enabled; then
-        PIP=$(which pip 2>/dev/null || which pip-python 2>/dev/null)
-        sudo -H python${PYTHON3_VERSION} $PIP install -e "$AODH_DIR"[test,$AODH_BACKEND]
+        PY_VERS=${PYTHON3_VERSION}
     else
-        sudo -H pip install -e "$AODH_DIR"[test,$AODH_BACKEND]
+        PY_VERS=${PYTHON2_VERSION}
     fi
+    sudo -H python${PY_VERS} -m pip install -e "$AODH_DIR"[test,$AODH_BACKEND]
     sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR
 
     if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
