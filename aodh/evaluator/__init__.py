@@ -78,6 +78,14 @@ class Evaluator(object):
             self.storage_conn = storage.get_connection_from_config(self.conf)
         return self.storage_conn
 
+    @property
+    def alarm_change_notifier(self):
+        if not self._alarm_change_notifier:
+            transport = messaging.get_transport(self.conf)
+            self._alarm_change_notifier = messaging.get_notifier(
+                transport, publisher_id="aodh.evaluator")
+        return self._alarm_change_notifier
+
     def _record_change(self, alarm, reason):
         if not self.conf.record_history:
             return
@@ -100,13 +108,9 @@ class Evaluator(object):
             self._storage_conn.record_alarm_change(payload)
         except aodh.NotImplementedError:
             pass
-        if not self._alarm_change_notifier:
-            transport = messaging.get_transport(self.conf)
-            self._alarm_change_notifier = messaging.get_notifier(
-                transport, publisher_id="aodh.evaluator")
         notification = "alarm.state_transition"
-        self._alarm_change_notifier.info({},
-                                         notification, payload)
+        self.alarm_change_notifier.info({},
+                                        notification, payload)
 
     def _refresh(self, alarm, state, reason, reason_data, always_record=False):
         """Refresh alarm state."""
