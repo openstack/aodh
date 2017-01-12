@@ -17,7 +17,6 @@
 import datetime
 import os
 
-from gnocchiclient import exceptions
 import mock
 import oslo_messaging.conffixture
 from oslo_serialization import jsonutils
@@ -2920,6 +2919,43 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
                              for r in data
                              if 'gnocchi_resources_threshold_rule' in r))
 
+    def test_post_gnocchi_metrics_alarm_cached(self):
+        # NOTE(gordc):  cache is a decorator and therefore, gets mocked across
+        # entire scenario. ideally we should test both scenario but tough.
+        # assume cache will return aggregation_method == ['count'] always.
+        json = {
+            'enabled': False,
+            'name': 'name_post',
+            'state': 'ok',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            'severity': 'critical',
+            'ok_actions': ['http://something/ok'],
+            'alarm_actions': ['http://something/alarm'],
+            'insufficient_data_actions': ['http://something/no'],
+            'repeat_actions': True,
+            'gnocchi_aggregation_by_metrics_threshold_rule': {
+                'metrics': ['b3d9d8ab-05e8-439f-89ad-5e978dd2a5eb',
+                            '009d4faf-c275-46f0-8f2d-670b15bac2b0'],
+                'comparison_operator': 'le',
+                'aggregation_method': 'count',
+                'threshold': 50,
+                'evaluation_periods': 3,
+                'granularity': 180,
+            }
+        }
+
+        with mock.patch('aodh.api.controllers.v2.alarm_rules.'
+                        'gnocchi.client') as clientlib:
+            c = clientlib.Client.return_value
+            c.capabilities.list.return_value = {
+                'aggregation_methods': ['count']}
+            self.post_json('/alarms', params=json, headers=self.auth_headers)
+
+        with mock.patch('aodh.api.controllers.v2.alarm_rules.'
+                        'gnocchi.client') as clientlib:
+            self.post_json('/alarms', params=json, headers=self.auth_headers)
+            self.assertFalse(clientlib.called)
+
     def test_post_gnocchi_resources_alarm(self):
         json = {
             'enabled': False,
@@ -2946,35 +2982,12 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
         with mock.patch('aodh.api.controllers.v2.alarm_rules.'
                         'gnocchi.client') as clientlib:
             c = clientlib.Client.return_value
-            c.capabilities.list.side_effect = Exception("boom!")
-            resp = self.post_json('/alarms', params=json,
-                                  headers=self.auth_headers,
-                                  expect_errors=True)
-            self.assertEqual(503, resp.status_code, resp.body)
-
-        with mock.patch('aodh.api.controllers.v2.alarm_rules.'
-                        'gnocchi.client') as clientlib:
-            c = clientlib.Client.return_value
-            c.capabilities.list.side_effect = (
-                exceptions.ClientException(500, "my_custom_error"))
-            resp = self.post_json('/alarms', params=json,
-                                  headers=self.auth_headers,
-                                  expect_errors=True)
-            self.assertEqual(500, resp.status_code, resp.body)
-            self.assertIn('my_custom_error',
-                          resp.json['error_message']['faultstring'])
-
-        with mock.patch('aodh.api.controllers.v2.alarm_rules.'
-                        'gnocchi.client') as clientlib:
-            c = clientlib.Client.return_value
             c.capabilities.list.return_value = {
                 'aggregation_methods': ['count']}
             self.post_json('/alarms', params=json, headers=self.auth_headers)
-            expected = [mock.call.capabilities.list(),
-                        mock.call.resource.get(
-                            "instance",
-                            "209ef69c-c10c-4efb-90ff-46f4b2d90d2e")]
-            self.assertEqual(expected, c.mock_calls)
+            expected = mock.call.resource.get(
+                "instance", "209ef69c-c10c-4efb-90ff-46f4b2d90d2e")
+            self.assertIn(expected, c.mock_calls)
 
         alarms = list(self.alarm_conn.get_alarms(enabled=False))
         self.assertEqual(1, len(alarms))
