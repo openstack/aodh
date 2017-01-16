@@ -7,6 +7,6 @@ fixtures:
 tests:
 
 - name: get capabilities
-  url: /v2/capabilities
+  GET: /v2/capabilities
   response_json_paths:
       $.alarm_storage.['storage:production_ready']: true

@@ -5,15 +5,13 @@ defaults:
 tests:
     - name: list alarms none
       desc: Lists alarms, none yet exist
-      url: /v2/alarms
-      method: GET
+      GET: /v2/alarms
       response_strings:
           - "[]"
 
     - name: try to PUT an alarm
       desc: what does PUT do
-      url: /v2/alarms
-      method: PUT
+      PUT: /v2/alarms
       request_headers:
           content-type: application/json
       data:
@@ -28,8 +26,7 @@ tests:
 
     - name: createAlarm
       desc: Creates an alarm.
-      url: /v2/alarms
-      method: POST
+      POST: /v2/alarms
       request_headers:
           content-type: application/json
       data:
@@ -49,8 +46,7 @@ tests:
 
     - name: showAlarm
       desc: Shows information for a specified alarm.
-      url: /v2/alarms/$RESPONSE['$.alarm_id']
-      method: GET
+      GET: /v2/alarms/$RESPONSE['$.alarm_id']
       response_json_paths:
           $.severity: low
           $.alarm_id: $RESPONSE['$.alarm_id']
@@ -61,8 +57,7 @@ tests:
 
     - name: updateAlarm
       desc: Updates a specified alarm.
-      url: /v2/alarms/$RESPONSE['$.alarm_id']
-      method: PUT
+      PUT: /v2/alarms/$RESPONSE['$.alarm_id']
       request_headers:
           content-type: application/json
       data:
@@ -81,18 +76,16 @@ tests:
 
     - name: showAlarmHistory
       desc: Assembles the history for a specified alarm.
-      url: /v2/alarms/$RESPONSE['$.alarm_id']/history?q.field=type&q.op=eq&q.value=rule%20change
-      method: GET
+      GET: /v2/alarms/$RESPONSE['$.alarm_id']/history?q.field=type&q.op=eq&q.value=rule%20change
       response_json_paths:
           $[0].type: rule change
 
     - name: updateAlarmState
       desc: Sets the state of a specified alarm.
-      url: /v2/alarms/$RESPONSE['$[0].alarm_id']/state
+      PUT: /v2/alarms/$RESPONSE['$[0].alarm_id']/state
       request_headers:
           content-type: application/json
       data: '"alarm"'
-      method: PUT
     # TODO(chdent): really? Of what possible use is this?
       response_json_paths:
           $: alarm
@@ -100,15 +93,13 @@ tests:
     # Get a list of alarms so we can extract an id for the next test
     - name: list alarms for data
       desc: Lists alarms, only one
-      url: /v2/alarms
-      method: GET
+      GET: /v2/alarms
       response_json_paths:
           $[0].name: added_alarm_defaults
 
     - name: showAlarmState
       desc: Gets the state of a specified alarm.
-      url: /v2/alarms/$RESPONSE['$[0].alarm_id']/state
-      method: GET
+      GET: /v2/alarms/$RESPONSE['$[0].alarm_id']/state
       response_headers:
           content-type: application/json; charset=UTF-8
       response_json_paths:
@@ -116,20 +107,17 @@ tests:
 
     - name: list alarms one
       desc: Lists alarms, only one
-      url: /v2/alarms
-      method: GET
+      GET: /v2/alarms
       response_json_paths:
           $[0].name: added_alarm_defaults
 
     - name: deleteAlarm
       desc: Deletes a specified alarm.
-      url: /v2/alarms/$RESPONSE['$[0].alarm_id']
-      method: DELETE
+      DELETE: /v2/alarms/$RESPONSE['$[0].alarm_id']
       status: 204
 
     - name: list alarms none end
       desc: Lists alarms, none now exist
-      url: /v2/alarms
-      method: GET
+      GET: /v2/alarms
       response_strings:
           - "[]"
