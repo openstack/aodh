@@ -15,15 +15,11 @@
 
 import pecan
 
-from aodh.api.controllers.v2 import root as v2
-
 MEDIA_TYPE_JSON = 'application/vnd.openstack.telemetry-%s+json'
 MEDIA_TYPE_XML = 'application/vnd.openstack.telemetry-%s+xml'
 
 
-class RootController(object):
-
-    v2 = v2.V2Controller()
+class VersionsController(object):
 
     @pecan.expose('json')
     def index(self):

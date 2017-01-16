@@ -22,8 +22,6 @@ import os
 
 from gabbi import driver
 
-from aodh.api import app
-from aodh import service
 from aodh.tests.functional.gabbi import fixtures as fixture_module
 
 
@@ -34,10 +32,5 @@ def load_tests(loader, tests, pattern):
     """Provide a TestSuite to the discovery process."""
     test_dir = os.path.join(os.path.dirname(__file__), TESTS_DIR)
     return driver.build_tests(test_dir, loader, host=None,
-                              intercept=setup_app,
+                              intercept=fixture_module.setup_app,
                               fixture_module=fixture_module)
-
-
-def setup_app():
-    conf = service.prepare_service([])
-    return app.load_app(conf)
