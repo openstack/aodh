@@ -81,11 +81,6 @@ class ConfigFixture(fixture.GabbiFixture):
                               'aodh/tests/open-policy.json'),
                           group='oslo_policy',
                           enforce_type=True)
-        conf.set_override(
-            'paste_config',
-            os.path.abspath('etc/aodh/api_paste.ini'),
-            group='api',
-        )
         conf.set_override('auth_mode', None, group='api')
 
         parsed_url = urlparse.urlparse(db_url)

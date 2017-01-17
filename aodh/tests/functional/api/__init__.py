@@ -44,9 +44,6 @@ class FunctionalTest(db_test_base.TestBase):
         self.CONF.set_override('policy_file',
                                os.path.abspath('etc/aodh/policy.json'),
                                group='oslo_policy', enforce_type=True)
-        self.CONF.set_override('paste_config',
-                               os.path.abspath('etc/aodh/api_paste.ini'),
-                               group='api', enforce_type=True)
         self.CONF.set_override('auth_mode', None, group='api')
         self.app = webtest.TestApp(app.load_app(self.CONF))
 
