@@ -86,6 +86,7 @@ class ConfigFixture(fixture.GabbiFixture):
             os.path.abspath('etc/aodh/api_paste.ini'),
             group='api',
         )
+        conf.set_override('auth_mode', None, group='api')
 
         parsed_url = urlparse.urlparse(db_url)
         if parsed_url.scheme != 'sqlite':
@@ -105,7 +106,6 @@ class ConfigFixture(fixture.GabbiFixture):
 
         LOAD_APP_KWARGS = {
             'conf': conf,
-            'appname': 'aodh+noauth',
         }
 
     def stop_fixture(self):
