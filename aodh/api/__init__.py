@@ -20,6 +20,10 @@ OPTS = [
     cfg.StrOpt('paste_config',
                default="api_paste.ini",
                help="Configuration file for WSGI definition of API."),
+    cfg.StrOpt(
+        'auth_mode',
+        default="keystone",
+        help="Authentication mode to use. Unset to disable authentication"),
     cfg.BoolOpt('enable_combination_alarms',
                 default=False,
                 help="Enable deprecated combination alarms.",

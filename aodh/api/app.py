@@ -54,7 +54,7 @@ def setup_app(root, conf):
     )
 
 
-def load_app(conf, appname="aodh+keystone"):
+def load_app(conf):
     global APPCONFIGS
 
     # Build the WSGI app
@@ -71,7 +71,10 @@ def load_app(conf, appname="aodh+keystone"):
 
     LOG.info(_LI("WSGI config used: %s"), cfg_path)
     return deploy.loadapp("config:" + cfg_path,
-                          name=appname,
+                          name="aodh+" + (
+                              conf.api.auth_mode
+                              if conf.api.auth_mode else "noauth"
+                          ),
                           global_conf={'configkey': configkey})
 
 

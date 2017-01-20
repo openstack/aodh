@@ -47,8 +47,8 @@ class FunctionalTest(db_test_base.TestBase):
         self.CONF.set_override('paste_config',
                                os.path.abspath('etc/aodh/api_paste.ini'),
                                group='api', enforce_type=True)
-        self.app = webtest.TestApp(app.load_app(
-            self.CONF, appname='aodh+noauth'))
+        self.CONF.set_override('auth_mode', None, group='api')
+        self.app = webtest.TestApp(app.load_app(self.CONF))
 
     def put_json(self, path, params, expect_errors=False, headers=None,
                  extra_environ=None, status=None):
