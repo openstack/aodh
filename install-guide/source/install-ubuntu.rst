@@ -31,15 +31,6 @@ Install and configure components
 
 .. include:: configure-common.rst
 
-3. Edit the ``/etc/aodh/api_paste.ini`` file and modify the
-   ``[filter:authtoken]`` section as follows:
-
-   .. code-block:: ini
-
-      [filter:authtoken]
-      ...
-      oslo_config_project = aodh
-
 Finalize installation
 ~~~~~~~~~~~~~~~~~~~~~
 
