@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2013 Red Hat, Inc
+# Copyright 2013-2017 Red Hat, Inc
 # Copyright 2012-2015 eNovance <licensing@enovance.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,6 +14,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import os
+
 from keystoneauth1 import loading as ka_loading
 from oslo_config import cfg
 from oslo_db import options as db_options
@@ -72,7 +74,8 @@ def prepare_service(argv=None, config_files=None):
     log.set_defaults(default_log_levels=log_levels)
     defaults.set_cors_middleware_defaults()
     db_options.set_defaults(conf)
-    policy_opts.set_defaults(conf)
+    policy_opts.set_defaults(conf, policy_file=os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "api", "policy.json")))
     from aodh import opts
     # Register our own Aodh options
     for group, options in opts.list_opts():

@@ -169,10 +169,6 @@ function configure_aodh {
         setup_colorized_logging $AODH_CONF DEFAULT
     fi
 
-    # Install the policy file for the API server
-    cp $AODH_DIR/etc/aodh/policy.json $AODH_CONF_DIR
-    iniset $AODH_CONF oslo_policy policy_file $AODH_CONF_DIR/policy.json
-
     cp $AODH_DIR/etc/aodh/aodh-config-generator.conf $AODH_CONF_DIR
 
     # The alarm evaluator needs these options to call gnocchi/ceilometer APIs

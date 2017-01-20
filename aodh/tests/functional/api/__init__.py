@@ -16,8 +16,6 @@
 """Base classes for API tests.
 """
 
-import os
-
 from oslo_config import fixture as fixture_config
 import webtest
 
@@ -41,9 +39,6 @@ class FunctionalTest(db_test_base.TestBase):
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
 
-        self.CONF.set_override('policy_file',
-                               os.path.abspath('etc/aodh/policy.json'),
-                               group='oslo_policy', enforce_type=True)
         self.CONF.set_override('auth_mode', None, group='api')
         self.app = webtest.TestApp(app.load_app(self.CONF))
 
