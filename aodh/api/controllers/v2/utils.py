@@ -39,7 +39,7 @@ def get_auth_project(on_behalf_of=None):
     #   added so that admin-level visibility on statistics is not leaked
     # - combination alarm, that alarm ids verification is scoped to
     #   alarms owned by the alarm project.
-    # hence for null auth_project (indicating admin-ness) we check if
+    # Hence, for null auth_project (indicating admin-ness) we check if
     # the creating tenant differs from the tenant on whose behalf the
     # alarm is being created
     auth_project = rbac.get_limited_to_project(pecan.request.headers,

@@ -97,7 +97,7 @@ class AlarmThresholdRule(base.AlarmRule):
                 else:
                     raise
             else:
-                # I don't think this meter can exists but how known
+                # I don't think this meter can exist but how known
                 cls.ceilometer_sample_api_is_supported = True
 
         if cls.ceilometer_sample_api_is_supported is False:

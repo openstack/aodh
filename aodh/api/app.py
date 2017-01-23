@@ -33,7 +33,7 @@ LOG = log.getLogger(__name__)
 
 # NOTE(sileht): pastedeploy uses ConfigParser to handle
 # global_conf, since python 3 ConfigParser doesn't
-# allow to store object as config value, only strings are
+# allow storing object as config value, only strings are
 # permit, so to be able to pass an object created before paste load
 # the app, we store them into a global var. But the each loaded app
 # store it's configuration in unique key to be concurrency safe.

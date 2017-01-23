@@ -80,7 +80,7 @@ def get_limited_to(headers, enforcer):
     """
     # TODO(sileht): Only filtering on role work currently for segregation
     # oslo.policy expects the target to be the alarm. That will allow
-    # to create more enhanced rbac. But for now we enforce the
+    # creating more enhanced rbac. But for now we enforce the
     # scoping of request to the project-id, so...
     target = {}
     credentials = {
