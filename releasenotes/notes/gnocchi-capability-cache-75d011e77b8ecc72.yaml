@@ -1,0 +1,8 @@
+---
+other:
+  - |
+    Gnocchi aggregation capabilities are now cached to minimise redundant calls
+    to Gnocchi when validating aggregation methods. The cache is stored
+    in-memory for an hour. If additional aggregations are added to Gnocchi,
+    they will not be proprogated to Aodh's API service for at most an hour or
+    unless the service is restarted.

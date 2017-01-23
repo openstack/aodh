@@ -13,6 +13,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import threading
+
+import cachetools
 from gnocchiclient import client
 from gnocchiclient import exceptions
 from oslo_serialization import jsonutils
@@ -47,6 +50,9 @@ class AlarmGnocchiThresholdRule(base.AlarmRule):
     granularity = wsme.wsattr(wtypes.IntegerType(minimum=1), default=60)
     "The time range in seconds over which query"
 
+    cache = cachetools.TTLCache(maxsize=1, ttl=3600)
+    lock = threading.RLock()
+
     @classmethod
     def validate_alarm(cls, alarm):
         alarm_rule = getattr(alarm, "%s_rule" % alarm.type)
@@ -56,10 +62,8 @@ class AlarmGnocchiThresholdRule(base.AlarmRule):
                 'aggregation_method should be in %s not %s' % (
                     cls._get_aggregation_methods(), aggregation_method))
 
-    # NOTE(sileht): once cachetools is in the requirements
-    # enable it
-    # @cachetools.ttl_cache(maxsize=1, ttl=600)
     @staticmethod
+    @cachetools.cached(cache, lock=lock)
     def _get_aggregation_methods():
         conf = pecan.request.cfg
         gnocchi_client = client.Client(
