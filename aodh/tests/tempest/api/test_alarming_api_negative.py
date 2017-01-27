@@ -14,6 +14,7 @@
 
 from oslo_utils import uuidutils
 from tempest.common.utils import data_utils
+from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
 from tempest import test
 
@@ -30,7 +31,7 @@ class TelemetryAlarmingNegativeTest(base.BaseAlarmingTest):
     """
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('668743d5-08ad-4480-b2b8-15da34f81e7e')
+    @decorators.idempotent_id('668743d5-08ad-4480-b2b8-15da34f81e7e')
     def test_get_non_existent_alarm(self):
         # get the non-existent alarm
         non_existent_id = uuidutils.generate_uuid()
@@ -38,7 +39,7 @@ class TelemetryAlarmingNegativeTest(base.BaseAlarmingTest):
                           non_existent_id)
 
     @test.attr(type=['negative'])
-    @test.idempotent_id('ef45000d-0a72-4781-866d-4cb7bf2582ae')
+    @decorators.idempotent_id('ef45000d-0a72-4781-866d-4cb7bf2582ae')
     def test_get_update_show_history_delete_deleted_alarm(self):
         # get, update and delete the deleted alarm
         alarm_name = data_utils.rand_name('telemetry_alarm')
