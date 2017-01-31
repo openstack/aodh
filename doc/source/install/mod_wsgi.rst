@@ -17,37 +17,30 @@
  Installing the API behind mod_wsgi
 ===================================
 
-Aodh comes with a few example files for configuring the API
-service to run behind Apache with ``mod_wsgi``.
+Aodh comes with a WSGI application file named `aodh/api/app.wsgi` for
+configuring the API service to run behind Apache with ``mod_wsgi``. This file
+is installed with the rest of the Aodh application code, and should not need to
+be modified.
 
-app.wsgi
-========
+You can then configure Apache with something like this::
 
-The file ``aodh/api/app.wsgi`` sets up the V2 API WSGI
-application. The file is installed with the rest of the Aodh
-application code, and should not need to be modified.
+    Listen 8042
 
-etc/apache2/aodh
-================
+    <VirtualHost *:8042>
+        WSGIDaemonProcess aodh-api processes=2 threads=10 user=SOMEUSER display-name=%{GROUP}
+        WSGIProcessGroup aodh-api
+        WSGIScriptAlias / /usr/lib/python2.7/dist-packages/aodh/api/app
+        WSGIApplicationGroup %{GLOBAL}
+        <IfVersion >= 2.4>
+            ErrorLogFormat "%{cu}t %M"
+        </IfVersion>
+        ErrorLog /var/log/httpd/aodh_error.log
+        CustomLog /var/log/httpd/aodh_access.log combined
+    </VirtualHost>
 
-The ``etc/apache2/aodh`` file contains example settings that
-work with a copy of Aodh installed via devstack.
+    WSGISocketPrefix /var/run/httpd
 
-.. literalinclude:: ../../../etc/apache2/aodh
 
-1. On deb-based systems copy or symlink the file to
-   ``/etc/apache2/sites-available``. For rpm-based systems the file will go in
-   ``/etc/httpd/conf.d``.
-
-2. Modify the ``WSGIDaemonProcess`` directive to set the ``user`` and
-   ``group`` values to an appropriate user on your server. In many
-   installations ``aodh`` will be correct.
-
-3. Enable the Aodh site. On deb-based systems::
-
-      $ a2ensite aodh
-      $ service apache2 reload
-
-   On rpm-based systems::
-
-      $ service httpd reload
+Modify the ``WSGIDaemonProcess`` directive to set the ``user`` and ``group``
+values to an appropriate user on your server. In many installations ``aodh``
+will be correct.
