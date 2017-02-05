@@ -26,7 +26,6 @@ from six import moves
 import webtest
 
 from aodh.api import app
-from aodh.cmd import alarm_conversion
 from aodh import messaging
 from aodh.storage import models
 from aodh.tests import constants
@@ -116,27 +115,7 @@ def default_alarms(auth_headers):
                                            'op': 'eq', 'value':
                                            auth_headers['X-Project-Id']}
                                           ]),
-                         ),
-            models.Alarm(name='name4',
-                         type='combination',
-                         enabled=True,
-                         alarm_id='d',
-                         description='d',
-                         state='insufficient data',
-                         severity='low',
-                         state_timestamp=constants.MIN_DATETIME,
-                         timestamp=constants.MIN_DATETIME,
-                         ok_actions=[],
-                         insufficient_data_actions=[],
-                         alarm_actions=[],
-                         repeat_actions=False,
-                         user_id=auth_headers['X-User-Id'],
-                         project_id=auth_headers['X-Project-Id'],
-                         time_constraints=[],
-                         rule=dict(alarm_ids=['a', 'b'],
-                                   operator='or'),
-                         ),
-            ]
+                         )]
 
 
 class TestAlarmsBase(v2.FunctionalTest):
@@ -199,15 +178,12 @@ class TestAlarms(TestAlarmsBase):
 
     def test_list_alarms(self):
         data = self.get_json('/alarms', headers=self.auth_headers)
-        self.assertEqual(4, len(data))
-        self.assertEqual(set(['name1', 'name2', 'name3', 'name4']),
+        self.assertEqual(3, len(data))
+        self.assertEqual(set(['name1', 'name2', 'name3']),
                          set(r['name'] for r in data))
         self.assertEqual(set(['meter.test', 'meter.mine']),
                          set(r['threshold_rule']['meter_name']
                              for r in data if 'threshold_rule' in r))
-        self.assertEqual(set(['or']),
-                         set(r['combination_rule']['operator']
-                             for r in data if 'combination_rule' in r))
 
     def test_alarms_query_with_timestamp(self):
         date_time = datetime.datetime(2012, 7, 2, 10, 41)
@@ -241,10 +217,10 @@ class TestAlarms(TestAlarmsBase):
 
     def test_alarms_query_with_state(self):
         alarm = models.Alarm(name='disabled',
-                             type='combination',
+                             type='threshold',
                              enabled=False,
-                             alarm_id='d',
-                             description='d',
+                             alarm_id='c',
+                             description='c',
                              state='ok',
                              state_timestamp=constants.MIN_DATETIME,
                              timestamp=constants.MIN_DATETIME,
@@ -255,7 +231,17 @@ class TestAlarms(TestAlarmsBase):
                              user_id=self.auth_headers['X-User-Id'],
                              project_id=self.auth_headers['X-Project-Id'],
                              time_constraints=[],
-                             rule=dict(alarm_ids=['a', 'b'], operator='or'),
+                             rule=dict(comparison_operator='gt',
+                                       threshold=3.0,
+                                       statistic='avg',
+                                       evaluation_periods=60,
+                                       period=1,
+                                       meter_name='meter.mine',
+                                       query=[
+                                           {'field': 'project_id',
+                                            'op': 'eq', 'value':
+                                            self.auth_headers['X-Project-Id']}
+                                       ]),
                              severity='critical')
         self.alarm_conn.update_alarm(alarm)
         resp = self.get_json('/alarms',
@@ -308,10 +294,10 @@ class TestAlarms(TestAlarmsBase):
 
     def test_get_alarm_disabled(self):
         alarm = models.Alarm(name='disabled',
-                             type='combination',
+                             type='threshold',
                              enabled=False,
-                             alarm_id='d',
-                             description='d',
+                             alarm_id='c',
+                             description='c',
                              state='insufficient data',
                              state_timestamp=constants.MIN_DATETIME,
                              timestamp=constants.MIN_DATETIME,
@@ -322,7 +308,17 @@ class TestAlarms(TestAlarmsBase):
                              user_id=self.auth_headers['X-User-Id'],
                              project_id=self.auth_headers['X-Project-Id'],
                              time_constraints=[],
-                             rule=dict(alarm_ids=['a', 'b'], operator='or'),
+                             rule=dict(comparison_operator='gt',
+                                       threshold=3.0,
+                                       statistic='avg',
+                                       evaluation_periods=60,
+                                       period=1,
+                                       meter_name='meter.mine',
+                                       query=[
+                                           {'field': 'project_id',
+                                            'op': 'eq', 'value':
+                                            self.auth_headers['X-Project-Id']}
+                                       ]),
                              severity='critical')
         self.alarm_conn.update_alarm(alarm)
 
@@ -366,7 +362,7 @@ class TestAlarms(TestAlarmsBase):
                                    q=[{'field': field,
                                        'op': 'eq',
                                        'value': project}])
-            self.assertEqual(4, len(alarms))
+            self.assertEqual(3, len(alarms))
 
         _test('project')
         _test('project_id')
@@ -433,11 +429,6 @@ class TestAlarms(TestAlarmsBase):
                     'meter_name': 'ameter',
                 }
             },
-            'combination_rule/alarm_ids': {
-                'name': 'missing alarm_ids',
-                'type': 'combination',
-                'combination_rule': {}
-            }
         }
         for field, json in six.iteritems(jsons):
             resp = self.post_json('/alarms', params=json, expect_errors=True,
@@ -447,7 +438,7 @@ class TestAlarms(TestAlarmsBase):
                              % field.split('/', 1)[-1],
                              resp.json['error_message']['faultstring'])
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
 
     def test_post_invalid_alarm_time_constraint_start(self):
         json = {
@@ -468,7 +459,7 @@ class TestAlarms(TestAlarmsBase):
         self.post_json('/alarms', params=json, expect_errors=True, status=400,
                        headers=self.auth_headers)
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
 
     def test_post_duplicate_time_constraint_name(self):
         json = {
@@ -497,7 +488,7 @@ class TestAlarms(TestAlarmsBase):
             "Time constraint names must be unique for a given alarm.",
             resp.json['error_message']['faultstring'])
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
 
     def test_post_alarm_null_time_constraint(self):
         json = {
@@ -531,7 +522,7 @@ class TestAlarms(TestAlarmsBase):
         self.post_json('/alarms', params=json, expect_errors=True, status=400,
                        headers=self.auth_headers)
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
 
     def test_post_invalid_alarm_time_constraint_timezone(self):
         json = {
@@ -553,7 +544,7 @@ class TestAlarms(TestAlarmsBase):
         self.post_json('/alarms', params=json, expect_errors=True, status=400,
                        headers=self.auth_headers)
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
 
     def test_post_invalid_alarm_period(self):
         json = {
@@ -571,14 +562,13 @@ class TestAlarms(TestAlarmsBase):
         self.post_json('/alarms', params=json, expect_errors=True, status=400,
                        headers=self.auth_headers)
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
 
     def test_post_null_rule(self):
         json = {
             'name': 'added_alarm_invalid_threshold_rule',
             'type': 'threshold',
             'threshold_rule': None,
-            'combination_rule': None,
         }
         resp = self.post_json('/alarms', params=json, expect_errors=True,
                               status=400, headers=self.auth_headers)
@@ -604,7 +594,7 @@ class TestAlarms(TestAlarmsBase):
         self.assertIn(expected_err_msg,
                       resp.json['error_message']['faultstring'])
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
 
     def test_post_invalid_alarm_input_severity(self):
         json = {
@@ -625,7 +615,7 @@ class TestAlarms(TestAlarmsBase):
         self.assertIn(expected_err_msg,
                       resp.json['error_message']['faultstring'])
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
 
     def test_post_invalid_alarm_input_type(self):
         json = {
@@ -646,7 +636,7 @@ class TestAlarms(TestAlarmsBase):
         self.assertIn(expected_err_msg,
                       resp.json['error_message']['faultstring'])
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
 
     def test_post_invalid_alarm_input_enabled_str(self):
         json = {
@@ -666,7 +656,7 @@ class TestAlarms(TestAlarmsBase):
         self.assertIn(expected_err_msg,
                       resp.json['error_message']['faultstring'])
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
 
     def test_post_invalid_alarm_input_enabled_int(self):
         json = {
@@ -684,36 +674,7 @@ class TestAlarms(TestAlarmsBase):
                               headers=self.auth_headers)
         self.assertFalse(resp.json['enabled'])
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(5, len(alarms))
-
-    def test_post_invalid_alarm_have_multiple_rules(self):
-        json = {
-            'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'meter',
-                           'value': 'ameter'}],
-                'comparison_operator': 'gt',
-                'threshold': 2.0,
-            },
-            'combination_rule': {
-                'alarm_ids': ['a', 'b'],
-
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        alarms = list(self.alarm_conn.get_alarms())
         self.assertEqual(4, len(alarms))
-
-        # threshold_rule and combination_rule order is not
-        # predictable so it is not possible to do an exact match
-        # here
-        error_faultstring = resp.json['error_message']['faultstring']
-        for expected_string in ['threshold_rule', 'combination_rule',
-                                'cannot be set at the same time']:
-            self.assertIn(expected_string, error_faultstring)
 
     def _do_post_alarm_invalid_action(self, ok_actions=None,
                                       alarm_actions=None,
@@ -748,7 +709,7 @@ class TestAlarms(TestAlarmsBase):
         resp = self.post_json('/alarms', params=json, status=400,
                               headers=self.auth_headers)
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
+        self.assertEqual(3, len(alarms))
         self.assertEqual(error_message,
                          resp.json['error_message']['faultstring'])
 
@@ -799,7 +760,7 @@ class TestAlarms(TestAlarmsBase):
         self.post_json('/alarms', params=json, status=201,
                        headers=self.auth_headers)
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(5, len(alarms))
+        self.assertEqual(4, len(alarms))
         for alarm in alarms:
             if alarm.name == 'added_alarm_defaults':
                 for key in to_check:
@@ -1655,18 +1616,18 @@ class TestAlarms(TestAlarmsBase):
 
     def test_delete_alarm(self):
         data = self.get_json('/alarms', headers=self.auth_headers)
-        self.assertEqual(4, len(data))
+        self.assertEqual(3, len(data))
 
         resp = self.delete('/alarms/%s' % data[0]['alarm_id'],
                            headers=self.auth_headers,
                            status=204)
         self.assertEqual(b'', resp.body)
         alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(3, len(alarms))
+        self.assertEqual(2, len(alarms))
 
     def test_get_state_alarm(self):
         data = self.get_json('/alarms', headers=self.auth_headers)
-        self.assertEqual(4, len(data))
+        self.assertEqual(3, len(data))
 
         resp = self.get_json('/alarms/%s/state' % data[0]['alarm_id'],
                              headers=self.auth_headers)
@@ -1674,7 +1635,7 @@ class TestAlarms(TestAlarmsBase):
 
     def test_set_state_alarm(self):
         data = self.get_json('/alarms', headers=self.auth_headers)
-        self.assertEqual(4, len(data))
+        self.assertEqual(3, len(data))
 
         resp = self.put_json('/alarms/%s/state' % data[0]['alarm_id'],
                              headers=self.auth_headers,
@@ -1686,7 +1647,7 @@ class TestAlarms(TestAlarmsBase):
 
     def test_set_invalid_state_alarm(self):
         data = self.get_json('/alarms', headers=self.auth_headers)
-        self.assertEqual(4, len(data))
+        self.assertEqual(3, len(data))
 
         self.put_json('/alarms/%s/state' % data[0]['alarm_id'],
                       headers=self.auth_headers,
@@ -2443,383 +2404,6 @@ class TestAlarmsRuleThreshold(TestAlarmsBase):
             self.fail("Alarm not found")
 
 
-class TestAlarmsRuleCombination(TestAlarmsBase):
-
-    def setUp(self):
-        super(TestAlarmsRuleCombination, self).setUp()
-        self.CONF.set_override("enable_combination_alarms", True, "api")
-        for alarm in default_alarms(self.auth_headers):
-            self.alarm_conn.create_alarm(alarm)
-
-    def test_get_alarm_combination(self):
-        alarms = self.get_json('/alarms',
-                               headers=self.auth_headers,
-                               q=[{'field': 'name',
-                                   'value': 'name4',
-                                   }])
-        self.assertEqual('name4', alarms[0]['name'])
-        self.assertEqual(['a', 'b'],
-                         alarms[0]['combination_rule']['alarm_ids'])
-        self.assertEqual('or', alarms[0]['combination_rule']['operator'])
-
-        one = self.get_json('/alarms/%s' % alarms[0]['alarm_id'],
-                            headers=self.auth_headers)
-        self.assertEqual('name4', one['name'])
-        self.assertEqual(['a', 'b'],
-                         alarms[0]['combination_rule']['alarm_ids'])
-        self.assertEqual('or', alarms[0]['combination_rule']['operator'])
-        self.assertEqual(alarms[0]['alarm_id'], one['alarm_id'])
-        self.assertEqual(alarms[0]['repeat_actions'], one['repeat_actions'])
-
-    def test_post_alarm_combination(self):
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'type': 'combination',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'combination_rule': {
-                'alarm_ids': ['a',
-                              'b'],
-                'operator': 'and',
-            }
-        }
-        self.post_json('/alarms', params=json, status=201,
-                       headers=self.auth_headers)
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(1, len(alarms))
-        if alarms[0].name == 'added_alarm':
-            for key in json:
-                if key.endswith('_rule'):
-                    storage_key = 'rule'
-                else:
-                    storage_key = key
-                self.assertEqual(json[key], getattr(alarms[0], storage_key))
-        else:
-            self.fail("Alarm not found")
-
-    def test_post_invalid_alarm_combination(self):
-        """Test that post a combination alarm with a not existing alarm id."""
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'type': 'combination',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'combination_rule': {
-                'alarm_ids': ['not_exists',
-                              'b'],
-                'operator': 'and',
-            }
-        }
-        self.post_json('/alarms', params=json, status=404,
-                       headers=self.auth_headers)
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(0, len(alarms))
-
-    def test_post_invalid_combination_alarm_input_operator(self):
-        json = {
-            'enabled': False,
-            'name': 'alarm6',
-            'state': 'ok',
-            'type': 'combination',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'combination_rule': {
-                'alarm_ids': ['a',
-                              'b'],
-                'operator': 'bad_operator',
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        expected_err_msg = ("Invalid input for field/attribute"
-                            " operator."
-                            " Value: 'bad_operator'.")
-        self.assertIn(expected_err_msg,
-                      resp.json['error_message']['faultstring'])
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(4, len(alarms))
-
-    def test_post_combination_alarm_as_user_with_unauthorized_alarm(self):
-        """Test posting a combination alarm.
-
-        Test that post a combination alarm as normal user/project
-        with an alarm_id unauthorized for this project/user
-        """
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'type': 'combination',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'combination_rule': {
-                'alarm_ids': ['a',
-                              'b'],
-                'operator': 'and',
-            }
-        }
-        an_other_user_auth = {'X-User-Id': uuidutils.generate_uuid(),
-                              'X-Project-Id': uuidutils.generate_uuid()}
-        resp = self.post_json('/alarms', params=json, status=404,
-                              headers=an_other_user_auth)
-        self.assertEqual("Alarm a not found in project "
-                         "%s" %
-                         an_other_user_auth['X-Project-Id'],
-                         jsonutils.loads(resp.body)['error_message']
-                         ['faultstring'])
-
-    def test_post_combination_alarm_as_admin_on_behalf_of_an_other_user(self):
-        """Test posting a combination alarm.
-
-        Test that post a combination alarm as admin on behalf of an other
-        user/project with an alarm_id unauthorized for this project/user
-        """
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'user_id': 'auseridthatisnotmine',
-            'project_id': 'aprojectidthatisnotmine',
-            'type': 'combination',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'combination_rule': {
-                'alarm_ids': ['a',
-                              'b'],
-                'operator': 'and',
-            }
-        }
-
-        headers = {}
-        headers.update(self.auth_headers)
-        headers['X-Roles'] = 'admin'
-        resp = self.post_json('/alarms', params=json, status=404,
-                              headers=headers)
-        self.assertEqual("Alarm a not found in project "
-                         "aprojectidthatisnotmine",
-                         jsonutils.loads(resp.body)['error_message']
-                         ['faultstring'])
-
-    def test_post_combination_alarm_with_reasonable_description(self):
-        """Test posting a combination alarm.
-
-        Test that post a combination alarm with two blanks around the
-        operator in alarm description.
-        """
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'type': 'combination',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'combination_rule': {
-                'alarm_ids': ['a',
-                              'b'],
-                'operator': 'and',
-            }
-        }
-        self.post_json('/alarms', params=json, status=201,
-                       headers=self.auth_headers)
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(1, len(alarms))
-        self.assertEqual(u'Combined state of alarms a and b',
-                         alarms[0].description)
-
-    def _do_post_combination_alarm_as_admin_success(self, owner_is_set):
-        """Test posting a combination alarm.
-
-        Test that post a combination alarm as admin on behalf of nobody
-        with an alarm_id of someone else, with owner set or not
-        """
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'type': 'combination',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'combination_rule': {
-                'alarm_ids': ['a',
-                              'b'],
-                'operator': 'and',
-            }
-        }
-        an_other_admin_auth = {'X-User-Id': uuidutils.generate_uuid(),
-                               'X-Project-Id': uuidutils.generate_uuid(),
-                               'X-Roles': 'admin'}
-        if owner_is_set:
-            json['project_id'] = an_other_admin_auth['X-Project-Id']
-            json['user_id'] = an_other_admin_auth['X-User-Id']
-
-        self.post_json('/alarms', params=json, status=201,
-                       headers=an_other_admin_auth)
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        if alarms[0].name == 'added_alarm':
-            for key in json:
-                if key.endswith('_rule'):
-                    storage_key = 'rule'
-                else:
-                    storage_key = key
-                self.assertEqual(json[key], getattr(alarms[0], storage_key))
-        else:
-            self.fail("Alarm not found")
-
-    def test_post_combination_alarm_as_admin_success_owner_unset(self):
-        self._do_post_combination_alarm_as_admin_success(False)
-
-    def test_post_combination_alarm_as_admin_success_owner_set(self):
-        self._do_post_combination_alarm_as_admin_success(True)
-
-    def test_post_alarm_combination_duplicate_alarm_ids(self):
-        """Test combination alarm doesn't allow duplicate alarm ids."""
-        json_body = {
-            'name': 'dup_alarm_id',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': ['a', 'a', 'd', 'a', 'c', 'c', 'b'],
-            }
-        }
-        self.post_json('/alarms', params=json_body, status=201,
-                       headers=self.auth_headers)
-        alarms = list(self.alarm_conn.get_alarms(name='dup_alarm_id'))
-        self.assertEqual(1, len(alarms))
-        self.assertEqual(['a', 'd', 'c', 'b'],
-                         alarms[0].rule.get('alarm_ids'))
-
-    def _test_post_alarm_combination_rule_less_than_two_alarms(self,
-                                                               alarm_ids=None):
-        json_body = {
-            'name': 'one_alarm_in_combination_rule',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': alarm_ids or []
-            }
-        }
-
-        resp = self.post_json('/alarms', params=json_body,
-                              expect_errors=True, status=400,
-                              headers=self.auth_headers)
-        self.assertEqual(
-            'Alarm combination rule should contain at'
-            ' least two different alarm ids.',
-            resp.json['error_message']['faultstring'])
-
-    def test_post_alarm_combination_rule_with_no_alarm(self):
-        self._test_post_alarm_combination_rule_less_than_two_alarms()
-
-    def test_post_alarm_combination_rule_with_one_alarm(self):
-        self._test_post_alarm_combination_rule_less_than_two_alarms(['a'])
-
-    def test_post_alarm_combination_rule_with_two_same_alarms(self):
-        self._test_post_alarm_combination_rule_less_than_two_alarms(['a',
-                                                                     'a'])
-
-    def test_put_alarm_combination_cannot_specify_itself(self):
-        json = {
-            'name': 'name4',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': ['d', 'a'],
-            }
-        }
-
-        data = self.get_json('/alarms',
-                             headers=self.auth_headers,
-                             q=[{'field': 'name',
-                                 'value': 'name4',
-                                 }])
-        self.assertEqual(1, len(data))
-        alarm_id = data[0]['alarm_id']
-
-        resp = self.put_json('/alarms/%s' % alarm_id,
-                             expect_errors=True, status=400,
-                             params=json,
-                             headers=self.auth_headers)
-
-        msg = 'Cannot specify alarm %s itself in combination rule' % alarm_id
-        self.assertEqual(msg, resp.json['error_message']['faultstring'])
-
-    def _test_put_alarm_combination_rule_less_than_two_alarms(self,
-                                                              alarm_ids=None):
-        json_body = {
-            'name': 'name4',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': alarm_ids or []
-            }
-        }
-
-        data = self.get_json('/alarms',
-                             headers=self.auth_headers,
-                             q=[{'field': 'name',
-                                 'value': 'name4',
-                                 }])
-        self.assertEqual(1, len(data))
-        alarm_id = data[0]['alarm_id']
-
-        resp = self.put_json('/alarms/%s' % alarm_id, params=json_body,
-                             expect_errors=True, status=400,
-                             headers=self.auth_headers)
-        self.assertEqual(
-            'Alarm combination rule should contain at'
-            ' least two different alarm ids.',
-            resp.json['error_message']['faultstring'])
-
-    def test_put_alarm_combination_rule_with_no_alarm(self):
-        self._test_put_alarm_combination_rule_less_than_two_alarms()
-
-    def test_put_alarm_combination_rule_with_one_alarm(self):
-        self._test_put_alarm_combination_rule_less_than_two_alarms(['a'])
-
-    def test_put_alarm_combination_rule_with_two_same_alarm_itself(self):
-        self._test_put_alarm_combination_rule_less_than_two_alarms(['d',
-                                                                    'd'])
-
-    def test_put_combination_alarm_with_duplicate_ids(self):
-        """Test combination alarm doesn't allow duplicate alarm ids."""
-        alarms = self.get_json('/alarms',
-                               headers=self.auth_headers,
-                               q=[{'field': 'name',
-                                   'value': 'name4',
-                                   }])
-        self.assertEqual(1, len(alarms))
-        alarm_id = alarms[0]['alarm_id']
-
-        json_body = {
-            'name': 'name4',
-            'type': 'combination',
-            'combination_rule': {
-                'alarm_ids': ['c', 'a', 'b', 'a', 'c', 'b'],
-            }
-        }
-        self.put_json('/alarms/%s' % alarm_id,
-                      params=json_body, status=200,
-                      headers=self.auth_headers)
-
-        alarms = list(self.alarm_conn.get_alarms(alarm_id=alarm_id))
-        self.assertEqual(1, len(alarms))
-        self.assertEqual(['c', 'a', 'b'], alarms[0].rule.get('alarm_ids'))
-
-
 class TestAlarmsRuleGnocchi(TestAlarmsBase):
 
     def setUp(self):
@@ -3313,11 +2897,11 @@ class TestPaginationQuery(TestAlarmsBase):
         data = self.get_json('/alarms?sort=name:desc',
                              headers=self.auth_headers)
         names = [a['name'] for a in data]
-        self.assertEqual(['name4', 'name3', 'name2', 'name1'], names)
+        self.assertEqual(['name3', 'name2', 'name1'], names)
         data = self.get_json('/alarms?sort=name:asc',
                              headers=self.auth_headers)
         names = [a['name'] for a in data]
-        self.assertEqual(['name1', 'name2', 'name3', 'name4'], names)
+        self.assertEqual(['name1', 'name2', 'name3'], names)
 
     def test_sort_by_severity_with_its_value(self):
         if self.engine != "mysql":
@@ -3325,12 +2909,12 @@ class TestPaginationQuery(TestAlarmsBase):
         data = self.get_json('/alarms?sort=severity:asc',
                              headers=self.auth_headers)
         severities = [a['severity'] for a in data]
-        self.assertEqual(['low', 'moderate', 'critical', 'critical'],
+        self.assertEqual(['moderate', 'critical', 'critical'],
                          severities)
         data = self.get_json('/alarms?sort=severity:desc',
                              headers=self.auth_headers)
         severities = [a['severity'] for a in data]
-        self.assertEqual(['critical', 'critical', 'moderate', 'low'],
+        self.assertEqual(['critical', 'critical', 'moderate'],
                          severities)
 
     def test_pagination_query_limit(self):
@@ -3345,17 +2929,17 @@ class TestPaginationQuery(TestAlarmsBase):
     def test_pagination_query_marker(self):
         data = self.get_json('/alarms?sort=name:desc',
                              headers=self.auth_headers)
-        self.assertEqual(4, len(data))
+        self.assertEqual(3, len(data))
         alarm_ids = [a['alarm_id'] for a in data]
         names = [a['name'] for a in data]
-        self.assertEqual(['name4', 'name3', 'name2', 'name1'], names)
+        self.assertEqual(['name3', 'name2', 'name1'], names)
         marker_url = ('/alarms?sort=name:desc&marker=%s' % alarm_ids[1])
         data = self.get_json(marker_url, headers=self.auth_headers)
-        self.assertEqual(2, len(data))
+        self.assertEqual(1, len(data))
         new_alarm_ids = [a['alarm_id'] for a in data]
         self.assertEqual(alarm_ids[2:], new_alarm_ids)
         new_names = [a['name'] for a in data]
-        self.assertEqual(['name2', 'name1'], new_names)
+        self.assertEqual(['name1'], new_names)
 
     def test_pagination_query_multiple_sorts(self):
         new_alarms = default_alarms(self.auth_headers)
@@ -3363,11 +2947,11 @@ class TestPaginationQuery(TestAlarmsBase):
             a_id[0].alarm_id = a_id[1]
             self.alarm_conn.create_alarm(a_id[0])
         data = self.get_json('/alarms', headers=self.auth_headers)
-        self.assertEqual(8, len(data))
+        self.assertEqual(6, len(data))
         sort_url = '/alarms?sort=name:desc&sort=alarm_id:asc'
         data = self.get_json(sort_url, headers=self.auth_headers)
         name_ids = [(a['name'], a['alarm_id']) for a in data]
-        expected = [('name4', 'd'), ('name4', 'h'), ('name3', 'c'),
+        expected = [('name3', 'c'),
                     ('name3', 'g'), ('name2', 'b'), ('name2', 'f'),
                     ('name1', 'a'), ('name1', 'e')]
         self.assertEqual(expected, name_ids)
@@ -3392,7 +2976,7 @@ class TestPaginationQuery(TestAlarmsBase):
         data = self.get_json('/alarms?sort=name',
                              headers=self.auth_headers)
         names = [a['name'] for a in data]
-        self.assertEqual(['name1', 'name2', 'name3', 'name4'], names)
+        self.assertEqual(['name1', 'name2', 'name3'], names)
 
     def test_pagination_query_history_data(self):
         for i in moves.xrange(10):
@@ -3403,66 +2987,3 @@ class TestPaginationQuery(TestAlarmsBase):
                              key=lambda d: (d['event_id'], d['timestamp']),
                              reverse=True)
         self.assertEqual(sorted_data, data)
-
-
-class TestCombinationCompositeConversion(TestAlarmsBase):
-    def setUp(self):
-        super(TestCombinationCompositeConversion, self).setUp()
-        alarms = default_alarms(self.auth_headers)
-        for alarm in alarms:
-            self.alarm_conn.create_alarm(alarm)
-        com_parameters = alarms[3].as_dict()
-        com_parameters.update(dict(name='name5', alarm_id='e', description='e',
-                                   rule=dict(alarm_ids=['b', 'c'],
-                                             operator='and')))
-        combin1 = models.Alarm(**com_parameters)
-        self.alarm_conn.create_alarm(combin1)
-        com_parameters.update(dict(name='name6', alarm_id='f', description='f',
-                                   rule=dict(alarm_ids=['d', 'e'],
-                                             operator='and')))
-        combin2 = models.Alarm(**com_parameters)
-        self.alarm_conn.create_alarm(combin2)
-
-    def test_conversion_without_combination_deletion(self):
-        data = self.get_json('/alarms', headers=self.auth_headers)
-        self.assertEqual(6, len(data))
-        url = '/alarms?q.field=type&q.op=eq&q.value=combination'
-        combination_alarms = self.get_json(url, headers=self.auth_headers)
-        self.assertEqual(3, len(combination_alarms))
-        test_args = alarm_conversion.get_parser().parse_args([])
-        with mock.patch('__builtin__.raw_input', return_value='yes'):
-            with mock.patch('argparse.ArgumentParser.parse_args',
-                            return_value=test_args):
-                alarm_conversion.conversion()
-        url = '/alarms?q.field=type&q.op=eq&q.value=composite'
-        composite_alarms = self.get_json(url, headers=self.auth_headers)
-        self.assertEqual(3, len(composite_alarms))
-        url = '/alarms?q.field=type&q.op=eq&q.value=combination'
-        combination_alarms = self.get_json(url, headers=self.auth_headers)
-        self.assertEqual(3, len(combination_alarms))
-
-    def test_conversion_with_combination_deletion(self):
-        test_args = alarm_conversion.get_parser().parse_args(
-            ['--delete-combination-alarm', 'True'])
-        with mock.patch('__builtin__.raw_input', return_value='yes'):
-            with mock.patch('argparse.ArgumentParser.parse_args',
-                            return_value=test_args):
-                alarm_conversion.conversion()
-        url = '/alarms?q.field=type&q.op=eq&q.value=composite'
-        composite_alarms = self.get_json(url, headers=self.auth_headers)
-        self.assertEqual(3, len(composite_alarms))
-        url = '/alarms?q.field=type&q.op=eq&q.value=combination'
-        combination_alarms = self.get_json(url, headers=self.auth_headers)
-        self.assertEqual(0, len(combination_alarms))
-
-    def test_conversion_with_alarm_specified(self):
-        test_args = alarm_conversion.get_parser().parse_args(
-            ['--alarm-id', 'e'])
-        with mock.patch('__builtin__.raw_input', return_value='yes'):
-            with mock.patch('argparse.ArgumentParser.parse_args',
-                            return_value=test_args):
-                alarm_conversion.conversion()
-        url = '/alarms?q.field=type&q.op=eq&q.value=composite'
-        composite_alarms = self.get_json(url, headers=self.auth_headers)
-        self.assertEqual(1, len(composite_alarms))
-        self.assertEqual('From-combination: e', composite_alarms[0]['name'])

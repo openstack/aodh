@@ -174,8 +174,6 @@ class AlarmTest(AlarmTestBase):
         self.add_some_alarms()
         alarms = list(self.alarm_conn.get_alarms(alarm_type='threshold'))
         self.assertEqual(3, len(alarms))
-        alarms = list(self.alarm_conn.get_alarms(alarm_type='combination'))
-        self.assertEqual(0, len(alarms))
 
     def test_list_excluded_by_name(self):
         self.add_some_alarms()

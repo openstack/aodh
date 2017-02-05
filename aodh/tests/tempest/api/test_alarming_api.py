@@ -92,21 +92,3 @@ class TelemetryAlarmingAPITest(base.BaseAlarmingTest):
         # Get alarm state and verify
         state = self.alarming_client.show_alarm_state(alarm['alarm_id'])
         self.assertEqual(new_state, state.data)
-
-    @decorators.idempotent_id('08d7e45a-1344-4e5c-ba6f-f6cbb77f55ba')
-    @decorators.skip_because(bug='1585267')
-    def test_create_delete_alarm_with_combination_rule(self):
-        rule = {"alarm_ids": self.alarm_ids,
-                "operator": "or"}
-        # Verifies alarm create
-        alarm_name = data_utils.rand_name('combination_alarm')
-        body = self.alarming_client.create_alarm(name=alarm_name,
-                                                 combination_rule=rule,
-                                                 type='combination')
-        self.assertEqual(alarm_name, body['name'])
-        alarm_id = body['alarm_id']
-        self.assertDictContainsSubset(rule, body['combination_rule'])
-        # Verify alarm delete
-        self.alarming_client.delete_alarm(alarm_id)
-        self.assertRaises(lib_exc.NotFound,
-                          self.alarming_client.show_alarm, alarm_id)

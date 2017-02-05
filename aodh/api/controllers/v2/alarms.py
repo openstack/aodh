@@ -39,7 +39,6 @@ from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
 import aodh
-from aodh.api.controllers.v2.alarm_rules import combination
 from aodh.api.controllers.v2 import base
 from aodh.api.controllers.v2 import utils as v2_utils
 from aodh.api import rbac
@@ -184,13 +183,7 @@ ACTIONS_SCHEMA = extension.ExtensionManager(
 
 
 class Alarm(base.Base):
-    """Representation of an alarm.
-
-    .. note::
-        combination_rule and threshold_rule are mutually exclusive. The *type*
-        of the alarm should be set to *threshold* or *combination* and the
-        appropriate rule should be filled.
-    """
+    """Representation of an alarm."""
 
     alarm_id = wtypes.text
     "The UUID of the alarm"
@@ -289,10 +282,6 @@ class Alarm(base.Base):
 
     @staticmethod
     def check_rule(alarm):
-        if (not pecan.request.cfg.api.enable_combination_alarms
-           and alarm.type == 'combination'):
-            raise base.ClientSideError("Unavailable alarm type")
-
         rule = '%s_rule' % alarm.type
         if getattr(alarm, rule) in (wtypes.Unset, None):
             error = _("%(rule)s must be set for %(type)s"
@@ -354,7 +343,7 @@ class Alarm(base.Base):
         return cls(alarm_id=None,
                    name="SwiftObjectAlarm",
                    description="An alarm",
-                   type='combination',
+                   type='threshold',
                    time_constraints=[AlarmTimeConstraint.sample().as_dict()],
                    user_id="c96c887c216949acbdfbd8b494863567",
                    project_id="c96c887c216949acbdfbd8b494863567",
@@ -367,7 +356,6 @@ class Alarm(base.Base):
                    alarm_actions=["http://site:8000/alarm"],
                    insufficient_data_actions=["http://site:8000/nodata"],
                    repeat_actions=False,
-                   combination_rule=combination.AlarmCombinationRule.sample(),
                    )
 
     def as_dict(self, db_model):
