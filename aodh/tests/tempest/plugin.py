@@ -33,8 +33,8 @@ class AodhTempestPlugin(plugins.TempestPlugin):
 
     def register_opts(self, conf):
         config.register_opt_group(conf,
-                                  tempest_config.service_available_group,
-                                  tempest_config.ServiceAvailableGroup)
+                                  config.service_available_group,
+                                  tempest_config.service_option)
         config.register_opt_group(conf,
                                   tempest_config.alarming_group,
                                   tempest_config.AlarmingGroup)
@@ -43,5 +43,5 @@ class AodhTempestPlugin(plugins.TempestPlugin):
         return [
             (tempest_config.alarming_group.name,
              tempest_config.AlarmingGroup),
-            ('service_available', tempest_config.ServiceAvailableGroup)
+            ('service_available', tempest_config.service_option)
         ]
