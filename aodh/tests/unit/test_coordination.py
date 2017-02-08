@@ -117,7 +117,8 @@ class TestHashRing(base.BaseTestCase):
         assignments = [-1] * num_keys
         for k in range(num_keys):
             n = int(hr.get_node(str(k)))
-            self.assertTrue(0 <= n <= num_nodes)
+            self.assertLessEqual(0, n)
+            self.assertLessEqual(n, num_nodes)
             buckets[n] += 1
             assignments[k] = n
 
@@ -126,7 +127,7 @@ class TestHashRing(base.BaseTestCase):
 
         # approximately even distribution
         diff = max(buckets) - min(buckets)
-        self.assertTrue(diff < 0.3 * (num_keys / num_nodes))
+        self.assertLess(diff, 0.3 * (num_keys / num_nodes))
 
         # consistency
         num_nodes += 1
@@ -136,7 +137,7 @@ class TestHashRing(base.BaseTestCase):
             n = int(hr.get_node(str(k)))
             assignments[k] -= n
         reassigned = len([c for c in assignments if c != 0])
-        self.assertTrue(reassigned < num_keys / num_nodes)
+        self.assertLess(reassigned, num_keys / num_nodes)
 
 
 class TestPartitioning(base.BaseTestCase):
