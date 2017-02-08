@@ -43,7 +43,7 @@ def upgrade():
         # TABLE … USING …". We need to copy everything and convert…
         for table_name, column_name in (("alarm", "timestamp"),
                                         ("alarm", "state_timestamp"),
-                                        ("alarm_change", "timestamp")):
+                                        ("alarm_history", "timestamp")):
             existing_type = sa.types.DECIMAL(
                 precision=20, scale=6, asdecimal=True)
             existing_col = sa.Column(
