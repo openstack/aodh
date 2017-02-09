@@ -91,7 +91,7 @@ tests:
           $: alarm
 
     # Get a list of alarms so we can extract an id for the next test
-    - name: list alarms for data
+    - name: list alarms
       desc: Lists alarms, only one
       GET: /v2/alarms
       response_json_paths:
@@ -105,15 +105,9 @@ tests:
       response_json_paths:
           $: alarm
 
-    - name: list alarms one
-      desc: Lists alarms, only one
-      GET: /v2/alarms
-      response_json_paths:
-          $[0].name: added_alarm_defaults
-
     - name: deleteAlarm
       desc: Deletes a specified alarm.
-      DELETE: /v2/alarms/$RESPONSE['$[0].alarm_id']
+      DELETE: /v2/alarms/$HISTORY['list alarms'].$RESPONSE['$[0].alarm_id']
       status: 204
 
     - name: list alarms none end
