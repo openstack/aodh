@@ -93,7 +93,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
         for alarm in data.json:
             result_time = timeutils.parse_isotime(alarm['timestamp'])
             result_time = result_time.replace(tzinfo=None)
-            self.assertTrue(result_time > date_time)
+            self.assertGreater(result_time, date_time)
 
     def test_filter_with_isotime_state_timestamp(self):
         date_time = datetime.datetime(2013, 1, 1)
@@ -109,7 +109,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
         for alarm in data.json:
             result_time = timeutils.parse_isotime(alarm['state_timestamp'])
             result_time = result_time.replace(tzinfo=None)
-            self.assertTrue(result_time > date_time)
+            self.assertGreater(result_time, date_time)
 
     def test_non_admin_tenant_sees_only_its_own_project(self):
         data = self.post_json(self.alarm_url,
@@ -269,7 +269,7 @@ class TestQueryAlarmsHistoryController(tests_api.FunctionalTest):
         for history in data.json:
             result_time = timeutils.parse_isotime(history['timestamp'])
             result_time = result_time.replace(tzinfo=None)
-            self.assertTrue(result_time > date_time)
+            self.assertGreater(result_time, date_time)
 
     def test_non_admin_tenant_sees_only_its_own_project(self):
         data = self.post_json(self.url,
