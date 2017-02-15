@@ -16,27 +16,30 @@
 
 .. _installing_manually:
 
-=====================
- Installing Manually
-=====================
+===================
+Installing Manually
+===================
 
+Installing the API Server
+=========================
+There are two recommended ways to start api server:
+ 1. Starting API server through mod_wsgi_;
+ 2. Starting API server through: uwsgi_.
 
-Storage Backend Installation
-============================
+Not recommended, for testing purpose, we can also start api server by
+aodh-api binary::
 
-This step is a prerequisite for the collector, notification agent and API
-services. You may use one of the listed database backends below to store
-Aodh data.
+    aodh-api --port 8042 -- --config-file /etc/aodh/aodh.conf
 
+Database configuration
+======================
 
-The recommended Aodh storage backend is any SQLAlchemy-supported database
-(`PostgreSQL` or `MySQL`). You need to create a `aodh` database first and then
-initialise it by running::
-
- aodh-dbsync
-
+You can use any SQLAlchemy-supported DB such as  `PostgreSQL` or `MySQL`.
 To use MySQL as the storage backend, change the 'database' section in
 aodh.conf as follows::
 
- [database]
- connection = mysql+pymysql://username:password@host/aodh?charset=utf8
+    [database]
+    connection = mysql+pymysql://username:password@host/aodh?charset=utf8
+
+.. _mod_wsgi: ../install/mod_wsgi.html
+.. _uwsgi: ../install/uwsgi.html
