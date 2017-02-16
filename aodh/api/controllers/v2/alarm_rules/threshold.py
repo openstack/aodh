@@ -13,7 +13,6 @@
 
 from ceilometerclient import client as ceiloclient
 from ceilometerclient import exc as ceiloexc
-from oslo_log import log
 import pecan
 import wsme
 from wsme import types as wtypes
@@ -23,8 +22,6 @@ from aodh.api.controllers.v2 import utils as v2_utils
 from aodh.i18n import _
 from aodh import keystone_client
 from aodh import storage
-
-LOG = log.getLogger(__name__)
 
 
 class AlarmThresholdRule(base.AlarmRule):
