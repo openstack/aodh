@@ -33,3 +33,4 @@ WebOb>=1.2.3
 WSME>=0.8
 cachetools>=1.1.6
 cotyledon
+keystoneauth1>=2.1
