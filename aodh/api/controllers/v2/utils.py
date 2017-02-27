@@ -37,8 +37,6 @@ def get_auth_project(on_behalf_of=None):
     # we must ensure for:
     # - threshold alarm, that an implicit query constraint on project_id is
     #   added so that admin-level visibility on statistics is not leaked
-    # - combination alarm, that alarm ids verification is scoped to
-    #   alarms owned by the alarm project.
     # Hence, for null auth_project (indicating admin-ness) we check if
     # the creating tenant differs from the tenant on whose behalf the
     # alarm is being created

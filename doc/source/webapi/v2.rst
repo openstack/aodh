@@ -35,9 +35,6 @@ Alarms
 .. autotype:: aodh.api.controllers.v2.alarm_rules.threshold.AlarmThresholdRule
    :members:
 
-.. autotype:: aodh.api.controllers.v2.alarm_rules.combination.AlarmCombinationRule
-   :members:
-
 .. autotype:: aodh.api.controllers.v2.alarm_rules.gnocchi.MetricOfResourceRule
    :members:
 
