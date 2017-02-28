@@ -21,8 +21,10 @@
 import datetime
 import itertools
 import json
+import warnings
 
 import croniter
+import debtcollector
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import netutils
@@ -265,6 +267,12 @@ class Alarm(base.Base):
 
     @staticmethod
     def validate(alarm):
+        if alarm.type == 'threshold':
+            warnings.simplefilter("always")
+            debtcollector.deprecate(
+                "Ceilometer's API is deprecated as of Ocata. Therefore, "
+                " threshold rule alarms are no longer supported.",
+                version="5.0.0")
 
         Alarm.check_rule(alarm)
         Alarm.check_alarm_actions(alarm)

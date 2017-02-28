@@ -1,0 +1,9 @@
+---
+deprecations:
+  - |
+    Ceilometer's API is deprecated in Ocata. Therefore, threshold alarms are
+    now deprecated as well. Threshold rules will be removed when Ceilometer's
+    API is also removed. Similar functionality is provided through Gnocchi
+    alarm rules: ``gnocchi_resources_threshold``,
+    ``gnocchi_aggregation_by_metrics_threshold``, or
+    ``gnocchi_aggregation_by_resources_threshold``.
