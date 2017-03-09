@@ -14,11 +14,11 @@
 # under the License.
 """Tests for aodh.evaluator.AlarmEvaluationService.
 """
+import fixtures
 import time
 
 import mock
 from oslo_config import fixture as fixture_config
-from oslotest import mockpatch
 from stevedore import extension
 
 from aodh import evaluator
@@ -47,15 +47,15 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
             ]
         )
 
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'stevedore.extension.ExtensionManager',
             return_value=self._fake_em
         ))
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'aodh.coordination.PartitionCoordinator',
             return_value=self._fake_pc
         ))
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'aodh.storage.get_connection_from_config',
             return_value=self._fake_conn
         ))

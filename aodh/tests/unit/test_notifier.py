@@ -12,13 +12,13 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import fixtures
 import time
 
 import mock
 from oslo_config import fixture as fixture_config
 import oslo_messaging
 from oslo_serialization import jsonutils
-from oslotest import mockpatch
 import requests
 import six.moves.urllib.parse as urlparse
 
@@ -65,7 +65,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             self.transport, topics=['alarming'], driver='messaging',
             publisher_id='testpublisher')
         self.zaqar = FakeZaqarClient(self)
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'aodh.notifier.zaqar.ZaqarAlarmNotifier.get_zaqar_client',
             return_value=self.zaqar))
         self.service = notifier.AlarmNotifierService(0, self.CONF)
@@ -356,8 +356,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         client.session.auth.get_access.return_value.auth_token = 'token_1234'
 
         self.useFixture(
-            mockpatch.Patch('aodh.keystone_client.get_trusted_client',
-                            lambda *args: client))
+            fixtures.MockPatch('aodh.keystone_client.get_trusted_client',
+                               lambda *args: client))
 
         with mock.patch.object(requests.Session, 'post') as poster:
             self._msg_notifier.sample({}, 'alarm.update',
@@ -410,8 +410,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         client.session.auth.get_access.return_value.auth_token = 'token_1234'
 
         self.useFixture(
-            mockpatch.Patch('aodh.keystone_client.get_trusted_client',
-                            lambda *args: client))
+            fixtures.MockPatch('aodh.keystone_client.get_trusted_client',
+                               lambda *args: client))
 
         action = 'trust+zaqar://trust-1234:delete@?queue_name=foobar-critical'
         self._msg_notifier.sample({}, 'alarm.update',

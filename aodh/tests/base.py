@@ -15,6 +15,7 @@
 # under the License.
 """Test base classes.
 """
+import fixtures
 import functools
 import os.path
 import unittest
@@ -22,7 +23,6 @@ import unittest
 import oslo_messaging.conffixture
 from oslo_utils import timeutils
 from oslotest import base
-from oslotest import mockpatch
 import six
 import webtest
 
@@ -41,7 +41,7 @@ class BaseTestCase(base.BaseTestCase):
         # NOTE(sileht): Ensure a new oslo.messaging driver is loaded
         # between each tests
         self.transport = messaging.get_transport(conf, "fake://", cache=False)
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'aodh.messaging.get_transport',
             return_value=self.transport))
 

@@ -14,10 +14,10 @@
 """
 
 from ceilometerclient.v2 import statistics
+import fixtures
 import mock
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
-from oslotest import mockpatch
 import six
 from six import moves
 
@@ -32,7 +32,7 @@ class BaseCompositeEvaluate(base.TestEvaluatorBase):
     EVALUATOR = composite.CompositeEvaluator
 
     def setUp(self):
-        self.client = self.useFixture(mockpatch.Patch(
+        self.client = self.useFixture(fixtures.MockPatch(
             'aodh.evaluator.gnocchi.client'
         )).mock.Client.return_value
         super(BaseCompositeEvaluate, self).setUp()

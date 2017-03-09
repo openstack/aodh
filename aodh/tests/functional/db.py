@@ -21,7 +21,6 @@ import os
 import fixtures
 from oslo_config import fixture as fixture_config
 from oslo_utils import uuidutils
-from oslotest import mockpatch
 import six
 from six.moves.urllib import parse as urlparse
 
@@ -110,7 +109,7 @@ class TestBase(test_base.BaseTestCase):
         self.alarm_conn = storage.get_connection_from_config(self.CONF)
         self.alarm_conn.upgrade()
 
-        self.useFixture(mockpatch.Patch(
+        self.useFixture(fixtures.MockPatch(
             'aodh.storage.get_connection_from_config',
             side_effect=self._get_connection))
 

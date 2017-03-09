@@ -13,10 +13,10 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import fixtures
 import mock
 from oslo_config import fixture
 from oslotest import base
-from oslotest import mockpatch
 
 from aodh import service
 
@@ -27,8 +27,9 @@ class TestEvaluatorBase(base.BaseTestCase):
         conf = service.prepare_service(argv=[], config_files=[])
         self.conf = self.useFixture(fixture.Config(conf)).conf
         self.api_client = mock.Mock()
-        self.useFixture(mockpatch.Patch('ceilometerclient.client.get_client',
-                                        return_value=self.api_client))
+        self.useFixture(
+            fixtures.MockPatch('ceilometerclient.client.get_client',
+                               return_value=self.api_client))
         self.evaluator = self.EVALUATOR(self.conf)
         self.notifier = mock.MagicMock()
         self.evaluator.notifier = self.notifier

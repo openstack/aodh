@@ -14,13 +14,13 @@
 # under the License.
 
 import datetime
+import fixtures
 import unittest
 
 from gnocchiclient import exceptions
 import mock
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
-from oslotest import mockpatch
 import pytz
 import six
 from six import moves
@@ -33,7 +33,7 @@ from aodh.tests.unit.evaluator import base
 
 class TestGnocchiEvaluatorBase(base.TestEvaluatorBase):
     def setUp(self):
-        self.client = self.useFixture(mockpatch.Patch(
+        self.client = self.useFixture(fixtures.MockPatch(
             'aodh.evaluator.gnocchi.client'
         )).mock.Client.return_value
         self.prepared_alarms = [
