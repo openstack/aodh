@@ -3,9 +3,9 @@
 # KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
+"Project-Id-Version: aodh 4.0.1.dev28\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-09-14 17:53+0000\n"
+"POT-Creation-Date: 2017-03-10 01:26+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Last-Translator: KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>\n"
 "Language-Team: Chinese (Taiwan)\n"
 "Language: zh-TW\n"
-"X-Generator: Zanata 3.7.3\n"
+"X-Generator: Zanata 3.9.6\n"
 "Plural-Forms: nplurals=1; plural=0\n"
 
 #, python-format
@@ -40,9 +40,6 @@ msgstr "在專案 %(project)s 中找不到警示 %(alarm_id)s"
 msgid "Alarm %s not found"
 msgstr "找不到警示 %s"
 
-msgid "Alarm combination rule should contain at least two different alarm ids."
-msgstr "警示組合規則應該至少包含兩個不同的警示 ID。"
-
 msgid "Alarm incorrect"
 msgstr "警示不正確"
 
@@ -57,18 +54,6 @@ msgid ""
 msgstr ""
 "如果 %(meter_name)s 在 %(period)s 秒內 %(comparison_operator)s %(threshold)s "
 "的%(statistic)s，則會出現警示"
-
-#, python-format
-msgid "Alarms %(alarm_ids)s are in unknown state"
-msgstr "警示 %(alarm_ids)s 處於不明狀態"
-
-#, python-format
-msgid "Cannot specify alarm %s itself in combination rule"
-msgstr "無法在組合規則中指定警示 %s 本身"
-
-#, python-format
-msgid "Combined state of alarms %s"
-msgstr "警示 %s 的合併狀態"
 
 #, python-format
 msgid "Failed to parse the timestamp value %s"
@@ -103,10 +88,6 @@ msgstr ""
 "%(most_recent)s"
 
 #, python-format
-msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
-msgstr "保持 %(state)s，因為警示 %(alarm_ids)s 處於狀態 %(state)s"
-
-#, python-format
 msgid ""
 "The data type %(type)s is not supported. The supported data type list is: "
 "%(supported)s"
@@ -126,10 +107,6 @@ msgid ""
 msgstr ""
 "轉移到 %(state)s，由於 %(count)d 個樣本 %(disposition)s 臨界值，最新："
 "%(most_recent)s"
-
-#, python-format
-msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
-msgstr "轉移至 %(state)s，因為警示 %(alarm_ids)s 處於狀態 %(state)s"
 
 #, python-format
 msgid ""

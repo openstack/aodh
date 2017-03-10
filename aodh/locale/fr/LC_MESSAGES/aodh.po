@@ -3,16 +3,17 @@
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
+"Project-Id-Version: aodh 4.0.1.dev28\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-09-14 17:53+0000\n"
+"POT-Creation-Date: 2017-03-10 01:26+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2016-04-12 04:26+0000\n"
+"Last-Translator: Copied by Zanata <copied-by-zanata@zanata.org>\n"
 "Language-Team: French\n"
 "Language: fr\n"
-"X-Generator: Zanata 3.7.3\n"
+"X-Generator: Zanata 3.9.6\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 
 #, python-format
@@ -39,11 +40,6 @@ msgstr "Alarme %(alarm_id)s introuvable dans le projet %(project)s"
 msgid "Alarm %s not found"
 msgstr "Alarme: %s non trouvé"
 
-msgid "Alarm combination rule should contain at least two different alarm ids."
-msgstr ""
-"La règle de combinaison d'alarmes doit contenir au moins deux "
-"identificateurs d'alarme différents."
-
 msgid "Alarm incorrect"
 msgstr "Alarme incorrecte"
 
@@ -58,19 +54,6 @@ msgid ""
 msgstr ""
 "Alarme lorsque %(meter_name)s est %(comparison_operator)s à une "
 "%(statistic)s de %(threshold)s de plus de %(period)s secondes"
-
-#, python-format
-msgid "Alarms %(alarm_ids)s are in unknown state"
-msgstr "Les alarmes %(alarm_ids)s sont dans un état inconnu"
-
-#, python-format
-msgid "Cannot specify alarm %s itself in combination rule"
-msgstr ""
-"Impossible d'indiquer l'alarme %s elle-même dans la règle de combinaison"
-
-#, python-format
-msgid "Combined state of alarms %s"
-msgstr "Etat combiné des alarmes %s"
 
 #, python-format
 msgid "Failed to parse the timestamp value %s"
@@ -106,12 +89,6 @@ msgstr ""
 "%(disposition)s au seuil, le plus récent: %(most_recent)s "
 
 #, python-format
-msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
-msgstr ""
-"Reste dans l\"état %(state)s car toutes les alarmes %(alarm_ids)s sont dans "
-"l'état %(state)s."
-
-#, python-format
 msgid ""
 "The data type %(type)s is not supported. The supported data type list is: "
 "%(supported)s"
@@ -134,12 +111,6 @@ msgid ""
 msgstr ""
 "Transition vers l'état %(state)s à cause de %(count)d échantillons "
 "%(disposition)s au seuil, le plus récent: %(most_recent)s "
-
-#, python-format
-msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
-msgstr ""
-"Transition vers %(state)s car les alarmes %(alarm_ids)s sont dans l'état   "
-"%(state)s"
 
 #, python-format
 msgid ""

@@ -3,9 +3,9 @@
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 3.0.0.0b4.dev4\n"
+"Project-Id-Version: aodh 4.0.1.dev28\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-09-14 17:53+0000\n"
+"POT-Creation-Date: 2017-03-10 01:26+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Last-Translator: Andi Chandler <andi@gowling.com>\n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en-GB\n"
-"X-Generator: Zanata 3.7.3\n"
+"X-Generator: Zanata 3.9.6\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 #, python-format
@@ -44,10 +44,6 @@ msgstr "Alarm %(alarm_id)s not found in project %(project)s"
 msgid "Alarm %s not found"
 msgstr "Alarm %s not found"
 
-msgid "Alarm combination rule should contain at least two different alarm ids."
-msgstr ""
-"Alarm combination rule should contain at least two different alarm ids."
-
 msgid "Alarm incorrect"
 msgstr "Alarm incorrect"
 
@@ -66,18 +62,6 @@ msgstr ""
 #, python-format
 msgid "Alarm when %s event occurred."
 msgstr "Alarm when %s event occurred."
-
-#, python-format
-msgid "Alarms %(alarm_ids)s are in unknown state"
-msgstr "Alarms %(alarm_ids)s are in unknown state"
-
-#, python-format
-msgid "Cannot specify alarm %s itself in combination rule"
-msgstr "Cannot specify alarm %s itself in combination rule"
-
-#, python-format
-msgid "Combined state of alarms %s"
-msgstr "Combined state of alarms %s"
 
 #, python-format
 msgid ""
@@ -149,10 +133,6 @@ msgstr ""
 "most recent: %(most_recent)s"
 
 #, python-format
-msgid "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
-msgstr "Remaining as %(state)s due to alarms %(alarm_ids)s in state %(state)s"
-
-#, python-format
 msgid ""
 "The data type %(type)s is not supported. The supported data type list is: "
 "%(supported)s"
@@ -177,10 +157,6 @@ msgid ""
 msgstr ""
 "Transition to %(state)s due to %(count)d samples %(disposition)s threshold, "
 "most recent: %(most_recent)s"
-
-#, python-format
-msgid "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
-msgstr "Transition to %(state)s due to alarms %(alarm_ids)s in state %(state)s"
 
 #, python-format
 msgid ""
