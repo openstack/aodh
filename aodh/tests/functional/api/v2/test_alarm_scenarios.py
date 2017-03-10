@@ -2569,9 +2569,6 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
             c.capabilities.list.return_value = {
                 'aggregation_methods': ['count']}
             self.post_json('/alarms', params=json, headers=self.auth_headers)
-            expected = mock.call.resource.get(
-                "instance", "209ef69c-c10c-4efb-90ff-46f4b2d90d2e")
-            self.assertIn(expected, c.mock_calls)
 
         alarms = list(self.alarm_conn.get_alarms(enabled=False))
         self.assertEqual(1, len(alarms))

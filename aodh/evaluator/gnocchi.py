@@ -14,6 +14,7 @@
 # under the License.
 
 from gnocchiclient import client
+from gnocchiclient import exceptions
 from oslo_log import log
 from oslo_serialization import jsonutils
 
@@ -61,9 +62,12 @@ class GnocchiResourceThresholdEvaluator(GnocchiBase):
                 start=start, stop=end,
                 resource_id=rule['resource_id'],
                 aggregation=rule['aggregation_method'])
+        except exceptions.NotFound:
+            LOG.debug('metric %s or resource %s does not exists',
+                      rule['metric'], rule['resource_id'])
+            return []
         except Exception as e:
-            LOG.warning(_LW('alarm stats retrieval failed: %s'),
-                        e)
+            LOG.warning(_LW('alarm stats retrieval failed: %s'), e)
             return []
 
 
@@ -83,6 +87,9 @@ class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
                 start=start, stop=end,
                 aggregation=rule['aggregation_method'],
                 needed_overlap=0)
+        except exceptions.NotFound:
+            LOG.debug('metrics %s does not exists', rule['metrics'])
+            return []
         except Exception as e:
             LOG.warning(_LW('alarm stats retrieval failed: %s'), e)
             return []
@@ -107,6 +114,9 @@ class GnocchiAggregationResourcesThresholdEvaluator(GnocchiBase):
                 aggregation=rule['aggregation_method'],
                 needed_overlap=0,
             )
+        except exceptions.NotFound:
+            LOG.debug('metric %s does not exists', rule['metric'])
+            return []
         except Exception as e:
             LOG.warning(_LW('alarm stats retrieval failed: %s'), e)
             return []

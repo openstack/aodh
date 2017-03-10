@@ -99,26 +99,6 @@ class MetricOfResourceRule(AlarmGnocchiThresholdRule):
                                        'resource_type'])
         return rule
 
-    @classmethod
-    def validate_alarm(cls, alarm):
-        super(MetricOfResourceRule,
-              cls).validate_alarm(alarm)
-
-        conf = pecan.request.cfg
-        gnocchi_client = client.Client(
-            '1', keystone_client.get_session(conf),
-            interface=conf.service_credentials.interface,
-            region_name=conf.service_credentials.region_name)
-
-        rule = alarm.gnocchi_resources_threshold_rule
-        try:
-            gnocchi_client.resource.get(rule.resource_type,
-                                        rule.resource_id)
-        except exceptions.ClientException as e:
-            raise base.ClientSideError(e.message, status_code=e.code)
-        except Exception as e:
-            raise GnocchiUnavailable(e)
-
 
 class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
     metric = wsme.wsattr(wtypes.text, mandatory=True)
@@ -176,6 +156,11 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
                 needed_overlap=0,
                 resource_type=rule.resource_type)
         except exceptions.ClientException as e:
+            if e.code == 404:
+                # NOTE(sileht): We are fine here, we just want to ensure the
+                # 'query' payload is valid for Gnocchi If the metric
+                # doesn't exists yet, it doesn't matter
+                return
             raise base.ClientSideError(e.message, status_code=e.code)
         except Exception as e:
             raise GnocchiUnavailable(e)
