@@ -31,7 +31,6 @@ from sqlalchemy import func
 from sqlalchemy.orm import exc
 
 import aodh
-from aodh.i18n import _LI
 from aodh import storage
 from aodh.storage import base
 from aodh.storage import models as alarm_api_models
@@ -392,5 +391,5 @@ class Connection(base.Connection):
             deleted_rows = (session.query(models.AlarmChange)
                             .filter(models.AlarmChange.timestamp < valid_start)
                             .delete())
-            LOG.info(_LI("%d alarm histories are removed from database"),
+            LOG.info("%d alarm histories are removed from database",
                      deleted_rows)

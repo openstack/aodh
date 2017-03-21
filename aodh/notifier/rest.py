@@ -21,7 +21,6 @@ from oslo_utils import uuidutils
 import requests
 import six.moves.urllib.parse as urlparse
 
-from aodh.i18n import _LI
 from aodh import notifier
 
 LOG = log.getLogger(__name__)
@@ -65,10 +64,10 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
             headers['x-openstack-request-id'] = b'req-' + \
                 uuidutils.generate_uuid().encode('ascii')
 
-        LOG.info(_LI(
+        LOG.info(
             "Notifying alarm %(alarm_name)s %(alarm_id)s with severity"
             " %(severity)s from %(previous)s to %(current)s with action "
-            "%(action)s because %(reason)s. request-id: %(request_id)s ") %
+            "%(action)s because %(reason)s. request-id: %(request_id)s " %
             ({'alarm_name': alarm_name, 'alarm_id': alarm_id,
               'severity': severity, 'previous': previous,
               'current': current, 'action': action, 'reason': reason,
@@ -104,7 +103,7 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
         session.mount(action.geturl(),
                       requests.adapters.HTTPAdapter(max_retries=max_retries))
         resp = session.post(action.geturl(), **kwargs)
-        LOG.info(_LI('Notifying alarm <%(id)s> gets response: %(status_code)s '
-                     '%(reason)s.'), {'id': alarm_id,
-                                      'status_code': resp.status_code,
-                                      'reason': resp.reason})
+        LOG.info('Notifying alarm <%(id)s> gets response: %(status_code)s '
+                 '%(reason)s.', {'id': alarm_id,
+                                 'status_code': resp.status_code,
+                                 'reason': resp.reason})

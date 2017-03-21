@@ -16,7 +16,6 @@
 
 from oslo_log import log
 
-from aodh.i18n import _LI
 from aodh import service
 from aodh import storage
 
@@ -38,5 +37,5 @@ def expirer():
         storage_conn.clear_expired_alarm_history_data(
             conf.database.alarm_history_time_to_live)
     else:
-        LOG.info(_LI("Nothing to clean, database alarm history time to live "
-                     "is disabled"))
+        LOG.info("Nothing to clean, database alarm history time to live "
+                 "is disabled")

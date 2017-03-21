@@ -33,7 +33,6 @@ from stevedore import extension
 
 import aodh
 from aodh import coordination
-from aodh.i18n import _LI, _LE, _LW
 from aodh import keystone_client
 from aodh import messaging
 from aodh import queue
@@ -118,15 +117,15 @@ class Evaluator(object):
             previous = alarm.state
             alarm.state = state
             if previous != state or always_record:
-                LOG.info(_LI('alarm %(id)s transitioning to %(state)s because '
-                             '%(reason)s'), {'id': alarm.alarm_id,
-                                             'state': state,
-                                             'reason': reason})
+                LOG.info('alarm %(id)s transitioning to %(state)s because '
+                         '%(reason)s', {'id': alarm.alarm_id,
+                                        'state': state,
+                                        'reason': reason})
                 try:
                     self._storage_conn.update_alarm(alarm)
                 except storage.AlarmNotFound:
-                    LOG.warning(_LW("Skip updating this alarm's state, the"
-                                    "alarm: %s has been deleted"),
+                    LOG.warning("Skip updating this alarm's state, the"
+                                "alarm: %s has been deleted",
                                 alarm.alarm_id)
                 else:
                     self._record_change(alarm, reason)
@@ -136,7 +135,7 @@ class Evaluator(object):
         except Exception:
             # retry will occur naturally on the next evaluation
             # cycle (unless alarm state reverts in the meantime)
-            LOG.exception(_LE('alarm state update failed'))
+            LOG.exception('alarm state update failed')
 
     @classmethod
     def within_time_constraint(cls, alarm):
@@ -245,12 +244,12 @@ class AlarmEvaluationService(cotyledon.Service):
     def _evaluate_assigned_alarms(self):
         try:
             alarms = self._assigned_alarms()
-            LOG.info(_LI('initiating evaluation cycle on %d alarms'),
+            LOG.info('initiating evaluation cycle on %d alarms',
                      len(alarms))
             for alarm in alarms:
                 self._evaluate_alarm(alarm)
         except Exception:
-            LOG.exception(_LE('alarm evaluation cycle failed'))
+            LOG.exception('alarm evaluation cycle failed')
 
     def _evaluate_alarm(self, alarm):
         """Evaluate the alarms assigned to this evaluator."""
@@ -262,7 +261,7 @@ class AlarmEvaluationService(cotyledon.Service):
         try:
             self.evaluators[alarm.type].obj.evaluate(alarm)
         except Exception:
-            LOG.exception(_LE('Failed to evaluate alarm %s'), alarm.alarm_id)
+            LOG.exception('Failed to evaluate alarm %s', alarm.alarm_id)
 
     def _assigned_alarms(self):
         # NOTE(r-mibu): The 'event' type alarms will be evaluated by the

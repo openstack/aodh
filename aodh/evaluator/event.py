@@ -23,7 +23,7 @@ from oslo_utils import timeutils
 import six
 
 from aodh import evaluator
-from aodh.i18n import _, _LE, _LW
+from aodh.i18n import _
 
 LOG = log.getLogger(__name__)
 
@@ -76,16 +76,16 @@ class Event(object):
         """Validate received event has mandatory parameters."""
 
         if not self.obj:
-            LOG.error(_LE('Received invalid event (empty or None)'))
+            LOG.error('Received invalid event (empty or None)')
             raise InvalidEvent()
 
         if not self.obj.get('event_type'):
-            LOG.error(_LE('Failed to extract event_type from event = %s'),
+            LOG.error('Failed to extract event_type from event = %s',
                       self.obj)
             raise InvalidEvent()
 
         if not self.obj.get('message_id'):
-            LOG.error(_LE('Failed to extract message_id from event = %s'),
+            LOG.error('Failed to extract message_id from event = %s',
                       self.obj)
             raise InvalidEvent()
 
@@ -168,8 +168,8 @@ class EventAlarmEvaluator(evaluator.Evaluator):
             try:
                 event = Event(e)
             except InvalidEvent:
-                LOG.warning(_LW('Event <%s> is invalid, aborting evaluation '
-                                'for it.'), e)
+                LOG.warning('Event <%s> is invalid, aborting evaluation '
+                            'for it.', e)
                 continue
 
             for id, alarm in six.iteritems(
@@ -177,8 +177,8 @@ class EventAlarmEvaluator(evaluator.Evaluator):
                 try:
                     self._evaluate_alarm(alarm, event)
                 except Exception:
-                    LOG.exception(_LE('Failed to evaluate alarm (id=%(a)s) '
-                                      'triggered by event = %(e)s.'),
+                    LOG.exception('Failed to evaluate alarm (id=%(a)s) '
+                                  'triggered by event = %(e)s.',
                                   {'a': id, 'e': e})
 
         LOG.debug('Finished event alarm evaluation.')

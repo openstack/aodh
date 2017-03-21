@@ -17,7 +17,6 @@
 
 from oslo_log import log
 
-from aodh.i18n import _LI
 from aodh.storage import base
 
 LOG = log.getLogger(__name__)
@@ -65,5 +64,5 @@ class Connection(base.Connection):
         :param alarm_history_ttl: Number of seconds to keep alarm history
                                   records for.
         """
-        LOG.info(_LI('Dropping alarm history data with TTL %d'),
+        LOG.info('Dropping alarm history data with TTL %d',
                  alarm_history_ttl)

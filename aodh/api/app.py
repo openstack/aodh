@@ -24,7 +24,6 @@ import pecan
 
 from aodh.api import hooks
 from aodh.api import middleware
-from aodh.i18n import _LI
 from aodh import service
 from aodh import storage
 
@@ -69,7 +68,7 @@ def load_app(conf):
     configkey = str(uuid.uuid4())
     APPCONFIGS[configkey] = config
 
-    LOG.info(_LI("WSGI config used: %s"), cfg_path)
+    LOG.info("WSGI config used: %s", cfg_path)
     return deploy.loadapp("config:" + cfg_path,
                           name="aodh+" + (
                               conf.api.auth_mode

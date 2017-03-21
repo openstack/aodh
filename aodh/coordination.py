@@ -23,7 +23,6 @@ import six
 import tenacity
 import tooz.coordination
 
-from aodh.i18n import _LE, _LI, _LW
 
 LOG = log.getLogger(__name__)
 
@@ -55,13 +54,13 @@ OPTS = [
 
 class ErrorJoiningPartitioningGroup(Exception):
     def __init__(self):
-        super(ErrorJoiningPartitioningGroup, self).__init__(_LE(
+        super(ErrorJoiningPartitioningGroup, self).__init__((
             'Error occurred when joining partitioning group'))
 
 
 class MemberNotInGroupError(Exception):
     def __init__(self, group_id, members, my_id):
-        super(MemberNotInGroupError, self).__init__(_LE(
+        super(MemberNotInGroupError, self).__init__((
             'Group ID: %(group_id)s, Members: %(members)s, Me: %(me)s: '
             'Current agent is not part of group and cannot take tasks') %
             {'group_id': group_id, 'members': members, 'me': my_id})
@@ -124,9 +123,9 @@ class PartitionCoordinator(object):
                 self._coordinator = tooz.coordination.get_coordinator(
                     self.backend_url, self._my_id)
                 self._coordinator.start()
-                LOG.info(_LI('Coordination backend started successfully.'))
+                LOG.info('Coordination backend started successfully.')
             except tooz.coordination.ToozError:
-                LOG.exception(_LE('Error connecting to coordination backend.'))
+                LOG.exception('Error connecting to coordination backend.')
 
     def stop(self):
         if not self._coordinator:
@@ -138,7 +137,7 @@ class PartitionCoordinator(object):
         try:
             self._coordinator.stop()
         except tooz.coordination.ToozError:
-            LOG.exception(_LE('Error connecting to coordination backend.'))
+            LOG.exception('Error connecting to coordination backend.')
         finally:
             self._coordinator = None
 
@@ -153,8 +152,8 @@ class PartitionCoordinator(object):
             try:
                 self._coordinator.heartbeat()
             except tooz.coordination.ToozError:
-                LOG.exception(_LE('Error sending a heartbeat to coordination '
-                                  'backend.'))
+                LOG.exception('Error sending a heartbeat to coordination '
+                              'backend.')
 
     def join_group(self, group_id):
         if (not self._coordinator or not self._coordinator.is_started
@@ -171,7 +170,7 @@ class PartitionCoordinator(object):
             try:
                 join_req = self._coordinator.join_group(group_id)
                 join_req.get()
-                LOG.info(_LI('Joined partitioning group %s'), group_id)
+                LOG.info('Joined partitioning group %s', group_id)
             except tooz.coordination.MemberAlreadyExist:
                 return
             except tooz.coordination.GroupNotCreated:
@@ -182,8 +181,8 @@ class PartitionCoordinator(object):
                     pass
                 raise ErrorJoiningPartitioningGroup()
             except tooz.coordination.ToozError:
-                LOG.exception(_LE('Error joining partitioning group %s,'
-                                  ' re-trying'), group_id)
+                LOG.exception('Error joining partitioning group %s,'
+                              ' re-trying', group_id)
                 raise ErrorJoiningPartitioningGroup()
             self._groups.add(group_id)
 
@@ -195,7 +194,7 @@ class PartitionCoordinator(object):
         if self._coordinator:
             self._coordinator.leave_group(group_id)
             self._groups.remove(group_id)
-            LOG.info(_LI('Left partitioning group %s'), group_id)
+            LOG.info('Left partitioning group %s', group_id)
 
     def _get_members(self, group_id):
         if not self._coordinator:
@@ -228,8 +227,8 @@ class PartitionCoordinator(object):
             members = self._get_members(group_id)
             LOG.debug('Members of group: %s, Me: %s', members, self._my_id)
             if self._my_id not in members:
-                LOG.warning(_LW('Cannot extract tasks because agent failed to '
-                                'join group properly. Rejoining group.'))
+                LOG.warning('Cannot extract tasks because agent failed to '
+                            'join group properly. Rejoining group.')
                 self.join_group(group_id)
                 members = self._get_members(group_id)
                 if self._my_id not in members:
@@ -242,6 +241,6 @@ class PartitionCoordinator(object):
             LOG.debug('My subset: %s', my_subset)
             return my_subset
         except tooz.coordination.ToozError:
-            LOG.exception(_LE('Error getting group membership info from '
-                              'coordination backend.'))
+            LOG.exception('Error getting group membership info from '
+                          'coordination backend.')
             return []

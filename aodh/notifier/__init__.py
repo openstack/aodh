@@ -23,7 +23,6 @@ from oslo_utils import netutils
 import six
 from stevedore import extension
 
-from aodh.i18n import _LE
 from aodh import messaging
 
 
@@ -119,8 +118,8 @@ class AlarmEndpoint(object):
             action = netutils.urlsplit(action)
         except Exception:
             LOG.error(
-                _LE("Unable to parse action %(action)s for alarm "
-                    "%(alarm_id)s"), {'action': action, 'alarm_id': alarm_id})
+                ("Unable to parse action %(action)s for alarm "
+                 "%(alarm_id)s"), {'action': action, 'alarm_id': alarm_id})
             return
 
         try:
@@ -128,8 +127,8 @@ class AlarmEndpoint(object):
         except KeyError:
             scheme = action.scheme
             LOG.error(
-                _LE("Action %(scheme)s for alarm %(alarm_id)s is unknown, "
-                    "cannot notify"),
+                ("Action %(scheme)s for alarm %(alarm_id)s is unknown, "
+                 "cannot notify"),
                 {'scheme': scheme, 'alarm_id': alarm_id})
             return
 
@@ -139,7 +138,7 @@ class AlarmEndpoint(object):
             notifier.notify(action, alarm_id, alarm_name, severity,
                             previous, current, reason, reason_data)
         except Exception:
-            LOG.exception(_LE("Unable to notify alarm %s"), alarm_id)
+            LOG.exception("Unable to notify alarm %s", alarm_id)
 
     @staticmethod
     def _process_alarm(notifiers, data):
@@ -151,7 +150,7 @@ class AlarmEndpoint(object):
 
         actions = data.get('actions')
         if not actions:
-            LOG.error(_LE("Unable to notify for an alarm with no action"))
+            LOG.error("Unable to notify for an alarm with no action")
             return
 
         for action in actions:

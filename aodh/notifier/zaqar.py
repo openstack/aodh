@@ -19,7 +19,6 @@ from oslo_config import cfg
 from oslo_log import log
 import six.moves.urllib.parse as urlparse
 
-from aodh.i18n import _LE, _LI
 from aodh import keystone_client
 from aodh import notifier
 from aodh.notifier import trust
@@ -75,9 +74,9 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
                                                       interface=endpoint_type)
                 self._zendpoint = z_endpoint.url
             except Exception:
-                LOG.error(_LE("Aodh was configured to use zaqar:// action,"
-                              " but Zaqar endpoint could not be found in"
-                              " Keystone service catalog."))
+                LOG.error("Aodh was configured to use zaqar:// action,"
+                          " but Zaqar endpoint could not be found in"
+                          " Keystone service catalog.")
         return self._zendpoint
 
     def _get_client_conf(self):
@@ -101,7 +100,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
             return zaqar_client.Client(self._get_endpoint(),
                                        version=2, conf=conf)
         except Exception:
-            LOG.error(_LE("Failed to connect to Zaqar service "),
+            LOG.error("Failed to connect to Zaqar service ",
                       exc_info=True)
 
     def _get_presigned_client_conf(self, queue_info):
@@ -130,16 +129,16 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
 
     def notify(self, action, alarm_id, alarm_name, severity, previous,
                current, reason, reason_data, headers=None):
-        LOG.info(_LI(
+        LOG.info(
             "Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s "
             "priority from %(previous)s to %(current)s with action %(action)s"
-            " because %(reason)s.") % ({'alarm_name': alarm_name,
-                                        'alarm_id': alarm_id,
-                                        'severity': severity,
-                                        'previous': previous,
-                                        'current': current,
-                                        'action': action,
-                                        'reason': reason}))
+            " because %(reason)s." % ({'alarm_name': alarm_name,
+                                       'alarm_id': alarm_id,
+                                       'severity': severity,
+                                       'previous': previous,
+                                       'current': current,
+                                       'action': action,
+                                       'reason': reason}))
         body = {'alarm_name': alarm_name, 'alarm_id': alarm_id,
                 'severity': severity, 'previous': previous,
                 'current': current, 'reason': reason,
@@ -182,11 +181,11 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
             # post the message to the queue
             queue.post(message)
         except IndexError:
-            LOG.error(_LE("Required query option missing in action %s"),
+            LOG.error("Required query option missing in action %s",
                       action)
         except Exception:
-            LOG.error(_LE("Unknown error occurred; Failed to post message to"
-                          " Zaqar queue"),
+            LOG.error("Unknown error occurred; Failed to post message to"
+                      " Zaqar queue",
                       exc_info=True)
 
 
@@ -212,8 +211,8 @@ class TrustZaqarAlarmNotifier(trust.TrustAlarmNotifierMixin,
         try:
             queue_name = queue_info.get('queue_name')[-1]
         except IndexError:
-            LOG.error(_LE("Required 'queue_name' query option missing in"
-                          " action %s"),
+            LOG.error("Required 'queue_name' query option missing in"
+                      " action %s",
                       action)
             return
 
@@ -223,6 +222,6 @@ class TrustZaqarAlarmNotifier(trust.TrustAlarmNotifierMixin,
             queue = client.queue(queue_name)
             queue.post(message)
         except Exception:
-            LOG.error(_LE("Unknown error occurred; Failed to post message to"
-                          " Zaqar queue"),
+            LOG.error("Unknown error occurred; Failed to post message to"
+                      " Zaqar queue",
                       exc_info=True)
