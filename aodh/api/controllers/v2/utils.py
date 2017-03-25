@@ -106,7 +106,7 @@ def validate_query(query, db_func, internal_keys=None,
     :raises InvalidInput: if an operator is not supported for a given field
     :raises InvalidInput: if timestamp constraints are allowed, but
         search_offset was included without timestamp constraint
-    :raises: UnknownArgument: if a field name is not a timestamp field, nor
+    :raises UnknownArgument: if a field name is not a timestamp field, nor
         in the list of valid keys
     """
 
