@@ -13,7 +13,7 @@ Compute, Image Service, Identity.
 .. include:: prereq-common.rst
 
 Install and configure components
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 .. note::
 
@@ -32,7 +32,7 @@ Install and configure components
 .. include:: configure-common.rst
 
 Finalize installation
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 #. Restart the Alarming services:
 

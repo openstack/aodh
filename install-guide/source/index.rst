@@ -8,8 +8,8 @@ Telemetry Alarming service
    install-obs.rst
    install-rdo.rst
    install-ubuntu.rst
-   verify.rst
    next-steps.rst
+.. verify.rst
 
-This chapter assumes a working setup of OpenStack following the base
-Installation Guide.
+This chapter assumes a working setup of OpenStack following the
+`OpenStack Installation Tutorials and Guides <http://docs.openstack.org/#install-guides>`_.

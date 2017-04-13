@@ -13,7 +13,7 @@ Compute, Image Service, Identity.
 .. include:: prereq-common.rst
 
 Install and configure components
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 .. note::
 
@@ -34,7 +34,7 @@ Install and configure components
 .. include:: configure-common.rst
 
 Finalize installation
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 #. Start the Telemetry Alarming services and configure them to start
    when the system boots:

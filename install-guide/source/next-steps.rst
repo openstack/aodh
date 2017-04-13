@@ -5,5 +5,6 @@ Next steps
 
 Your OpenStack environment now includes the aodh service.
 
-To add additional services, see
-docs.openstack.org/draft/install-guides/index.html .
+To add additional services, see the
+`OpenStack Installation Tutorials and Guides <http://docs.openstack.org/#install-guides>`_
+

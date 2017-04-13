@@ -10,7 +10,7 @@
 
      Replace ``AODH_DBPASS`` with the password you chose for the
      Telemetry Alarming module database. You must escape special characters
-     such as ':', '/', '+', and '@' in the connection string in accordance
+     such as ``:``, ``/``, ``+``, and ``@`` in the connection string in accordance
      with `RFC2396 <https://www.ietf.org/rfc/rfc2396.txt>`_.
 
    * In the ``[DEFAULT]`` section,
