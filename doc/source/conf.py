@@ -51,7 +51,8 @@ extensions = [
     'oslo_config.sphinxconfiggen',
 ]
 
-config_generator_config_file = os.path.join(ROOT, 'etc/aodh/aodh-config-generator.conf')
+config_generator_config_file = os.path.join(ROOT,
+                                            'aodh/aodh-config-generator.conf')
 sample_config_basename = '_static/aodh'
 
 wsme_protocols = ['restjson', 'restxml']
