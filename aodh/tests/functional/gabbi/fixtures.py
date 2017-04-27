@@ -79,8 +79,7 @@ class ConfigFixture(fixture.GabbiFixture):
         conf.set_override('policy_file',
                           os.path.abspath(
                               'aodh/tests/open-policy.json'),
-                          group='oslo_policy',
-                          enforce_type=True)
+                          group='oslo_policy')
         conf.set_override('auth_mode', None, group='api')
 
         parsed_url = urlparse.urlparse(db_url)
@@ -89,8 +88,7 @@ class ConfigFixture(fixture.GabbiFixture):
             parsed_url[2] += '-%s' % uuidutils.generate_uuid(dashed=False)
             db_url = urlparse.urlunparse(parsed_url)
 
-        conf.set_override('connection', db_url, group='database',
-                          enforce_type=True)
+        conf.set_override('connection', db_url, group='database')
 
         if (parsed_url[0].startswith("mysql")
            or parsed_url[0].startswith("postgresql")):

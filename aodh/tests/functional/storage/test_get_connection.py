@@ -34,15 +34,14 @@ class EngineTest(base.BaseTestCase):
 
     def test_get_connection(self):
         self.CONF.set_override('connection', 'log://localhost',
-                               group='database', enforce_type=True)
+                               group='database')
         engine = storage.get_connection_from_config(self.CONF)
         self.assertIsInstance(engine, impl_log.Connection)
 
     def test_get_connection_no_such_engine(self):
         self.CONF.set_override('connection', 'no-such-engine://localhost',
-                               group='database', enforce_type=True)
-        self.CONF.set_override('max_retries', 0, 'database',
-                               enforce_type=True)
+                               group='database')
+        self.CONF.set_override('max_retries', 0, 'database')
         try:
             storage.get_connection_from_config(self.CONF)
         except RuntimeError as err:
@@ -67,12 +66,9 @@ class ConnectionRetryTest(base.BaseTestCase):
                 raise ConnectionError
 
             log_init.side_effect = x
-            self.CONF.set_override("connection", "log://", "database",
-                                   enforce_type=True)
-            self.CONF.set_override("retry_interval", 0.00001, "database",
-                                   enforce_type=True)
-            self.CONF.set_override("max_retries", max_retries, "database",
-                                   enforce_type=True)
+            self.CONF.set_override("connection", "log://", "database")
+            self.CONF.set_override("retry_interval", 0.00001, "database")
+            self.CONF.set_override("max_retries", max_retries, "database")
             self.assertRaises(ConnectionError,
                               storage.get_connection_from_config,
                               self.CONF)
@@ -86,7 +82,6 @@ class ConnectionConfigTest(base.BaseTestCase):
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
     def test_only_default_url(self):
-        self.CONF.set_override("connection", "log://", group="database",
-                               enforce_type=True)
+        self.CONF.set_override("connection", "log://", group="database")
         conn = storage.get_connection_from_config(self.CONF)
         self.assertIsInstance(conn, impl_log.Connection)
