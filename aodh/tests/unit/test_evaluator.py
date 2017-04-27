@@ -68,8 +68,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
                                test_interval)
         self.CONF.set_override('heartbeat',
                                coordination_heartbeat,
-                               group='coordination',
-                               enforce_type=True)
+                               group='coordination')
 
         self._fake_pc.is_active.return_value = coordination_active
 

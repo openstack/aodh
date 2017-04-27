@@ -92,8 +92,7 @@ class TestBase(test_base.BaseTestCase):
 
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
-        self.CONF.set_override('connection', db_url, group="database",
-                               enforce_type=True)
+        self.CONF.set_override('connection', db_url, group="database")
 
         manager = self.DRIVER_MANAGERS.get(self.engine)
         if not manager:
@@ -104,7 +103,7 @@ class TestBase(test_base.BaseTestCase):
         self.useFixture(self.db_manager)
 
         self.CONF.set_override('connection', self.db_manager.url,
-                               group="database", enforce_type=True)
+                               group="database")
 
         self.alarm_conn = storage.get_connection_from_config(self.CONF)
         self.alarm_conn.upgrade()
