@@ -27,6 +27,7 @@ from oslo_utils import timeutils
 import six
 from sqlalchemy import asc
 from sqlalchemy import desc
+from sqlalchemy.engine import url as sqlalchemy_url
 from sqlalchemy import func
 from sqlalchemy.orm import exc
 
@@ -71,8 +72,18 @@ class Connection(base.Connection):
         # oslo.db doesn't support options defined by Aodh
         for opt in storage.OPTS:
             options.pop(opt.name, None)
-        self._engine_facade = db_session.EngineFacade(url, **options)
+        self._engine_facade = db_session.EngineFacade(self.dress_url(url),
+                                                      **options)
         self.conf = conf
+
+    @staticmethod
+    def dress_url(url):
+        # If no explicit driver has been set, we default to pymysql
+        if url.startswith("mysql://"):
+            url = sqlalchemy_url.make_url(url)
+            url.drivername = "mysql+pymysql"
+            return str(url)
+        return url
 
     def disconnect(self):
         self._engine_facade.get_engine().dispose()
