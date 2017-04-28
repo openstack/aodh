@@ -31,7 +31,7 @@ TESTS_DIR = 'gabbits-live'
 
 def load_tests(loader, tests, pattern):
     """Provide a TestSuite to the discovery process."""
-    aodh_url = os.getenv('AODH_SERVICE_URL')
+    aodh_url = os.getenv('AODH_URL')
     if aodh_url:
         parsed_url = urlparse.urlsplit(aodh_url)
         prefix = parsed_url.path.rstrip('/')  # turn it into a prefix
@@ -50,4 +50,4 @@ def load_tests(loader, tests, pattern):
                                   port=port,
                                   prefix=prefix)
     elif os.getenv('GABBI_LIVE_FAIL_IF_NO_TEST'):
-        raise RuntimeError('AODH_SERVICE_URL is not set')
+        raise RuntimeError('AODH_URL is not set')

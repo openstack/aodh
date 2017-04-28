@@ -1,6 +1,7 @@
 defaults:
     request_headers:
         x-auth-token: $ENVIRON['AODH_SERVICE_TOKEN']
+        x-roles: $ENVIRON['AODH_SERVICE_ROLES']
 
 tests:
     - name: list alarms none
