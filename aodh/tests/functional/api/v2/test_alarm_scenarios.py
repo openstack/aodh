@@ -2877,8 +2877,8 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
                                   expect_errors=True,
                                   headers=self.auth_headers)
         faultstring = ("Invalid input for field/attribute threshold. "
-                       "Value: 'False'. Wrong type. Expected '<type '"
-                       "float'>', got '<type 'bool'>'")
+                       "Value: 'False'. Wrong type. Expected '%s', got '%s'"
+                       % (type(1.0), type(True)))
         self.assertEqual(faultstring,
                          response.json['error_message']['faultstring'])
 
