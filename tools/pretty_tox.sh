@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-TESTRARGS=$1
+TESTRARGS=$*
 
 # --until-failure is not compatible with --subunit see:
 #
@@ -10,7 +10,7 @@ TESTRARGS=$1
 #
 # this work around exists until that is addressed
 if [[ "$TESTARGS" =~ "until-failure" ]]; then
-    python setup.py testr --slowest --testr-args="$TESTRARGS"
+    ostestr --slowest $TESTRARGS
 else
-    python setup.py testr --slowest --testr-args="--subunit $TESTRARGS" | subunit-trace -f
+    ostestr --no-pretty --slowest --subunit $TESTRARGS | subunit-trace -f
 fi
