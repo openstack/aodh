@@ -20,7 +20,6 @@ import fixtures
 import mock
 from oslo_utils import timeutils
 from oslotest import base
-from oslotest import mockpatch
 import wsme
 
 from aodh.api.controllers.v2 import base as v2_base
@@ -156,9 +155,9 @@ class TestQuery(base.BaseTestCase):
 class TestQueryToKwArgs(tests_base.BaseTestCase):
     def setUp(self):
         super(TestQueryToKwArgs, self).setUp()
-        self.useFixture(mockpatch.PatchObject(
+        self.useFixture(fixtures.MockPatchObject(
             utils, 'sanitize_query', side_effect=lambda x, y, **z: x))
-        self.useFixture(mockpatch.PatchObject(
+        self.useFixture(fixtures.MockPatchObject(
             utils, '_verify_query_segregation', side_effect=lambda x, **z: x))
 
     def test_sample_filter_single(self):
