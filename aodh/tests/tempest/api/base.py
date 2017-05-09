@@ -35,7 +35,7 @@ class BaseAlarmingTest(tempest.test.BaseTestCase):
     @classmethod
     def setup_clients(cls):
         super(BaseAlarmingTest, cls).setup_clients()
-        cls.alarming_client = cls.os.alarming_client
+        cls.alarming_client = cls.os_primary.alarming_client
 
     @classmethod
     def resource_setup(cls):
