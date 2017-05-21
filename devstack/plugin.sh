@@ -169,8 +169,6 @@ function configure_aodh {
         setup_colorized_logging $AODH_CONF DEFAULT
     fi
 
-    cp $AODH_DIR/etc/aodh/aodh-config-generator.conf $AODH_CONF_DIR
-
     # The alarm evaluator needs these options to call gnocchi/ceilometer APIs
     iniset $AODH_CONF service_credentials auth_type password
     iniset $AODH_CONF service_credentials username aodh
