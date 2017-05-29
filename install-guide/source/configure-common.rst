@@ -73,8 +73,3 @@
    Workaround for https://bugs.launchpad.net/ubuntu/+source/aodh/+bug/1513599.
 
 3. In order to initialize the database please run the ``aodh-dbsync`` script.
-
-.. note::
-
-   The ``aodh-dbsync`` script is only necessary if you are using an SQL
-   database.
