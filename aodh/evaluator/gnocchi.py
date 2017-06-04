@@ -48,6 +48,9 @@ class GnocchiBase(threshold.ThresholdEvaluator):
         LOG.debug('sanitize stats %s', statistics)
         statistics = [stats[VALUE] for stats in statistics
                       if stats[GRANULARITY] == rule['granularity']]
+        if not statistics:
+            raise threshold.InsufficientDataError(
+                "No datapoint for granularity %s" % rule['granularity'], [])
         statistics = statistics[-rule['evaluation_periods']:]
         LOG.debug('pruned statistics to %d', len(statistics))
         return statistics
@@ -61,13 +64,28 @@ class GnocchiResourceThresholdEvaluator(GnocchiBase):
                 start=start, stop=end,
                 resource_id=rule['resource_id'],
                 aggregation=rule['aggregation_method'])
+        except exceptions.MetricNotFound:
+            raise threshold.InsufficientDataError(
+                'metric %s for resource %s does not exists' %
+                (rule['metric'], rule['resource_id']), [])
+        except exceptions.ResourceNotFound:
+            raise threshold.InsufficientDataError(
+                'resource %s does not exists' % rule['resource_id'], [])
         except exceptions.NotFound:
-            LOG.debug('metric %s or resource %s does not exists',
-                      rule['metric'], rule['resource_id'])
-            return []
+            # TODO(sileht): gnocchiclient should raise a explicit
+            # exception for AggregationNotFound, this API endpoint
+            # can only raise 3 different 404, so we are safe to
+            # assume this is an AggregationNotFound for now.
+            raise threshold.InsufficientDataError(
+                'aggregation %s does not exist for '
+                'metric %s of resource %s' % (rule['aggregation_method'],
+                                              rule['metric'],
+                                              rule['resource_id']),
+                [])
         except Exception as e:
-            LOG.warning('alarm stats retrieval failed: %s', e)
-            return []
+            msg = 'alarm statistics retrieval failed: %s' % e
+            LOG.warning(msg)
+            raise threshold.InsufficientDataError(msg, [])
 
 
 class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
@@ -86,12 +104,23 @@ class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
                 start=start, stop=end,
                 aggregation=rule['aggregation_method'],
                 needed_overlap=0)
+        except exceptions.MetricNotFound:
+            raise threshold.InsufficientDataError(
+                'At least of metrics in %s does not exist' %
+                rule['metrics'], [])
         except exceptions.NotFound:
-            LOG.debug('metrics %s does not exists', rule['metrics'])
-            return []
+            # TODO(sileht): gnocchiclient should raise a explicit
+            # exception for AggregationNotFound, this API endpoint
+            # can only raise 3 different 404, so we are safe to
+            # assume this is an AggregationNotFound for now.
+            raise threshold.InsufficientDataError(
+                'aggregation %s does not exist for at least one '
+                'metrics in %s' % (rule['aggregation_method'],
+                                   rule['metrics']), [])
         except Exception as e:
-            LOG.warning('alarm stats retrieval failed: %s', e)
-            return []
+            msg = 'alarm statistics retrieval failed: %s' % e
+            LOG.warning(msg)
+            raise threshold.InsufficientDataError(msg, [])
 
 
 class GnocchiAggregationResourcesThresholdEvaluator(GnocchiBase):
@@ -113,9 +142,18 @@ class GnocchiAggregationResourcesThresholdEvaluator(GnocchiBase):
                 aggregation=rule['aggregation_method'],
                 needed_overlap=0,
             )
+        except exceptions.MetricNotFound:
+            raise threshold.InsufficientDataError(
+                'metric %s does not exists' % rule['metric'], [])
         except exceptions.NotFound:
-            LOG.debug('metric %s does not exists', rule['metric'])
-            return []
+            # TODO(sileht): gnocchiclient should raise a explicit
+            # exception for AggregationNotFound, this API endpoint
+            # can only raise 3 different 404, so we are safe to
+            # assume this is an AggregationNotFound for now.
+            raise threshold.InsufficientDataError(
+                'aggregation %s does not exist for at least one '
+                'metric of the query' % rule['aggregation_method'], [])
         except Exception as e:
-            LOG.warning('alarm stats retrieval failed: %s', e)
-            return []
+            msg = 'alarm statistics retrieval failed: %s' % e
+            LOG.warning(msg)
+            raise threshold.InsufficientDataError(msg, [])

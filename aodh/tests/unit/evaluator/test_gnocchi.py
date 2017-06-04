@@ -150,8 +150,8 @@ class TestGnocchiEvaluatorBase(base.TestEvaluatorBase):
         expected = [mock.call(
             alarm,
             'ok',
-            ('%d datapoints are unknown'
-             % alarm.rule['evaluation_periods']),
+            ('No datapoint for granularity %s'
+             % alarm.rule['granularity']),
             self._reason_data('unknown',
                               alarm.rule['evaluation_periods'],
                               None))

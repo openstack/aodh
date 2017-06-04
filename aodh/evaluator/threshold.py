@@ -49,6 +49,13 @@ OPTS = [
 ]
 
 
+class InsufficientDataError(Exception):
+    def __init__(self, reason, statistics):
+        self.reason = reason
+        self.statistics = statistics
+        super(InsufficientDataError, self).__init__(reason)
+
+
 class ThresholdEvaluator(evaluator.Evaluator):
 
     # the sliding evaluation window is extended to allow
@@ -172,7 +179,9 @@ class ThresholdEvaluator(evaluator.Evaluator):
         statistics = self._sanitize(alarm_rule, statistics)
         sufficient = len(statistics) >= alarm_rule['evaluation_periods']
         if not sufficient:
-            return evaluator.UNKNOWN, None, statistics, len(statistics)
+            raise InsufficientDataError(
+                '%d datapoints are unknown' % alarm_rule['evaluation_periods'],
+                statistics)
 
         def _compare(value):
             op = COMPARATORS[alarm_rule['comparison_operator']]
@@ -188,13 +197,13 @@ class ThresholdEvaluator(evaluator.Evaluator):
 
         if unequivocal:
             state = evaluator.ALARM if distilled else evaluator.OK
-            return state, None, statistics, number_outside
+            return state, None, statistics, number_outside, None
         else:
             trending_state = evaluator.ALARM if compared[-1] else evaluator.OK
-            return None, trending_state, statistics, number_outside
+            return None, trending_state, statistics, number_outside, None
 
     def _transition_alarm(self, alarm, state, trending_state, statistics,
-                          outside_count):
+                          outside_count, unknown_reason):
         unknown = alarm.state == evaluator.UNKNOWN
         continuous = alarm.repeat_actions
 
@@ -213,13 +222,11 @@ class ThresholdEvaluator(evaluator.Evaluator):
                            'actual': len(statistics)})
             # Reason is not same as log message because we want to keep
             # consistent since thirdparty software may depend on old format.
-            reason = _('%d datapoints are unknown') % alarm.rule[
-                'evaluation_periods']
             last = None if not statistics else statistics[-1]
             reason_data = self._reason_data('unknown',
                                             alarm.rule['evaluation_periods'],
                                             last)
-            self._refresh(alarm, state, reason, reason_data)
+            self._refresh(alarm, state, unknown_reason, reason_data)
 
         elif state and (alarm.state != state or continuous):
             reason, reason_data = self._reason(alarm, statistics, state,
@@ -232,7 +239,9 @@ class ThresholdEvaluator(evaluator.Evaluator):
                       'within its time constraint.', alarm.alarm_id)
             return
 
-        state, trending_state, statistics, outside_count = self.evaluate_rule(
-            alarm.rule)
-        self._transition_alarm(alarm, state, trending_state, statistics,
-                               outside_count)
+        try:
+            evaluation = self.evaluate_rule(alarm.rule)
+        except InsufficientDataError as e:
+            evaluation = (evaluator.UNKNOWN, None, e.statistics, 0,
+                          e.reason)
+        self._transition_alarm(alarm, *evaluation)

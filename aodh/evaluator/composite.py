@@ -17,6 +17,7 @@ import six
 import stevedore
 
 from aodh import evaluator
+from aodh.evaluator import threshold
 from aodh.i18n import _
 
 LOG = log.getLogger(__name__)
@@ -43,8 +44,13 @@ class RuleTarget(object):
         if not self.evaluated:
             LOG.debug('Evaluating %(type)s rule: %(rule)s',
                       {'type': self.type, 'rule': self.rule})
-            self.state, self.trending_state, self.statistics, __ = \
-                self.rule_evaluator.evaluate_rule(self.rule)
+            try:
+                self.state, self.trending_state, self.statistics, __, __ = \
+                    self.rule_evaluator.evaluate_rule(self.rule)
+            except threshold.InsufficientDataError as e:
+                self.state = evaluator.UNKNOWN
+                self.trending_state = None
+                self.statistics = e.statistics
             self.evaluated = True
 
 
