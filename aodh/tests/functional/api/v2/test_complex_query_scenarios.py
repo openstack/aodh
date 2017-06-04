@@ -49,6 +49,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
                                          alarm_id=alarm_id,
                                          description='a',
                                          state=state,
+                                         state_reason="state_reason",
                                          state_timestamp=date,
                                          timestamp=date,
                                          ok_actions=[],

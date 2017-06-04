@@ -47,6 +47,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                          alarm_id=uuidutils.generate_uuid(),
                          state='insufficient data',
                          state_timestamp=constants.MIN_DATETIME,
+                         state_reason='Not evaluated',
                          timestamp=constants.MIN_DATETIME,
                          insufficient_data_actions=[],
                          ok_actions=[],
@@ -76,6 +77,7 @@ class TestEvaluate(base.TestEvaluatorBase):
                          project_id='snafu',
                          state='insufficient data',
                          state_timestamp=constants.MIN_DATETIME,
+                         state_reason='Not evaluated',
                          timestamp=constants.MIN_DATETIME,
                          insufficient_data_actions=[],
                          ok_actions=[],
@@ -419,6 +421,7 @@ class TestEvaluate(base.TestEvaluatorBase):
             primitive_alarms = [a.as_dict() for a in self.alarms]
             for alarm in original_alarms:
                 alarm.state = 'alarm'
+                alarm.state_reason = mock.ANY
             primitive_original_alarms = [a.as_dict() for a in original_alarms]
             self.assertEqual(primitive_original_alarms, primitive_alarms)
 

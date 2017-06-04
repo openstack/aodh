@@ -51,6 +51,7 @@ class Alarm(base.Model):
     :param description: User friendly description of the alarm
     :param enabled: Is the alarm enabled
     :param state: Alarm state (ok/alarm/insufficient data)
+    :param state_reason: Alarm state reason
     :param rule: A rule that defines when the alarm fires
     :param user_id: the owner/creator of the alarm
     :param project_id: the project_id of the creator
@@ -70,8 +71,9 @@ class Alarm(base.Model):
     """
     def __init__(self, alarm_id, type, enabled, name, description,
                  timestamp, user_id, project_id, state, state_timestamp,
-                 ok_actions, alarm_actions, insufficient_data_actions,
-                 repeat_actions, rule, time_constraints, severity=None):
+                 state_reason, ok_actions, alarm_actions,
+                 insufficient_data_actions, repeat_actions, rule,
+                 time_constraints, severity=None):
         if not isinstance(timestamp, datetime.datetime):
             raise TypeError(_("timestamp should be datetime object"))
         if not isinstance(state_timestamp, datetime.datetime):
@@ -88,6 +90,7 @@ class Alarm(base.Model):
             project_id=project_id,
             state=state,
             state_timestamp=state_timestamp,
+            state_reason=state_reason,
             ok_actions=ok_actions,
             alarm_actions=alarm_actions,
             insufficient_data_actions=insufficient_data_actions,

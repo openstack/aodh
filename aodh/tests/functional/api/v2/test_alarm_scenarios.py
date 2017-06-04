@@ -38,6 +38,7 @@ def default_alarms(auth_headers):
                          alarm_id='a',
                          description='a',
                          state='insufficient data',
+                         state_reason='Not evaluated',
                          severity='critical',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,
@@ -67,6 +68,7 @@ def default_alarms(auth_headers):
                          alarm_id='b',
                          description='b',
                          state='insufficient data',
+                         state_reason='Not evaluated',
                          severity='critical',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,
@@ -94,6 +96,7 @@ def default_alarms(auth_headers):
                          alarm_id='c',
                          description='c',
                          state='insufficient data',
+                         state_reason='Not evaluated',
                          severity='moderate',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,
@@ -221,6 +224,7 @@ class TestAlarms(TestAlarmsBase):
                              alarm_id='c',
                              description='c',
                              state='ok',
+                             state_reason='Not evaluated',
                              state_timestamp=constants.MIN_DATETIME,
                              timestamp=constants.MIN_DATETIME,
                              ok_actions=[],
@@ -298,6 +302,7 @@ class TestAlarms(TestAlarmsBase):
                              alarm_id='c',
                              description='c',
                              state='insufficient data',
+                             state_reason='Not evaluated',
                              state_timestamp=constants.MIN_DATETIME,
                              timestamp=constants.MIN_DATETIME,
                              ok_actions=[],
@@ -809,6 +814,7 @@ class TestAlarms(TestAlarmsBase):
             'enabled': False,
             'name': 'added_alarm',
             'state': 'ok',
+            'state_reason': 'ignored',
             'type': 'threshold',
             'severity': 'low',
             'ok_actions': ['http://something/ok'],
@@ -841,6 +847,8 @@ class TestAlarms(TestAlarmsBase):
         # to check to IntegerType type conversion
         json['threshold_rule']['evaluation_periods'] = 3
         json['threshold_rule']['period'] = 180
+        # to check it's read only
+        json['state_reason'] = "Not evaluated yet"
         self._verify_alarm(json, alarms[0], 'added_alarm')
 
     def test_post_alarm_outlier_exclusion_set(self):
@@ -1289,6 +1297,58 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(['test://', 'log://'],
                          alarms[0].alarm_actions)
 
+    def test_exercise_state_reason(self):
+        body = {
+            'name': 'nostate',
+            'type': 'threshold',
+            'threshold_rule': {
+                'meter_name': 'ameter',
+                'query': [{'field': 'metadata.field',
+                           'op': 'eq',
+                           'value': '5',
+                           'type': 'string'}],
+                'comparison_operator': 'le',
+                'statistic': 'count',
+                'threshold': 50,
+                'evaluation_periods': '3',
+                'period': '180',
+            },
+        }
+        headers = self.auth_headers
+        headers['X-Roles'] = 'admin'
+
+        self.post_json('/alarms', params=body, status=201,
+                       headers=headers)
+        alarms = list(self.alarm_conn.get_alarms(name='nostate'))
+        self.assertEqual(1, len(alarms))
+        alarm_id = alarms[0].alarm_id
+
+        alarm = self._get_alarm(alarm_id)
+        self.assertEqual("insufficient data", alarm['state'])
+        self.assertEqual("Not evaluated yet", alarm['state_reason'])
+
+        # Ensure state reason is updated
+        alarm = self._get_alarm('a')
+        alarm['state'] = 'ok'
+        self.put_json('/alarms/%s' % alarm_id,
+                      params=alarm,
+                      headers=self.auth_headers)
+        alarm = self._get_alarm(alarm_id)
+        self.assertEqual("ok", alarm['state'])
+        self.assertEqual("Manually set via API", alarm['state_reason'])
+
+        # Ensure state reason read only
+        alarm = self._get_alarm('a')
+        alarm['state'] = 'alarm'
+        alarm['state_reason'] = 'oh no!'
+        self.put_json('/alarms/%s' % alarm_id,
+                      params=alarm,
+                      headers=self.auth_headers)
+
+        alarm = self._get_alarm(alarm_id)
+        self.assertEqual("alarm", alarm['state'])
+        self.assertEqual("Manually set via API", alarm['state_reason'])
+
     def test_post_alarm_without_actions(self):
         body = {
             'name': 'alarm_actions_none',
@@ -1641,6 +1701,8 @@ class TestAlarms(TestAlarmsBase):
         alarms = list(self.alarm_conn.get_alarms(alarm_id=data[0]['alarm_id']))
         self.assertEqual(1, len(alarms))
         self.assertEqual('alarm', alarms[0].state)
+        self.assertEqual('Manually set via API',
+                         alarms[0].state_reason)
         self.assertEqual('alarm', resp.json)
 
     def test_set_invalid_state_alarm(self):
@@ -1726,6 +1788,7 @@ class TestAlarmsHistory(TestAlarmsBase):
             alarm_id='a',
             description='a',
             state='insufficient data',
+            state_reason='insufficient data',
             severity='critical',
             state_timestamp=constants.MIN_DATETIME,
             timestamp=constants.MIN_DATETIME,
@@ -1764,7 +1827,10 @@ class TestAlarmsHistory(TestAlarmsBase):
 
     def _assert_is_subset(self, expected, actual):
         for k, v in six.iteritems(expected):
-            self.assertEqual(v, actual.get(k), 'mismatched field: %s' % k)
+            current = actual.get(k)
+            if k == 'detail' and isinstance(v, dict):
+                current = jsonutils.loads(current)
+            self.assertEqual(v, current, 'mismatched field: %s' % k)
         self.assertIsNotNone(actual['event_id'])
 
     def _assert_in_json(self, expected, actual):
@@ -1955,7 +2021,9 @@ class TestAlarmsHistory(TestAlarmsBase):
                                               auth_headers=auth)
             self.assertEqual(2, len(history), 'hist: %s' % history)
             self._assert_is_subset(dict(alarm_id=alarm['alarm_id'],
-                                        detail='{"state": "alarm"}',
+                                        detail={"state": "alarm",
+                                                "state_reason":
+                                                "Manually set via API"},
                                         on_behalf_of=alarm['project_id'],
                                         project_id=admin_project,
                                         type='rule change',
@@ -2405,6 +2473,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
                          alarm_id='e',
                          description='e',
                          state='insufficient data',
+                         state_reason='Not evaluated',
                          severity='critical',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,
@@ -2432,6 +2501,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
                          alarm_id='f',
                          description='f',
                          state='insufficient data',
+                         state_reason='Not evaluated',
                          severity='critical',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,
@@ -2458,6 +2528,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
                          alarm_id='g',
                          description='f',
                          state='insufficient data',
+                         state_reason='Not evaluated',
                          severity='critical',
                          state_timestamp=constants.MIN_DATETIME,
                          timestamp=constants.MIN_DATETIME,
@@ -2671,6 +2742,7 @@ class TestAlarmsEvent(TestAlarmsBase):
                              alarm_id='h',
                              description='h',
                              state='insufficient data',
+                             state_reason='insufficient data',
                              severity='moderate',
                              state_timestamp=constants.MIN_DATETIME,
                              timestamp=constants.MIN_DATETIME,
@@ -2796,6 +2868,7 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
                              alarm_id='composite',
                              description='composite',
                              state='insufficient data',
+                             state_reason='insufficient data',
                              severity='moderate',
                              state_timestamp=constants.MIN_DATETIME,
                              timestamp=constants.MIN_DATETIME,

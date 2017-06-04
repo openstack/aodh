@@ -147,6 +147,7 @@ class Connection(base.Connection):
                                       project_id=row.project_id,
                                       state=row.state,
                                       state_timestamp=row.state_timestamp,
+                                      state_reason=row.state_reason,
                                       ok_actions=row.ok_actions,
                                       alarm_actions=row.alarm_actions,
                                       insufficient_data_actions=(

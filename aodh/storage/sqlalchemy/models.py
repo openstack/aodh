@@ -94,6 +94,7 @@ class Alarm(Base):
     project_id = Column(String(128))
 
     state = Column(String(255))
+    state_reason = Column(Text)
     state_timestamp = Column(TimestampUTC,
                              default=lambda: timeutils.utcnow())
 

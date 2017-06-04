@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    The reason of the state change is now part of the API as "state_reason" field of the alarm object.

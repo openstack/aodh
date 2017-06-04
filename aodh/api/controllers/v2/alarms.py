@@ -74,6 +74,9 @@ state_kind_enum = wtypes.Enum(str, *state_kind)
 severity_kind = ["low", "moderate", "critical"]
 severity_kind_enum = wtypes.Enum(str, *severity_kind)
 
+ALARM_REASON_DEFAULT = "Not evaluated yet"
+ALARM_REASON_MANUAL = "Manually set via API"
+
 
 class OverQuota(base.ClientSideError):
     def __init__(self, data):
@@ -250,6 +253,9 @@ class Alarm(base.Base):
     state_timestamp = datetime.datetime
     "The date of the last alarm state changed"
 
+    state_reason = wsme.wsattr(wtypes.text, default=ALARM_REASON_DEFAULT)
+    "The reason of the current state"
+
     severity = base.AdvEnum('severity', str, *severity_kind,
                             default='low')
     "The severity of the alarm"
@@ -359,6 +365,7 @@ class Alarm(base.Base):
                    timestamp=datetime.datetime(2015, 1, 1, 12, 0, 0, 0),
                    state="ok",
                    severity="moderate",
+                   state_reason="threshold over 90%",
                    state_timestamp=datetime.datetime(2015, 1, 1, 12, 0, 0, 0),
                    ok_actions=["http://site:8000/ok"],
                    alarm_actions=["http://site:8000/alarm"],
@@ -620,8 +627,10 @@ class AlarmController(rest.RestController):
         data.timestamp = now
         if alarm_in.state != data.state:
             data.state_timestamp = now
+            data.state_reason = ALARM_REASON_MANUAL
         else:
             data.state_timestamp = alarm_in.state_timestamp
+            data.state_reason = alarm_in.state_reason
 
         ALARMS_RULES[data.type].plugin.update_hook(data)
 
@@ -699,8 +708,10 @@ class AlarmController(rest.RestController):
         now = timeutils.utcnow()
         alarm.state = state
         alarm.state_timestamp = now
+        alarm.state_reason = ALARM_REASON_MANUAL
         alarm = pecan.request.storage.update_alarm(alarm)
-        change = {'state': alarm.state}
+        change = {'state': alarm.state,
+                  'state_reason': alarm.state_reason}
         self._record_change(change, now, on_behalf_of=alarm.project_id,
                             type=models.AlarmChange.STATE_TRANSITION)
         return alarm.state
@@ -785,6 +796,7 @@ class AlarmsController(rest.RestController):
 
         data.timestamp = now
         data.state_timestamp = now
+        data.state_reason = ALARM_REASON_DEFAULT
 
         ALARMS_RULES[data.type].plugin.create_hook(data)
 

@@ -116,6 +116,7 @@ class Evaluator(object):
         try:
             previous = alarm.state
             alarm.state = state
+            alarm.state_reason = reason
             if previous != state or always_record:
                 LOG.info('alarm %(id)s transitioning to %(state)s because '
                          '%(reason)s', {'id': alarm.alarm_id,

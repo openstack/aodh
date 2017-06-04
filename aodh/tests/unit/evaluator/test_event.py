@@ -41,6 +41,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
                             alarm_id=alarm_id,
                             description='desc',
                             state=kwargs.get('state', 'insufficient data'),
+                            state_reason='reason',
                             severity='critical',
                             state_timestamp=constants.MIN_DATETIME,
                             timestamp=constants.MIN_DATETIME,
