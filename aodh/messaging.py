@@ -32,7 +32,7 @@ def get_transport(conf, url=None, optional=False, cache=True):
     transport = TRANSPORTS.get(cache_key)
     if not transport or not cache:
         try:
-            transport = oslo_messaging.get_transport(conf, url)
+            transport = oslo_messaging.get_notification_transport(conf, url)
         except (oslo_messaging.InvalidTransportURL,
                 oslo_messaging.DriverLoadFailure):
             if not optional or url:
