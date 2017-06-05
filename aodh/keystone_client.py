@@ -18,7 +18,7 @@ import os
 from keystoneauth1 import exceptions as ka_exception
 from keystoneauth1.identity.generic import password
 from keystoneauth1 import loading as ka_loading
-from keystoneclient import session
+from keystoneauth1 import session
 from keystoneclient.v3 import client as ks_client_v3
 from oslo_config import cfg
 
