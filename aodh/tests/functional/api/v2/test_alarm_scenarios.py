@@ -2607,7 +2607,9 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
         self.assertEqual(1, len(alarms))
         self._verify_alarm(json, alarms[0])
 
-    def test_post_gnocchi_aggregation_alarm_project_constraint(self):
+    @mock.patch('aodh.keystone_client.get_client')
+    def test_post_gnocchi_aggregation_alarm_project_constraint(self,
+                                                               get_client):
         json = {
             'enabled': False,
             'name': 'project_constraint',
@@ -2630,10 +2632,21 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
             }
         }
 
-        expected_query = {"and": [{"=": {"created_by_project_id":
-                                         self.auth_headers['X-Project-Id']}},
-                                  {"=": {"server_group":
-                                         "my_autoscaling_group"}}]}
+        expected_query = {"and": [
+            {"or": [
+                {"=": {"created_by_project_id":
+                       self.auth_headers['X-Project-Id']}},
+                {"and": [
+                    {"=": {"created_by_project_id": "<my-uuid>"}},
+                    {"=": {"project_id": self.auth_headers['X-Project-Id']}}
+                ]},
+            ]},
+            {"=": {"server_group": "my_autoscaling_group"}},
+        ]}
+
+        ks_client = mock.Mock()
+        ks_client.projects.find.return_value = mock.Mock(id='<my-uuid>')
+        get_client.return_value = ks_client
 
         with mock.patch('aodh.api.controllers.v2.alarm_rules.'
                         'gnocchi.client') as clientlib:

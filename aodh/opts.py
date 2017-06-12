@@ -16,6 +16,7 @@ import itertools
 from keystoneauth1 import loading
 
 import aodh.api
+import aodh.api.controllers.v2.alarm_rules.gnocchi
 import aodh.api.controllers.v2.alarms
 import aodh.coordination
 import aodh.evaluator
@@ -42,6 +43,7 @@ def list_opts():
         ('api',
          itertools.chain(
              aodh.api.OPTS,
+             aodh.api.controllers.v2.alarm_rules.gnocchi.GNOCCHI_OPTS,
              aodh.api.controllers.v2.alarms.ALARM_API_OPTS)),
         ('coordination', aodh.coordination.OPTS),
         ('database', aodh.storage.OPTS),
