@@ -18,8 +18,5 @@ doc/source/_static/
 etc/aodh/aodh.conf
 subunit.log
 
-# Files created by install-guide build
-install-guide/build
-
 # Files created by releasenotes build
 releasenotes/build
