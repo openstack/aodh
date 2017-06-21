@@ -18,6 +18,8 @@ import threading
 import cachetools
 from gnocchiclient import client
 from gnocchiclient import exceptions
+from keystoneauth1 import exceptions as ka_exceptions
+from oslo_config import cfg
 from oslo_serialization import jsonutils
 import pecan
 import wsme
@@ -26,6 +28,14 @@ from wsme import types as wtypes
 from aodh.api.controllers.v2 import base
 from aodh.api.controllers.v2 import utils as v2_utils
 from aodh import keystone_client
+
+
+GNOCCHI_OPTS = [
+    cfg.StrOpt('gnocchi_external_project_owner',
+               default="service",
+               help='Project name of resources creator in Gnocchi. '
+               '(For example the Ceilometer project name'),
+]
 
 
 class GnocchiUnavailable(Exception):
@@ -122,6 +132,20 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
                                        'resource_type'])
         return rule
 
+    cache = cachetools.TTLCache(maxsize=1, ttl=3600)
+    lock = threading.RLock()
+
+    @staticmethod
+    @cachetools.cached(cache, lock=lock)
+    def get_external_project_owner():
+        kc = keystone_client.get_client(pecan.request.cfg)
+        project_name = pecan.request.cfg.api.gnocchi_external_project_owner
+        try:
+            project = kc.projects.find(name=project_name)
+            return project.id
+        except ka_exceptions.NotFound:
+            return None
+
     @classmethod
     def validate_alarm(cls, alarm):
         super(AggregationMetricByResourcesLookupRule,
@@ -135,14 +159,27 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
         except ValueError:
             raise wsme.exc.InvalidInput('rule/query', rule.query)
 
+        conf = pecan.request.cfg
+
         # Scope the alarm to the project id if needed
         auth_project = v2_utils.get_auth_project(alarm.project_id)
         if auth_project:
-            query = {"and": [{"=": {"created_by_project_id": auth_project}},
-                             query]}
+
+            perms_filter = {"=": {"created_by_project_id": auth_project}}
+
+            external_project_owner = cls.get_external_project_owner()
+            if external_project_owner:
+                perms_filter = {"or": [
+                    perms_filter,
+                    {"and": [
+                        {"=": {"created_by_project_id":
+                               external_project_owner}},
+                        {"=": {"project_id": auth_project}}]}
+                ]}
+
+            query = {"and": [perms_filter, query]}
             rule.query = jsonutils.dumps(query)
 
-        conf = pecan.request.cfg
         gnocchi_client = client.Client(
             '1', keystone_client.get_session(conf),
             interface=conf.service_credentials.interface,

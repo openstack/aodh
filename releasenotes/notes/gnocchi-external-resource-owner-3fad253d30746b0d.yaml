@@ -1,0 +1,11 @@
+---
+fixes:
+  - |
+    When an unprivileged user want to access to Gnocchi resources created by
+    Ceilometer, that doesn't work because the filter scope the Gnocchi query to
+    resource owner to the user. To fix we introduce a new configuration option
+    "gnocchi_external_project_owner" set by default to "service". The new
+    filter now allow two kind of Gnocchi resources:
+    * owned by the user project
+    * owned by "gnocchi_external_project_owner" and the orignal project_id of
+      the resource is the user project.
