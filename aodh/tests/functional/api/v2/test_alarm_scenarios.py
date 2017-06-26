@@ -18,7 +18,6 @@ import datetime
 import os
 
 import mock
-import oslo_messaging.conffixture
 from oslo_serialization import jsonutils
 from oslo_utils import uuidutils
 import six
@@ -1667,29 +1666,21 @@ class TestAlarms(TestAlarmsBase):
             }
 
         }
-        endpoint = mock.MagicMock()
-        target = oslo_messaging.Target(topic="notifications")
-        listener = messaging.get_batch_notification_listener(
-            self.transport, [target], [endpoint])
-        listener.start()
-        endpoint.info.side_effect = lambda *args: listener.stop()
-        self.post_json('/alarms', params=json, headers=self.auth_headers)
-        listener.wait()
-
-        class NotificationsMatcher(object):
-            def __eq__(self, notifications):
-                payload = notifications[0]['payload']
-                return (payload['detail']['name'] == 'sent_notification' and
-                        payload['type'] == 'creation' and
-                        payload['detail']['rule']['meter_name'] == 'ameter' and
-                        set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
-                             'project_id', 'timestamp',
+        with mock.patch.object(messaging, 'get_notifier') as get_notifier:
+            notifier = get_notifier.return_value
+            self.post_json('/alarms', params=json, headers=self.auth_headers)
+            get_notifier.assert_called_once_with(mock.ANY,
+                                                 publisher_id='aodh.api')
+        calls = notifier.info.call_args_list
+        self.assertEqual(1, len(calls))
+        args, _ = calls[0]
+        context, event_type, payload = args
+        self.assertEqual('alarm.creation', event_type)
+        self.assertEqual('sent_notification', payload['detail']['name'])
+        self.assertEqual('ameter', payload['detail']['rule']['meter_name'])
+        self.assertTrue(set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
+                             'project_id', 'timestamp', 'type',
                              'user_id']).issubset(payload.keys()))
-
-            def __ne__(self, other):
-                return not self.__eq__(other)
-
-        endpoint.info.assert_called_once_with(NotificationsMatcher())
 
     def test_alarm_sends_notification(self):
         with mock.patch.object(messaging, 'get_notifier') as get_notifier:
