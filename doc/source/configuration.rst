@@ -33,11 +33,4 @@ The following is a sample Aodh configuration for adaptation and use. It is
 auto-generated from Aodh when this documentation is built, and can also be
 viewed in `file form <_static/aodh.conf.sample>`_.
 
-.. note::
-
-    As a developer, with full development tools, you can create a sample
-    configuration file from any branch or commit. Just checkout to that
-    branch or commit, run ``tox -e genconfig``, then `etc/aodh/aodh.conf`
-    will be generated.
-
 .. literalinclude:: _static/aodh.conf.sample
