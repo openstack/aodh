@@ -52,7 +52,7 @@ extensions = [
 ]
 
 config_generator_config_file = os.path.join(ROOT,
-                                            'aodh/aodh-config-generator.conf')
+                                            'aodh/cmd/aodh-config-generator.conf')
 sample_config_basename = '_static/aodh'
 
 wsme_protocols = ['restjson', 'restxml']
