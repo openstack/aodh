@@ -1,16 +1,17 @@
 # Lucas Palm <lapalm@us.ibm.com>, 2015. #zanata
 # OpenStack Infra <zanata@openstack.org>, 2015. #zanata
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
+# SEOKJAE BARK <sj.bark@samsung.com>, 2017. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 4.0.1.dev28\n"
+"Project-Id-Version: aodh 4.0.1.dev62\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2017-03-10 01:26+0000\n"
+"POT-Creation-Date: 2017-07-11 05:32+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2016-04-12 04:27+0000\n"
-"Last-Translator: Copied by Zanata <copied-by-zanata@zanata.org>\n"
+"PO-Revision-Date: 2017-07-06 01:10+0000\n"
+"Last-Translator: SEOKJAE BARK <sj.bark@samsung.com>\n"
 "Language-Team: Korean (South Korea)\n"
 "Language: ko-KR\n"
 "X-Generator: Zanata 3.9.6\n"
@@ -54,6 +55,10 @@ msgid ""
 msgstr ""
 "%(meter_name)s이(가) %(comparison_operator)s %(statistic)s %(threshold)s인 경"
 "우 알람(%(period)s초 동안)"
+
+#, python-format
+msgid "Alarm when %s event occurred."
+msgstr "%s의 event가 발생했을 때 알람을 발생"
 
 #, python-format
 msgid "Failed to parse the timestamp value %s"
