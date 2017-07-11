@@ -154,13 +154,13 @@ class ThresholdEvaluator(evaluator.Evaluator):
         transition = alarm.state != state
         reason_data = cls._reason_data(disposition, count, last)
         if transition:
-            return (_('Transition to %(state)s due to %(count)d samples'
-                      ' %(disposition)s threshold, most recent:'
-                      ' %(most_recent)s')
-                    % dict(reason_data, state=state)), reason_data
-        return (_('Remaining as %(state)s due to %(count)d samples'
-                  ' %(disposition)s threshold, most recent: %(most_recent)s')
-                % dict(reason_data, state=state)), reason_data
+            return ('Transition to %(state)s due to %(count)d samples'
+                    ' %(disposition)s threshold, most recent:'
+                    ' %(most_recent)s' % dict(reason_data, state=state),
+                    reason_data)
+        return ('Remaining as %(state)s due to %(count)d samples'
+                ' %(disposition)s threshold, most recent: %(most_recent)s'
+                % dict(reason_data, state=state), reason_data)
 
     def evaluate_rule(self, alarm_rule):
         """Evaluate alarm rule.
