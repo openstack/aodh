@@ -100,6 +100,7 @@ def get_limited_to_project(headers, enforcer):
     """Return the project the request should be limited to.
 
     :param headers: HTTP headers dictionary
+    :param enforcer: policy enforcer
     :return: A project, or None if there's no limit on it.
 
     """
