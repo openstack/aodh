@@ -14,15 +14,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import os
+import sys
 
 
 def config_generator():
-    args = ['--output-file', 'etc/aodh/aodh.conf']
     try:
         from oslo_config import generator
         generator.main(
             ['--config-file',
              '%s/aodh-config-generator.conf' % os.path.dirname(__file__)]
-            + args)
+            + sys.argv[1:])
     except Exception as e:
         print("Unable to build sample configuration file: %s" % e)
+        return 1
