@@ -53,7 +53,13 @@ echo "Running aodh functional test suite"
 set +e
 
 # NOTE(ityaptin) Expect a script param which contains at least one backend name
-AODH_TEST_BACKEND="${1:?test backend required}" sudo -E -H -u ${STACK_USER:-${USER}} tox -efunctional
+export AODH_TEST_BACKEND="${1:?test backend required}"
+
+case $AODH_TEST_BACKEND in
+    mongodb) sudo apt-get install -y mongodb-server ;;
+esac
+
+sudo -E -H -u ${STACK_USER:-${USER}} tox -efunctional
 EXIT_CODE=$?
 set -e
 
