@@ -25,6 +25,7 @@ from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
 from aodh.api.controllers.v2 import base
+from aodh import profiler
 
 
 def _decode_unicode(input):
@@ -90,6 +91,7 @@ class Capabilities(base.Base):
         )
 
 
+@profiler.trace_cls('api')
 class CapabilitiesController(rest.RestController):
     """Manages capabilities queries."""
 

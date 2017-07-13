@@ -32,6 +32,7 @@ from aodh.api.controllers.v2 import alarms
 from aodh.api.controllers.v2 import base
 from aodh.api import rbac
 from aodh.i18n import _
+from aodh import profiler
 from aodh.storage import models
 
 LOG = log.getLogger(__name__)
@@ -75,6 +76,7 @@ def _list_to_regexp(items, regexp_prefix=""):
     return regexp
 
 
+@profiler.trace_cls('api')
 class ValidatedComplexQuery(object):
     complex_operators = ["and", "or"]
     order_directions = ["asc", "desc"]

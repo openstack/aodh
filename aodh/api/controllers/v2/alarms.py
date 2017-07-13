@@ -46,6 +46,7 @@ from aodh.i18n import _
 from aodh import keystone_client
 from aodh import messaging
 from aodh import notifier
+from aodh import profiler
 from aodh.storage import models
 
 LOG = log.getLogger(__name__)
@@ -185,6 +186,7 @@ ACTIONS_SCHEMA = extension.ExtensionManager(
     notifier.AlarmNotifierService.NOTIFIER_EXTENSIONS_NAMESPACE).names()
 
 
+@profiler.trace_cls('api')
 class Alarm(base.Base):
     """Representation of an alarm."""
 
@@ -532,6 +534,7 @@ def stringify_timestamps(data):
                 for (k, v) in six.iteritems(data))
 
 
+@profiler.trace_cls('api')
 class AlarmController(rest.RestController):
     """Manages operations on a single alarm."""
 
@@ -738,6 +741,7 @@ class AlarmController(rest.RestController):
         return self._enforce_rbac('get_alarm_state').state
 
 
+@profiler.trace_cls('api')
 class AlarmsController(rest.RestController):
     """Manages operations on the alarms collection."""
 

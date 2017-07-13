@@ -23,8 +23,10 @@ from alembic import migration
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as oslo_sql_utils
 from oslo_log import log
+from oslo_utils import importutils
 from oslo_utils import timeutils
 import six
+import sqlalchemy
 from sqlalchemy import asc
 from sqlalchemy import desc
 from sqlalchemy.engine import url as sqlalchemy_url
@@ -37,6 +39,9 @@ from aodh.storage import base
 from aodh.storage import models as alarm_api_models
 from aodh.storage.sqlalchemy import models
 from aodh.storage.sqlalchemy import utils as sql_utils
+
+
+osprofiler_sqlalchemy = importutils.try_import('osprofiler.sqlalchemy')
 
 LOG = log.getLogger(__name__)
 
@@ -74,6 +79,11 @@ class Connection(base.Connection):
             options.pop(opt.name, None)
         self._engine_facade = db_session.EngineFacade(self.dress_url(url),
                                                       **options)
+
+        if osprofiler_sqlalchemy:
+            osprofiler_sqlalchemy.add_tracing(sqlalchemy,
+                                              self._engine_facade.get_engine(),
+                                              'db')
         self.conf = conf
 
     @staticmethod

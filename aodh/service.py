@@ -22,11 +22,14 @@ from oslo_db import options as db_options
 import oslo_i18n
 from oslo_log import log
 from oslo_policy import opts as policy_opts
+from oslo_utils import importutils
 
 from aodh.conf import defaults
 from aodh import keystone_client
 from aodh import messaging
+from aodh import profiler
 
+profiler_opts = importutils.try_import('osprofiler.opts')
 
 OPTS = [
     cfg.IntOpt('http_timeout',
@@ -74,6 +77,8 @@ def prepare_service(argv=None, config_files=None):
     log.set_defaults(default_log_levels=log_levels)
     defaults.set_cors_middleware_defaults()
     db_options.set_defaults(conf)
+    if profiler_opts:
+        profiler_opts.set_defaults(conf)
     policy_opts.set_defaults(conf, policy_file=os.path.abspath(
         os.path.join(os.path.dirname(__file__), "api", "policy.json")))
     from aodh import opts
@@ -88,5 +93,6 @@ def prepare_service(argv=None, config_files=None):
 
     ka_loading.load_auth_from_conf_options(conf, "service_credentials")
     log.setup(conf, 'aodh')
+    profiler.setup(conf)
     messaging.setup()
     return conf
