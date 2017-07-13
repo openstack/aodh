@@ -1,5 +1,6 @@
 ..
-      Copyright 2012 Nicolas Barcet for Canonical
+      Copyright 2010 OpenStack Foundation
+      All Rights Reserved.
 
       Licensed under the Apache License, Version 2.0 (the "License"); you may
       not use this file except in compliance with the License. You may obtain
@@ -13,55 +14,20 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-============================================
-Welcome to the Aodh developer documentation!
-============================================
+==================================
+Welcome to Aodh's documentation!
+==================================
 
-What is the purpose of the project and vision for it?
-=====================================================
-
-* Provide alarms and notifications based on metrics.
-
-This documentation offers information on how Aodh works and how to contribute
-to the project.
-
-Overview
-========
+The Alarming service (aodh) project provides a service that enables the ability
+to trigger actions based on defined rules against metric or event data
+collected by Ceilometer or Gnocchi.
 
 .. toctree::
    :maxdepth: 2
 
-   architecture
-   webapi/index
-
-Developer Documentation
-=======================
-
-.. toctree::
-   :maxdepth: 2
-
-   install/index
-   configuration
-   testing
-   contributing
-   event-alarm
-
-Appendix
-========
+   contributor/index
 
 .. toctree::
    :maxdepth: 1
 
-   releasenotes/index
    glossary
-   api/index
-
-
-.. update index
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
