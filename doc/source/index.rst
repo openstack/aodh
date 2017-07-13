@@ -25,6 +25,7 @@ collected by Ceilometer or Gnocchi.
 .. toctree::
    :maxdepth: 2
 
+   install/index
    contributor/index
 
 .. toctree::
