@@ -48,6 +48,7 @@ extensions = [
     'sphinxcontrib.pecanwsme.rest',
     'stevedore.sphinxext',
     'oslo_config.sphinxconfiggen',
+    'sphinxcontrib.httpdomain',
 ]
 
 config_generator_config_file = os.path.join(ROOT,
