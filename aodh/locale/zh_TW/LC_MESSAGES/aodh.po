@@ -3,9 +3,9 @@
 # KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 4.0.1.dev28\n"
+"Project-Id-Version: aodh 4.0.1.dev87\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2017-03-10 01:26+0000\n"
+"POT-Creation-Date: 2017-07-13 18:01+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -23,10 +23,6 @@ msgstr "必須為 %(type)s 類型警示設定 %(rule)s"
 #, python-format
 msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
 msgstr "無法同時設定 %(rule1)s 和 %(rule2)s"
-
-#, python-format
-msgid "%d datapoints are unknown"
-msgstr "%d 個資料點不明"
 
 #, python-format
 msgid "%s is not JSON serializable"
@@ -81,14 +77,6 @@ msgstr "排序方式表示式無效：%s"
 
 #, python-format
 msgid ""
-"Remaining as %(state)s due to %(count)d samples %(disposition)s threshold, "
-"most recent: %(most_recent)s"
-msgstr ""
-"保持 %(state)s，因為有 %(count)d 個樣本 %(disposition)s 臨界值，最新："
-"%(most_recent)s"
-
-#, python-format
-msgid ""
 "The data type %(type)s is not supported. The supported data type list is: "
 "%(supported)s"
 msgstr "不支援資料類型 %(type)s。支援的資料類型清單為：%(supported)s"
@@ -99,14 +87,6 @@ msgstr "針對給定的警示，時間限制名稱必須是唯一的。"
 #, python-format
 msgid "Timezone %s is not valid"
 msgstr "時區 %s 無效"
-
-#, python-format
-msgid ""
-"Transition to %(state)s due to %(count)d samples %(disposition)s threshold, "
-"most recent: %(most_recent)s"
-msgstr ""
-"轉移到 %(state)s，由於 %(count)d 個樣本 %(disposition)s 臨界值，最新："
-"%(most_recent)s"
 
 #, python-format
 msgid ""

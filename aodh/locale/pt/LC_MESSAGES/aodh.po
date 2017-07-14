@@ -7,9 +7,9 @@
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 4.0.1.dev28\n"
+"Project-Id-Version: aodh 4.0.1.dev87\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2017-03-10 01:26+0000\n"
+"POT-Creation-Date: 2017-07-13 18:01+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -32,10 +32,6 @@ msgstr "%(rule)s devem ser definidas para o tipo de aviso %(type)s"
 #, python-format
 msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
 msgstr "%(rule1)s e %(rule2)s não podem ser programadas ao mesmo tempo"
-
-#, python-format
-msgid "%d datapoints are unknown"
-msgstr "endereços de grupo %d desconhecidos"
 
 #, python-format
 msgid "Alarm %(alarm_id)s not found in project %(project)s"
@@ -93,14 +89,6 @@ msgstr "Expressão ordenar por inválida: %s"
 
 #, python-format
 msgid ""
-"Remaining as %(state)s due to %(count)d samples %(disposition)s threshold, "
-"most recent: %(most_recent)s"
-msgstr ""
-"Mantendo-se como %(state)s devido a %(count)d amostras %(disposition)s no "
-"limite, mais recentes: %(most_recent)s"
-
-#, python-format
-msgid ""
 "The data type %(type)s is not supported. The supported data type list is: "
 "%(supported)s"
 msgstr ""
@@ -114,14 +102,6 @@ msgstr ""
 #, python-format
 msgid "Timezone %s is not valid"
 msgstr "Fuso horário %s inválido"
-
-#, python-format
-msgid ""
-"Transition to %(state)s due to %(count)d samples %(disposition)s threshold, "
-"most recent: %(most_recent)s"
-msgstr ""
-"Transição para  %(state)s devido a %(count)d amostras %(disposition)s no "
-"limite, mais recentes: %(most_recent)s"
 
 #, python-format
 msgid ""

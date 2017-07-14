@@ -4,9 +4,9 @@
 # SEOKJAE BARK <sj.bark@samsung.com>, 2017. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 4.0.1.dev62\n"
+"Project-Id-Version: aodh 4.0.1.dev87\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2017-07-11 05:32+0000\n"
+"POT-Creation-Date: 2017-07-13 18:01+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -24,10 +24,6 @@ msgstr "%(type)s 유형 알람에 %(rule)s을(를) 설정해야 함"
 #, python-format
 msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
 msgstr "%(rule1)s 및 %(rule2)s을(를) 동시에 설정할 수 없음"
-
-#, python-format
-msgid "%d datapoints are unknown"
-msgstr "%d 데이터포인트를 알 수 없습니다. "
 
 #, python-format
 msgid "%s is not JSON serializable"
@@ -86,14 +82,6 @@ msgstr "Order-by 표현식이 올바르지 않음: %s"
 
 #, python-format
 msgid ""
-"Remaining as %(state)s due to %(count)d samples %(disposition)s threshold, "
-"most recent: %(most_recent)s"
-msgstr ""
-"%(count)d개 샘플의 %(disposition)s(으)로 인해 %(state)s(으)로 남아 있음 임계"
-"값, 가장 최근: %(most_recent)s"
-
-#, python-format
-msgid ""
 "The data type %(type)s is not supported. The supported data type list is: "
 "%(supported)s"
 msgstr ""
@@ -106,14 +94,6 @@ msgstr "시간 제한조건 이름은 지정된 알람에 고유해야 합니다
 #, python-format
 msgid "Timezone %s is not valid"
 msgstr "시간대 %s이(가) 올바르지 않음"
-
-#, python-format
-msgid ""
-"Transition to %(state)s due to %(count)d samples %(disposition)s threshold, "
-"most recent: %(most_recent)s"
-msgstr ""
-"%(count)d개 샘플의 %(disposition)s(으)로 인해 %(state)s(으)로 전환되었습니"
-"다. 임계값, 가장 최근: %(most_recent)s"
 
 #, python-format
 msgid ""
