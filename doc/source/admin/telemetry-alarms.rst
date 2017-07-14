@@ -256,7 +256,7 @@ brevity):
 
    $ aodh alarm list
    +----------+-----------+--------+-------------------+----------+---------+
-   | Alarm ID | Type      | Name   | State             | Severity | Enabled |
+   | alarm_id | type      | name   | state             | severity | enabled |
    +----------+-----------+--------+-------------------+----------+---------+
    | ALARM_ID | threshold | cpu_hi | insufficient data | high     | True    |
    +----------+-----------+--------+-------------------+----------+---------+
@@ -315,16 +315,34 @@ via the audit API:
 .. code-block:: console
 
    $ aodh alarm-history show ALARM_ID
-   +------------------+-----------+---------------------------------------+
-   | Type             | Timestamp | Detail                                |
-   +------------------+-----------+---------------------------------------+
-   | creation         | time0     | name: cpu_hi                          |
-   |                  |           | description: instance running hot     |
-   |                  |           | type: threshold                       |
-   |                  |           | rule: cpu_util > 70.0 during 3 x 600s |
-   | state transition | time1     | state: ok                             |
-   | rule change      | time2     | rule: cpu_util > 75.0 during 3 x 600s |
-   +------------------+-----------+---------------------------------------+
+   +-----------+------------------+---------------------------------------------------+----------+
+   | timestamp | type             | detail                                            | event_id |
+   +-----------+------------------+---------------------------------------------------+----------+
+   | TIME_3    | rule change      | {"rule": {"evaluation_periods": 3, "metric":      | EVENT_ID |
+   |           |                  | "cpu_util", "resource_id": RESOURCE_ID,           |          |
+   |           |                  | "aggregation_method": "mean", "granularity":600,  |          |
+   |           |                  | "threshold": 75.0, "comparison_operator": "gt"    |          |
+   |           |                  | "resource_type": "instance"}}                     |          |
+   | TIME_2    | state transition | {"transition_reason": "Transition to alarm due 3  | EVENT_ID |
+   |           |                  | samples outside threshold, most recent:           |          |
+   |           |                  | 81.4108514719", "state": "alarm"}                 |          |
+   | TIME_1    | state transition | {"transition_reason": "Transition to ok due to 1  | EVENT_ID |
+   |           |                  | samples inside threshold, most recent:            |          |
+   |           |                  | 67.952938019089", "state": "ok"}                  |          |
+   | TIME_0    | creation         | {"alarm_actions": ["log://"], "user_id": USER_ID, | EVENT_ID |
+   |           |                  | "name": "cup_hi", "state": "insufficient data",   |          |
+   |           |                  | "timestamp": TIME_0, "description": "instance     |          |
+   |           |                  | running hot", "enabled": true, "state_timestamp": |          |
+   |           |                  | TIME_0, "rule": {"evaluation_periods": 3,         |          |
+   |           |                  | "metric": "cpu_util", "resource_id": RESOURCE_ID, |          |
+   |           |                  | "aggregation_method": "mean", "granularity": 600, |          |
+   |           |                  | "resource_type": "instance"}, "alarm_id":         |          |
+   |           |                  | ALARM_ID, "time_constraints": [],                 |          |
+   |           |                  | "insufficient_data_actions": [],                  |          |
+   |           |                  | "repeat_actions": false, "ok_actions": [],        |          |
+   |           |                  | "project_id": PROJECT_ID, "type":                 |          |
+   |           |                  | "gnocchi_resources_threshold", "severity": "low"} |          |
+   +-----------+------------------+---------------------------------------------------+----------+
 
 Alarm deletion
 --------------
