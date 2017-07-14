@@ -13,10 +13,10 @@ ChangeLog
 cover/*
 dist/*
 doc/build
-doc/source/api/
 doc/source/_static/
 etc/aodh/aodh.conf
 subunit.log
 
 # Files created by releasenotes build
 releasenotes/build
+/doc/source/contributor/api/
