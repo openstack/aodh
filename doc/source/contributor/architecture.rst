@@ -4,8 +4,6 @@
  System Architecture
 =====================
 
-.. index::
-
 High-Level Architecture
 =======================
 
