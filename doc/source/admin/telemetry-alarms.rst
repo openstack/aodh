@@ -144,18 +144,27 @@ Using alarms
 Alarm creation
 --------------
 
+Threshold based alarm
+`````````````````````
+
 An example of creating a Gnocchi threshold-oriented alarm, based on an upper
 bound on the CPU utilization for a particular instance:
 
 .. code-block:: console
 
-   $ aodh alarm create --name cpu_hi \
+   $ aodh alarm create \
+     --name cpu_hi \
      --type gnocchi_resources_threshold \
      --description 'instance running hot' \
-     --metric cpu_util --threshold 70.0 \
-     --comparison-operator gt --aggregation_method avg \
-     --granularity 600 --evaluation-periods 3 \
-     --alarm-action 'log://' --resource_id INSTANCE_ID
+     --metric cpu_util \
+     --threshold 70.0 \
+     --comparison-operator gt \
+     --aggregation-method mean \
+     --granularity 600 \
+     --evaluation-periods 3 \
+     --alarm-action 'log://' \
+     --resource-id INSTANCE_ID \
+     --resource-type instance
 
 This creates an alarm that will fire when the average CPU utilization
 for an individual instance exceeds 70% for three consecutive 10
@@ -220,17 +229,21 @@ time-constraint
   day or days of the week (expressed as ``cron`` expression with an
   optional timezone).
 
+Composite alarm
+```````````````
+
 An example of creating a combination alarm, based on the combined
 state of two underlying alarms:
 
 .. code-block:: console
 
    $ aodh alarm create --name meta --type composite \
-     --composite-rule '{"or":[{"threshold": 0.8,"metric": "cpu_util", "type": \
-     "gnocchi_resources_threshold", "resource_id": INSTANCE_ID, \
-     "aggregation-method": "last"},{"threshold": 0.8,"metric": "cpu_util", \
-     "type": "gnocchi_resources_threshold", "resource_id": INSTANCE_ID2, \
-     "aggregation-method": "last"}]}' \
+     --composite-rule '{"or": [{"threshold": 0.8,"metric": "cpu_util", \
+     "type": "gnocchi_resources_threshold", "resource_id": INSTANCE_ID1, \
+     "aggregation_method": "last", "resource_type": "instance"}, {"threshold": \
+     0.8, "metric": "cpu_util", "type": "gnocchi_resources_threshold", \
+     "resource_id": INSTANCE_ID2, "aggregation_method": "last", \
+     "resource_type": "instance"}]}' \
      --alarm-action 'http://example.org/notify'
 
 This creates an alarm that will fire when either one of two underlying
@@ -239,12 +252,88 @@ is a webhook call. Any number of underlying alarms can be combined in
 this way, using either ``and`` or ``or``. Additionally, combinations
 can contain nested conditions:
 
+.. note::
+
+   Observe the *underscore in* ``resource_id`` & ``resource_type`` in
+   composite rule as opposed to ``--resource-id`` &
+   ``--resource-type`` CLI arguments.
+
 .. code-block:: console
 
    $ aodh alarm create --name meta --type composite \
      --composite-rule '{"or":[ALARM_1, {"and":[ALARM2, ALARM3]}]}'
      --alarm-action 'http://example.org/notify'
 
+
+Event based alarm
+`````````````````
+
+An example of creating a event alarm based on power state of
+instance:
+
+.. code-block:: console
+
+   $ aodh alarm create \
+     --type event \
+     --name instance_off \
+     --description 'Instance powered OFF' \
+     --event-type "compute.instance.power_off.*" \
+     --enable True \
+     --query "traits.instance_id=string::INSTANCE_ID" \
+     --alarm-action 'log://' \
+     --ok-action 'log://' \
+     --insufficient-data-action 'log://'
+
+Valid list of ``event-type`` and ``traits`` can be found in
+``event_definitions.yaml`` file . ``--query`` may also contain mix of
+traits for example to create alarm when instance is powered on but
+went into error state:
+
+.. code-block:: console
+
+   $ aodh alarm create \
+     --type event \
+     --name instance_on_but_in err_state \
+     --description 'Instance powered ON but in error state' \
+     --event-type "compute.instance.power_on.*" \
+     --enable True \
+     --query "traits.instance_id=string::INSTANCE_ID;traits.state=string::error" \
+     --alarm-action 'log://' \
+     --ok-action 'log://' \
+     --insufficient-data-action 'log://'
+
+Sample output of alarm type **event**:
+
+.. code-block:: console
+
+   +---------------------------+---------------------------------------------------------------+
+   | Field                     | Value                                                         |
+   +---------------------------+---------------------------------------------------------------+
+   | alarm_actions             | [u'log://']                                                   |
+   | alarm_id                  | 15c0da26-524d-40ad-8fba-3e55ee0ddc91                          |
+   | description               | Instance powered ON but in error state                        |
+   | enabled                   | True                                                          |
+   | event_type                | compute.instance.power_on.*                                   |
+   | insufficient_data_actions | [u'log://']                                                   |
+   | name                      | instance_on_state_err                                         |
+   | ok_actions                | [u'log://']                                                   |
+   | project_id                | 9ee200732f4c4d10a6530bac746f1b6e                              |
+   | query                     | traits.instance_id = bb912729-fa51-443b-bac6-bf4c795f081d AND |
+   |                           | traits.state = error                                          |
+   | repeat_actions            | False                                                         |
+   | severity                  | low                                                           |
+   | state                     | insufficient data                                             |
+   | state_timestamp           | 2017-07-15T02:28:31.114455                                    |
+   | time_constraints          | []                                                            |
+   | timestamp                 | 2017-07-15T02:28:31.114455                                    |
+   | type                      | event                                                         |
+   | user_id                   | 89b4e48bcbdb4816add7800502bd5122                              |
+   +---------------------------+---------------------------------------------------------------+
+
+.. note::
+
+   To enable event alarms please refer `Configuration
+   <https://docs.openstack.org/aodh/latest/contributor/event-alarm.html#configuration>`_
 
 Alarm retrieval
 ---------------
@@ -341,3 +430,54 @@ or even deleted permanently (an irreversible step):
 .. code-block:: console
 
    $ aodh alarm delete ALARM_ID
+
+Debug alarms
+------------
+
+A good place to start is to add ``--debug`` flag when creating or
+updating an alarm. For example:
+
+.. code-block:: console
+
+   $ aodh --debug alarm create <OTHER_PARAMS>
+
+Look for the state to transition when event is triggered in
+``/var/log/aodh/listener.log`` file. For example, the below logs shows
+the transition state of alarm with id
+``85a2942f-a2ec-4310-baea-d58f9db98654`` triggered by event id
+``abe437a3-b75b-40b4-a3cb-26022a919f5e``
+
+.. code-block:: console
+
+   2017-07-15 07:03:20.149 2866 INFO aodh.evaluator [-] alarm 85a2942f-a2ec-4310-baea-d58f9db98654 transitioning to alarm because Event <id=abe437a3-b75b-40b4-a3cb-26022a919f5e,event_type=compute.instance.power_off.start> hits the query <query=[{"field": "traits.instance_id", "op": "eq", "type": "string", "value": "bb912729-fa51-443b-bac6-bf4c795f081d"}]>.
+
+
+The below entry in ``/var/log/aodh/notifier.log`` also confirms that
+event id ``abe437a3-b75b-40b4-a3cb-26022a919f5e`` hits the query
+matching instance id ``bb912729-fa51-443b-bac6-bf4c795f081d``
+
+.. code-block:: console
+
+   2017-07-15 07:03:24.071 2863 INFO aodh.notifier.log [-] Notifying alarm instance_off 85a2942f-a2ec-4310-baea-d58f9db98654 of low priority from insufficient data to alarm with action log: because Event <id=abe437a3-b75b-40b4-a3cb-26022a919f5e,event_type=compute.instance.power_off.start> hits the query <query=[{"field": "traits.instance_id", "op": "eq", "type": "string", "value": "bb912729-fa51-443b-bac6-bf4c795f081d"}]>
+
+
+``aodh alarm-history`` as mentioned earlier will also display the
+transition:
+
+.. code-block:: console
+
+   $ aodh alarm-history show 85a2942f-a2ec-4310-baea-d58f9db98654
+   +----------------------------+------------------+--------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
+   | timestamp                  | type             | detail                                                                                                                   | event_id                             |
+   +----------------------------+------------------+--------------------------------------------------------------------------------------------------------------------------+--------------------------------------+
+   | 2017-07-15T01:33:20.390623 | state transition | {"transition_reason": "Event <id=abe437a3-b75b-40b4-a3cb-26022a919f5e,event_type=compute.instance.power_off.start> hits  | c5ca92ae-584b-4da6-a12c-b7a00dd39fef |
+   |                            |                  | the query <query=[{\"field\": \"traits.instance_id\", \"op\": \"eq\", \"type\": \"string\", \"value\": \"bb912729-fa51   |                                      |
+   |                            |                  | -443b-bac6-bf4c795f081d\"}]>.", "state": "alarm"}                                                                        |                                      |
+   | 2017-07-15T01:31:14.516188 | creation         | {"alarm_actions": ["log://"], "user_id": "89b4e48bcbdb4816add7800502bd5122", "name": "instance_off", "state":            | fb31f4c2-e357-44c3-9b6a-bd2aaaa4ae68 |
+   |                            |                  | "insufficient data", "timestamp": "2017-07-15T01:31:14.516188", "description": "event_instance_power_off", "enabled":    |                                      |
+   |                            |                  | true, "state_timestamp": "2017-07-15T01:31:14.516188", "rule": {"query": [{"field": "traits.instance_id", "type":        |                                      |
+   |                            |                  | "string", "value": "bb912729-fa51-443b-bac6-bf4c795f081d", "op": "eq"}], "event_type": "compute.instance.power_off.*"},  |                                      |
+   |                            |                  | "alarm_id": "85a2942f-a2ec-4310-baea-d58f9db98654", "time_constraints": [], "insufficient_data_actions": ["log://"],     |                                      |
+   |                            |                  | "repeat_actions": false, "ok_actions": ["log://"], "project_id": "9ee200732f4c4d10a6530bac746f1b6e", "type": "event",    |                                      |
+   |                            |                  | "severity": "low"}                                                                                                       |                                      |
+   +----------------------------+------------------+--------------------------------------------------------------------------------------------------------------------------+--------------------------------------+

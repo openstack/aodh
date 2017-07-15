@@ -63,13 +63,14 @@ The following is an example of event alarm rule::
 Configuration
 =============
 
-To enable this functionality, config the Ceilometer to be able to publish
-events to the queue the aodh-listener service listen on. The
-*event_alarm_topic* config option of Aodh identify which messaging topic the
-aodh-listener on, the default value is "alarm.all". In Ceilometer side,
-a publisher of notifier type need to be configured in the event pipeline config
-file(event_pipeline.yaml as default), the notifier should be with a messaging
-topic same as the *event_alarm_topic* option defined. For an example::
+To enable this functionality, config the Ceilometer to be able to
+publish events to the queue the aodh-listener service listen on. The
+*event_alarm_topic* config option of Aodh identify which messaging
+topic the aodh-listener on, the default value is "alarm.all". In
+Ceilometer side, a publisher of notifier type need to be configured in
+the event pipeline config file(``event_pipeline.yaml`` as default),
+the notifier should be with a messaging topic same as the
+*event_alarm_topic* option defined. For an example::
 
     ---
     sources:
