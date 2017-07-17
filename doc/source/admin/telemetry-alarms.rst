@@ -237,13 +237,15 @@ state of two underlying alarms:
 
 .. code-block:: console
 
-   $ aodh alarm create --name meta --type composite \
-     --composite-rule '{"or": [{"threshold": 0.8,"metric": "cpu_util", \
-     "type": "gnocchi_resources_threshold", "resource_id": INSTANCE_ID1, \
-     "aggregation_method": "last", "resource_type": "instance"}, {"threshold": \
-     0.8, "metric": "cpu_util", "type": "gnocchi_resources_threshold", \
-     "resource_id": INSTANCE_ID2, "aggregation_method": "last", \
-     "resource_type": "instance"}]}' \
+   $ aodh alarm create \
+     --name meta \
+     --type composite \
+     --composite-rule '{"or": [{"threshold": 0.8, "metric": "cpu_util", \
+       "type": "gnocchi_resources_threshold", "resource_id": INSTANCE_ID1, \
+       "resource_type": "instance", "aggregation_method": "last"}, \
+       {"threshold": 0.8, "metric": "cpu_util", \
+       "type": "gnocchi_resources_threshold", "resource_id": INSTANCE_ID2, \
+       "resource_type": "instance", "aggregation_method": "last"}]}' \
      --alarm-action 'http://example.org/notify'
 
 This creates an alarm that will fire when either one of two underlying
@@ -260,8 +262,10 @@ can contain nested conditions:
 
 .. code-block:: console
 
-   $ aodh alarm create --name meta --type composite \
-     --composite-rule '{"or":[ALARM_1, {"and":[ALARM2, ALARM3]}]}'
+   $ aodh alarm create \
+     --name meta \
+     --type composite \
+     --composite-rule '{"or": [ALARM_1, {"and": [ALARM_2, ALARM_3]}]}' \
      --alarm-action 'http://example.org/notify'
 
 
@@ -423,7 +427,7 @@ longer actively evaluated:
 
 .. code-block:: console
 
-   $ aodh alarm update --enabled False -a ALARM_ID
+   $ aodh alarm update --enabled False ALARM_ID
 
 or even deleted permanently (an irreversible step):
 
