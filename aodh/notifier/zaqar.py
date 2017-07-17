@@ -40,17 +40,17 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
     to an existing Zaqar queue with a pre-signed URL.
 
     To create a new subscription in the service project, use a notification URL
-    of the form:
+    of the form::
 
         zaqar://?topic=example&subscriber=mailto%3A//test%40example.com&ttl=3600
 
-    Multiple subscribers are allowed. ``ttl` is the time to live of the
+    Multiple subscribers are allowed. ``ttl`` is the time to live of the
     subscription. The queue will be created automatically, in the service
     project, with a name based on the topic and the alarm ID.
 
     To use a pre-signed URL for an existing queue, use a notification URL with
     the scheme ``zaqar://`` and the pre-signing data from Zaqar in the query
-    string:
+    string::
 
         zaqar://?queue_name=example&project_id=foo&
                  paths=/messages&methods=POST&expires=1970-01-01T00:00Z&

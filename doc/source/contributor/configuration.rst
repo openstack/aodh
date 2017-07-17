@@ -33,4 +33,4 @@ The following is a sample Aodh configuration for adaptation and use. It is
 auto-generated from Aodh when this documentation is built, and can also be
 viewed in `file form <_static/aodh.conf.sample>`_.
 
-.. literalinclude:: _static/aodh.conf.sample
+.. literalinclude:: ../_static/aodh.conf.sample
