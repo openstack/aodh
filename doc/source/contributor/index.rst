@@ -45,6 +45,7 @@ Developer Documentation
    testing
    contributing
    event-alarm
+   api/autoindex
 
 Appendix
 ========
@@ -53,7 +54,6 @@ Appendix
    :maxdepth: 1
 
    releasenotes/index
-   api/index
 
 .. update index
 
