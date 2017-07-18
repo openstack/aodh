@@ -15,7 +15,7 @@
 For more Aodh related benchmarks take a look here:
 github.com/openstack/rally/blob/master/rally/benchmark/scenarios/aodh/
 
-About plugins: https://rally.readthedocs.org/en/latest/plugins.html
+About plugins: https://rally.readthedocs.io/en/latest/plugins/index.html
 
 Rally concepts https://wiki.openstack.org/wiki/Rally/Concepts
 """

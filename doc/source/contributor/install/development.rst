@@ -32,9 +32,8 @@ Configuring devstack
 
       ``local.conf`` replaces the former configuration file called ``localrc``.
       If you used localrc before, remove it to switch to using the new file.
-      For further information see the `localrc description page
-      <http://devstack.org/localrc.html>`_ or `devstack configuration
-      <http://devstack.org/configuration.html>`_.
+      For further information see the `devstack configuration
+      <https://docs.openstack.org/devstack/latest/configuration.html>`_.
 
 3. The aodh services are not enabled by default, so they must be
    enabled in ``local.conf`` before running ``stack.sh``.
@@ -47,4 +46,4 @@ Configuring devstack
       # Enable the aodh alarming services
       enable_plugin aodh https://git.openstack.org/openstack/aodh master
 
-.. _devstack: http://docs.openstack.org/developer/devstack
+.. _devstack: https://docs.openstack.org/devstack/latest/

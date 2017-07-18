@@ -67,10 +67,10 @@ run through tox_.
    ``aodh/tests/functional/gabbi/gabbits``. If you are adding to or adjusting
    the API you should consider adding tests here.
 
-.. _gabbi: https://gabbi.readthedocs.org/
+.. _gabbi: https://gabbi.readthedocs.io/en/latest/
 
 .. seealso::
 
    * tox_
 
-.. _tox: http://tox.testrun.org/latest/
+.. _tox: https://tox.readthedocs.io/en/latest/

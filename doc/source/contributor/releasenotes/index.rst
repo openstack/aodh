@@ -26,4 +26,4 @@ Since Mitaka development cycle, we start to host release notes on:
 `Aodh Release Notes`_
 
 .. _Liberty: https://wiki.openstack.org/wiki/ReleaseNotes/Liberty#OpenStack_Telemetry_.28Ceilometer.29
-.. _Aodh Release Notes: http://docs.openstack.org/releasenotes/aodh/
+.. _Aodh Release Notes: https://docs.openstack.org/releasenotes/aodh/

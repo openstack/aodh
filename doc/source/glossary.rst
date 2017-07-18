@@ -57,4 +57,4 @@
      An OpenStack user.
 
 .. [#] http://en.wikipedia.org/wiki/Ceilometer
-.. _Zaqar Developer Documentation: http://docs.openstack.org/developer/zaqar/
+.. _Zaqar Developer Documentation: https://docs.openstack.org/zaqar/latest/
