@@ -49,14 +49,16 @@ database, service credentials, and API endpoints.
           --password-prompt aodh
         User Password:
         Repeat User Password:
-        +-----------+----------------------------------+
-        | Field     | Value                            |
-        +-----------+----------------------------------+
-        | domain_id | e0353a670a9e496da891347c589539e9 |
-        | enabled   | True                             |
-        | id        | b7657c9ea07a4556aef5d34cf70713a3 |
-        | name      | aodh                             |
-        +-----------+----------------------------------+
+        +---------------------+----------------------------------+
+        | Field               | Value                            |
+        +---------------------+----------------------------------+
+        | domain_id           | default                          |
+        | enabled             | True                             |
+        | id                  | b7657c9ea07a4556aef5d34cf70713a3 |
+        | name                | aodh                             |
+        | options             | {}                               |
+        | password_expires_at | None                             |
+        +---------------------+----------------------------------+
 
    * Add the ``admin`` role to the ``aodh`` user:
 
