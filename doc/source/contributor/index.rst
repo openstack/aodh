@@ -41,7 +41,6 @@ Developer Documentation
    :maxdepth: 2
 
    install/index
-   configuration
    testing
    contributing
    event-alarm
