@@ -16,7 +16,6 @@ from oslo_utils import uuidutils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
 from tempest.lib import exceptions as lib_exc
-from tempest import test
 
 from aodh.tests.tempest.api import base
 
@@ -30,7 +29,7 @@ class TelemetryAlarmingNegativeTest(base.BaseAlarmingTest):
         ** update deleted alarm
     """
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('668743d5-08ad-4480-b2b8-15da34f81e7e')
     def test_get_non_existent_alarm(self):
         # get the non-existent alarm
@@ -38,7 +37,7 @@ class TelemetryAlarmingNegativeTest(base.BaseAlarmingTest):
         self.assertRaises(lib_exc.NotFound, self.alarming_client.show_alarm,
                           non_existent_id)
 
-    @test.attr(type=['negative'])
+    @decorators.attr(type=['negative'])
     @decorators.idempotent_id('ef45000d-0a72-4781-866d-4cb7bf2582ae')
     def test_get_update_show_history_delete_deleted_alarm(self):
         # get, update and delete the deleted alarm
