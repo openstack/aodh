@@ -13,17 +13,13 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-============================================
-Welcome to the Aodh developer documentation!
-============================================
+=================
+Contributor Guide
+=================
 
-What is the purpose of the project and vision for it?
-=====================================================
-
-* Provide alarms and notifications based on metrics.
-
-This documentation offers information on how Aodh works and how to contribute
-to the project.
+In the Contributions Guide, you will find documented policies for developing
+with Aodh. This includes the processes we use for bugs, contributor onboarding,
+core reviewer memberships, and other procedural items.
 
 Overview
 ========
