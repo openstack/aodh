@@ -2721,6 +2721,8 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
                 aggregation='count',
                 metrics='ameter',
                 needed_overlap=0,
+                start="-1 day",
+                stop="now",
                 query=expected_query,
                 resource_type="instance")],
                 c.metric.aggregation.mock_calls),
