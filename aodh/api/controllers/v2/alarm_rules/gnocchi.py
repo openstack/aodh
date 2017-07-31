@@ -191,6 +191,8 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
                 query=query,
                 aggregation=rule.aggregation_method,
                 needed_overlap=0,
+                start="-1 day",
+                stop="now",
                 resource_type=rule.resource_type)
         except exceptions.ClientException as e:
             if e.code == 404:
