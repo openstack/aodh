@@ -1,6 +1,6 @@
-==========================
-Telemetry Alarming service
-==========================
+==================
+Installation Guide
+==================
 
 .. toctree::
 
