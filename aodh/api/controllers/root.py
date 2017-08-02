@@ -37,7 +37,7 @@ def version_descriptor(base_url, version, released_on):
         'id': version,
         'links': [
             {'href': url, 'rel': 'self', },
-            {'href': 'http://docs.openstack.org/',
+            {'href': 'https://docs.openstack.org/',
              'rel': 'describedby', 'type': 'text/html', }],
         'media-types': [
             {'base': 'application/json', 'type': MEDIA_TYPE_JSON % version, },

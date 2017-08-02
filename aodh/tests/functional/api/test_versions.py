@@ -26,7 +26,7 @@ V2_MEDIA_TYPES = [
 ]
 
 V2_HTML_DESCRIPTION = {
-    'href': 'http://docs.openstack.org/',
+    'href': 'https://docs.openstack.org/',
     'rel': 'describedby',
     'type': 'text/html',
 }
