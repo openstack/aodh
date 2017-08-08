@@ -297,7 +297,7 @@ went into error state:
 
    $ aodh alarm create \
      --type event \
-     --name instance_on_but_in err_state \
+     --name instance_on_but_in_err_state \
      --description 'Instance powered ON but in error state' \
      --event-type "compute.instance.power_on.*" \
      --enable True \
