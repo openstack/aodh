@@ -55,5 +55,5 @@ class TrustRestAlarmNotifier(TrustAlarmNotifierMixin, rest.RestAlarmNotifier):
     keystone authentication. It uses the aodh service user to
     authenticate using the trust ID provided.
 
-    The URL must be in the form ``trust+http://trust-id@host/action``.
+    The URL must be in the form ``trust+http://host/action``.
     """
