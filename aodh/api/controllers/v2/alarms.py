@@ -420,7 +420,8 @@ class Alarm(base.Base):
                     url = netutils.urlsplit(action)
                     if self._is_trust_url(url):
                         if '@' in url.netloc:
-                            continue
+                            errmsg = _("trust URL cannot contain a trust ID.")
+                            raise base.ClientSideError(errmsg)
                         if trust_id is None:
                             # We have a trust action without a trust ID,
                             # create it

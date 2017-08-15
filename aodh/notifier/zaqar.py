@@ -194,7 +194,7 @@ class TrustZaqarAlarmNotifier(trust.TrustAlarmNotifierMixin,
                               ZaqarAlarmNotifier):
     """Zaqar notifier using a Keystone trust to post to user-defined queues.
 
-    The URL must be in the form ``trust+zaqar://trust_id@?queue_name=example``.
+    The URL must be in the form ``trust+zaqar://?queue_name=example``.
     """
 
     def _get_client_conf(self, auth_token):
