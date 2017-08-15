@@ -412,6 +412,9 @@ class Alarm(base.Base):
                             url = list(url)
                             url[1] = netloc
                             actions[index] = urlparse.urlunsplit(url)
+                        else:
+                            errmsg = _("trust URL cannot contain a trust ID.")
+                            raise base.ClientSideError(errmsg)
         if old_alarm:
             new_actions = list(itertools.chain(
                 self.ok_actions or [],

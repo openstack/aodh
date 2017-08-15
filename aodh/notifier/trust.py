@@ -27,7 +27,7 @@ class TrustRestAlarmNotifier(rest.RestAlarmNotifier):
     keystone authentication. It uses the aodh service user to
     authenticate using the trust ID provided.
 
-    The URL must be in the form trust+http://trust-id@host/action.
+    The URL must be in the form trust+http://host/action.
     """
 
     def notify(self, action, alarm_id, alarm_name, severity, previous, current,
