@@ -1,0 +1,87 @@
+# Ian Y. Choi <ianyrchoi@gmail.com>, 2016. #zanata
+# SEOKJAE BARK <sj.bark@samsung.com>, 2017. #zanata
+# Sungjin Kang <gang.sungjin@gmail.com>, 2017. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: Aodh Release Notes 5.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-08-21 17:56+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2017-07-06 01:12+0000\n"
+"Last-Translator: SEOKJAE BARK <sj.bark@samsung.com>\n"
+"Language-Team: Korean (South Korea)\n"
+"Language: ko-KR\n"
+"X-Generator: Zanata 3.9.6\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+msgid "1.1.1"
+msgstr "1.1.1"
+
+msgid "1.1.3"
+msgstr "1.1.3"
+
+msgid "2.0.0"
+msgstr "2.0.0"
+
+msgid "2.0.1"
+msgstr "2.0.1"
+
+msgid "2.0.2"
+msgstr "2.0.2"
+
+msgid "3.0.0"
+msgstr "3.0.0"
+
+msgid "4.0.0"
+msgstr "4.0.0"
+
+msgid ""
+"A healthcheck endpoint is provided by default at /healthcheck. It leverages "
+"oslo_middleware healthcheck middleware. It allows to retrieve information "
+"about the health of the API service."
+msgstr ""
+"기본으로 /healthcheck 로 상태 체크 endpoint를 제공합니다. oslo_midlleware "
+"healthcheck 미들웨어를 활용하여 API 서비스 상태에 대한 정보를 검색할 수 있습"
+"니다."
+
+msgid "Aodh Release Notes"
+msgstr "Aodh 릴리즈 노트"
+
+msgid "Bug Fixes"
+msgstr "버그 수정"
+
+msgid "Current Series Release Notes"
+msgstr "현재 시리즈에 대한 릴리즈 노트"
+
+msgid "Deprecation Notes"
+msgstr "사용하지 않는 기능"
+
+msgid "Liberty Series Release Notes"
+msgstr "Liberty 시리즈에 대한 릴리즈 노트"
+
+msgid "Mitaka Series Release Notes"
+msgstr "Mitaka 시리즈에 대한 릴리즈 노트"
+
+msgid "New Features"
+msgstr "새로운 기능"
+
+msgid "Newton Series Release Notes"
+msgstr "Newton 시리즈 릴리즈 노트"
+
+msgid "Ocata Series Release Notes"
+msgstr "Ocata 시리즈 릴리즈 노트"
+
+msgid "Other Notes"
+msgstr "기타 기능"
+
+msgid "Security Issues"
+msgstr "보안 이슈"
+
+msgid "Upgrade Notes"
+msgstr "업그레이드 노트"
+
+msgid "gnocchiclient library is now a requirement if using ceilometer+gnocchi."
+msgstr ""
+"ceilometer+gnocchi 를 사용할 경우, gnocchiclient 라이브러리가 필요합니다."
