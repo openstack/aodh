@@ -34,8 +34,9 @@ class GnocchiBase(threshold.ThresholdEvaluator):
         super(GnocchiBase, self).__init__(conf)
         self._gnocchi_client = client.Client(
             '1', keystone_client.get_session(conf),
-            interface=conf.service_credentials.interface,
-            region_name=conf.service_credentials.region_name)
+            adapter_options={
+                'interface': conf.service_credentials.interface,
+                'region_name': conf.service_credentials.region_name})
 
     @staticmethod
     def _sanitize(rule, statistics):
