@@ -78,9 +78,9 @@ class AlarmGnocchiThresholdRule(base.AlarmRule):
         conf = pecan.request.cfg
         gnocchi_client = client.Client(
             '1', keystone_client.get_session(conf),
-            interface=conf.service_credentials.interface,
-            region_name=conf.service_credentials.region_name)
-
+            adapter_options={
+                'interface': conf.service_credentials.interface,
+                'region_name': conf.service_credentials.region_name})
         try:
             return gnocchi_client.capabilities.list().get(
                 'aggregation_methods', [])
@@ -182,9 +182,9 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
 
         gnocchi_client = client.Client(
             '1', keystone_client.get_session(conf),
-            interface=conf.service_credentials.interface,
-            region_name=conf.service_credentials.region_name)
-
+            adapter_options={
+                'interface': conf.service_credentials.interface,
+                'region_name': conf.service_credentials.region_name})
         try:
             gnocchi_client.metric.aggregation(
                 metrics=rule.metric,
