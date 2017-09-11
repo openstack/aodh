@@ -10,7 +10,7 @@ TESTRARGS=$*
 #
 # this work around exists until that is addressed
 if [[ "$TESTARGS" =~ "until-failure" ]]; then
-    ostestr --slowest $TESTRARGS
+    python setup.py testr --slowest --testr-args="$TESTRARGS"
 else
-    ostestr --no-pretty --slowest --subunit $TESTRARGS | subunit-trace -f
+    python setup.py testr --slowest --testr-args="--subunit $TESTRARGS" | subunit-trace -f
 fi
