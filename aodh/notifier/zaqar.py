@@ -85,10 +85,10 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
             'auth_opts': {
                 'backend': 'keystone',
                 'options': {
-                    'os_username': conf.os_username,
-                    'os_password': conf.os_password,
-                    'os_project_name': conf.os_tenant_name,
-                    'os_auth_url': conf.os_auth_url,
+                    'os_username': conf.username,
+                    'os_password': conf.password,
+                    'os_project_name': conf.project_name,
+                    'os_auth_url': conf.auth_url,
                     'insecure': ''
                 }
             }
