@@ -189,6 +189,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
 
         self.assertEqual(
             [mock.call.get_measures(aggregation='mean', metric='cpu_util',
+                                    granularity=60,
                                     resource_id='my_instance',
                                     start=start_alarm, stop=end)],
             self.client.metric.mock_calls)
@@ -329,6 +330,7 @@ class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
                                    metrics=[
                                        '0bb1604d-1193-4c0a-b4b8-74b170e35e83',
                                        '9ddc209f-42f8-41e1-b8f1-8804f59c4053'],
+                                   granularity=300,
                                    needed_overlap=0,
                                    start=start_alarm, stop=end)],
             self.client.metric.mock_calls)
@@ -446,6 +448,7 @@ class TestGnocchiAggregationResourcesThresholdEvaluate(
         end = "2015-01-26T12:57:00"
         self.assertEqual(
             [mock.call.aggregation(aggregation='mean', metrics='cpu_util',
+                                   granularity=50,
                                    needed_overlap=0,
                                    query={"=": {"server_group":
                                           "my_autoscaling_group"}},
