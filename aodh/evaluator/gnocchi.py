@@ -62,6 +62,7 @@ class GnocchiResourceThresholdEvaluator(GnocchiBase):
         try:
             return self._gnocchi_client.metric.get_measures(
                 metric=rule['metric'],
+                granularity=rule['granularity'],
                 start=start, stop=end,
                 resource_id=rule['resource_id'],
                 aggregation=rule['aggregation_method'])
@@ -102,6 +103,7 @@ class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
             #   https://bugs.launchpad.net/gnocchi/+bug/1479429
             return self._gnocchi_client.metric.aggregation(
                 metrics=rule['metrics'],
+                granularity=rule['granularity'],
                 start=start, stop=end,
                 aggregation=rule['aggregation_method'],
                 needed_overlap=0)
@@ -137,6 +139,7 @@ class GnocchiAggregationResourcesThresholdEvaluator(GnocchiBase):
         try:
             return self._gnocchi_client.metric.aggregation(
                 metrics=rule['metric'],
+                granularity=rule['granularity'],
                 query=jsonutils.loads(rule['query']),
                 resource_type=rule["resource_type"],
                 start=start, stop=end,
