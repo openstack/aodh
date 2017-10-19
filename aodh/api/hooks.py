@@ -16,6 +16,8 @@
 from oslo_policy import policy
 from pecan import hooks
 
+from aodh.api import policies
+
 
 class ConfigHook(hooks.PecanHook):
     """Attach the configuration and policy enforcer object to the request.
@@ -26,6 +28,7 @@ class ConfigHook(hooks.PecanHook):
     def __init__(self, conf):
         self.conf = conf
         self.enforcer = policy.Enforcer(conf, default_rule="default")
+        self.enforcer.register_defaults(policies.list_rules())
 
     def before(self, state):
         state.request.cfg = self.conf
