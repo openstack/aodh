@@ -100,6 +100,50 @@ rules = [
                 'method': 'DELETE'
             }
         ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:get_alarm_state",
+        check_str=RULE_ADMIN_OR_OWNER,
+        description='Get the state of this alarm.',
+        operations=[
+            {
+                'path': '/v2/alarms/{alarm_id}/state',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:change_alarm_state",
+        check_str=RULE_ADMIN_OR_OWNER,
+        description='Set the state of this alarm.',
+        operations=[
+            {
+                'path': '/v2/alarms/{alarm_id}/state',
+                'method': 'PUT'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:alarm_history",
+        check_str=RULE_ADMIN_OR_OWNER,
+        description='Assembles the alarm history requested.',
+        operations=[
+            {
+                'path': '/v2/alarms/{alarm_id}/history',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:query_alarm_history",
+        check_str=RULE_ADMIN_OR_OWNER,
+        description='Define query for retrieving AlarmChange data.',
+        operations=[
+            {
+                'path': '/v2/query/alarms/history',
+                'method': 'POST'
+            }
+        ]
     )
 ]
 

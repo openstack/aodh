@@ -1,7 +1,0 @@
-{
-    "telemetry:get_alarm_state": "rule:admin_or_owner",
-    "telemetry:change_alarm_state": "rule:admin_or_owner",
-
-    "telemetry:alarm_history": "rule:admin_or_owner",
-    "telemetry:query_alarm_history": "rule:admin_or_owner"
-}
