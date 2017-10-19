@@ -58,19 +58,6 @@ Composite rule alarms
 Composite alarms enable users to define an alarm with multiple triggering
 conditions, using a combination of ``and`` and ``or`` relations.
 
-
-Combination rule alarms
------------------------
-
-.. note::
-
-   Combination alarms are deprecated as of Newton for composite alarms.
-   Combination alarm functionality is removed in Pike.
-
-The Telemetry service also supports the concept of a meta-alarm, which
-aggregates over the current state of a set of underlying basic alarms
-combined via a logical operator (``and`` or ``or``).
-
 Alarm dimensioning
 ~~~~~~~~~~~~~~~~~~
 
