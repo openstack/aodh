@@ -15,9 +15,9 @@
 
 from oslo_policy import policy
 
-
 RULE_CONTEXT_IS_ADMIN = 'rule:context_is_admin'
 RULE_ADMIN_OR_OWNER = 'rule:context_is_admin or project_id:%(project_id)s'
+UNPROTECTED = ''
 
 rules = [
     policy.RuleDefault(
@@ -34,6 +34,72 @@ rules = [
     policy.RuleDefault(
         name="default",
         check_str=RULE_ADMIN_OR_OWNER
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:get_alarm",
+        check_str=RULE_ADMIN_OR_OWNER,
+        description='Get an alarm.',
+        operations=[
+            {
+                'path': '/v2/alarms/{alarm_id}',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:get_alarms",
+        check_str=RULE_ADMIN_OR_OWNER,
+        description='Get all alarms, based on the query provided.',
+        operations=[
+            {
+                'path': '/v2/alarms',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:query_alarm",
+        check_str=RULE_ADMIN_OR_OWNER,
+        description='Get all alarms, based on the query provided.',
+        operations=[
+            {
+                'path': '/v2/query/alarms',
+                'method': 'POST'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:create_alarm",
+        check_str=UNPROTECTED,
+        description='Create a new alarm.',
+        operations=[
+            {
+                'path': '/v2/alarms',
+                'method': 'POST'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:change_alarm",
+        check_str=RULE_ADMIN_OR_OWNER,
+        description='Modify this alarm.',
+        operations=[
+            {
+                'path': '/v2/alarms/{alarm_id}',
+                'method': 'PUT'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:delete_alarm",
+        check_str=RULE_ADMIN_OR_OWNER,
+        description='Delete this alarm.',
+        operations=[
+            {
+                'path': '/v2/alarms/{alarm_id}',
+                'method': 'DELETE'
+            }
+        ]
     )
 ]
 

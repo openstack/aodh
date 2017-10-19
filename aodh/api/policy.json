@@ -1,12 +1,4 @@
 {
-    "telemetry:get_alarm": "rule:admin_or_owner",
-    "telemetry:get_alarms": "rule:admin_or_owner",
-    "telemetry:query_alarm": "rule:admin_or_owner",
-
-    "telemetry:create_alarm": "",
-    "telemetry:change_alarm": "rule:admin_or_owner",
-    "telemetry:delete_alarm": "rule:admin_or_owner",
-
     "telemetry:get_alarm_state": "rule:admin_or_owner",
     "telemetry:change_alarm_state": "rule:admin_or_owner",
 

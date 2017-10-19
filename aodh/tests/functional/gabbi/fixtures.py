@@ -27,6 +27,7 @@ from six.moves.urllib import parse as urlparse
 import sqlalchemy_utils
 
 from aodh.api import app
+from aodh.api import rbac
 from aodh import service
 from aodh import storage
 
@@ -76,10 +77,7 @@ class ConfigFixture(fixture.GabbiFixture):
         self.conf = conf
         opts.set_defaults(self.conf)
 
-        conf.set_override('policy_file',
-                          os.path.abspath(
-                              'aodh/tests/open-policy.json'),
-                          group='oslo_policy')
+        rbac.enforce = mock.Mock()
         conf.set_override('auth_mode', None, group='api')
 
         parsed_url = urlparse.urlparse(db_url)
