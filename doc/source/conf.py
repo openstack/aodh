@@ -49,12 +49,19 @@ extensions = [
     'stevedore.sphinxext',
     'oslo_config.sphinxconfiggen',
     'oslo_config.sphinxext',
+    'oslo_policy.sphinxpolicygen',
+    'oslo_policy.sphinxext',
     'sphinxcontrib.httpdomain',
 ]
 
 config_generator_config_file = os.path.join(ROOT,
                                             'aodh/cmd/aodh-config-generator.conf')
 sample_config_basename = '_static/aodh'
+
+policy_generator_config_file = (
+    '../../aodh/cmd/aodh-policy-generator.conf'
+)
+sample_policy_basename = '_static/aodh'
 
 wsme_protocols = ['restjson', 'restxml']
 

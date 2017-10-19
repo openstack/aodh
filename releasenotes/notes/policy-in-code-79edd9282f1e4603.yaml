@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Aodh now support policy in code, which means if users didn't modify
+    any of policy rules, they can leave policy file (in `json` or `yaml`
+    format) empty or not deploy it at all. Because from now, Aodh keeps
+    all default policies under `aodh/api/policies` module.
+    Users can still modify/generate `policy.yaml` file which will override
+    policy rules in code if those rules show in `policy.yaml` file.
+other:
+  - |
+    Default `policy.json` file is now removed as Aodh now generate the
+    default policies from code. Please be aware that when using that file in
+    your environment.
