@@ -1,22 +1,27 @@
 # Lucas Palm <lapalm@us.ibm.com>, 2015. #zanata
 # OpenStack Infra <zanata@openstack.org>, 2015. #zanata
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
+# ByungYeol Woo <wby1089@gmail.com>, 2017. #zanata
 # Heetae Ahn <heetae82.ahn@samsung.com>, 2017. #zanata
 # SEOKJAE BARK <sj.bark@samsung.com>, 2017. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 4.0.1.dev118\n"
+"Project-Id-Version: aodh 5.0.1.dev16\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2017-08-09 15:06+0000\n"
+"POT-Creation-Date: 2017-10-15 20:27+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2017-07-20 02:46+0000\n"
-"Last-Translator: Heetae Ahn <heetae82.ahn@samsung.com>\n"
+"PO-Revision-Date: 2017-10-18 02:25+0000\n"
+"Last-Translator: ByungYeol Woo <wby1089@gmail.com>\n"
 "Language-Team: Korean (South Korea)\n"
 "Language: ko-KR\n"
 "X-Generator: Zanata 3.9.6\n"
 "Plural-Forms: nplurals=1; plural=0\n"
+
+#, python-format
+msgid "%(name)s count exceeds maximum value %(maximum)d"
+msgstr "%(name)s 카운트가 최대값 %(maximum)d을 초과하였습니다."
 
 #, python-format
 msgid "%(rule)s must be set for %(type)s type alarm"
@@ -106,7 +111,7 @@ msgstr "%(value)s 값을 예상 데이터 유형 %(type)s(으)로 변환할 수 
 
 #, python-format
 msgid "Unable to parse action %s"
-msgstr "%s 조치를 구문 분석할 수 없음"
+msgstr "%s 동작을 구문 분석할 수 없음"
 
 #, python-format
 msgid ""
@@ -117,7 +122,11 @@ msgstr ""
 
 #, python-format
 msgid "Unsupported action %s"
-msgstr "지원되지 않는 조치 %s"
+msgstr "지원되지 않는 동작 %s"
+
+#, python-format
+msgid "You are not authorized to create action: %s"
+msgstr "다음 동작을 수행할 권한이 없습니다: %s"
 
 msgid "alarm stats retrieval failed"
 msgstr "알람 통계 검색에 실패했습니다. "
@@ -130,3 +139,6 @@ msgstr "state_timestamp는 Datetime 오브젝트여야 함"
 
 msgid "timestamp should be datetime object"
 msgstr "시간소인은 Datetime 오브젝트여야 함"
+
+msgid "trust URL cannot contain a trust ID."
+msgstr "신뢰하는 URL은 신뢰하는 ID를 포함할 수 없습니다."
