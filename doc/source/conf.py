@@ -48,6 +48,7 @@ extensions = [
     'sphinxcontrib.pecanwsme.rest',
     'stevedore.sphinxext',
     'oslo_config.sphinxconfiggen',
+    'oslo_config.sphinxext',
     'sphinxcontrib.httpdomain',
 ]
 
