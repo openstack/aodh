@@ -2,42 +2,14 @@
     name: openstack/aodh
     check:
       jobs:
-        - aodh-dsvm-functional-mysql:
-            branches: ^stable/(newton|ocata)$
-        - aodh-dsvm-functional-postgresql:
-            branches: ^stable/(newton|ocata)$
         - aodh-dsvm-tempest-plugin-mysql
         - aodh-dsvm-tempest-plugin-postgresql
         - telemetry-dsvm-integration-aodh
     gate:
       jobs:
-        - aodh-dsvm-functional-mysql:
-            branches: ^stable/(newton|ocata)$
-        - aodh-dsvm-functional-postgresql:
-            branches: ^stable/(newton|ocata)$
         - aodh-dsvm-tempest-plugin-mysql
         - aodh-dsvm-tempest-plugin-postgresql
         - telemetry-dsvm-integration-aodh
-
-- job:
-    name: aodh-dsvm-functional-mysql
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/aodh-dsvm-functional-mysql/run
-    post-run: playbooks/legacy/aodh-dsvm-functional-mysql/post
-    timeout: 6000
-    required-projects:
-      - openstack-infra/devstack-gate
-      - openstack/aodh
-
-- job:
-    name: aodh-dsvm-functional-postgresql
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/aodh-dsvm-functional-postgresql/run
-    post-run: playbooks/legacy/aodh-dsvm-functional-postgresql/post
-    timeout: 6000
-    required-projects:
-      - openstack-infra/devstack-gate
-      - openstack/aodh
 
 - job:
     name: aodh-dsvm-tempest-plugin-mysql
