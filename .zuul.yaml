@@ -14,8 +14,8 @@
 - job:
     name: aodh-dsvm-tempest-plugin-mysql
     parent: legacy-dsvm-base
-    run: playbooks/legacy/aodh-dsvm-tempest-plugin-mysql/run
-    post-run: playbooks/legacy/aodh-dsvm-tempest-plugin-mysql/post
+    run: playbooks/legacy/aodh-dsvm-tempest-plugin-mysql/run.yaml
+    post-run: playbooks/legacy/aodh-dsvm-tempest-plugin-mysql/post.yaml
     timeout: 7800
     required-projects:
       - openstack-infra/devstack-gate
@@ -25,8 +25,8 @@
 - job:
     name: aodh-dsvm-tempest-plugin-postgresql
     parent: legacy-dsvm-base
-    run: playbooks/legacy/aodh-dsvm-tempest-plugin-postgresql/run
-    post-run: playbooks/legacy/aodh-dsvm-tempest-plugin-postgresql/post
+    run: playbooks/legacy/aodh-dsvm-tempest-plugin-postgresql/run.yaml
+    post-run: playbooks/legacy/aodh-dsvm-tempest-plugin-postgresql/post.yaml
     timeout: 7800
     required-projects:
       - openstack-infra/devstack-gate
@@ -36,8 +36,8 @@
 - job:
     name: telemetry-dsvm-integration-aodh
     parent: legacy-dsvm-base
-    run: playbooks/legacy/telemetry-dsvm-integration-aodh/run
-    post-run: playbooks/legacy/telemetry-dsvm-integration-aodh/post
+    run: playbooks/legacy/telemetry-dsvm-integration-aodh/run.yaml
+    post-run: playbooks/legacy/telemetry-dsvm-integration-aodh/post.yaml
     timeout: 7800
     required-projects:
       - openstack-infra/devstack-gate
