@@ -16,10 +16,10 @@
 from gnocchiclient import client
 from gnocchiclient import exceptions
 from oslo_log import log
-from oslo_serialization import jsonutils
 
 from aodh.evaluator import threshold
 from aodh import keystone_client
+import ujson
 
 LOG = log.getLogger(__name__)
 
@@ -140,7 +140,7 @@ class GnocchiAggregationResourcesThresholdEvaluator(GnocchiBase):
             return self._gnocchi_client.metric.aggregation(
                 metrics=rule['metric'],
                 granularity=rule['granularity'],
-                query=jsonutils.loads(rule['query']),
+                query=ujson.loads(rule['query']),
                 resource_type=rule["resource_type"],
                 start=start, stop=end,
                 aggregation=rule['aggregation_method'],

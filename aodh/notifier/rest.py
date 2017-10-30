@@ -16,10 +16,10 @@
 
 from oslo_config import cfg
 from oslo_log import log
-from oslo_serialization import jsonutils
 from oslo_utils import uuidutils
 import requests
 import six.moves.urllib.parse as urlparse
+import ujson
 
 from aodh import notifier
 
@@ -77,7 +77,7 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
                 'current': current, 'reason': reason,
                 'reason_data': reason_data}
         headers['content-type'] = 'application/json'
-        kwargs = {'data': jsonutils.dumps(body),
+        kwargs = {'data': ujson.dumps(body),
                   'headers': headers}
 
         if action.scheme == 'https':
