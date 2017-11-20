@@ -219,8 +219,8 @@ time-constraint
 Composite alarm
 ```````````````
 
-An example of creating a combination alarm, based on the combined
-state of two underlying alarms:
+An example of creating a composite alarm, based on the composite of
+two basic rules:
 
 .. code-block:: console
 
@@ -235,10 +235,10 @@ state of two underlying alarms:
        "resource_type": "instance", "aggregation_method": "last"}]}' \
      --alarm-action 'http://example.org/notify'
 
-This creates an alarm that will fire when either one of two underlying
-alarms transition into the alarm state. The notification in this case
-is a webhook call. Any number of underlying alarms can be combined in
-this way, using either ``and`` or ``or``. Additionally, combinations
+This creates an alarm that will fire when either of two basic rules
+meets the condition. The notification in this case is a webhook call.
+Any number of basic rules can be composed into a composite rule this
+way, using either ``and`` or ``or``. Additionally, composite rules
 can contain nested conditions:
 
 .. note::
