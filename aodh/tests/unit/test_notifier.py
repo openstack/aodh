@@ -18,16 +18,16 @@ import time
 import mock
 from oslo_config import fixture as fixture_config
 import oslo_messaging
-from oslo_serialization import jsonutils
 import requests
 import six.moves.urllib.parse as urlparse
+import ujson
 
 from aodh import notifier
 from aodh import service
 from aodh.tests import base as tests_base
 
 
-DATA_JSON = jsonutils.loads(
+DATA_JSON = ujson.loads(
     '{"current": "ALARM", "alarm_id": "foobar", "alarm_name": "testalarm",'
     ' "severity": "critical", "reason": "what ?",'
     ' "reason_data": {"test": "test"}, "previous": "OK"}'
@@ -175,7 +175,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                     'content-type': 'application/json'
                 },
                 kwargs['headers'])
-            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+            self.assertEqual(DATA_JSON, ujson.loads(kwargs['data']))
             self.assertEqual(2, len(m_log.info.call_args_list))
             expected = mock.call('Notifying alarm <%(id)s> gets response: '
                                  '%(status_code)s %(reason)s.',
@@ -204,7 +204,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                     'content-type': 'application/json'
                 },
                 kwargs['headers'])
-            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+            self.assertEqual(DATA_JSON, ujson.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_client_cert_and_key(self):
         action = 'https://host/action'
@@ -229,7 +229,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                     kwargs['headers']['x-openstack-request-id'],
                     'content-type': 'application/json'},
                 kwargs['headers'])
-            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+            self.assertEqual(DATA_JSON, ujson.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_verify_disable_by_cfg(self):
         action = 'https://host/action'
@@ -252,7 +252,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                     'content-type': 'application/json'
                 },
                 kwargs['headers'])
-            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+            self.assertEqual(DATA_JSON, ujson.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_server_verify_enable(self):
         action = 'https://host/action'
@@ -270,7 +270,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       headers=mock.ANY,
                                       verify=ca_bundle)
             args, kwargs = poster.call_args
-            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+            self.assertEqual(DATA_JSON, ujson.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_verify_disable(self):
         action = 'https://host/action?aodh-alarm-ssl-verify=0'
@@ -291,7 +291,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                     'content-type': 'application/json'
                 },
                 kwargs['headers'])
-            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+            self.assertEqual(DATA_JSON, ujson.loads(kwargs['data']))
 
     def test_notify_alarm_rest_action_with_ssl_verify_enable_by_user(self):
         action = 'https://host/action?aodh-alarm-ssl-verify=1'
@@ -314,7 +314,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                     'content-type': 'application/json'
                 },
                 kwargs['headers'])
-            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+            self.assertEqual(DATA_JSON, ujson.loads(kwargs['data']))
 
     @staticmethod
     def _fake_urlsplit(*args, **kwargs):
@@ -375,7 +375,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                 },
                 kwargs['headers'])
 
-            self.assertEqual(DATA_JSON, jsonutils.loads(kwargs['data']))
+            self.assertEqual(DATA_JSON, ujson.loads(kwargs['data']))
 
     def test_zaqar_notifier_action(self):
         with mock.patch.object(notifier.zaqar.ZaqarAlarmNotifier,

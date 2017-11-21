@@ -13,12 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_serialization import jsonutils as json
 from six.moves.urllib import parse as urllib
 from tempest import config
 from tempest.lib.common import rest_client
 from tempest import manager
-
+import ujson
 
 CONF = config.CONF
 
@@ -29,10 +28,10 @@ class AlarmingClient(rest_client.RestClient):
     uri_prefix = "v2"
 
     def deserialize(self, body):
-        return json.loads(body.replace("\n", ""))
+        return ujson.loads(body.replace("\n", ""))
 
     def serialize(self, body):
-        return json.dumps(body)
+        return ujson.dumps(body)
 
     def list_alarms(self, query=None):
         uri = '%s/alarms' % self.uri_prefix

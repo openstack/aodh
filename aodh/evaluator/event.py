@@ -17,10 +17,10 @@ import operator
 
 from oslo_config import cfg
 from oslo_log import log
-from oslo_serialization import jsonutils
 from oslo_utils import fnmatch
 from oslo_utils import timeutils
 import six
+import ujson
 
 from aodh import evaluator
 from aodh.i18n import _
@@ -253,8 +253,8 @@ class EventAlarmEvaluator(evaluator.Evaluator):
                     'query <query=%(alarm_query)s>.') %
                   {'id': event.id,
                    'event_type': event.get_value('event_type'),
-                   'alarm_query': jsonutils.dumps(alarm.obj.rule['query'],
-                                                  sort_keys=True)})
+                   'alarm_query': ujson.dumps(alarm.obj.rule['query'],
+                                              sort_keys=True)})
         reason_data = {'type': 'event', 'event': event.obj}
         always_record = alarm.obj.repeat_actions
         self._refresh(alarm.obj, state, reason, reason_data, always_record)
