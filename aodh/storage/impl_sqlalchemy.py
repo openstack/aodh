@@ -92,7 +92,7 @@ class Connection(base.Connection):
         cfg = config.Config(
             "%s/sqlalchemy/alembic/alembic.ini" % os.path.dirname(__file__))
         cfg.set_main_option('sqlalchemy.url',
-                            self.conf.database.connection)
+                            self.conf.database.connection.replace("%", "%%"))
         return cfg
 
     def upgrade(self, nocreate=False):
