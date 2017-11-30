@@ -16,6 +16,7 @@
 """Fixtures used during Gabbi-based test runs."""
 
 import os
+import unittest
 
 from gabbi import fixture
 import mock
@@ -60,7 +61,8 @@ class ConfigFixture(fixture.GabbiFixture):
             'AODH_TEST_STORAGE_URL', "").replace(
                 "mysql://", "mysql+pymysql://")
         if not db_url:
-            self.fail('No database connection configured')
+            raise unittest.TestCase.failureException(
+                'No database connection configured')
 
         conf = service.prepare_service([], config_files=[])
         # NOTE(jd): prepare_service() is called twice: first by load_app() for
