@@ -33,6 +33,10 @@
     run: playbooks/legacy/aodh-dsvm-tempest-plugin-mysql/run.yaml
     post-run: playbooks/legacy/aodh-dsvm-tempest-plugin-mysql/post.yaml
     timeout: 7800
+    # Disabling this job in order to remove aodh tempest plugin as they are
+    # moved to telemetry-tempest-plugin, It will be reenabled once this patch
+    # get's merged.
+    voting: false
     required-projects:
       - openstack-infra/devstack-gate
       - openstack/aodh
@@ -44,6 +48,10 @@
     run: playbooks/legacy/aodh-dsvm-tempest-plugin-postgresql/run.yaml
     post-run: playbooks/legacy/aodh-dsvm-tempest-plugin-postgresql/post.yaml
     timeout: 7800
+    # Disabling this job in order to remove aodh tempest plugin as they are
+    # moved to telemetry-tempest-plugin, It will be reenabled once this patch
+    # get's merged.
+    voting: false
     required-projects:
       - openstack-infra/devstack-gate
       - openstack/aodh

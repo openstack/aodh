@@ -43,7 +43,7 @@
           set -x
           export PYTHONUNBUFFERED=true
           export DEVSTACK_GATE_TEMPEST=1
-          export DEVSTACK_GATE_TEMPEST_REGEX="^aodh\."
+          export DEVSTACK_GATE_TEMPEST_REGEX="ceilometer.tests.tempest.aodh"
           export DEVSTACK_GATE_TEMPEST_ALL_PLUGINS=1
           export PROJECTS="openstack/aodh $PROJECTS"
           export AODH_BACKEND=postgresql
