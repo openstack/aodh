@@ -1,0 +1,5 @@
+openstackdocstheme>=1.11.0  # Apache-2.0
+reno>=0.1.1  # Apache2
+sphinx>=1.6.2
+sphinxcontrib-httpdomain
+sphinxcontrib-pecanwsme>=0.8
