@@ -4,16 +4,17 @@
 # ByungYeol Woo <wby1089@gmail.com>, 2017. #zanata
 # Heetae Ahn <heetae82.ahn@samsung.com>, 2017. #zanata
 # SEOKJAE BARK <sj.bark@samsung.com>, 2017. #zanata
+# johjuhyun <juhyun.joh@samsung.com>, 2017. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: aodh 5.0.1.dev16\n"
+"Project-Id-Version: aodh 5.0.1.dev49\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2017-10-15 20:27+0000\n"
+"POT-Creation-Date: 2017-12-14 12:08+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2017-10-18 02:25+0000\n"
-"Last-Translator: ByungYeol Woo <wby1089@gmail.com>\n"
+"PO-Revision-Date: 2017-12-15 06:18+0000\n"
+"Last-Translator: johjuhyun <juhyun.joh@samsung.com>\n"
 "Language-Team: Korean (South Korea)\n"
 "Language: ko-KR\n"
 "X-Generator: Zanata 3.9.6\n"
@@ -142,3 +143,6 @@ msgstr "시간소인은 Datetime 오브젝트여야 함"
 
 msgid "trust URL cannot contain a trust ID."
 msgstr "신뢰하는 URL은 신뢰하는 ID를 포함할 수 없습니다."
+
+msgid "type must be set in every rule"
+msgstr "타입은 모든 rule에 반드시 설정되어야 한다"
