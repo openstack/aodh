@@ -13,13 +13,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 """Rest alarm notifier."""
+import json
 
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import uuidutils
 import requests
 import six.moves.urllib.parse as urlparse
-import ujson
 
 from aodh import notifier
 
@@ -77,7 +77,7 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
                 'current': current, 'reason': reason,
                 'reason_data': reason_data}
         headers['content-type'] = 'application/json'
-        kwargs = {'data': ujson.dumps(body),
+        kwargs = {'data': json.dumps(body),
                   'headers': headers}
 
         if action.scheme == 'https':

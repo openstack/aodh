@@ -15,13 +15,13 @@
 """Tests alarm operation."""
 
 import datetime
+import json as jsonlib
 import os
 
 import mock
 from oslo_utils import uuidutils
 import six
 from six import moves
-import ujson
 import webtest
 
 from aodh.api import app
@@ -197,8 +197,7 @@ class TestAlarms(TestAlarmsBase):
                                  'value': isotime}],
                              expect_errors=True)
         self.assertEqual(resp.status_code, 400)
-        self.assertEqual(ujson.loads(resp.body)['error_message']
-                         ['faultstring'],
+        self.assertEqual(resp.json['error_message']['faultstring'],
                          'Unknown argument: "timestamp": '
                          'not valid for this resource')
 
@@ -273,8 +272,7 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(404, resp.status_code)
         self.assertEqual('Alarm alarm-id-3 not found in project %s' %
                          self.auth_headers["X-Project-Id"],
-                         ujson.loads(resp.body)['error_message']
-                         ['faultstring'])
+                         resp.json['error_message']['faultstring'])
 
     def test_get_alarm(self):
         alarms = self.get_json('/alarms',
@@ -1091,8 +1089,7 @@ class TestAlarms(TestAlarmsBase):
         aspect = 'user' if 'user' in identifiers else 'project'
         params = dict(aspect=aspect, id=identifiers[aspect])
         self.assertEqual("Not Authorized to access %(aspect)s %(id)s" % params,
-                         ujson.loads(resp.body)['error_message']
-                         ['faultstring'])
+                         resp.json['error_message']['faultstring'])
 
     def test_post_alarm_as_nonadmin_on_behalf_of_another_user(self):
         identifiers = dict(user='auseridthatisnotmine')
@@ -1829,14 +1826,14 @@ class TestAlarmsHistory(TestAlarmsBase):
         for k, v in six.iteritems(expected):
             current = actual.get(k)
             if k == 'detail' and isinstance(v, dict):
-                current = ujson.loads(current)
+                current = jsonlib.loads(current)
             self.assertEqual(v, current, 'mismatched field: %s' % k)
         self.assertIsNotNone(actual['event_id'])
 
     def _assert_in_json(self, expected, actual):
-        actual = ujson.dumps(ujson.loads(actual), sort_keys=True)
+        actual = jsonlib.dumps(jsonlib.loads(actual), sort_keys=True)
         for k, v in six.iteritems(expected):
-            fragment = ujson.dumps({k: v}, sort_keys=True)[1:-1]
+            fragment = jsonlib.dumps({k: v}, sort_keys=True)[1:-1]
             self.assertIn(fragment, actual,
                           '%s not in %s' % (fragment, actual))
 
@@ -1862,7 +1859,7 @@ class TestAlarmsHistory(TestAlarmsBase):
         new_alarm = self._get_alarm('a')
         history = self._get_alarm_history('a')
         self.assertEqual(1, len(history))
-        self.assertEqual('{"severity": "low"}',
+        self.assertEqual(jsonlib.dumps({'severity': 'low'}),
                          history[0]['detail'])
         self.assertEqual('low', new_alarm['severity'])
 
@@ -1879,7 +1876,7 @@ class TestAlarmsHistory(TestAlarmsBase):
         new_alarm = self._get_alarm('a')
         history = self._get_alarm_history('a')
         self.assertEqual(1, len(history))
-        self.assertEqual("min", ujson.loads(history[0]['detail'])
+        self.assertEqual("min", jsonlib.loads(history[0]['detail'])
                          ['rule']["statistic"])
         self.assertEqual('min', new_alarm['threshold_rule']['statistic'])
 
@@ -1893,14 +1890,14 @@ class TestAlarmsHistory(TestAlarmsBase):
         new_alarm = self._get_alarm('a')
         history = self._get_alarm_history('a')
         self.assertEqual(1, len(history))
-        self.assertEqual('{"severity": "low"}',
+        self.assertEqual(jsonlib.dumps({'severity': 'low'}),
                          history[0]['detail'])
         self.assertEqual('low', new_alarm['severity'])
 
         self._update_alarm('a', dict(severity='low'))
         updated_history = self._get_alarm_history('a')
         self.assertEqual(1, len(updated_history))
-        self.assertEqual('{"severity": "low"}',
+        self.assertEqual(jsonlib.dumps({'severity': 'low'}),
                          updated_history[0]['detail'])
         self.assertEqual(history, updated_history)
 
@@ -2146,7 +2143,7 @@ class TestAlarmsHistory(TestAlarmsBase):
         query = dict(field='severity', op='eq', value='low')
         history = self._get_alarm_history('a', query=query)
         self.assertEqual(1, len(history))
-        self.assertEqual('{"severity": "low"}',
+        self.assertEqual(jsonlib.dumps({'severity': 'low'}),
                          history[0]['detail'])
 
     def test_get_nonexistent_alarm_history(self):
@@ -2343,8 +2340,7 @@ class TestAlarmsRuleThreshold(TestAlarmsBase):
         resp = self.post_json('/alarms', params=json, expect_errors=True,
                               status=400, headers=self.auth_headers)
         expected_error_message = 'The data type blob is not supported.'
-        resp_string = ujson.loads(resp.body)
-        fault_string = resp_string['error_message']['faultstring']
+        fault_string = resp.json['error_message']['faultstring']
         self.assertTrue(fault_string.startswith(expected_error_message))
         alarms = list(self.alarm_conn.get_alarms())
         self.assertEqual(0, len(alarms))
@@ -2731,7 +2727,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
         self.assertEqual(1, len(alarms))
 
         json['gnocchi_aggregation_by_resources_threshold_rule']['query'] = (
-            ujson.dumps(expected_query))
+            jsonlib.dumps(expected_query))
         self._verify_alarm(json, alarms[0])
 
 
@@ -3044,8 +3040,7 @@ class TestPaginationQuery(TestAlarmsBase):
                          "('alarm_id', 'enabled', 'name', 'type', 'severity',"
                          " 'timestamp', 'user_id', 'project_id', 'state', "
                          "'repeat_actions', 'state_timestamp')",
-                         ujson.loads(resp.body)['error_message']
-                         ['faultstring'])
+                         resp.json['error_message']['faultstring'])
 
     def test_pagination_query_only_sort_key_specified(self):
         data = self.get_json('/alarms?sort=name',

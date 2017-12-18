@@ -12,7 +12,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
+import json
 import threading
 
 import cachetools
@@ -21,7 +21,6 @@ from gnocchiclient import exceptions
 from keystoneauth1 import exceptions as ka_exceptions
 from oslo_config import cfg
 import pecan
-import ujson
 import wsme
 from wsme import types as wtypes
 
@@ -155,7 +154,7 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
 
         # check the query string is a valid json
         try:
-            query = ujson.loads(rule.query)
+            query = json.loads(rule.query)
         except ValueError:
             raise wsme.exc.InvalidInput('rule/query', rule.query)
 
@@ -178,7 +177,7 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
                 ]}
 
             query = {"and": [perms_filter, query]}
-            rule.query = ujson.dumps(query)
+            rule.query = json.dumps(query)
 
         gnocchi_client = client.Client(
             '1', keystone_client.get_session(conf),
