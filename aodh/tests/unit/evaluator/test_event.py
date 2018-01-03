@@ -15,12 +15,12 @@
 
 import copy
 import datetime
+import json
 import six
 
 import mock
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
-import ujson
 
 from aodh import evaluator
 from aodh.evaluator import event as event_evaluator
@@ -128,8 +128,7 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
                           'query <query=%(query)s>.') % {
                     'e': event['message_id'],
                     'type': event['event_type'],
-                    'query': ujson.dumps(alarm.rule['query'],
-                                         sort_keys=True)}
+                    'query': json.dumps(alarm.rule['query'], sort_keys=True)}
                 data = {'type': 'event', 'event': event}
                 expected = dict(alarm_id=alarm.alarm_id,
                                 state=evaluator.ALARM,

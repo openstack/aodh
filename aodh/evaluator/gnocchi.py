@@ -12,6 +12,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import json
 
 from gnocchiclient import client
 from gnocchiclient import exceptions
@@ -19,7 +20,6 @@ from oslo_log import log
 
 from aodh.evaluator import threshold
 from aodh import keystone_client
-import ujson
 
 LOG = log.getLogger(__name__)
 
@@ -140,7 +140,7 @@ class GnocchiAggregationResourcesThresholdEvaluator(GnocchiBase):
             return self._gnocchi_client.metric.aggregation(
                 metrics=rule['metric'],
                 granularity=rule['granularity'],
-                query=ujson.loads(rule['query']),
+                query=json.loads(rule['query']),
                 resource_type=rule["resource_type"],
                 start=start, stop=end,
                 aggregation=rule['aggregation_method'],
