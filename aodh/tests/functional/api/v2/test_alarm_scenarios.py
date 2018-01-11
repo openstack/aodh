@@ -16,8 +16,10 @@
 
 import datetime
 import json as jsonlib
+import operator
 import os
 
+import fixtures
 import mock
 from oslo_utils import uuidutils
 import six
@@ -31,9 +33,12 @@ from aodh.tests import constants
 from aodh.tests.functional.api import v2
 
 
+RULE_KEY = 'gnocchi_aggregation_by_metrics_threshold_rule'
+
+
 def default_alarms(auth_headers):
     return [models.Alarm(name='name1',
-                         type='threshold',
+                         type='gnocchi_aggregation_by_metrics_threshold',
                          enabled=True,
                          alarm_id='a',
                          description='a',
@@ -53,17 +58,16 @@ def default_alarms(auth_headers):
                                                 duration=300)],
                          rule=dict(comparison_operator='gt',
                                    threshold=2.0,
-                                   statistic='avg',
+                                   aggregation_method='mean',
                                    evaluation_periods=60,
-                                   period=1,
-                                   meter_name='meter.test',
-                                   query=[{'field': 'project_id',
-                                           'op': 'eq', 'value':
-                                           auth_headers['X-Project-Id']}
-                                          ]),
+                                   granularity=1,
+                                   metrics=[
+                                       '41869681-5776-46d6-91ed-cccc43b6e4e3',
+                                       'a1fb80f4-c242-4f57-87c6-68f47521059e'
+                                   ])
                          ),
             models.Alarm(name='name2',
-                         type='threshold',
+                         type='gnocchi_aggregation_by_metrics_threshold',
                          enabled=True,
                          alarm_id='b',
                          description='b',
@@ -81,17 +85,16 @@ def default_alarms(auth_headers):
                          time_constraints=[],
                          rule=dict(comparison_operator='gt',
                                    threshold=4.0,
-                                   statistic='avg',
+                                   aggregation_method='mean',
                                    evaluation_periods=60,
-                                   period=1,
-                                   meter_name='meter.test',
-                                   query=[{'field': 'project_id',
-                                           'op': 'eq', 'value':
-                                           auth_headers['X-Project-Id']}
-                                          ]),
+                                   granularity=1,
+                                   metrics=[
+                                       '41869681-5776-46d6-91ed-cccc43b6e4e3',
+                                       'a1fb80f4-c242-4f57-87c6-68f47521059e'
+                                   ])
                          ),
             models.Alarm(name='name3',
-                         type='threshold',
+                         type='gnocchi_aggregation_by_metrics_threshold',
                          enabled=True,
                          alarm_id='c',
                          description='c',
@@ -109,14 +112,13 @@ def default_alarms(auth_headers):
                          time_constraints=[],
                          rule=dict(comparison_operator='gt',
                                    threshold=3.0,
-                                   statistic='avg',
+                                   aggregation_method='mean',
                                    evaluation_periods=60,
-                                   period=1,
-                                   meter_name='meter.mine',
-                                   query=[{'field': 'project_id',
-                                           'op': 'eq', 'value':
-                                           auth_headers['X-Project-Id']}
-                                          ]),
+                                   granularity=1,
+                                   metrics=[
+                                       '95f3c171-5605-4021-87ed-eede77101268',
+                                       'bf588a78-56c7-4ba4-be46-d71e5002e030',
+                                   ])
                          )]
 
 
@@ -127,16 +129,17 @@ class TestAlarmsBase(v2.FunctionalTest):
         self.auth_headers = {'X-User-Id': uuidutils.generate_uuid(),
                              'X-Project-Id': uuidutils.generate_uuid()}
 
-    @staticmethod
-    def _add_default_threshold_rule(alarm):
-        if (alarm['type'] == 'threshold' and
-                'exclude_outliers' not in alarm['threshold_rule']):
-            alarm['threshold_rule']['exclude_outliers'] = False
+        c = mock.Mock()
+        c.capabilities.list.return_value = {'aggregation_methods': [
+            'count', 'mean', 'max', 'min', 'first', 'last', 'std']}
+        self.useFixture(fixtures.MockPatch(
+            'aodh.api.controllers.v2.alarm_rules.gnocchi.client.Client',
+            return_value=c
+        ))
 
     def _verify_alarm(self, json, alarm, expected_name=None):
         if expected_name and alarm.name != expected_name:
             self.fail("Alarm not found")
-        self._add_default_threshold_rule(json)
         for key in json:
             if key.endswith('_rule'):
                 storage_key = 'rule'
@@ -183,9 +186,15 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(3, len(data))
         self.assertEqual(set(['name1', 'name2', 'name3']),
                          set(r['name'] for r in data))
-        self.assertEqual(set(['meter.test', 'meter.mine']),
-                         set(r['threshold_rule']['meter_name']
-                             for r in data if 'threshold_rule' in r))
+        self.assertEqual([['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                           'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                          ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                           'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                          ['95f3c171-5605-4021-87ed-eede77101268',
+                           'bf588a78-56c7-4ba4-be46-d71e5002e030']],
+                         [r[RULE_KEY]['metrics']
+                          for r in sorted(data,
+                                          key=operator.itemgetter('name'))])
 
     def test_alarms_query_with_timestamp(self):
         date_time = datetime.datetime(2012, 7, 2, 10, 41)
@@ -201,24 +210,9 @@ class TestAlarms(TestAlarmsBase):
                          'Unknown argument: "timestamp": '
                          'not valid for this resource')
 
-    def test_alarms_query_with_meter(self):
-        resp = self.get_json('/alarms',
-                             headers=self.auth_headers,
-                             q=[{'field': 'meter',
-                                 'op': 'eq',
-                                 'value': 'meter.mine'}],
-                             )
-        self.assertEqual(1, len(resp))
-        self.assertEqual('c',
-                         resp[0]['alarm_id'])
-        self.assertEqual('meter.mine',
-                         resp[0]
-                         ['threshold_rule']
-                         ['meter_name'])
-
     def test_alarms_query_with_state(self):
         alarm = models.Alarm(name='disabled',
-                             type='threshold',
+                             type='gnocchi_aggregation_by_metrics_threshold',
                              enabled=False,
                              alarm_id='c',
                              description='c',
@@ -233,17 +227,16 @@ class TestAlarms(TestAlarmsBase):
                              user_id=self.auth_headers['X-User-Id'],
                              project_id=self.auth_headers['X-Project-Id'],
                              time_constraints=[],
-                             rule=dict(comparison_operator='gt',
-                                       threshold=3.0,
-                                       statistic='avg',
-                                       evaluation_periods=60,
-                                       period=1,
-                                       meter_name='meter.mine',
-                                       query=[
-                                           {'field': 'project_id',
-                                            'op': 'eq', 'value':
-                                            self.auth_headers['X-Project-Id']}
-                                       ]),
+                             rule=dict(
+                                 comparison_operator='gt',
+                                 threshold=3.0,
+                                 aggregation_method='mean',
+                                 evaluation_periods=60,
+                                 granularity=1,
+                                 metrics=[
+                                     '41869681-5776-46d6-91ed-cccc43b6e4e3',
+                                     'a1fb80f4-c242-4f57-87c6-68f47521059e',
+                                 ]),
                              severity='critical')
         self.alarm_conn.update_alarm(alarm)
         resp = self.get_json('/alarms',
@@ -260,9 +253,11 @@ class TestAlarms(TestAlarmsBase):
                                headers=self.auth_headers,
                                q=[{'field': 'type',
                                    'op': 'eq',
-                                   'value': 'threshold'}])
+                                   'value':
+                                   'gnocchi_aggregation_by_metrics_threshold'
+                                   }])
         self.assertEqual(3, len(alarms))
-        self.assertEqual(set(['threshold']),
+        self.assertEqual(set(['gnocchi_aggregation_by_metrics_threshold']),
                          set(alarm['type'] for alarm in alarms))
 
     def test_get_not_existing_alarm(self):
@@ -281,13 +276,16 @@ class TestAlarms(TestAlarmsBase):
                                    'value': 'name1',
                                    }])
         self.assertEqual('name1', alarms[0]['name'])
-        self.assertEqual('meter.test',
-                         alarms[0]['threshold_rule']['meter_name'])
+        self.assertEqual(['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                          'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                         alarms[0][RULE_KEY]['metrics'])
 
         one = self.get_json('/alarms/%s' % alarms[0]['alarm_id'],
                             headers=self.auth_headers)
         self.assertEqual('name1', one['name'])
-        self.assertEqual('meter.test', one['threshold_rule']['meter_name'])
+        self.assertEqual(['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                          'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                         one[RULE_KEY]['metrics'])
         self.assertEqual(alarms[0]['alarm_id'], one['alarm_id'])
         self.assertEqual(alarms[0]['repeat_actions'], one['repeat_actions'])
         self.assertEqual(alarms[0]['time_constraints'],
@@ -295,7 +293,7 @@ class TestAlarms(TestAlarmsBase):
 
     def test_get_alarm_disabled(self):
         alarm = models.Alarm(name='disabled',
-                             type='threshold',
+                             type='gnocchi_aggregation_by_metrics_threshold',
                              enabled=False,
                              alarm_id='c',
                              description='c',
@@ -310,17 +308,17 @@ class TestAlarms(TestAlarmsBase):
                              user_id=self.auth_headers['X-User-Id'],
                              project_id=self.auth_headers['X-Project-Id'],
                              time_constraints=[],
-                             rule=dict(comparison_operator='gt',
-                                       threshold=3.0,
-                                       statistic='avg',
-                                       evaluation_periods=60,
-                                       period=1,
-                                       meter_name='meter.mine',
-                                       query=[
-                                           {'field': 'project_id',
-                                            'op': 'eq', 'value':
-                                            self.auth_headers['X-Project-Id']}
-                                       ]),
+                             rule=dict(
+                                 comparison_operator='gt',
+                                 threshold=3.0,
+                                 aggregation_method='mean',
+                                 evaluation_periods=60,
+                                 granularity=1,
+                                 metrics=[
+                                     '41869681-5776-46d6-91ed-cccc43b6e4e3',
+                                     'a1fb80f4-c242-4f57-87c6-68f47521059e',
+                                 ]
+                             ),
                              severity='critical')
         self.alarm_conn.update_alarm(alarm)
 
@@ -404,30 +402,37 @@ class TestAlarms(TestAlarmsBase):
         jsons = {
             'type': {
                 'name': 'missing type',
-                'threshold_rule': {
-                    'meter_name': 'ameter',
+                RULE_KEY: {
+                    'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                                'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                    'aggregation_method': 'mean',
                     'threshold': 2.0,
                 }
             },
             'name': {
-                'type': 'threshold',
-                'threshold_rule': {
-                    'meter_name': 'ameter',
+                'type': 'gnocchi_aggregation_by_metrics_threshold',
+                RULE_KEY: {
+                    'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                                'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                    'aggregation_method': 'mean',
                     'threshold': 2.0,
                 }
             },
-            'threshold_rule/meter_name': {
-                'name': 'missing meter_name',
-                'type': 'threshold',
-                'threshold_rule': {
+            'threshold_rule/metrics': {
+                'name': 'missing metrics',
+                'type': 'gnocchi_aggregation_by_metrics_threshold',
+                RULE_KEY: {
+                    'aggregation_method': 'mean',
                     'threshold': 2.0,
                 }
             },
             'threshold_rule/threshold': {
                 'name': 'missing threshold',
-                'type': 'threshold',
-                'threshold_rule': {
-                    'meter_name': 'ameter',
+                'type': 'gnocchi_aggregation_by_metrics_threshold',
+                RULE_KEY: {
+                    'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                                'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                    'aggregation_method': 'mean',
                 }
             },
         }
@@ -444,7 +449,7 @@ class TestAlarms(TestAlarmsBase):
     def test_post_invalid_alarm_time_constraint_start(self):
         json = {
             'name': 'added_alarm_invalid_constraint_duration',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'time_constraints': [
                 {
                     'name': 'testcons',
@@ -452,8 +457,10 @@ class TestAlarms(TestAlarmsBase):
                     'duration': 10
                 }
             ],
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                "aggregation_method": "mean",
                 'threshold': 300.0
             }
         }
@@ -465,7 +472,7 @@ class TestAlarms(TestAlarmsBase):
     def test_post_duplicate_time_constraint_name(self):
         json = {
             'name': 'added_alarm_duplicate_constraint_name',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'time_constraints': [
                 {
                     'name': 'testcons',
@@ -478,8 +485,10 @@ class TestAlarms(TestAlarmsBase):
                     'duration': 20
                 }
             ],
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                "aggregation_method": "mean",
                 'threshold': 300.0
             }
         }
@@ -494,10 +503,12 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_null_time_constraint(self):
         json = {
             'name': 'added_alarm_invalid_constraint_duration',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'time_constraints': None,
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                'aggregation_method': 'mean',
                 'threshold': 300.0
             }
         }
@@ -507,7 +518,7 @@ class TestAlarms(TestAlarmsBase):
     def test_post_invalid_alarm_time_constraint_duration(self):
         json = {
             'name': 'added_alarm_invalid_constraint_duration',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'time_constraints': [
                 {
                     'name': 'testcons',
@@ -515,8 +526,9 @@ class TestAlarms(TestAlarmsBase):
                     'duration': -1,
                 }
             ],
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'threshold': 300.0
             }
         }
@@ -528,7 +540,7 @@ class TestAlarms(TestAlarmsBase):
     def test_post_invalid_alarm_time_constraint_timezone(self):
         json = {
             'name': 'added_alarm_invalid_constraint_timezone',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'time_constraints': [
                 {
                     'name': 'testcons',
@@ -537,8 +549,9 @@ class TestAlarms(TestAlarmsBase):
                     'timezone': 'aaaa'
                 }
             ],
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'threshold': 300.0
             }
         }
@@ -547,16 +560,17 @@ class TestAlarms(TestAlarmsBase):
         alarms = list(self.alarm_conn.get_alarms())
         self.assertEqual(3, len(alarms))
 
-    def test_post_invalid_alarm_period(self):
+    def test_post_invalid_alarm_granularity(self):
         json = {
-            'name': 'added_alarm_invalid_period',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            'name': 'added_alarm_invalid_granularity',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'gt',
                 'threshold': 2.0,
-                'statistic': 'avg',
-                'period': -1,
+                'aggregation_method': 'mean',
+                'granularity': -1,
             }
 
         }
@@ -568,22 +582,25 @@ class TestAlarms(TestAlarmsBase):
     def test_post_null_rule(self):
         json = {
             'name': 'added_alarm_invalid_threshold_rule',
-            'type': 'threshold',
-            'threshold_rule': None,
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: None,
         }
         resp = self.post_json('/alarms', params=json, expect_errors=True,
                               status=400, headers=self.auth_headers)
         self.assertEqual(
-            "threshold_rule must be set for threshold type alarm",
+            "gnocchi_aggregation_by_metrics_threshold_rule "
+            "must be set for gnocchi_aggregation_by_metrics_threshold "
+            "type alarm",
             resp.json['error_message']['faultstring'])
 
     def test_post_invalid_alarm_input_state(self):
         json = {
             'name': 'alarm1',
             'state': 'bad_state',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'gt',
                 'threshold': 50.0
             }
@@ -602,9 +619,10 @@ class TestAlarms(TestAlarmsBase):
             'name': 'alarm1',
             'state': 'ok',
             'severity': 'bad_value',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'gt',
                 'threshold': 50.0
             }
@@ -623,8 +641,9 @@ class TestAlarms(TestAlarmsBase):
             'name': 'alarm3',
             'state': 'ok',
             'type': 'bad_type',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'gt',
                 'threshold': 50.0
             }
@@ -644,9 +663,10 @@ class TestAlarms(TestAlarmsBase):
             'name': 'alarm5',
             'enabled': 'bad_enabled',
             'state': 'ok',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'gt',
                 'threshold': 50.0
             }
@@ -664,10 +684,12 @@ class TestAlarms(TestAlarmsBase):
             'name': 'alarm6',
             'enabled': 0,
             'state': 'ok',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'gt',
+                'aggregation_method': 'mean',
                 'threshold': 50.0
             }
         }
@@ -689,22 +711,19 @@ class TestAlarms(TestAlarmsBase):
             'enabled': False,
             'name': 'added_alarm',
             'state': 'ok',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'ok_actions': ok_actions,
             'alarm_actions': alarm_actions,
             'insufficient_data_actions': insufficient_data_actions,
             'repeat_actions': True,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'period': '180',
+                'granularity': '180',
             }
         }
         resp = self.post_json('/alarms', params=json, status=400,
@@ -752,9 +771,11 @@ class TestAlarms(TestAlarmsBase):
 
         json = {
             'name': 'added_alarm_defaults',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                'aggregation_method': 'mean',
                 'threshold': 300.0
             }
         }
@@ -776,22 +797,19 @@ class TestAlarms(TestAlarmsBase):
             'enabled': False,
             'name': 'dup_alarm_name',
             'state': 'ok',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'ok_actions': ['http://something/ok'],
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
             'repeat_actions': True,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'period': '180',
+                'granularity': '180',
             }
         }
 
@@ -807,88 +825,33 @@ class TestAlarms(TestAlarmsBase):
                                    'value': 'dup_alarm_name'}])
         self.assertEqual(2, len(alarms))
 
-    def _do_test_post_alarm(self, exclude_outliers=None):
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'state_reason': 'ignored',
-            'type': 'threshold',
-            'severity': 'low',
-            'ok_actions': ['http://something/ok'],
-            'alarm_actions': ['http://something/alarm'],
-            'insufficient_data_actions': ['http://something/no'],
-            'repeat_actions': True,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
-                'comparison_operator': 'le',
-                'statistic': 'count',
-                'threshold': 50,
-                'evaluation_periods': '3',
-                'period': '180',
-            }
-        }
-        if exclude_outliers is not None:
-            json['threshold_rule']['exclude_outliers'] = exclude_outliers
-
-        self.post_json('/alarms', params=json, status=201,
-                       headers=self.auth_headers)
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(1, len(alarms))
-        json['threshold_rule']['query'].append({
-            'field': 'project_id', 'op': 'eq',
-            'value': self.auth_headers['X-Project-Id']})
-        # to check to IntegerType type conversion
-        json['threshold_rule']['evaluation_periods'] = 3
-        json['threshold_rule']['period'] = 180
-        # to check it's read only
-        json['state_reason'] = "Not evaluated yet"
-        self._verify_alarm(json, alarms[0], 'added_alarm')
-
-    def test_post_alarm_outlier_exclusion_set(self):
-        self._do_test_post_alarm(True)
-
-    def test_post_alarm_outlier_exclusion_clear(self):
-        self._do_test_post_alarm(False)
-
-    def test_post_alarm_outlier_exclusion_defaulted(self):
-        self._do_test_post_alarm()
-
     def test_post_alarm_noauth(self):
         json = {
             'enabled': False,
             'name': 'added_alarm',
             'state': 'ok',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'severity': 'low',
             'ok_actions': ['http://something/ok'],
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
             'repeat_actions': True,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'exclude_outliers': False,
-                'period': '180',
+                'granularity': '180',
             }
         }
         self.post_json('/alarms', params=json, status=201)
         alarms = list(self.alarm_conn.get_alarms(enabled=False))
         self.assertEqual(1, len(alarms))
         # to check to BoundedInt type conversion
-        json['threshold_rule']['evaluation_periods'] = 3
-        json['threshold_rule']['period'] = 180
+        json[RULE_KEY]['evaluation_periods'] = 3
+        json[RULE_KEY]['granularity'] = 180
         if alarms[0].name == 'added_alarm':
             for key in json:
                 if key.endswith('_rule'):
@@ -900,172 +863,21 @@ class TestAlarms(TestAlarmsBase):
         else:
             self.fail("Alarm not found")
 
-    def _do_test_post_alarm_as_admin(self, explicit_project_constraint):
-        """Test the creation of an alarm as admin for another project."""
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'type': 'threshold',
-            'user_id': 'auseridthatisnotmine',
-            'project_id': 'aprojectidthatisnotmine',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
-                'comparison_operator': 'le',
-                'statistic': 'count',
-                'threshold': 50,
-                'evaluation_periods': 3,
-                'period': 180,
-            }
-        }
-        if explicit_project_constraint:
-            project_constraint = {'field': 'project_id', 'op': 'eq',
-                                  'value': 'aprojectidthatisnotmine'}
-            json['threshold_rule']['query'].append(project_constraint)
-        headers = {}
-        headers.update(self.auth_headers)
-        headers['X-Roles'] = 'admin'
-        self.post_json('/alarms', params=json, status=201,
-                       headers=headers)
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(1, len(alarms))
-        self.assertEqual('auseridthatisnotmine', alarms[0].user_id)
-        self.assertEqual('aprojectidthatisnotmine', alarms[0].project_id)
-        self._add_default_threshold_rule(json)
-        if alarms[0].name == 'added_alarm':
-            for key in json:
-                if key.endswith('_rule'):
-                    storage_key = 'rule'
-                    if explicit_project_constraint:
-                        self.assertEqual(json[key],
-                                         getattr(alarms[0], storage_key))
-                    else:
-                        query = getattr(alarms[0], storage_key).get('query')
-                        self.assertEqual(2, len(query))
-                        implicit_constraint = {
-                            u'field': u'project_id',
-                            u'value': u'aprojectidthatisnotmine',
-                            u'op': u'eq'
-                        }
-                        self.assertEqual(implicit_constraint, query[1])
-                else:
-                    self.assertEqual(json[key], getattr(alarms[0], key))
-        else:
-            self.fail("Alarm not found")
-
-    def test_post_alarm_as_admin_explicit_project_constraint(self):
-        """Test the creation of an alarm as admin for another project.
-
-        With an explicit query constraint on the owner's project ID.
-        """
-        self._do_test_post_alarm_as_admin(True)
-
-    def test_post_alarm_as_admin_implicit_project_constraint(self):
-        """Test the creation of an alarm as admin for another project.
-
-        Test without an explicit query constraint on the owner's project ID.
-        """
-        self._do_test_post_alarm_as_admin(False)
-
-    def test_post_alarm_as_admin_no_user(self):
-        """Test the creation of an alarm.
-
-        Test the creation of an alarm as admin for another project but
-        forgetting to set the values.
-        """
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'type': 'threshold',
-            'project_id': 'aprojectidthatisnotmine',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'},
-                          {'field': 'project_id', 'op': 'eq',
-                           'value': 'aprojectidthatisnotmine'}],
-                'comparison_operator': 'le',
-                'statistic': 'count',
-                'threshold': 50,
-                'evaluation_periods': 3,
-                'period': 180,
-            }
-        }
-        headers = {}
-        headers.update(self.auth_headers)
-        headers['X-Roles'] = 'admin'
-        self.post_json('/alarms', params=json, status=201,
-                       headers=headers)
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(1, len(alarms))
-        self.assertEqual(self.auth_headers['X-User-Id'], alarms[0].user_id)
-        self.assertEqual('aprojectidthatisnotmine', alarms[0].project_id)
-        self._verify_alarm(json, alarms[0], 'added_alarm')
-
-    def test_post_alarm_as_admin_no_project(self):
-        """Test the creation of an alarm.
-
-        Test the creation of an alarm as admin for another project but
-        forgetting to set the values.
-        """
-        json = {
-            'enabled': False,
-            'name': 'added_alarm',
-            'state': 'ok',
-            'type': 'threshold',
-            'user_id': 'auseridthatisnotmine',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'},
-                          {'field': 'project_id', 'op': 'eq',
-                           'value': 'aprojectidthatisnotmine'}],
-                'comparison_operator': 'le',
-                'statistic': 'count',
-                'threshold': 50,
-                'evaluation_periods': 3,
-                'period': 180,
-            }
-        }
-        headers = {}
-        headers.update(self.auth_headers)
-        headers['X-Roles'] = 'admin'
-        self.post_json('/alarms', params=json, status=201,
-                       headers=headers)
-        alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(1, len(alarms))
-        self.assertEqual('auseridthatisnotmine', alarms[0].user_id)
-        self.assertEqual(self.auth_headers['X-Project-Id'],
-                         alarms[0].project_id)
-        self._verify_alarm(json, alarms[0], 'added_alarm')
-
     @staticmethod
     def _alarm_representation_owned_by(identifiers):
         json = {
             'name': 'added_alarm',
             'enabled': False,
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'ok_actions': ['http://something/ok'],
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': 3,
-                'period': 180,
+                'granularity': 180,
             }
         }
         for aspect, id in six.iteritems(identifiers):
@@ -1146,17 +958,14 @@ class TestAlarms(TestAlarmsBase):
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
             'repeat_actions': True,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'period': '180',
+                'granularity': '180',
             }
         }
         resp = self.post_json('/alarms', params=json,
@@ -1170,18 +979,15 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_with_duplicate_actions(self):
         body = {
             'name': 'dup-alarm-actions',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'period': '180',
+                'granularity': '180',
             },
             'alarm_actions': ['http://no.where', 'http://no.where']
         }
@@ -1196,18 +1002,15 @@ class TestAlarms(TestAlarmsBase):
         self.CONF.set_override('alarm_max_actions', 1, group='api')
         body = {
             'name': 'alarm-with-many-actions',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'period': '180',
+                'granularity': '180',
             },
             'alarm_actions': ['http://no.where', 'http://no.where2']
         }
@@ -1220,18 +1023,15 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_normal_user_set_log_actions(self):
         body = {
             'name': 'log_alarm_actions',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'period': '180',
+                'granularity': '180',
             },
             'alarm_actions': ['log://']
         }
@@ -1245,18 +1045,15 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_normal_user_set_test_actions(self):
         body = {
             'name': 'test_alarm_actions',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'period': '180',
+                'granularity': '180',
             },
             'alarm_actions': ['test://']
         }
@@ -1270,18 +1067,15 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_admin_user_set_log_test_actions(self):
         body = {
             'name': 'admin_alarm_actions',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'period': '180',
+                'granularity': '180',
             },
             'alarm_actions': ['test://', 'log://']
         }
@@ -1297,18 +1091,15 @@ class TestAlarms(TestAlarmsBase):
     def test_exercise_state_reason(self):
         body = {
             'name': 'nostate',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'period': '180',
+                'granularity': '180',
             },
         }
         headers = self.auth_headers
@@ -1349,18 +1140,15 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_without_actions(self):
         body = {
             'name': 'alarm_actions_none',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': '3',
-                'period': '180',
+                'granularity': '180',
             },
             'alarm_actions': None
         }
@@ -1382,10 +1170,12 @@ class TestAlarms(TestAlarmsBase):
     def test_post_alarm_trust(self):
         json = {
             'name': 'added_alarm_defaults',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'ok_actions': ['trust+http://my.server:1234/foo'],
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                'aggregation_method': 'mean',
                 'threshold': 300.0
             }
         }
@@ -1433,23 +1223,20 @@ class TestAlarms(TestAlarmsBase):
             'enabled': False,
             'name': 'name_put',
             'state': 'ok',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'severity': 'critical',
             'ok_actions': ['http://something/ok'],
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
             'repeat_actions': True,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': 3,
-                'period': 180,
+                'granularity': 180,
             }
         }
         data = self.get_json('/alarms',
@@ -1465,9 +1252,6 @@ class TestAlarms(TestAlarmsBase):
                       headers=self.auth_headers)
         alarm = list(self.alarm_conn.get_alarms(alarm_id=alarm_id,
                                                 enabled=False))[0]
-        json['threshold_rule']['query'].append({
-            'field': 'project_id', 'op': 'eq',
-            'value': self.auth_headers['X-Project-Id']})
         self._verify_alarm(json, alarm)
 
     def test_put_alarm_as_admin(self):
@@ -1477,25 +1261,20 @@ class TestAlarms(TestAlarmsBase):
             'enabled': False,
             'name': 'name_put',
             'state': 'ok',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'severity': 'critical',
             'ok_actions': ['http://something/ok'],
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
             'repeat_actions': True,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'},
-                          {'field': 'project_id', 'op': 'eq',
-                           'value': 'myprojectid'}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': 3,
-                'period': 180,
+                'granularity': 180,
             }
         }
         headers = {}
@@ -1525,23 +1304,20 @@ class TestAlarms(TestAlarmsBase):
             'enabled': False,
             'name': 'name1',
             'state': 'ok',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'severity': 'critical',
             'ok_actions': ['http://something/ok'],
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
             'repeat_actions': True,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': 3,
-                'period': 180,
+                'granularity': 180,
             }
         }
         data = self.get_json('/alarms',
@@ -1564,23 +1340,20 @@ class TestAlarms(TestAlarmsBase):
             'enabled': False,
             'name': 'name1',
             'state': 'ok',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'severity': 'critical',
             'ok_actions': ['http://something/ok'],
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
             'repeat_actions': True,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': 3,
-                'period': 180,
+                'granularity': 180,
             }
         }
         data = self.get_json('/alarms',
@@ -1601,23 +1374,20 @@ class TestAlarms(TestAlarmsBase):
             'enabled': False,
             'name': 'name1',
             'state': 'ok',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'severity': 'critical',
             'ok_actions': ['spam://something/ok'],
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
             'repeat_actions': True,
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.field',
-                           'op': 'eq',
-                           'value': '5',
-                           'type': 'string'}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'count',
+                'aggregation_method': 'count',
                 'threshold': 50,
                 'evaluation_periods': 3,
-                'period': 180,
+                'granularity': 180,
             }
         }
         data = self.get_json('/alarms',
@@ -1715,13 +1485,14 @@ class TestAlarms(TestAlarmsBase):
         # Hit the AlarmsController ...
         json = {
             'name': 'sent_notification',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'severity': 'low',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'gt',
                 'threshold': 2.0,
-                'statistic': 'avg',
+                'aggregation_method': 'mean',
             }
 
         }
@@ -1736,7 +1507,9 @@ class TestAlarms(TestAlarmsBase):
         context, event_type, payload = args
         self.assertEqual('alarm.creation', event_type)
         self.assertEqual('sent_notification', payload['detail']['name'])
-        self.assertEqual('ameter', payload['detail']['rule']['meter_name'])
+        self.assertEqual(['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                          'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                         payload['detail']['rule']['metrics'])
         self.assertTrue(set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
                              'project_id', 'timestamp', 'type',
                              'user_id']).issubset(payload.keys()))
@@ -1780,7 +1553,7 @@ class TestAlarmsHistory(TestAlarmsBase):
         super(TestAlarmsHistory, self).setUp()
         alarm = models.Alarm(
             name='name1',
-            type='threshold',
+            type='gnocchi_aggregation_by_metrics_threshold',
             enabled=True,
             alarm_id='a',
             description='a',
@@ -1800,14 +1573,11 @@ class TestAlarmsHistory(TestAlarmsBase):
                                    duration=300)],
             rule=dict(comparison_operator='gt',
                       threshold=2.0,
-                      statistic='avg',
+                      aggregation_method='mean',
                       evaluation_periods=60,
-                      period=1,
-                      meter_name='meter.test',
-                      query=[dict(field='project_id',
-                                  op='eq',
-                                  value=self.auth_headers['X-Project-Id'])
-                             ]))
+                      granularity=1,
+                      metrics=['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                               'a1fb80f4-c242-4f57-87c6-68f47521059e']))
         self.alarm_conn.create_alarm(alarm)
 
     def _get_alarm_history(self, alarm_id, auth_headers=None, query=None,
@@ -1867,18 +1637,18 @@ class TestAlarmsHistory(TestAlarmsBase):
         alarm = self._get_alarm('a')
         history = self._get_alarm_history('a')
         self.assertEqual([], history)
-        self.assertEqual('avg', alarm['threshold_rule']['statistic'])
+        self.assertEqual('mean', alarm[RULE_KEY]['aggregation_method'])
 
-        rule = alarm['threshold_rule'].copy()
-        rule['statistic'] = 'min'
-        data = dict(threshold_rule=rule)
+        rule = alarm[RULE_KEY].copy()
+        rule['aggregation_method'] = 'min'
+        data = dict(gnocchi_aggregation_by_metrics_threshold_rule=rule)
         self._update_alarm('a', data)
         new_alarm = self._get_alarm('a')
         history = self._get_alarm_history('a')
         self.assertEqual(1, len(history))
         self.assertEqual("min", jsonlib.loads(history[0]['detail'])
-                         ['rule']["statistic"])
-        self.assertEqual('min', new_alarm['threshold_rule']['statistic'])
+                         ['rule']["aggregation_method"])
+        self.assertEqual('min', new_alarm[RULE_KEY]['aggregation_method'])
 
     def test_redundant_update_alarm_property_no_history_change(self):
         alarm = self._get_alarm('a')
@@ -1904,14 +1674,14 @@ class TestAlarmsHistory(TestAlarmsBase):
     def test_get_recorded_alarm_history_on_create(self):
         new_alarm = {
             'name': 'new_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [],
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'max',
+                'aggregation_method': 'max',
                 'threshold': 42.0,
-                'period': 60,
+                'granularity': 60,
                 'evaluation_periods': 1,
             }
         }
@@ -1934,12 +1704,8 @@ class TestAlarmsHistory(TestAlarmsBase):
                                     type='creation',
                                     user_id=alarm['user_id']),
                                history[0])
-        self._add_default_threshold_rule(new_alarm)
-        new_alarm['rule'] = new_alarm['threshold_rule']
-        del new_alarm['threshold_rule']
-        new_alarm['rule']['query'].append({
-            'field': 'project_id', 'op': 'eq',
-            'value': self.auth_headers['X-Project-Id']})
+        new_alarm['rule'] = new_alarm[RULE_KEY]
+        del new_alarm[RULE_KEY]
         self._assert_in_json(new_alarm, history[0]['detail'])
 
     def _do_test_get_recorded_alarm_history_on_update(self,
@@ -1980,18 +1746,16 @@ class TestAlarmsHistory(TestAlarmsBase):
                        'X-Project-Id': member_project}
         new_alarm = {
             'name': 'new_alarm',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'state': 'ok',
-            'threshold_rule': {
-                'meter_name': 'other_meter',
-                'query': [{'field': 'project_id',
-                           'op': 'eq',
-                           'value': member_project}],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'max',
+                'aggregation_method': 'max',
                 'threshold': 42.0,
                 'evaluation_periods': 1,
-                'period': 60
+                'granularity': 60
             }
         }
         self.post_json('/alarms', params=new_alarm, status=201,
@@ -2007,9 +1771,8 @@ class TestAlarmsHistory(TestAlarmsBase):
         data = dict(state='alarm')
         self._update_alarm(alarm['alarm_id'], data, auth_headers=admin_auth)
 
-        self._add_default_threshold_rule(new_alarm)
-        new_alarm['rule'] = new_alarm['threshold_rule']
-        del new_alarm['threshold_rule']
+        new_alarm['rule'] = new_alarm[RULE_KEY]
+        del new_alarm[RULE_KEY]
 
         # ensure that both the creation event and state transition
         # are visible to the non-admin alarm owner and admin user alike
@@ -2155,16 +1918,16 @@ class TestAlarmsQuotas(TestAlarmsBase):
     def _test_alarm_quota(self):
         alarm = {
             'name': 'alarm',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'user_id': self.auth_headers['X-User-Id'],
             'project_id': self.auth_headers['X-Project-Id'],
-            'threshold_rule': {
-                'meter_name': 'testmeter',
-                'query': [],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'max',
+                'aggregation_method': 'max',
                 'threshold': 42.0,
-                'period': 60,
+                'granularity': 60,
                 'evaluation_periods': 1,
             }
         }
@@ -2226,16 +1989,16 @@ class TestAlarmsQuotas(TestAlarmsBase):
 
         alarm = {
             'name': 'alarm',
-            'type': 'threshold',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
             'user_id': self.auth_headers['X-User-Id'],
             'project_id': self.auth_headers['X-Project-Id'],
-            'threshold_rule': {
-                'meter_name': 'testmeter',
-                'query': [],
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'le',
-                'statistic': 'max',
+                'aggregation_method': 'max',
                 'threshold': 42.0,
-                'period': 60,
+                'granularity': 60,
                 'evaluation_periods': 1,
             }
         }
@@ -2265,18 +2028,20 @@ class TestAlarmsRuleThreshold(TestAlarmsBase):
     def test_post_invalid_alarm_statistic(self):
         json = {
             'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'gt',
                 'threshold': 2.0,
-                'statistic': 'magic',
+                'aggregation_method': 'magic',
             }
         }
         resp = self.post_json('/alarms', params=json, expect_errors=True,
                               status=400, headers=self.auth_headers)
-        expected_err_msg = ("Invalid input for field/attribute"
-                            " statistic. Value: 'magic'.")
+        expected_err_msg = ("aggregation_method should be in ['count', "
+                            "'mean', 'max', 'min', 'first', 'last', 'std'] "
+                            "not magic")
         self.assertIn(expected_err_msg,
                       resp.json['error_message']['faultstring'])
         alarms = list(self.alarm_conn.get_alarms())
@@ -2286,9 +2051,10 @@ class TestAlarmsRuleThreshold(TestAlarmsBase):
         json = {
             'name': 'alarm2',
             'state': 'ok',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'comparison_operator': 'bad_co',
                 'threshold': 50.0
             }
@@ -2303,140 +2069,31 @@ class TestAlarmsRuleThreshold(TestAlarmsBase):
         alarms = list(self.alarm_conn.get_alarms())
         self.assertEqual(0, len(alarms))
 
-    def test_post_invalid_alarm_query(self):
-        json = {
-            'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.invalid',
-                           'field': 'gt',
-                           'value': 'value'}],
-                'comparison_operator': 'gt',
-                'threshold': 2.0,
-                'statistic': 'avg',
-            }
-        }
-        self.post_json('/alarms', params=json, expect_errors=True, status=400,
-                       headers=self.auth_headers)
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(0, len(alarms))
-
-    def test_post_invalid_alarm_query_field_type(self):
-        json = {
-            'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.valid',
-                           'op': 'eq',
-                           'value': 'value',
-                           'type': 'blob'}],
-                'comparison_operator': 'gt',
-                'threshold': 2.0,
-                'statistic': 'avg',
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        expected_error_message = 'The data type blob is not supported.'
-        fault_string = resp.json['error_message']['faultstring']
-        self.assertTrue(fault_string.startswith(expected_error_message))
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(0, len(alarms))
-
-    def test_post_invalid_alarm_query_non_field(self):
-        json = {
-            'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'q.field': 'metadata.valid',
-                           'value': 'value'}],
-                'threshold': 2.0,
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        expected_error_message = ("Unknown attribute for argument "
-                                  "data.threshold_rule.query: q.field")
-        fault_string = resp.json['error_message']['faultstring']
-        self.assertEqual(expected_error_message, fault_string)
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(0, len(alarms))
-
-    def test_post_invalid_alarm_query_non_value(self):
-        json = {
-            'name': 'added_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'metadata.valid',
-                           'q.value': 'value'}],
-                'threshold': 2.0,
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        expected_error_message = ("Unknown attribute for argument "
-                                  "data.threshold_rule.query: q.value")
-        fault_string = resp.json['error_message']['faultstring']
-        self.assertEqual(expected_error_message, fault_string)
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(0, len(alarms))
-
-    def test_post_invalid_alarm_timestamp_in_threshold_rule(self):
-        date_time = datetime.datetime(2012, 7, 2, 10, 41)
-        isotime = date_time.isoformat()
-
-        json = {
-            'name': 'invalid_alarm',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'timestamp',
-                           'op': 'gt',
-                           'value': isotime}],
-                'comparison_operator': 'gt',
-                'threshold': 2.0,
-            }
-        }
-        resp = self.post_json('/alarms', params=json, expect_errors=True,
-                              status=400, headers=self.auth_headers)
-        alarms = list(self.alarm_conn.get_alarms())
-        self.assertEqual(0, len(alarms))
-        self.assertEqual(
-            'Unknown argument: "timestamp": '
-            'not valid for this resource',
-            resp.json['error_message']['faultstring'])
-
     def test_post_threshold_rule_defaults(self):
         to_check = {
             'name': 'added_alarm_defaults',
             'state': 'insufficient data',
-            'description': ('Alarm when ameter is eq a avg of '
-                            '300.0 over 60 seconds'),
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
-                'query': [{'field': 'project_id',
-                           'op': 'eq',
-                           'value': self.auth_headers['X-Project-Id']}],
+            'description': ('gnocchi_aggregation_by_metrics_threshold '
+                            'alarm rule'),
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                 'threshold': 300.0,
                 'comparison_operator': 'eq',
-                'statistic': 'avg',
+                'aggregation_method': 'mean',
                 'evaluation_periods': 1,
-                'period': 60,
+                'granularity': 60,
             }
 
         }
-        self._add_default_threshold_rule(to_check)
-
         json = {
             'name': 'added_alarm_defaults',
-            'type': 'threshold',
-            'threshold_rule': {
-                'meter_name': 'ameter',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                            'a1fb80f4-c242-4f57-87c6-68f47521059e'],
+                'aggregation_method': 'mean',
                 'threshold': 300.0
             }
         }
@@ -2545,8 +2202,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
                                    query='{"=": {"server_group": '
                                    '"my_autoscaling_group"}}')
                          ),
-
-                ]:
+        ]:
 
             self.alarm_conn.create_alarm(alarm)
 
@@ -2574,7 +2230,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
             'repeat_actions': True,
-            'gnocchi_aggregation_by_metrics_threshold_rule': {
+            RULE_KEY: {
                 'metrics': ['b3d9d8ab-05e8-439f-89ad-5e978dd2a5eb',
                             '009d4faf-c275-46f0-8f2d-670b15bac2b0'],
                 'comparison_operator': 'le',
@@ -2642,7 +2298,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
             'alarm_actions': ['http://something/alarm'],
             'insufficient_data_actions': ['http://something/no'],
             'repeat_actions': True,
-            'gnocchi_aggregation_by_metrics_threshold_rule': {
+            RULE_KEY: {
                 'metrics': ['b3d9d8ab-05e8-439f-89ad-5e978dd2a5eb',
                             '009d4faf-c275-46f0-8f2d-670b15bac2b0'],
                 'comparison_operator': 'le',
@@ -2807,49 +2463,33 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
     def setUp(self):
         super(TestAlarmsCompositeRule, self).setUp()
         self.sub_rule1 = {
-            "type": "threshold",
-            "meter_name": "cpu_util",
+            "type": "gnocchi_aggregation_by_metrics_threshold",
+            "metrics": ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                        'a1fb80f4-c242-4f57-87c6-68f47521059e'],
             "evaluation_periods": 5,
             "threshold": 0.8,
-            "query": [{
-                "field": "metadata.metering.stack_id",
-                "value": "36b20eb3-d749-4964-a7d2-a71147cd8147",
-                "op": "eq"
-            }],
-            "statistic": "avg",
-            "period": 60,
-            "exclude_outliers": False,
+            "aggregation_method": "mean",
+            "granularity": 60,
             "comparison_operator": "gt"
         }
         self.sub_rule2 = {
-            "type": "threshold",
-            "meter_name": "disk.iops",
+            "type": "gnocchi_aggregation_by_metrics_threshold",
+            "metrics": ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                        'a1fb80f4-c242-4f57-87c6-68f47521059e'],
             "evaluation_periods": 4,
             "threshold": 200,
-            "query": [{
-                "field": "metadata.metering.stack_id",
-                "value": "36b20eb3-d749-4964-a7d2-a71147cd8147",
-                "op": "eq"
-            }],
-            "statistic": "max",
-            "period": 60,
-            "exclude_outliers": False,
+            "aggregation_method": "max",
+            "granularity": 60,
             "comparison_operator": "gt"
         }
         self.sub_rule3 = {
-            "type": "threshold",
-            "meter_name": "network.incoming.packets.rate",
+            "type": "gnocchi_aggregation_by_metrics_threshold",
+            "metrics": ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                        'a1fb80f4-c242-4f57-87c6-68f47521059e'],
             "evaluation_periods": 3,
             "threshold": 1000,
-            "query": [{
-                "field": "metadata.metering.stack_id",
-                "value":
-                    "36b20eb3-d749-4964-a7d2-a71147cd8147",
-                "op": "eq"
-            }],
-            "statistic": "avg",
-            "period": 60,
-            "exclude_outliers": False,
+            "aggregation_method": "mean",
+            "granularity": 60,
             "comparison_operator": "gt"
         }
 
@@ -2922,13 +2562,17 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
 
     def test_post_with_sub_rule_with_only_required_params(self):
         sub_rulea = {
-            "meter_name": "cpu_util",
+            "metrics": ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                        'a1fb80f4-c242-4f57-87c6-68f47521059e'],
             "threshold": 0.8,
-            "type": "threshold"}
+            "aggregation_method": "mean",
+            "type": "gnocchi_aggregation_by_metrics_threshold"}
         sub_ruleb = {
-            "meter_name": "disk.iops",
+            "metrics": ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                        'a1fb80f4-c242-4f57-87c6-68f47521059e'],
             "threshold": 200,
-            "type": "threshold"}
+            "aggregation_method": "mean",
+            "type": "gnocchi_aggregation_by_metrics_threshold"}
         json = {
             "type": "composite",
             "name": "composite_alarm",
@@ -2989,7 +2633,7 @@ class TestPaginationQuery(TestAlarmsBase):
                          severities)
 
     def test_pagination_query_limit(self):
-        data = self.get_json('/alarms?limit=2',  headers=self.auth_headers)
+        data = self.get_json('/alarms?limit=2', headers=self.auth_headers)
         self.assertEqual(2, len(data))
 
     def test_pagination_query_limit_sort(self):
