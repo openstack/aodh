@@ -30,6 +30,8 @@ non_admin_header = {"X-Roles": "Member",
                     "X-Project-Id":
                     "project-id1"}
 
+RULE_TYPE = 'gnocchi_aggregation_by_metrics_threshold'
+
 
 class TestQueryAlarmsController(tests_api.FunctionalTest):
 
@@ -44,7 +46,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
                     alarm_id = "-".join([state, date.isoformat(), str(id)])
                     project_id = "project-id%d" % id
                     alarm = models.Alarm(name=alarm_id,
-                                         type='threshold',
+                                         type=RULE_TYPE,
                                          enabled=True,
                                          alarm_id=alarm_id,
                                          description='a',
@@ -61,15 +63,10 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
                                          time_constraints=[],
                                          rule=dict(comparison_operator='gt',
                                                    threshold=2.0,
-                                                   statistic='avg',
+                                                   aggregation_method='mean',
                                                    evaluation_periods=60,
-                                                   period=1,
-                                                   meter_name='meter.test',
-                                                   query=[{'field':
-                                                           'project_id',
-                                                           'op': 'eq',
-                                                           'value':
-                                                           project_id}]),
+                                                   granularity=1,
+                                                   metrics=[]),
                                          severity='critical')
                     self.alarm_conn.create_alarm(alarm)
 
