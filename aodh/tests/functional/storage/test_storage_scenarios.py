@@ -26,6 +26,11 @@ from aodh.tests import constants
 from aodh.tests.functional import db as tests_db
 
 
+ALARM_TYPE = 'gnocchi_aggregation_by_metrics_threshold'
+METRIC_IDS = ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+              'a1fb80f4-c242-4f57-87c6-68f47521059e']
+
+
 class DBTestBase(tests_db.TestBase):
     @staticmethod
     def create_side_effect(method, exception_type, test_exception):
@@ -48,7 +53,7 @@ class AlarmTestBase(DBTestBase):
     def add_some_alarms(self):
         alarms = [alarm_models.Alarm(alarm_id='r3d',
                                      enabled=True,
-                                     type='threshold',
+                                     type=ALARM_TYPE,
                                      name='red-alert',
                                      description='my red-alert',
                                      timestamp=datetime.datetime(2015, 7,
@@ -67,18 +72,14 @@ class AlarmTestBase(DBTestBase):
                                                             duration=300)],
                                      rule=dict(comparison_operator='eq',
                                                threshold=36,
-                                               statistic='count',
+                                               aggregation_method='count',
                                                evaluation_periods=1,
-                                               period=60,
-                                               meter_name='test.one',
-                                               query=[{'field': 'key',
-                                                       'op': 'eq',
-                                                       'value': 'value',
-                                                       'type': 'string'}]),
+                                               granularity=60,
+                                               metrics=METRIC_IDS)
                                      ),
                   alarm_models.Alarm(alarm_id='0r4ng3',
                                      enabled=True,
-                                     type='threshold',
+                                     type=ALARM_TYPE,
                                      name='orange-alert',
                                      description='a orange',
                                      timestamp=datetime.datetime(2015, 7,
@@ -95,18 +96,14 @@ class AlarmTestBase(DBTestBase):
                                      time_constraints=[],
                                      rule=dict(comparison_operator='gt',
                                                threshold=75,
-                                               statistic='avg',
+                                               aggregation_method='avg',
                                                evaluation_periods=1,
-                                               period=60,
-                                               meter_name='test.forty',
-                                               query=[{'field': 'key2',
-                                                       'op': 'eq',
-                                                       'value': 'value2',
-                                                       'type': 'string'}]),
+                                               granularity=60,
+                                               metrics=METRIC_IDS)
                                      ),
                   alarm_models.Alarm(alarm_id='y3ll0w',
                                      enabled=False,
-                                     type='threshold',
+                                     type=ALARM_TYPE,
                                      name='yellow-alert',
                                      description='yellow',
                                      timestamp=datetime.datetime(2015, 7,
@@ -123,19 +120,10 @@ class AlarmTestBase(DBTestBase):
                                      time_constraints=[],
                                      rule=dict(comparison_operator='lt',
                                                threshold=10,
-                                               statistic='min',
+                                               aggregation_method='min',
                                                evaluation_periods=1,
-                                               period=60,
-                                               meter_name='test.five',
-                                               query=[{'field': 'key2',
-                                                       'op': 'eq',
-                                                       'value': 'value2',
-                                                       'type': 'string'},
-                                                      {'field':
-                                                       'user_metadata.key3',
-                                                       'op': 'eq',
-                                                       'value': 'value3',
-                                                       'type': 'string'}]),
+                                               granularity=60,
+                                               metrics=METRIC_IDS)
                                      )]
 
         for a in alarms:
@@ -175,7 +163,7 @@ class AlarmTest(AlarmTestBase):
 
     def test_list_by_type(self):
         self.add_some_alarms()
-        alarms = list(self.alarm_conn.get_alarms(alarm_type='threshold'))
+        alarms = list(self.alarm_conn.get_alarms(alarm_type=ALARM_TYPE))
         self.assertEqual(3, len(alarms))
 
     def test_list_excluded_by_name(self):
@@ -191,31 +179,27 @@ class AlarmTest(AlarmTestBase):
         alarms = list(self.alarm_conn.get_alarms())
         self.assertEqual(3, len(alarms))
 
-        meter_names = sorted([a.rule['meter_name'] for a in alarms])
-        self.assertEqual(['test.five', 'test.forty', 'test.one'], meter_names)
+        metrics = sorted([a.rule['metrics'] for a in alarms])
+        self.assertEqual([METRIC_IDS, METRIC_IDS, METRIC_IDS], metrics)
 
     def test_update(self):
         self.add_some_alarms()
+        metrics = ['6841c175-d7c4-4bc2-bc7a-1c7832271b8f',
+                   'bc1efaa5-93b4-4518-8337-18519917c15a']
         orange = list(self.alarm_conn.get_alarms(name='orange-alert'))[0]
         orange.enabled = False
         orange.state = alarm_models.Alarm.ALARM_INSUFFICIENT_DATA
-        query = [{'field': 'metadata.group',
-                  'op': 'eq',
-                  'value': 'test.updated',
-                  'type': 'string'}]
-        orange.rule['query'] = query
-        orange.rule['meter_name'] = 'new_meter_name'
+        orange.rule['metrics'] = metrics
         updated = self.alarm_conn.update_alarm(orange)
         self.assertFalse(updated.enabled)
         self.assertEqual(alarm_models.Alarm.ALARM_INSUFFICIENT_DATA,
                          updated.state)
-        self.assertEqual(query, updated.rule['query'])
-        self.assertEqual('new_meter_name', updated.rule['meter_name'])
+        self.assertEqual(metrics, updated.rule['metrics'])
 
     def test_update_llu(self):
         llu = alarm_models.Alarm(alarm_id='llu',
                                  enabled=True,
-                                 type='threshold',
+                                 type=ALARM_TYPE,
                                  name='llu',
                                  description='llu',
                                  timestamp=constants.MIN_DATETIME,
@@ -231,11 +215,10 @@ class AlarmTest(AlarmTestBase):
                                  time_constraints=[],
                                  rule=dict(comparison_operator='lt',
                                            threshold=34,
-                                           statistic='max',
+                                           aggregation_method='max',
                                            evaluation_periods=1,
-                                           period=60,
-                                           meter_name='llt',
-                                           query=[])
+                                           granularity=60,
+                                           metrics=METRIC_IDS)
                                  )
         updated = self.alarm_conn.create_alarm(llu)
         updated.state = alarm_models.Alarm.ALARM_OK
