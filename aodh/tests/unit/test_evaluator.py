@@ -36,11 +36,12 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
 
         self.threshold_eval = mock.MagicMock()
         self._fake_conn = mock.Mock()
+        self._fake_conn.get_alarms.return_value = []
         self._fake_pc = mock.Mock()
         self._fake_em = extension.ExtensionManager.make_test_instance(
             [
                 extension.Extension(
-                    'threshold',
+                    'gnocchi_aggregation_by_metrics_threshold',
                     None,
                     None,
                     self.threshold_eval),
@@ -90,7 +91,8 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
                             coordination_heartbeat=5)
 
     def test_evaluation_cycle(self):
-        alarm = mock.Mock(type='threshold', alarm_id="alarm_id1")
+        alarm = mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
+                          alarm_id="alarm_id1")
         self._fake_pc.extract_my_subset.return_value = ["alarm_id1"]
         self._fake_pc.is_active.return_value = False
         self._fake_conn.get_alarms.return_value = [alarm]
@@ -107,8 +109,10 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
     def test_evaluation_cycle_with_bad_alarm(self):
 
         alarms = [
-            mock.Mock(type='threshold', name='bad', alarm_id='a'),
-            mock.Mock(type='threshold', name='good', alarm_id='b'),
+            mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
+                      name='bad', alarm_id='a'),
+            mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
+                      name='good', alarm_id='b'),
         ]
         self.threshold_eval.evaluate.side_effect = [Exception('Boom!'), None]
 
@@ -125,7 +129,8 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
     def test_unknown_extension_skipped(self):
         alarms = [
             mock.Mock(type='not_existing_type', alarm_id='a'),
-            mock.Mock(type='threshold', alarm_id='b')
+            mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
+                      alarm_id='b')
         ]
 
         self._fake_pc.is_active.return_value = False
