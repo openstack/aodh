@@ -1,0 +1,4 @@
+---
+deprecations:
+  - |
+    The deprecated 'threshold' alarm type has been removed.

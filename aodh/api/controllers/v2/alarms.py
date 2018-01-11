@@ -21,10 +21,8 @@
 import datetime
 import itertools
 import json
-import warnings
 
 import croniter
-import debtcollector
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import netutils
@@ -273,13 +271,6 @@ class Alarm(base.Base):
 
     @staticmethod
     def validate(alarm):
-        if alarm.type == 'threshold':
-            warnings.simplefilter("always")
-            debtcollector.deprecate(
-                "Ceilometer's API is deprecated as of Ocata. Therefore, "
-                " threshold rule alarms are no longer supported.",
-                version="5.0.0")
-
         Alarm.check_rule(alarm)
         Alarm.check_alarm_actions(alarm)
 
@@ -357,7 +348,7 @@ class Alarm(base.Base):
         return cls(alarm_id=None,
                    name="SwiftObjectAlarm",
                    description="An alarm",
-                   type='threshold',
+                   type='gnocchi_aggregation_by_metrics_threshold',
                    time_constraints=[AlarmTimeConstraint.sample().as_dict()],
                    user_id="c96c887c216949acbdfbd8b494863567",
                    project_id="c96c887c216949acbdfbd8b494863567",

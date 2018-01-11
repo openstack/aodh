@@ -13,7 +13,6 @@
 """Tests for aodh/evaluator/composite.py
 """
 
-from ceilometerclient.v2 import statistics
 import fixtures
 import mock
 from oslo_utils import timeutils
@@ -36,10 +35,6 @@ class BaseCompositeEvaluate(base.TestEvaluatorBase):
             'aodh.evaluator.gnocchi.client'
         )).mock.Client.return_value
         super(BaseCompositeEvaluate, self).setUp()
-
-    @staticmethod
-    def _get_stats(attr, value, count=1):
-        return statistics.Statistics(None, {attr: value, 'count': count})
 
     @staticmethod
     def _get_gnocchi_stats(granularity, values):
