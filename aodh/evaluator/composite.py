@@ -118,7 +118,7 @@ class CompositeEvaluator(evaluator.Evaluator):
     @property
     def threshold_evaluators(self):
         if not self._threshold_evaluators:
-            threshold_types = ('threshold', 'gnocchi_resources_threshold',
+            threshold_types = ('gnocchi_resources_threshold',
                                'gnocchi_aggregation_by_metrics_threshold',
                                'gnocchi_aggregation_by_resources_threshold')
             self._threshold_evaluators = stevedore.NamedExtensionManager(
@@ -151,13 +151,16 @@ class CompositeEvaluator(evaluator.Evaluator):
                          alarm_rule['or'])
                 rules_alarm, rules_ok = zip(*rules)
                 return OrOp(rules_alarm), AndOp(rules_ok)
-        else:
+        elif alarm_rule['type'] in self.threshold_evaluators:
             rule_evaluator = self.threshold_evaluators[alarm_rule['type']].obj
             self.rule_num += 1
             name = self.rule_name_prefix + str(self.rule_num)
             rule = RuleTarget(alarm_rule, rule_evaluator, name)
             self.rule_targets.append(rule)
             return AlarmEvaluation(rule), OkEvaluation(rule)
+        else:
+            LOG.error("Invalid rule type: %s" % alarm_rule['type'])
+            return False, False
 
     def _reason(self, alarm, new_state, rule_target_alarm):
         transition = alarm.state != new_state

@@ -47,11 +47,6 @@ Valid threshold alarms are: ``gnocchi_resources_threshold_rule``,
 ``gnocchi_aggregation_by_metrics_threshold_rule``, or
 ``gnocchi_aggregation_by_resources_threshold_rule``.
 
-.. note::
-
-  As of Ocata, the ``threshold`` alarm is deprecated since Ceilometer's
-  native storage API is deprecated.
-
 Composite rule alarms
 ---------------------
 

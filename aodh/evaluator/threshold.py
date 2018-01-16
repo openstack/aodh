@@ -13,21 +13,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import copy
 import datetime
 import operator
 import six
 
-from ceilometerclient import client as ceiloclient
-from ceilometerclient import exc as ceiloexc
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
 
 from aodh import evaluator
-from aodh.evaluator import utils
-from aodh.i18n import _
-from aodh import keystone_client
 
 LOG = log.getLogger(__name__)
 
@@ -63,85 +57,19 @@ class ThresholdEvaluator(evaluator.Evaluator):
     # with 'additional_ingestion_lag' seconds if needed.
     look_back = 1
 
-    def __init__(self, conf):
-        super(ThresholdEvaluator, self).__init__(conf)
-        self._cm_client = None
-
-    @property
-    def cm_client(self):
-        if self._cm_client is None:
-            auth_config = self.conf.service_credentials
-            self._cm_client = ceiloclient.get_client(
-                version=2,
-                session=keystone_client.get_session(self.conf),
-                # ceiloclient adapter options
-                region_name=auth_config.region_name,
-                interface=auth_config.interface,
-            )
-
-        return self._cm_client
-
     def _bound_duration(self, rule):
         """Bound the duration of the statistics query."""
         now = timeutils.utcnow()
         # when exclusion of weak datapoints is enabled, we extend
         # the look-back period so as to allow a clearer sample count
         # trend to be established
-        look_back = (self.look_back if not rule.get('exclude_outliers')
-                     else rule['evaluation_periods'])
         window = ((rule.get('period', None) or rule['granularity'])
-                  * (rule['evaluation_periods'] + look_back) +
+                  * (rule['evaluation_periods'] + self.look_back) +
                   self.conf.additional_ingestion_lag)
         start = now - datetime.timedelta(seconds=window)
         LOG.debug('query stats from %(start)s to '
                   '%(now)s', {'start': start, 'now': now})
         return start.isoformat(), now.isoformat()
-
-    @staticmethod
-    def _sanitize(rule, statistics):
-        """Sanitize statistics."""
-        LOG.debug('sanitize stats %s', statistics)
-        if rule.get('exclude_outliers'):
-            key = operator.attrgetter('count')
-            mean = utils.mean(statistics, key)
-            stddev = utils.stddev(statistics, key, mean)
-            lower = mean - 2 * stddev
-            upper = mean + 2 * stddev
-            inliers, outliers = utils.anomalies(statistics, key, lower, upper)
-            if outliers:
-                LOG.debug('excluded weak datapoints with sample counts %s',
-                          [s.count for s in outliers])
-                statistics = inliers
-            else:
-                LOG.debug('no excluded weak datapoints')
-
-        # in practice statistics are always sorted by period start, not
-        # strictly required by the API though
-        statistics = statistics[-rule['evaluation_periods']:]
-        result_statistics = [getattr(stat, rule['statistic'])
-                             for stat in statistics]
-        LOG.debug('pruned statistics to %d', len(statistics))
-        return result_statistics
-
-    def _statistics(self, rule, start, end):
-        """Retrieve statistics over the current window."""
-        after = dict(field='timestamp', op='ge', value=start)
-        before = dict(field='timestamp', op='le', value=end)
-        query = copy.copy(rule['query'])
-        query.extend([before, after])
-        LOG.debug('stats query %s', query)
-        try:
-            return self.cm_client.statistics.list(
-                meter_name=rule['meter_name'], q=query,
-                period=rule['period'])
-        except Exception as e:
-            if isinstance(e, ceiloexc.HTTPException) and e.code == 410:
-                LOG.warning("This telemetry installation is not configured to "
-                            "support alarm of type 'threshold', they should "
-                            "be disabled or removed.")
-            else:
-                LOG.exception(_('alarm stats retrieval failed'))
-            return []
 
     @staticmethod
     def _reason_data(disposition, count, most_recent):

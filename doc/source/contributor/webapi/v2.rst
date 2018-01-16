@@ -32,9 +32,6 @@ Alarms
 .. autotype:: aodh.api.controllers.v2.alarms.Alarm
    :members:
 
-.. autotype:: aodh.api.controllers.v2.alarm_rules.threshold.AlarmThresholdRule
-   :members:
-
 .. autotype:: aodh.api.controllers.v2.alarm_rules.gnocchi.MetricOfResourceRule
    :members:
 
@@ -100,6 +97,9 @@ field to specify the rule type, like in the following sample::
 
    {
        "threshold": 0.8,
-       "meter_name": "cpu_util",
-       "type": "threshold"
+       "meters": [
+           "f6857d3f-bde6-441a-aa1d-e98fa4ea543f",
+           "ea1491ca-5309-4b5a-9f05-34409c6e8b6c"
+       ],
+       "type": "gnocchi_resources_threshold"
    }
