@@ -9,3 +9,8 @@ Documentation for the project can be found at:
 
 The project home is at:
   https://launchpad.net/aodh
+
+Bugs and feature requests are tracked on Launchpad at:
+
+    https://bugs.launchpad.net/aodh
+
