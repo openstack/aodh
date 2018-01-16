@@ -42,16 +42,13 @@
           set -x
           export PYTHONUNBUFFERED=true
           export DEVSTACK_GATE_TEMPEST=1
-          export DEVSTACK_GATE_TEMPEST_REGEX="ceilometer.tests.tempest.aodh"
+          export DEVSTACK_GATE_TEMPEST_REGEX="telemetry_tempest_plugin.aodh"
           export DEVSTACK_GATE_TEMPEST_ALL_PLUGINS=1
-          export PROJECTS="openstack/aodh $PROJECTS"
+          export PROJECTS="openstack/aodh openstack/ceilometer openstack/telemetry-tempest-plugin $PROJECTS"
+          export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin telemetry-tempest-plugin git://git.openstack.org/openstack/telemetry-tempest-plugin"
+          export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
+          export DEVSTACK_LOCAL_CONFIG+=$'\n'"CEILOMETER_BACKEND=gnocchi"
           export AODH_BACKEND=mysql
-          if [ "mysql" = "postgresql" ] ; then
-              export DEVSTACK_GATE_POSTGRES=1
-          fi
-          if [ "x" = "x-neutron" ] ; then
-              export DEVSTACK_GATE_NEUTRON=1
-          fi
           cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
           ./safe-devstack-vm-gate-wrap.sh
         executable: /bin/bash
