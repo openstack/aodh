@@ -13,8 +13,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import datetime
 import fixtures
+import json
 import unittest
 
 from gnocchiclient import exceptions
@@ -26,6 +28,7 @@ import six
 from six import moves
 
 from aodh.evaluator import gnocchi
+from aodh import messaging
 from aodh.storage import models
 from aodh.tests import constants
 from aodh.tests.unit.evaluator import base
@@ -220,6 +223,64 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
         expected = mock.call(self.alarms[0], 'alarm', reason, reason_data)
         self.assertEqual(expected, self.notifier.notify.call_args)
 
+    def _construct_payloads(self):
+        payloads = []
+        reasons = ["Transition to alarm due to 5 samples outside threshold, "
+                   "most recent: 85.0",
+                   "Transition to alarm due to 4 samples outside threshold, "
+                   "most recent: 7.0"]
+        for alarm in self.alarms:
+            num = self.alarms.index(alarm)
+            type = models.AlarmChange.STATE_TRANSITION
+            detail = json.dumps({'state': alarm.state,
+                                 'transition_reason': reasons[num]})
+            on_behalf_of = alarm.project_id
+            payload = dict(
+                event_id='fake_event_id_%s' % num,
+                alarm_id=alarm.alarm_id,
+                type=type,
+                detail=detail,
+                user_id='fake_user_id',
+                project_id='fake_project_id',
+                on_behalf_of=on_behalf_of,
+                timestamp=datetime.datetime(2015, 7, 26, 3, 33, 21, 876795))
+            payloads.append(payload)
+        return payloads
+
+    @mock.patch.object(uuidutils, 'generate_uuid')
+    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch.object(messaging, 'get_notifier')
+    def test_alarm_change_record(self, get_notifier, utcnow, mock_uuid):
+        # the context.RequestContext() method need to generate uuid,
+        # so we need to provide 'fake_uuid_0' and 'fake_uuid_1' for that.
+        mock_uuid.side_effect = ['fake_event_id_0', 'fake_event_id_1']
+        change_notifier = mock.MagicMock()
+        get_notifier.return_value = change_notifier
+        utcnow.return_value = datetime.datetime(2015, 7, 26, 3, 33, 21, 876795)
+
+        self._set_all_alarms('ok')
+        avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
+                                    for v in moves.xrange(1, 6)])
+
+        self.client.metric.get_measures.side_effect = [avgs]
+
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('alarm')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls)
+
+        payloads = self._construct_payloads()
+        expected_payloads = [mock.call(p) for p in payloads]
+        change_records = \
+            self.storage_conn.record_alarm_change.call_args_list
+        self.assertEqual(expected_payloads, change_records)
+        notify_calls = change_notifier.info.call_args_list
+        notification = "alarm.state_transition"
+        expected_payloads = [mock.call(mock.ANY, notification, p)
+                             for p in payloads]
+        self.assertEqual(expected_payloads, notify_calls)
+
     def test_equivocal_from_known_state_ok(self):
         self._set_all_alarms('ok')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
@@ -295,6 +356,76 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
                          "Alarm should not change state if the current "
                          " time is outside its time constraint.")
         self.assertEqual([], self.notifier.notify.call_args_list)
+
+    @unittest.skipIf(six.PY3,
+                     "the aodh base class is not python 3 ready")
+    @mock.patch.object(timeutils, 'utcnow')
+    def test_state_change_inside_time_constraint(self, mock_utcnow):
+        self._set_all_alarms('ok')
+        self.alarms[0].time_constraints = [
+            {'name': 'test',
+             'description': 'test',
+             'start': '0 11 * * *',  # daily at 11:00
+             'duration': 10800,  # 3 hours
+             'timezone': 'Europe/Ljubljana'}
+        ]
+        dt = datetime.datetime(2014, 1, 1, 12, 0, 0,
+                               tzinfo=pytz.timezone('Europe/Ljubljana'))
+        mock_utcnow.return_value = dt.astimezone(pytz.UTC)
+        self.client.metric.get_measures.return_value = []
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('insufficient data')
+        expected = [mock.call(alarm) for alarm in self.alarms]
+        update_calls = self.storage_conn.update_alarm.call_args_list
+        self.assertEqual(expected, update_calls,
+                         "Alarm should change state if the current "
+                         "time is inside its time constraint.")
+        expected = [mock.call(
+            alarm,
+            'ok',
+            'No datapoint for granularity 60',
+            self._reason_data('unknown',
+                              alarm.rule['evaluation_periods'],
+                              None))
+                    for alarm in self.alarms]
+        self.assertEqual(expected, self.notifier.notify.call_args_list)
+
+    @mock.patch.object(timeutils, 'utcnow')
+    def test_lag_configuration(self, mock_utcnow):
+        mock_utcnow.return_value = datetime.datetime(2012, 7, 2, 10, 45)
+        self.client.metric.get_measures.return_value = []
+
+        self._set_all_alarms('ok')
+        self._evaluate_all_alarms()
+        self._set_all_alarms('ok')
+        self.conf.set_override("additional_ingestion_lag", 42)
+        self._evaluate_all_alarms()
+
+        self.assertEqual([
+            mock.call(aggregation='mean', granularity=60, metric='cpu_util',
+                      resource_id='my_instance',
+                      start='2012-07-02T10:39:00', stop='2012-07-02T10:45:00'),
+            mock.call(aggregation='mean', granularity=60, metric='cpu_util',
+                      resource_id='my_instance',
+                      start='2012-07-02T10:38:18', stop='2012-07-02T10:45:00')
+        ], self.client.metric.get_measures.mock_calls)
+
+    @mock.patch.object(timeutils, 'utcnow')
+    def test_evaluation_keep_alarm_attributes_constant(self, utcnow):
+        utcnow.return_value = datetime.datetime(2015, 7, 26, 3, 33, 21, 876795)
+        self._set_all_alarms('ok')
+        original_alarms = copy.deepcopy(self.alarms)
+        avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
+                                    for v in moves.xrange(1, 6)])
+        self.client.metric.get_measures.side_effect = [avgs]
+        self._evaluate_all_alarms()
+        self._assert_all_alarms('alarm')
+        primitive_alarms = [a.as_dict() for a in self.alarms]
+        for alarm in original_alarms:
+            alarm.state = 'alarm'
+            alarm.state_reason = mock.ANY
+        primitive_original_alarms = [a.as_dict() for a in original_alarms]
+        self.assertEqual(primitive_original_alarms, primitive_alarms)
 
 
 class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
