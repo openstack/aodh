@@ -78,49 +78,37 @@ class BaseCompositeEvaluate(base.TestEvaluatorBase):
 
 class CompositeTest(BaseCompositeEvaluate):
     sub_rule1 = {
-        "type": "threshold",
-        "meter_name": "cpu_util",
+        "type": "gnocchi_aggregation_by_metrics_threshold",
+        "metrics": ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                    'a1fb80f4-c242-4f57-87c6-68f47521059e'],
         "evaluation_periods": 5,
         "threshold": 0.8,
-        "query": [{
-            "field": "metadata.metering.stack_id",
-            "value": "36b20eb3-d749-4964-a7d2-a71147cd8145",
-            "op": "eq"
-        }],
-        "statistic": "avg",
-        "period": 60,
+        "aggregation_method": "mean",
+        "granularity": 60,
         "exclude_outliers": False,
         "comparison_operator": "gt"
     }
 
     sub_rule2 = {
-        "type": "threshold",
-        "meter_name": "disk.iops",
+        "type": "gnocchi_aggregation_by_metrics_threshold",
+        "metrics": ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                    'a1fb80f4-c242-4f57-87c6-68f47521059e'],
         "evaluation_periods": 4,
         "threshold": 200,
-        "query": [{
-            "field": "metadata.metering.stack_id",
-            "value": "36b20eb3-d749-4964-a7d2-a71147cd8145",
-            "op": "eq"
-        }],
-        "statistic": "max",
-        "period": 60,
+        "aggregation_method": "max",
+        "granularity": 60,
         "exclude_outliers": False,
         "comparison_operator": "gt"
     }
 
     sub_rule3 = {
-        "type": "threshold",
-        "meter_name": "network.incoming.packets.rate",
+        "type": "gnocchi_aggregation_by_metrics_threshold",
+        "metrics": ['41869681-5776-46d6-91ed-cccc43b6e4e3',
+                    'a1fb80f4-c242-4f57-87c6-68f47521059e'],
         "evaluation_periods": 3,
         "threshold": 1000,
-        "query": [{
-            "field": "metadata.metering.stack_id",
-            "value": "36b20eb3-d749-4964-a7d2-a71147cd8145",
-            "op": "eq"
-        }],
-        "statistic": "avg",
-        "period": 60,
+        "aggregation_method": "mean",
+        "granularity": 60,
         "exclude_outliers": False,
         "comparison_operator": "gt"
     }
@@ -255,7 +243,6 @@ class CompositeTest(BaseCompositeEvaluate):
 
     def test_simple_insufficient(self):
         self._set_all_alarms('ok')
-        self.api_client.statistics.list.return_value = []
         self.client.metric.aggregation.return_value = []
         self.client.metric.get_measures.return_value = []
         self._evaluate_all_alarms()
@@ -307,12 +294,12 @@ class CompositeTest(BaseCompositeEvaluate):
         # self.sub_rule4: ok
         # self.sub_rule5: ok
         # self.sub_rule6: alarm
-        maxs = [self._get_stats('max', self.sub_rule2['threshold'] + 0.01 * v)
-                for v in moves.xrange(1, 5)]
-        avgs1 = [self._get_stats('avg', self.sub_rule3['threshold'] + 0.01 * v)
-                 for v in moves.xrange(1, 4)]
-        avgs2 = [self._get_stats('avg', self.sub_rule1['threshold'] - 0.01 * v)
-                 for v in moves.xrange(1, 6)]
+        maxs = self._get_gnocchi_stats(60, [self.sub_rule2['threshold'] + v
+                                            for v in moves.xrange(1, 5)])
+        avgs1 = self._get_gnocchi_stats(60, [self.sub_rule3['threshold'] + v
+                                             for v in moves.xrange(1, 4)])
+        avgs2 = self._get_gnocchi_stats(60, [self.sub_rule1['threshold'] - v
+                                             for v in moves.xrange(1, 6)])
 
         gavgs1 = self._get_gnocchi_stats(60, [self.sub_rule4['threshold']
                                               - v for v in moves.xrange(1, 6)])
@@ -321,13 +308,12 @@ class CompositeTest(BaseCompositeEvaluate):
         gavgs2 = self._get_gnocchi_stats(50, [self.sub_rule6['threshold'] + v
                                               for v in moves.xrange(1, 7)])
 
-        self.api_client.statistics.list.side_effect = [maxs, avgs1, avgs2]
         self.client.metric.get_measures.side_effect = [gavgs1]
-        self.client.metric.aggregation.side_effect = [gmaxs, gavgs2]
+        self.client.metric.aggregation.side_effect = [maxs, avgs1, avgs2,
+                                                      gmaxs, gavgs2]
         self.evaluator.evaluate(alarm)
-        self.assertEqual(3, self.api_client.statistics.list.call_count)
         self.assertEqual(1, self.client.metric.get_measures.call_count)
-        self.assertEqual(2, self.client.metric.aggregation.call_count)
+        self.assertEqual(5, self.client.metric.aggregation.call_count)
         self.assertEqual('alarm', alarm.state)
         expected = mock.call(
             alarm, 'ok',
@@ -341,12 +327,12 @@ class CompositeTest(BaseCompositeEvaluate):
     def test_alarm_with_short_circuit_logic(self):
         alarm = self.alarms[1]
         # self.sub_rule1: alarm
-        avgs = [self._get_stats('avg', self.sub_rule1['threshold'] + 0.01 * v)
-                for v in moves.xrange(1, 6)]
-        self.api_client.statistics.list.side_effect = [avgs]
+        avgs = self._get_gnocchi_stats(60, [self.sub_rule1['threshold'] + v
+                                            for v in moves.xrange(1, 6)])
+        self.client.metric.aggregation.side_effect = [avgs]
         self.evaluator.evaluate(alarm)
         self.assertEqual('alarm', alarm.state)
-        self.assertEqual(1, self.api_client.statistics.list.call_count)
+        self.assertEqual(1, self.client.metric.aggregation.call_count)
         expected = mock.call(self.alarms[1], 'insufficient data',
                              *self._reason(
                                  'alarm',
@@ -357,12 +343,12 @@ class CompositeTest(BaseCompositeEvaluate):
     def test_ok_with_short_circuit_logic(self):
         alarm = self.alarms[2]
         # self.sub_rule1: ok
-        avgs = [self._get_stats('avg', self.sub_rule1['threshold'] - 0.01 * v)
-                for v in moves.xrange(1, 6)]
-        self.api_client.statistics.list.side_effect = [avgs]
+        avgs = self._get_gnocchi_stats(60, [self.sub_rule1['threshold'] - v
+                                            for v in moves.xrange(1, 6)])
+        self.client.metric.aggregation.side_effect = [avgs]
         self.evaluator.evaluate(alarm)
         self.assertEqual('ok', alarm.state)
-        self.assertEqual(1, self.api_client.statistics.list.call_count)
+        self.assertEqual(1, self.client.metric.aggregation.call_count)
         expected = mock.call(self.alarms[2], 'insufficient data',
                              *self._reason(
                                  'ok',
@@ -372,13 +358,14 @@ class CompositeTest(BaseCompositeEvaluate):
 
     def test_unknown_state_with_sub_rules_trending_state(self):
         alarm = self.alarms[0]
-        maxs = [self._get_stats('max', self.sub_rule2['threshold'] + 0.01 * v)
-                for v in moves.xrange(-1, 4)]
-        avgs = [self._get_stats('avg', self.sub_rule3['threshold'] + 0.01 * v)
-                for v in moves.xrange(-1, 3)]
-        avgs2 = [self._get_stats('avg', self.sub_rule1['threshold'] - 0.01 * v)
-                 for v in moves.xrange(1, 6)]
-        self.api_client.statistics.list.side_effect = [avgs2, maxs, avgs]
+        maxs = self._get_gnocchi_stats(60, [self.sub_rule2['threshold'] + v
+                                            for v in moves.xrange(-1, 4)])
+        avgs = self._get_gnocchi_stats(60, [self.sub_rule3['threshold'] + v
+                                            for v in moves.xrange(-1, 3)])
+        avgs2 = self._get_gnocchi_stats(60, [self.sub_rule1['threshold'] - v
+                                             for v in moves.xrange(1, 6)])
+        self.client.metric.aggregation.side_effect = [avgs2, maxs, avgs]
+
         self.evaluator.evaluate(alarm)
         self.assertEqual('alarm', alarm.state)
         expected = mock.call(self.alarms[0], 'insufficient data',
@@ -393,13 +380,15 @@ class CompositeTest(BaseCompositeEvaluate):
         alarm = self.alarms[0]
         alarm.repeat_actions = True
         alarm.state = 'ok'
-        maxs = [self._get_stats('max', self.sub_rule2['threshold'] + 0.01 * v)
-                for v in moves.xrange(-1, 4)]
-        avgs = [self._get_stats('avg', self.sub_rule3['threshold'] + 0.01 * v)
-                for v in moves.xrange(-1, 3)]
-        avgs2 = [self._get_stats('avg', self.sub_rule1['threshold'] - 0.01 * v)
-                 for v in moves.xrange(1, 6)]
-        self.api_client.statistics.list.side_effect = [avgs2, maxs, avgs]
+
+        maxs = self._get_gnocchi_stats(60, [self.sub_rule2['threshold'] + v
+                                            for v in moves.xrange(-1, 4)])
+        avgs = self._get_gnocchi_stats(60, [self.sub_rule3['threshold'] + v
+                                            for v in moves.xrange(-1, 3)])
+        avgs2 = self._get_gnocchi_stats(60, [self.sub_rule1['threshold'] - v
+                                             for v in moves.xrange(1, 6)])
+        self.client.metric.aggregation.side_effect = [avgs2, maxs, avgs]
+
         self.evaluator.evaluate(alarm)
         self.assertEqual('ok', alarm.state)
         expected = mock.call(self.alarms[0], 'ok',
@@ -414,13 +403,13 @@ class CompositeTest(BaseCompositeEvaluate):
     def test_known_state_with_sub_rules_trending_state_and_not_repeat(self):
         alarm = self.alarms[2]
         alarm.state = 'ok'
-        maxs = [self._get_stats('max', self.sub_rule2['threshold'] + 0.01 * v)
-                for v in moves.xrange(-1, 4)]
-        avgs = [self._get_stats('avg', self.sub_rule3['threshold'] + 0.01 * v)
-                for v in moves.xrange(-1, 3)]
-        avgs2 = [self._get_stats('avg', self.sub_rule1['threshold'] - 0.01 * v)
-                 for v in moves.xrange(1, 6)]
-        self.api_client.statistics.list.side_effect = [avgs2, maxs, avgs]
+        maxs = self._get_gnocchi_stats(60, [self.sub_rule2['threshold'] + v
+                                            for v in moves.xrange(-1, 4)])
+        avgs = self._get_gnocchi_stats(60, [self.sub_rule3['threshold'] + v
+                                            for v in moves.xrange(-1, 3)])
+        avgs2 = self._get_gnocchi_stats(60, [self.sub_rule1['threshold'] - v
+                                             for v in moves.xrange(1, 6)])
+        self.client.metric.aggregation.side_effect = [avgs2, maxs, avgs]
         self.evaluator.evaluate(alarm)
         self.assertEqual('ok', alarm.state)
         self.assertEqual([], self.notifier.notify.mock_calls)
