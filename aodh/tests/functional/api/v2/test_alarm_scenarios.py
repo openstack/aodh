@@ -2556,7 +2556,7 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
                "rule, should be one of: "
                "['gnocchi_aggregation_by_metrics_threshold', "
                "'gnocchi_aggregation_by_resources_threshold', "
-               "'gnocchi_resources_threshold', 'threshold']")
+               "'gnocchi_resources_threshold']")
         faultstring = response.json['error_message']['faultstring']
         self.assertEqual(err, faultstring)
 

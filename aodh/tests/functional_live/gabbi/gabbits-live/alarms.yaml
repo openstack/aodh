@@ -17,9 +17,12 @@ tests:
           content-type: application/json
       data:
           name: added_alarm_defaults2
-          type: threshold
-          threshold_rule:
-              meter_name: ameter
+          type: gnocchi_resources_threshold
+          gnocchi_resources_threshold_rule:
+              metric: ameter
+              resource_id: random_id
+              resource_type: instance
+              aggregation_method: max
               threshold: 300.0
       status: 405
       response_headers:
@@ -32,9 +35,12 @@ tests:
           content-type: application/json
       data:
           name: added_alarm_defaults
-          type: threshold
-          threshold_rule:
-              meter_name: ameter
+          type: gnocchi_resources_threshold
+          gnocchi_resources_threshold_rule:
+              metric: ameter
+              resource_id: random_id
+              resource_type: instance
+              aggregation_method: max
               threshold: 300.0
       status: 201
       response_headers:
@@ -42,8 +48,8 @@ tests:
           content-type: application/json
       response_json_paths:
           $.severity: low
-          $.threshold_rule.threshold: 300.0
-          $.threshold_rule.comparison_operator: eq
+          $.gnocchi_resources_threshold_rule.threshold: 300.0
+          $.gnocchi_resources_threshold_rule.comparison_operator: eq
 
     - name: showAlarm
       desc: Shows information for a specified alarm.
@@ -51,8 +57,8 @@ tests:
       response_json_paths:
           $.severity: low
           $.alarm_id: $RESPONSE['$.alarm_id']
-          $.threshold_rule.threshold: 300.0
-          $.threshold_rule.comparison_operator: eq
+          $.gnocchi_resources_threshold_rule.threshold: 300.0
+          $.gnocchi_resources_threshold_rule.comparison_operator: eq
       response_headers:
           content-type: application/json
 
@@ -63,15 +69,18 @@ tests:
           content-type: application/json
       data:
           name: added_alarm_defaults
-          type: threshold
           severity: moderate
-          threshold_rule:
-              meter_name: ameter
+          type: gnocchi_resources_threshold
+          gnocchi_resources_threshold_rule:
+              metric: ameter
+              resource_id: random_id
+              resource_type: instance
+              aggregation_method: max
               threshold: 200.0
     # TODO(chdent): why do we have a response, why not status: 204?
     # status: 204
       response_json_paths:
-          $.threshold_rule.threshold: 200.0
+          $.gnocchi_resources_threshold_rule.threshold: 200.0
           $.severity: moderate
           $.state: insufficient data
 

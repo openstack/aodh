@@ -81,12 +81,9 @@ class TestApiMiddleware(v2.FunctionalTest):
         # Ensure translated messages get placed properly into json faults
         with mock.patch.object(i18n, 'translate',
                                side_effect=self._fake_translate):
-            response = self.post_json('/alarms', params={'name': 'foobar',
-                                                         'type': 'threshold'},
-                                      expect_errors=True,
-                                      headers={"Accept":
-                                               "application/json"}
-                                      )
+            response = self.post_json('/alarms', params={
+                'name': 'foobar', 'type': 'gnocchi_resources_threshold'},
+                expect_errors=True, headers={"Accept": "application/json"})
         self.assertEqual(400, response.status_int)
         self.assertEqual("application/json", response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -116,12 +113,9 @@ class TestApiMiddleware(v2.FunctionalTest):
         # Ensure translated messages get placed properly into xml faults
         with mock.patch.object(i18n, 'translate',
                                side_effect=self._fake_translate):
-            response = self.post_json('/alarms', params={'name': 'foobar',
-                                                         'type': 'threshold'},
-                                      expect_errors=True,
-                                      headers={"Accept":
-                                               "application/xml,*/*"}
-                                      )
+            response = self.post_json('/alarms', params={
+                'name': 'foobar', 'type': 'gnocchi_resources_threshold'},
+                expect_errors=True, headers={"Accept": "application/xml,*/*"})
         self.assertEqual(400, response.status_int)
         self.assertEqual("application/xml", response.content_type)
         self.assertEqual('error_message', response.xml.tag)
@@ -133,14 +127,10 @@ class TestApiMiddleware(v2.FunctionalTest):
         # Ensure that we are actually invoking language negotiation
         with mock.patch.object(i18n, 'translate',
                                side_effect=self._fake_translate):
-            response = self.post_json('/alarms', params={'name': 'foobar',
-                                                         'type': 'threshold'},
-                                      expect_errors=True,
-                                      headers={"Accept":
-                                               "application/xml,*/*",
-                                               "Accept-Language":
-                                               "en-US"}
-                                      )
+            response = self.post_json('/alarms', params={
+                'name': 'foobar', 'type': 'gnocchi_resources_threshold'},
+                expect_errors=True, headers={"Accept": "application/xml,*/*",
+                                             "Accept-Language": "en-US"})
 
         self.assertEqual(400, response.status_int)
         self.assertEqual("application/xml", response.content_type)
