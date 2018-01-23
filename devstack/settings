@@ -32,9 +32,6 @@ AODH_NOTIFICATION_TOPICS=${AODH_NOTIFICATION_TOPICS:-notifications}
 
 AODH_COORDINATION_URL=${AODH_COORDINATION_URL:-}
 
-# Tell Tempest this project is present
-TEMPEST_SERVICES+=,aodh
-
 # Set up default directories for client
 GITDIR["python-aodhclient"]=$DEST/python-aodhclient
 
