@@ -117,8 +117,7 @@ information about this approach, see the `high availability guide
 
 To use this workload partitioning solution set the
 ``evaluation_service`` option to ``default``. For more
-information, see the alarm section in the
-`OpenStack Configuration Reference <https://docs.openstack.org/ocata/config-reference/telemetry.html>`_.
+information, see :ref:`aodh-config-file`.
 
 Using alarms
 ~~~~~~~~~~~~
