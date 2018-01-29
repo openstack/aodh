@@ -75,7 +75,8 @@ class AlarmTestBase(DBTestBase):
                                                aggregation_method='count',
                                                evaluation_periods=1,
                                                granularity=60,
-                                               metrics=METRIC_IDS)
+                                               metrics=METRIC_IDS),
+                                     severity='low'
                                      ),
                   alarm_models.Alarm(alarm_id='0r4ng3',
                                      enabled=True,
@@ -99,7 +100,8 @@ class AlarmTestBase(DBTestBase):
                                                aggregation_method='avg',
                                                evaluation_periods=1,
                                                granularity=60,
-                                               metrics=METRIC_IDS)
+                                               metrics=METRIC_IDS),
+                                     severity='low'
                                      ),
                   alarm_models.Alarm(alarm_id='y3ll0w',
                                      enabled=False,
@@ -123,7 +125,8 @@ class AlarmTestBase(DBTestBase):
                                                aggregation_method='min',
                                                evaluation_periods=1,
                                                granularity=60,
-                                               metrics=METRIC_IDS)
+                                               metrics=METRIC_IDS),
+                                     severity='low'
                                      )]
 
         for a in alarms:
@@ -301,6 +304,27 @@ class AlarmHistoryTest(AlarmTestBase):
         self.assertEqual(3, len(alarms))
         history = list(self.alarm_conn.query_alarm_history())
         self.assertEqual(0, len(history))
+
+    def test_record_severity_when_alarm_change(self):
+        alarm = list(self.alarm_conn.get_alarms(name='orange-alert'))[0]
+        severity = "low"
+        alarm_change = {
+            "event_id": "3d22800c-a3ca-4991-b34b-d97efb6047d9",
+            "alarm_id": alarm.alarm_id,
+            "type": alarm_models.AlarmChange.STATE_TRANSITION,
+            "detail": "detail %s" % alarm.name,
+            "user_id": alarm.user_id,
+            "project_id": alarm.project_id,
+            "on_behalf_of": alarm.project_id,
+            "severity": severity,
+            "timestamp": datetime.datetime(2014, 4, 7, 7, 34)
+            }
+        self.alarm_conn.record_alarm_change(alarm_change=alarm_change)
+        filter_expr = {"=": {"severity": "low"}}
+        history = list(self.alarm_conn.query_alarm_history(
+            filter_expr=filter_expr))
+        self.assertEqual(1, len(history))
+        self.assertEqual("low", history[0].severity)
 
 
 class ComplexAlarmQueryTest(AlarmTestBase):

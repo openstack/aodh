@@ -297,7 +297,8 @@ class Connection(base.Connection):
                                             user_id=row.user_id,
                                             project_id=row.project_id,
                                             on_behalf_of=row.on_behalf_of,
-                                            timestamp=row.timestamp)
+                                            timestamp=row.timestamp,
+                                            severity=row.severity)
 
     def query_alarms(self, filter_expr=None, orderby=None, limit=None):
         """Yields a lists of alarms that match filter."""

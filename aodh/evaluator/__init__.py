@@ -94,6 +94,7 @@ class Evaluator(object):
         user_id, project_id = self.ks_client.user_id, self.ks_client.project_id
         on_behalf_of = alarm.project_id
         now = timeutils.utcnow()
+        severity = alarm.severity
         payload = dict(event_id=uuidutils.generate_uuid(),
                        alarm_id=alarm.alarm_id,
                        type=type,
@@ -101,7 +102,8 @@ class Evaluator(object):
                        user_id=user_id,
                        project_id=project_id,
                        on_behalf_of=on_behalf_of,
-                       timestamp=now)
+                       timestamp=now,
+                       severity=severity)
 
         try:
             self._storage_conn.record_alarm_change(payload)
