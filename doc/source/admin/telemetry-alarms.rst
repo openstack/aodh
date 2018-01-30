@@ -108,8 +108,8 @@ intended primarily for testing purposes.
 Workload partitioning
 ---------------------
 
-The alarm evaluation process uses the same mechanism for workload
-partitioning as the central and compute agents. The
+The alarm evaluation process can be scaled horizontally but requires
+workload partitioning to function correctly. The
 `Tooz <https://pypi.python.org/pypi/tooz>`_ library provides the
 coordination within the groups of service instances. For further
 information about this approach, see the `high availability guide
