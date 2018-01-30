@@ -26,12 +26,6 @@
    API server
      HTTP REST API service for Aodh.
 
-   ceilometer
-     From Wikipedia [#]_:
-
-       A ceilometer is a device that uses a laser or other light
-       source to determine the height of a cloud base.
-
    http callback
      HTTP callback is used for calling a predefined URL, whenever an
      alarm has been set off. The payload of the request contains
@@ -56,5 +50,4 @@
    user
      An OpenStack user.
 
-.. [#] http://en.wikipedia.org/wiki/Ceilometer
 .. _Zaqar Developer Documentation: https://docs.openstack.org/zaqar/latest/
