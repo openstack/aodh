@@ -8,7 +8,7 @@
             branches: ^stable/(newton|ocata)$
         - aodh-dsvm-tempest-plugin-mysql
         - aodh-dsvm-tempest-plugin-postgresql
-        - telemetry-dsvm-integration-aodh
+        - telemetry-dsvm-integration
     gate:
       jobs:
         - aodh-dsvm-functional-mysql:
@@ -17,7 +17,7 @@
             branches: ^stable/(newton|ocata)$
         - aodh-dsvm-tempest-plugin-mysql
         - aodh-dsvm-tempest-plugin-postgresql
-        - telemetry-dsvm-integration-aodh
+        - telemetry-dsvm-integration
 
 - job:
     name: aodh-dsvm-functional-mysql
@@ -60,19 +60,3 @@
       - openstack-infra/devstack-gate
       - openstack/aodh
       - openstack/tempest
-
-- job:
-    name: telemetry-dsvm-integration-aodh
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/telemetry-dsvm-integration-aodh/run.yaml
-    post-run: playbooks/legacy/telemetry-dsvm-integration-aodh/post.yaml
-    timeout: 7800
-    required-projects:
-      - openstack-infra/devstack-gate
-      - openstack/aodh
-      - openstack/ceilometer
-      - openstack/panko
-      # following are required when DEVSTACK_GATE_HEAT, which this
-      # job turns on
-      - openstack/dib-utils
-      - openstack/diskimage-builder
