@@ -269,6 +269,19 @@ class Alarm(base.Base):
             self.time_constraints = [AlarmTimeConstraint(**tc)
                                      for tc in time_constraints]
 
+    @classmethod
+    def from_db_model_scrubbed(cls, m):
+        # Return an Alarm from a DB model with trust IDs scrubbed from actions
+        data = m.as_dict()
+
+        for field in ('ok_actions', 'alarm_actions',
+                      'insufficient_data_actions'):
+            if data.get(field) is not None:
+                data[field] = [cls._scrub_action_url(action)
+                               for action in data[field]]
+
+        return cls(**data)
+
     @staticmethod
     def validate(alarm):
         Alarm.check_rule(alarm)
@@ -379,6 +392,17 @@ class Alarm(base.Base):
     @staticmethod
     def _is_trust_url(url):
         return url.scheme.startswith('trust+')
+
+    @staticmethod
+    def _scrub_action_url(action):
+        """Remove trust ID from a URL."""
+        url = netutils.urlsplit(action)
+        if Alarm._is_trust_url(url):
+            netloc = url.netloc.rsplit('@', 1)[-1]
+            url = urlparse.SplitResult(url.scheme, netloc,
+                                       url.path, url.query,
+                                       url.fragment)
+        return url.geturl()
 
     def _get_existing_trust_ids(self):
         for action in itertools.chain(self.ok_actions or [],
@@ -590,7 +614,7 @@ class AlarmController(rest.RestController):
     @wsme_pecan.wsexpose(Alarm)
     def get(self):
         """Return this alarm."""
-        return Alarm.from_db_model(self._enforce_rbac('get_alarm'))
+        return Alarm.from_db_model_scrubbed(self._enforce_rbac('get_alarm'))
 
     @wsme_pecan.wsexpose(Alarm, body=Alarm)
     def put(self, data):
@@ -642,7 +666,7 @@ class AlarmController(rest.RestController):
                       if v != old_alarm[k] and k not in
                       ['timestamp', 'state_timestamp'])
         self._record_change(change, now, on_behalf_of=alarm.project_id)
-        return Alarm.from_db_model(alarm)
+        return Alarm.from_db_model_scrubbed(alarm)
 
     @wsme_pecan.wsexpose(None, status_code=204)
     def delete(self):
@@ -805,7 +829,7 @@ class AlarmsController(rest.RestController):
         alarm = conn.create_alarm(alarm_in)
         self._record_creation(conn, change, alarm.alarm_id, now)
         v2_utils.set_resp_location_hdr("/alarms/" + alarm.alarm_id)
-        return Alarm.from_db_model(alarm)
+        return Alarm.from_db_model_scrubbed(alarm)
 
     @wsme_pecan.wsexpose([Alarm], [base.Query], [str], int, str)
     def get_all(self, q=None, sort=None, limit=None, marker=None):
@@ -829,5 +853,5 @@ class AlarmsController(rest.RestController):
         if sort or limit or marker:
             kwargs['pagination'] = v2_utils.get_pagination_options(
                 sort, limit, marker, models.Alarm)
-        return [Alarm.from_db_model(m)
+        return [Alarm.from_db_model_scrubbed(m)
                 for m in pecan.request.storage.get_alarms(**kwargs)]
