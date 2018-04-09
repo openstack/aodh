@@ -159,11 +159,13 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
             # provide enough information about that. Otherwise, go to build
             # a client with service account and queue name for this alarm.
             conf, queue_name = self._get_presigned_client_conf(queue_info)
-            if conf is not None:
+
+            if conf is None:
+                zaqar_client = self.client
+            else:
                 zaqar_client = self.get_zaqar_client(conf)
 
-            if conf is None or queue_name is None or zaqar_client is None:
-                zaqar_client = self.client
+            if queue_name is None:
                 # queue_name is a combination of <alarm-id>-<topic>
                 queue_name = "%s-%s" % (message['body']['alarm_id'],
                                         queue_info.get('topic')[-1])
