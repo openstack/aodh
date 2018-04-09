@@ -1,6 +1,6 @@
-==============================
- Installing the API with uwsgi
-==============================
+=============================
+Installing the API with uwsgi
+=============================
 
 Aodh comes with a few example files for configuring the API
 service to run behind Apache with ``mod_wsgi``.

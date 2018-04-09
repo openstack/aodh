@@ -1,8 +1,8 @@
 .. _architecture:
 
-=====================
- System Architecture
-=====================
+===================
+System Architecture
+===================
 
 High-Level Architecture
 =======================
@@ -58,7 +58,7 @@ Alarm Notifiers
    :detailed:
 
 Alarm Storage
-===============
+=============
 
 .. list-plugins:: aodh.storage
    :detailed:

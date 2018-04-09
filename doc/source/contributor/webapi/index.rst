@@ -1,6 +1,6 @@
-=========
- Web API
-=========
+=======
+Web API
+=======
 
 .. toctree::
    :maxdepth: 2

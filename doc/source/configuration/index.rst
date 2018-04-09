@@ -1,8 +1,8 @@
 .. _configuring:
 
-==========================
+===================
 Configuration Guide
-==========================
+===================
 
 .. toctree::
     aodh-config-file.rst

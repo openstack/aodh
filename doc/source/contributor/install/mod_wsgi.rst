@@ -13,9 +13,9 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-===================================
- Installing the API behind mod_wsgi
-===================================
+==================================
+Installing the API behind mod_wsgi
+==================================
 
 Aodh comes with a WSGI application file named `aodh/api/app.wsgi` for
 configuring the API service to run behind Apache with ``mod_wsgi``. This file

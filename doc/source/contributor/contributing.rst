@@ -13,9 +13,9 @@
 
 .. _contributing:
 
-======================
- Contributing to Aodh
-======================
+====================
+Contributing to Aodh
+====================
 
 Aodh follows the same workflow as other OpenStack projects. To start
 contributing to Aodh, please follow the workflow found here_.

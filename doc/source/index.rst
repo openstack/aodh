@@ -14,9 +14,9 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-==================================
+================================
 Welcome to Aodh's documentation!
-==================================
+================================
 
 The Alarming service (aodh) project provides a service that enables the ability
 to trigger actions based on defined rules against metric or event data

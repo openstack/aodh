@@ -15,9 +15,9 @@
 
 .. _install:
 
-=================
- Installing Aodh
-=================
+===============
+Installing Aodh
+===============
 
 .. toctree::
    :maxdepth: 2
