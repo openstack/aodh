@@ -332,7 +332,7 @@ brevity):
    +----------+-----------+--------+-------------------+----------+---------+
    | alarm_id | type      | name   | state             | severity | enabled |
    +----------+-----------+--------+-------------------+----------+---------+
-   | ALARM_ID | threshold | cpu_hi | insufficient data | high     | True    |
+   | ALARM_ID | threshold | cpu_hi | insufficient data | low     | True    |
    +----------+-----------+--------+-------------------+----------+---------+
 
 In this case, the state is reported as ``insufficient data`` which
