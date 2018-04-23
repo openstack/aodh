@@ -1207,6 +1207,10 @@ class TestAlarms(TestAlarmsBase):
         else:
             self.fail("Alarm not found")
 
+        data = self._get_alarm(alarm.alarm_id)
+        self.assertEqual(
+            ['trust+http://my.server:1234/foo'], data['ok_actions'])
+
         with mock.patch('aodh.keystone_client.get_client') as client:
             client.return_value = mock.Mock(
                 auth_ref=mock.Mock(user_id='my_user'))
@@ -1419,9 +1423,16 @@ class TestAlarms(TestAlarmsBase):
                 self.put_json('/alarms/%s' % data['alarm_id'],
                               params=data,
                               headers=self.auth_headers)
+
+        for alarm in list(self.alarm_conn.get_alarms()):
+            if alarm.alarm_id == data['alarm_id']:
+                self.assertEqual(
+                    ['trust+http://5678:delete@something/ok'],
+                    alarm.ok_actions)
+                break
         data = self._get_alarm('a')
         self.assertEqual(
-            ['trust+http://5678:delete@something/ok'], data['ok_actions'])
+            ['trust+http://something/ok'], data['ok_actions'])
 
         data.update({'ok_actions': ['http://no-trust-something/ok']})
 
