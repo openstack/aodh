@@ -56,6 +56,7 @@ class TestGnocchiEvaluatorBase(base.TestEvaluatorBase):
                          alarm_actions=[],
                          repeat_actions=False,
                          time_constraints=[],
+                         severity='low',
                          rule=dict(
                              comparison_operator='gt',
                              threshold=80.0,
@@ -235,6 +236,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
             detail = json.dumps({'state': alarm.state,
                                  'transition_reason': reasons[num]})
             on_behalf_of = alarm.project_id
+            severity = alarm.severity
             payload = dict(
                 event_id='fake_event_id_%s' % num,
                 alarm_id=alarm.alarm_id,
@@ -243,7 +245,8 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
                 user_id='fake_user_id',
                 project_id='fake_project_id',
                 on_behalf_of=on_behalf_of,
-                timestamp=datetime.datetime(2015, 7, 26, 3, 33, 21, 876795))
+                timestamp=datetime.datetime(2015, 7, 26, 3, 33, 21, 876795),
+                severity=severity)
             payloads.append(payload)
         return payloads
 
