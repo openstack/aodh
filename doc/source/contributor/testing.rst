@@ -41,8 +41,6 @@ run through tox_.
    As tox is a wrapper around testr, it also accepts the same flags as testr.
    See the `testr documentation`_ for details about these additional flags.
 
-.. _testr documentation: https://testrepository.readthedocs.org/en/latest/MANUAL.html
-
    Use a double hyphen to pass options to testr. For example, to run only tests under tests/api/v2::
 
       $ tox -e py27 -- api.v2
@@ -55,6 +53,8 @@ run through tox_.
 
    For reference, the ``debug`` tox environment implements the instructions
    here: https://wiki.openstack.org/wiki/Testr#Debugging_.28pdb.29_Tests
+
+.. _testr documentation: https://testrepository.readthedocs.org/en/latest/MANUAL.html
 
 4. There is a growing suite of tests which use a tool called `gabbi`_ to
    test and validate the behavior of the Aodh API. These tests are run
