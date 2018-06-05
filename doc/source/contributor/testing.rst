@@ -41,15 +41,15 @@ run through tox_.
    As tox is a wrapper around testr, it also accepts the same flags as testr.
    See the `testr documentation`_ for details about these additional flags.
 
-   Use a double hyphen to pass options to testr. For example, to run only tests under tests/api/v2::
+   Use a double hyphen to pass options to testr. For example, to run only tests under tests/functional/api/v2::
 
-      $ tox -e py27 -- api.v2
+      $ tox -e py27 -- functional.api.v2
 
    To debug tests (ie. break into pdb debugger), you can use ''debug'' tox
    environment. Here's an example, passing the name of a test since you'll
    normally only want to run the test that hits your breakpoint::
 
-       $ tox -e debug aodh.tests.test_bin
+       $ tox -e debug aodh.tests.unit.test_bin
 
    For reference, the ``debug`` tox environment implements the instructions
    here: https://wiki.openstack.org/wiki/Testr#Debugging_.28pdb.29_Tests
