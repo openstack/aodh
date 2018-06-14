@@ -2370,9 +2370,6 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
         ]}
 
         ks_client = mock.Mock()
-        ks_client.domains.list.return_value = [mock.Mock(
-            id='<my-uuid>',
-            name='Default')]
         ks_client.projects.find.return_value = mock.Mock(id='<my-uuid>')
         get_client.return_value = ks_client
 

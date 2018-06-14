@@ -34,10 +34,6 @@ GNOCCHI_OPTS = [
                default="service",
                help='Project name of resources creator in Gnocchi. '
                '(For example the Ceilometer project name'),
-    cfg.StrOpt('gnocchi_external_domain_name',
-               default="Default",
-               help='Domain name of resources creator in Gnocchi. '
-               '(For example, default or service_domain'),
 ]
 
 
@@ -143,12 +139,8 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
     def get_external_project_owner():
         kc = keystone_client.get_client(pecan.request.cfg)
         project_name = pecan.request.cfg.api.gnocchi_external_project_owner
-        domain_name = pecan.request.cfg.api.gnocchi_external_domain_name
-        domains = kc.domains.list(name=domain_name)
         try:
-            project = kc.projects.find(
-                name=project_name,
-                domain_id=domains[0].id)
+            project = kc.projects.find(name=project_name)
             return project.id
         except ka_exceptions.NotFound:
             return None
