@@ -20,6 +20,7 @@ from gnocchiclient import client
 from gnocchiclient import exceptions
 from keystoneauth1 import exceptions as ka_exceptions
 from oslo_config import cfg
+from oslo_log import log
 from oslo_serialization import jsonutils
 import pecan
 import wsme
@@ -29,12 +30,17 @@ from aodh.api.controllers.v2 import base
 from aodh.api.controllers.v2 import utils as v2_utils
 from aodh import keystone_client
 
+LOG = log.getLogger(__name__)
 
 GNOCCHI_OPTS = [
     cfg.StrOpt('gnocchi_external_project_owner',
                default="service",
                help='Project name of resources creator in Gnocchi. '
                '(For example the Ceilometer project name'),
+    cfg.StrOpt('gnocchi_external_domain_name',
+               default="Default",
+               help='Domain name of resources creator in Gnocchi. '
+               '(For example, default or service_domain'),
 ]
 
 
@@ -140,10 +146,19 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
     def get_external_project_owner():
         kc = keystone_client.get_client(pecan.request.cfg)
         project_name = pecan.request.cfg.api.gnocchi_external_project_owner
+        domain_name = pecan.request.cfg.api.gnocchi_external_domain_name
         try:
-            project = kc.projects.find(name=project_name)
+            domains = kc.domains.list(name=domain_name)
+            project = kc.projects.find(
+                name=project_name,
+                domain_id=domains[0].id)
             return project.id
         except ka_exceptions.NotFound:
+            LOG.warning("Unable to get domain or project information. "
+                        "domain_name : %(domain_name)s, "
+                        "project_name : %(project_name)s",
+                        {'domain_name': domain_name,
+                         'project_name': project_name})
             return None
 
     @classmethod
