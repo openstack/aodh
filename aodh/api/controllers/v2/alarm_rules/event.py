@@ -13,11 +13,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import voluptuous
 import wsme
 from wsme import types as wtypes
 
 from aodh.api.controllers.v2 import base
 from aodh.i18n import _
+
+
+# Schema validation for the event type query.
+_q_validator = voluptuous.Schema(
+    {"field": voluptuous.Match(r"^[a-zA-Z.',0-9_-]*$"),
+     "op": voluptuous.In(base.operation_kind),
+     "value": voluptuous.In(["string", "integer", "float", "boolean", ""])})
 
 
 class AlarmEventRule(base.AlarmRule):
@@ -40,8 +48,15 @@ class AlarmEventRule(base.AlarmRule):
 
     @classmethod
     def validate_alarm(cls, alarm):
+        super(AlarmEventRule, cls).validate_alarm(alarm)
         for i in alarm.event_rule.query:
             i._get_value_as_type()
+            try:
+                _q_validator({"field": i.field, "op": i.op,
+                              "value": i.type})
+            except voluptuous.MultipleInvalid as e:
+                raise base.ClientSideError(
+                    _("Query value or traits invalid: %s") % str(e))
 
     @property
     def default_description(self):
