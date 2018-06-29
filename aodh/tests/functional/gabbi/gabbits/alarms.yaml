@@ -28,6 +28,72 @@ tests:
   response_headers:
       allow: GET, POST
 
+- name: try to POST an event type alarm
+  desc: what does POST response be
+  POST: /v2/alarms
+  request_headers:
+      content-type: application/json
+  data:
+      name: instance_off
+      type: event
+      event_rule:
+          query: [{'field': "{=:", 'op': "eq", 'type': "string", 'value': "sample_string"}]
+  status: 400
+  response_strings:
+      - "Query value or traits invalid:"
+
+- name: try to POST an event type alarm2
+  desc: what does POST response be
+  POST: /v2/alarms
+  request_headers:
+      content-type: application/json
+  data:
+      name: instance_off
+      type: event
+      event_rule:
+          query: [{'field': "traits.instance_id", 'op': "eq", 'type': "", 'value': "default_string_datatype_isconsidered"}]
+  status: 201
+
+- name: try to POST an event type alarm3
+  desc: what does POST response be
+  POST: /v2/alarms
+  request_headers:
+      content-type: application/json
+  data:
+      name: instance_off
+      type: event
+      event_rule:
+          query: [{'field': "traits.instance_id", 'op': "lt", 'type': "integer", 'value': "1234567"}]
+  status: 201
+
+- name: try to POST an event type alarm4
+  desc: what does POST response be
+  POST: /v2/alarms
+  request_headers:
+      content-type: application/json
+  data:
+      name: instance_off
+      type: event
+      event_rule:
+          query: [{'field': "traits.instance_id", 'op': "lt", 'type': "integer", 'value': "hello"}]
+  status: 400
+  response_strings:
+      - "Unable to convert the value hello to the expected data type integer"
+
+- name: try to POST an event type alarm5
+  desc: what does POST response be
+  POST: /v2/alarms
+  request_headers:
+      content-type: application/json
+  data:
+      name: instance_off
+      type: event
+      event_rule:
+          query: [{'field': "traits.instance_id", 'op': "ltt", 'type': "integer", 'value': "1234567"}]
+  status: 400
+  response_strings:
+      - "Query value or traits invalid:"
+
 - name: createAlarm
   desc: Creates an alarm.
   POST: /v2/alarms
