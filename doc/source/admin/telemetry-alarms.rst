@@ -16,7 +16,7 @@ ok
   The rule governing the alarm has been evaluated as ``False``.
 
 alarm
-  The rule governing the alarm have been evaluated as ``True``.
+  The rule governing the alarm has been evaluated as ``True``.
 
 insufficient data
   There are not enough datapoints available in the evaluation periods
