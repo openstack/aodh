@@ -110,7 +110,7 @@ Workload partitioning
 
 The alarm evaluation process can be scaled horizontally but requires
 workload partitioning to function correctly. The
-`Tooz <https://pypi.python.org/pypi/tooz>`_ library provides the
+`Tooz <https://pypi.org/project/tooz>`_ library provides the
 coordination within the groups of service instances. For further
 information about this approach, see the `high availability guide
 <https://docs.openstack.org/ha-guide/controller-ha-telemetry.html>`_.
