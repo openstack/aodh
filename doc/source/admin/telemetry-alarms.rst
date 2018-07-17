@@ -115,10 +115,6 @@ coordination within the groups of service instances. For further
 information about this approach, see the `high availability guide
 <https://docs.openstack.org/ha-guide/controller-ha-telemetry.html>`_.
 
-To use this workload partitioning solution set the
-``evaluation_service`` option to ``default``. For more
-information, see :ref:`aodh-config-file`.
-
 Using alarms
 ~~~~~~~~~~~~
 
