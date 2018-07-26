@@ -1,5 +1,12 @@
+postgresql
+postgresql-client [platform:dpkg]
 libpq-dev [platform:dpkg]
-postgresql [platform:dpkg]
+postgresql-devel [platform:rpm]
+postgresql-server [platform:rpm]
+
+mysql-server
 mysql-client [platform:dpkg]
-mysql-server [platform:dpkg]
+mysql [platform:rpm]
+
 gettext [platform:dpkg]
+python37 [platform:rpm py37]
