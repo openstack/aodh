@@ -40,7 +40,6 @@ Developer Documentation
    testing
    contributing
    event-alarm
-   api/autoindex
 
 Appendix
 ========
