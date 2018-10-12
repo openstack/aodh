@@ -1,8 +1,8 @@
 - project:
     templates:
       - openstack-python-jobs
-      - openstack-python35-jobs
       - openstack-python36-jobs
+      - openstack-python37-jobs
       - publish-openstack-docs-pti
       - release-notes-jobs-python3
     check:
@@ -10,13 +10,11 @@
         - aodh-dsvm-tempest-plugin-mysql
         - aodh-dsvm-tempest-plugin-postgresql
         - telemetry-dsvm-integration
-        - telemetry-tox-py37
     gate:
       jobs:
         - aodh-dsvm-tempest-plugin-mysql
         - aodh-dsvm-tempest-plugin-postgresql
         - telemetry-dsvm-integration
-        - telemetry-tox-py37
     experimental:
       jobs:
         # TripleO jobs that deploy Telemetry.
