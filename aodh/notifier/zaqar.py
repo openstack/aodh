@@ -70,7 +70,9 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
                 z_srv = ks_client.services.find(
                     type=self.conf.service_types.zaqar)
                 endpoint_type = self.conf.service_credentials.interface
+                region_name = self.conf.service_credentials.region_name
                 z_endpoint = ks_client.endpoints.find(service_id=z_srv.id,
+                                                      region_id=region_name,
                                                       interface=endpoint_type)
                 self._zendpoint = z_endpoint.url
             except Exception:
