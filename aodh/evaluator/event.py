@@ -22,7 +22,6 @@ from oslo_utils import timeutils
 import six
 
 from aodh import evaluator
-from aodh.i18n import _
 
 LOG = log.getLogger(__name__)
 
@@ -248,8 +247,8 @@ class EventAlarmEvaluator(evaluator.Evaluator):
         """Update alarm state and fire alarm via alarm notifier."""
 
         state = evaluator.ALARM
-        reason = (_('Event <id=%(id)s,event_type=%(event_type)s> hits the '
-                    'query <query=%(alarm_query)s>.') %
+        reason = (('Event <id=%(id)s,event_type=%(event_type)s> hits the '
+                   'query <query=%(alarm_query)s>.') %
                   {'id': event.id,
                    'event_type': event.get_value('event_type'),
                    'alarm_query': json.dumps(alarm.obj.rule['query'],

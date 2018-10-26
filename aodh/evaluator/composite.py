@@ -18,7 +18,6 @@ import stevedore
 
 from aodh import evaluator
 from aodh.evaluator import threshold
-from aodh.i18n import _
 
 LOG = log.getLogger(__name__)
 
@@ -177,14 +176,14 @@ class CompositeEvaluator(evaluator.Evaluator):
                   'rules': ', '.join(sorted(root_cause_rules)),
                   'description': STATE_CHANGE[new_state]}
         if transition:
-            reason = (_('Composite rule alarm with composition form: '
-                        '%(expression)s transition to %(state)s, due to '
-                        'rules: %(rules)s %(description)s') % params)
+            reason = (('Composite rule alarm with composition form: '
+                       '%(expression)s transition to %(state)s, due to '
+                       'rules: %(rules)s %(description)s') % params)
 
         else:
-            reason = (_('Composite rule alarm with composition form: '
-                        '%(expression)s remaining as %(state)s, due to '
-                        'rules: %(rules)s %(description)s') % params)
+            reason = (('Composite rule alarm with composition form: '
+                       '%(expression)s remaining as %(state)s, due to '
+                       'rules: %(rules)s %(description)s') % params)
 
         return reason, reason_data
 
