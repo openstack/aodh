@@ -42,7 +42,7 @@ New Features
 
 .. releasenotes/notes/ingestion-lag-2317725887287fbc.yaml @ b'b3874c47f1051d37ed839f4f8fffda2c77641f28'
 
-- Allow to extends the alarm evaluation windows to to compensate the reporting/ingestion lag.
+- Allow to extends the alarm evaluation windows to compensate the reporting/ingestion lag.
   An new option is introduced additional_ingestion_lag defaulted to 0. It represents the number of seconds of the window extension.
 
 .. releasenotes/notes/notifier-batch-listener-01796e2cb06344dd.yaml @ b'520425faf80cf2e0fb86cab216440df5550171c8'
