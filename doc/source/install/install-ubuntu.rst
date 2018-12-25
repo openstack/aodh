@@ -38,7 +38,7 @@ Finalize installation
 
    .. code-block:: console
 
-      # service aodh-api restart
+      # service apache2 restart
       # service aodh-evaluator restart
       # service aodh-notifier restart
       # service aodh-listener restart

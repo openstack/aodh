@@ -41,11 +41,18 @@ Finalize installation
 
    .. code-block:: console
 
-      # systemctl enable openstack-aodh-api.service \
+      # systemctl enable \
         openstack-aodh-evaluator.service \
         openstack-aodh-notifier.service \
         openstack-aodh-listener.service
-      # systemctl start openstack-aodh-api.service \
+      # systemctl start \
         openstack-aodh-evaluator.service \
         openstack-aodh-notifier.service \
         openstack-aodh-listener.service
+
+#. Restart Apache HTTP service to make aodh-api reload the updated
+   configuration::
+
+   .. code-block:: console
+
+      # systemctl restart httpd.service
