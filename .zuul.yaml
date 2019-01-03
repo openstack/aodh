@@ -33,7 +33,7 @@
         - tripleo-ci-centos-7-scenario001-multinode-oooq
         - tripleo-ci-centos-7-scenario001-multinode-oooq-container
         - tripleo-ci-centos-7-scenario002-multinode-oooq
-        - tripleo-ci-centos-7-scenario002-multinode-oooq-container
+        - tripleo-ci-centos-7-scenario002-standalone
 
 - job:
     name: aodh-dsvm-tempest-plugin-mysql
