@@ -17,7 +17,7 @@
               dest: devstack-gate
           EOF
           /usr/zuul-env/bin/zuul-cloner -m clonemap.yaml --cache-dir /opt/git \
-              git://git.openstack.org \
+              https://git.openstack.org \
               openstack-infra/devstack-gate
         executable: /bin/bash
         chdir: '{{ ansible_user_dir }}/workspace'
@@ -29,7 +29,7 @@
           set -x
           cat << 'EOF' >>"/tmp/dg-local.conf"
           [[local|localrc]]
-          enable_plugin aodh git://git.openstack.org/openstack/aodh
+          enable_plugin aodh https://git.openstack.org/openstack/aodh
 
           EOF
         executable: /bin/bash
@@ -45,8 +45,8 @@
           export DEVSTACK_GATE_TEMPEST_REGEX="telemetry_tempest_plugin.aodh"
           export DEVSTACK_GATE_TEMPEST_ALL_PLUGINS=1
           export PROJECTS="openstack/aodh openstack/ceilometer openstack/telemetry-tempest-plugin $PROJECTS"
-          export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin telemetry-tempest-plugin git://git.openstack.org/openstack/telemetry-tempest-plugin"
-          export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
+          export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin telemetry-tempest-plugin https://git.openstack.org/openstack/telemetry-tempest-plugin"
+          export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer"
           export DEVSTACK_LOCAL_CONFIG+=$'\n'"CEILOMETER_BACKEND=gnocchi"
           export AODH_BACKEND=mysql
           cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
