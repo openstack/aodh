@@ -69,7 +69,6 @@ function _aodh_config_apache_wsgi {
     sudo mkdir -p $AODH_WSGI_DIR
 
     local aodh_apache_conf=$(apache_site_config_for aodh)
-    local apache_version=$(get_apache_version)
     local venv_path=""
 
     # Copy proxy vhost and wsgi file
