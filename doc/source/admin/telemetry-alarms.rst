@@ -43,9 +43,9 @@ governed by:
 * A sliding time window to indicate how far back into the recent past
   you want to look.
 
-Valid threshold alarms are: ``gnocchi_resources_threshold_rule``,
-``gnocchi_aggregation_by_metrics_threshold_rule``, or
-``gnocchi_aggregation_by_resources_threshold_rule``.
+Valid threshold alarms are: ``gnocchi_resources_threshold``,
+``gnocchi_aggregation_by_metrics_threshold``, or
+``gnocchi_aggregation_by_resources_threshold``.
 
 Composite rule alarms
 ---------------------
