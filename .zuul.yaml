@@ -11,13 +11,11 @@
         - aodh-dsvm-tempest-plugin-mysql
         - aodh-dsvm-tempest-plugin-postgresql
         - telemetry-dsvm-integration
-        - telemetry-tox-py37
     gate:
       jobs:
         - aodh-dsvm-tempest-plugin-mysql
         - aodh-dsvm-tempest-plugin-postgresql
         - telemetry-dsvm-integration
-        - telemetry-tox-py37
     experimental:
       jobs:
         # TripleO jobs that deploy Telemetry.
