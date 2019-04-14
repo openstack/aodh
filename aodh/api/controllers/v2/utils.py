@@ -20,7 +20,6 @@
 
 import copy
 import datetime
-import inspect
 
 from oslo_utils import timeutils
 import pecan
@@ -30,6 +29,7 @@ import wsme
 
 from aodh.api.controllers.v2 import base
 from aodh.api import rbac
+from aodh.utils import get_func_valid_keys
 
 
 def get_auth_project(on_behalf_of=None):
@@ -64,7 +64,7 @@ def sanitize_query(query, db_func, on_behalf_of=None):
         _verify_query_segregation(q, auth_project)
 
         proj_q = [i for i in q if i.field == 'project_id']
-        valid_keys = inspect.getargspec(db_func)[0]
+        valid_keys = get_func_valid_keys(db_func)
         if not proj_q and 'on_behalf_of' not in valid_keys:
             # The user is restricted, but they didn't specify a project
             # so add it for them.
@@ -113,7 +113,7 @@ def validate_query(query, db_func, internal_keys=None,
     internal_keys = internal_keys or []
     _verify_query_segregation(query)
 
-    valid_keys = inspect.getargspec(db_func)[0]
+    valid_keys = get_func_valid_keys(db_func)
     if 'alarm_type' in valid_keys:
         valid_keys.remove('alarm_type')
         valid_keys.append('type')

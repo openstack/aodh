@@ -21,7 +21,6 @@
 import ast
 import datetime
 import functools
-import inspect
 
 from oslo_utils import strutils
 from oslo_utils import timeutils
@@ -31,6 +30,7 @@ import wsme
 from wsme import types as wtypes
 
 from aodh.i18n import _
+from aodh.utils import get_func_valid_keys
 
 
 operation_kind = ('lt', 'le', 'eq', 'ne', 'ge', 'gt')
@@ -87,7 +87,7 @@ class Base(wtypes.DynamicBase):
         return cls(links=links, **(m.as_dict()))
 
     def as_dict(self, db_model):
-        valid_keys = inspect.getargspec(db_model.__init__)[0]
+        valid_keys = get_func_valid_keys(db_model.__init__)
         if 'self' in valid_keys:
             valid_keys.remove('self')
         return self.as_dict_from_keys(valid_keys)
