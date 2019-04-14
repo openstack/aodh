@@ -291,6 +291,15 @@ function start_aodh {
     run_process aodh-listener "$AODH_BIN_DIR/aodh-listener --config-file $AODH_CONF"
 }
 
+# configure_tempest_for_aodh()
+# NOTE (gmann): Configure all the Tempest setting for Aodh service in
+# this function.
+function configure_tempest_for_aodh {
+    if is_service_enabled tempest; then
+        iniset $TEMPEST_CONFIG service_available aodh True
+    fi
+}
+
 # stop_aodh() - Stop running processes
 function stop_aodh {
     if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
@@ -322,6 +331,9 @@ if is_service_enabled aodh; then
         init_aodh
         # Start the services
         start_aodh
+    elif [[ "$1" == "stack" && "$2" == "test-config" ]]; then
+        echo_summary "Configuring Tempest for Aodh"
+        configure_tempest_for_aodh
     fi
 
     if [[ "$1" == "unstack" ]]; then
