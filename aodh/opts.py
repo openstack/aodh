@@ -22,6 +22,8 @@ import aodh.coordination
 import aodh.evaluator
 import aodh.evaluator.event
 import aodh.evaluator.gnocchi
+import aodh.evaluator.loadbalancer
+import aodh.evaluator.threshold
 import aodh.event
 import aodh.keystone_client
 import aodh.notifier.rest
@@ -37,6 +39,7 @@ def list_opts():
              aodh.evaluator.OPTS,
              aodh.evaluator.event.OPTS,
              aodh.evaluator.threshold.OPTS,
+             aodh.evaluator.loadbalancer.OPTS,
              aodh.notifier.rest.OPTS,
              aodh.queue.OPTS,
              aodh.service.OPTS)),

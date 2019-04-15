@@ -88,6 +88,11 @@ def delete_trust_id(trust_id, auth_plugin):
         pass
 
 
+def url_for(conf, **kwargs):
+    sess = get_session(conf)
+    return sess.get_endpoint(**kwargs)
+
+
 OPTS = [
     cfg.StrOpt('region-name',
                default=os.environ.get('OS_REGION_NAME'),
