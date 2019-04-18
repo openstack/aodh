@@ -1,0 +1,4 @@
+features:
+  - Added a new evaluator for the alarms of type
+    ``loadbalancer_member_health`` which evaluates the alarm by checking the
+    operating status of the members in a given load balancer pool.
