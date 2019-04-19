@@ -41,7 +41,7 @@
     post-run: playbooks/legacy/aodh-dsvm-tempest-plugin-mysql/post.yaml
     timeout: 7800
     required-projects:
-      - openstack-infra/devstack-gate
+      - openstack/devstack-gate
       - openstack/aodh
       # To install Gnocchi
       - openstack/ceilometer
@@ -55,7 +55,7 @@
     post-run: playbooks/legacy/aodh-dsvm-tempest-plugin-postgresql/post.yaml
     timeout: 7800
     required-projects:
-      - openstack-infra/devstack-gate
+      - openstack/devstack-gate
       - openstack/aodh
       # To install Gnocchi
       - openstack/ceilometer
