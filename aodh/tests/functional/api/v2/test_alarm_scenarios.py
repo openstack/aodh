@@ -2401,6 +2401,26 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
         self._verify_alarm(json, alarms[0])
 
 
+class TestAlarmsRuleLoadBalancer(TestAlarmsBase):
+    def test_post(self):
+        json = {
+            'name': 'added_alarm_defaults',
+            'type': 'loadbalancer_member_health',
+            'loadbalancer_member_health_rule': {
+                "pool_id": "2177ccd8-b09c-417a-89a0-e8d2419be612",
+                "stack_id": "1b974012-ebcb-4888-8ae2-47714d4d2c4d",
+                "autoscaling_group_id": "681c9266-61d2-4c9a-ad18-526807f6adc0"
+            }
+        }
+        self.post_json('/alarms', params=json, status=201,
+                       headers=self.auth_headers)
+
+        alarms = list(self.alarm_conn.get_alarms())
+
+        self.assertEqual(1, len(alarms))
+        self._verify_alarm(json, alarms[0])
+
+
 class TestAlarmsEvent(TestAlarmsBase):
 
     def test_list_alarms(self):
