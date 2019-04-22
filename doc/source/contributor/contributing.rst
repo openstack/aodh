@@ -28,5 +28,5 @@ Project Hosting Details
 
 :Bug tracker: https://bugs.launchpad.net/aodh
 :Mailing list: http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev (prefix subjects with ``[Aodh]`` for faster responses)
-:Code Hosting: https://git.openstack.org/cgit/openstack/aodh/
-:Code Review: https://review.openstack.org/#/q/status:open+project:openstack/aodh,n,z
+:Code Hosting: https://opendev.org/openstack/aodh/
+:Code Review: https://review.opendev.org/#/q/status:open+project:openstack/aodh,n,z

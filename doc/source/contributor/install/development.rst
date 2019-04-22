@@ -44,6 +44,6 @@ Configuring devstack
       [[local|localrc]]
 
       # Enable the aodh alarming services
-      enable_plugin aodh https://git.openstack.org/openstack/aodh master
+      enable_plugin aodh https://opendev.org/openstack/aodh master
 
 .. _devstack: https://docs.openstack.org/devstack/latest/

@@ -4,7 +4,7 @@
 # looks like
 #
 # [[local|localrc]]
-# enable_plugin aodh https://git.openstack.org/openstack/aodh
+# enable_plugin aodh https://opendev.org/openstack/aodh
 #
 # By default all aodh services are started (see
 # devstack/settings).
