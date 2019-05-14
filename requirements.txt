@@ -37,3 +37,4 @@ keystoneauth1>=2.1
 debtcollector>=1.2.0  # Apache-2.0
 python-octaviaclient>=1.8.0
 python-dateutil  # BSD
+python-heatclient>=1.17.0
