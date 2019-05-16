@@ -1,0 +1,3 @@
+features:
+  - Added a new notifier(``trust+heat``) that works together with
+    ``loadbalancer_member_health`` evaluator for auto-healing purpose.

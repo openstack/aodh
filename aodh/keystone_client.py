@@ -15,6 +15,7 @@
 
 import os
 
+from heatclient import client as heatclient
 from keystoneauth1 import exceptions as ka_exception
 from keystoneauth1.identity.generic import password
 from keystoneauth1 import loading as ka_loading
@@ -91,6 +92,19 @@ def delete_trust_id(trust_id, auth_plugin):
 def url_for(conf, **kwargs):
     sess = get_session(conf)
     return sess.get_endpoint(**kwargs)
+
+
+def get_heat_client_from_trust(conf, trust_id):
+    ks_client = get_trusted_client(conf, trust_id)
+    sess = ks_client.session
+
+    endpoint = sess.get_endpoint(
+        service_type='orchestration',
+        interface="internal",
+        region_name=conf.service_credentials.region_name
+    )
+
+    return heatclient.Client("1", endpoint=endpoint, session=sess)
 
 
 OPTS = [
