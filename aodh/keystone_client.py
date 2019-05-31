@@ -49,6 +49,7 @@ def get_trusted_client(conf, trust_id):
         password=conf[CFG_GROUP].password,
         auth_url=conf[CFG_GROUP].auth_url,
         user_domain_id=conf[CFG_GROUP].user_domain_id,
+        user_domain_name=conf[CFG_GROUP].user_domain_name,
         trust_id=trust_id)
 
     sess = session.Session(auth=auth_plugin)

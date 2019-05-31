@@ -17,13 +17,17 @@ import json
 import time
 
 import mock
+from oslo_config import cfg
 from oslo_config import fixture as fixture_config
+
 import oslo_messaging
 import requests
 import six.moves.urllib.parse as urlparse
 
+from aodh import keystone_client
 from aodh import notifier
 from aodh import service
+
 from aodh.tests import base as tests_base
 
 
@@ -53,6 +57,52 @@ class TestAlarmNotifierService(tests_base.BaseTestCase):
     def test_init_host_queue(self):
         self.service = notifier.AlarmNotifierService(0, self.CONF)
         self.service.terminate()
+
+
+class TestKeystoneClient(tests_base.BaseTestCase):
+    def setUp(self):
+        super(TestKeystoneClient, self).setUp()
+        self.config = fixture_config.Config(
+            service.prepare_service(argv=[], config_files=[]))
+        self.config.setUp()
+        self.config.register_opts([
+            cfg.StrOpt('user_domain_id', default=""),
+            cfg.StrOpt('user_domain_name', default=""),
+            cfg.StrOpt('username', default="username"),
+            cfg.StrOpt('password', default="password"),
+            cfg.StrOpt('auth_url', default="testdomain")
+        ], "service_credentials")
+
+    def test_get_trusted_client_domain_id(self):
+        self.config.config(
+            **{'group': "service_credentials",
+               'user_domain_id': "uuid-domain"})
+
+        client = keystone_client.get_trusted_client(
+            self.config.conf, "testing")
+        self.assertEqual(client.session.auth._user_domain_id, "uuid-domain")
+        self.assertEqual(client.session.auth._user_domain_name, '')
+
+    def test_get_trusted_client_domain_name(self):
+        self.config.config(
+            **{'group': "service_credentials",
+               'user_domain_name': "testdomain"})
+
+        client = keystone_client.get_trusted_client(
+            self.config.conf, "testing")
+        self.assertEqual(client.session.auth._user_domain_name, "testdomain")
+        self.assertEqual(client.session.auth._user_domain_id, '')
+
+    def test_get_trusted_client_domain(self):
+        self.config.config(**{'group': "service_credentials",
+                              'user_domain_name': "testdomain",
+                              'user_domain_id': "uuid-gen",
+                              })
+
+        client = keystone_client.get_trusted_client(self.config.conf,
+                                                    "testing")
+        self.assertEqual(client.session.auth._user_domain_name, "testdomain")
+        self.assertEqual(client.session.auth._user_domain_id, "uuid-gen")
 
 
 class TestAlarmNotifier(tests_base.BaseTestCase):
