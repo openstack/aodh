@@ -8,9 +8,7 @@ Documentation for the project can be found at:
   https://docs.openstack.org/aodh/latest/
 
 The project home is at:
-  https://launchpad.net/aodh
+  https://storyboard.openstack.org/#!/project/openstack/aodh
 
 Bugs and feature requests are tracked on Launchpad at:
-
-    https://bugs.launchpad.net/aodh
-
+  https://storyboard.openstack.org/#!/project/openstack/aodh
