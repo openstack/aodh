@@ -193,6 +193,11 @@ class TestPartitioning(base.BaseTestCase):
         self.assertEqual(['group1', 'group2'],
                          sorted(self.shared_storage.keys()))
 
+    def test_member_id(self):
+        agent = 'agent'.encode('ascii')
+        coord = self._get_new_started_coordinator({}, agent)
+        self.assertEqual(agent, coord._my_id)
+
     def test_partitioning(self):
         all_resources = ['resource_%s' % i for i in range(1000)]
         agents = ['agent_%s' % i for i in range(10)]
