@@ -39,12 +39,21 @@ class TrustHeatAlarmNotifier(notifier.AlarmNotifier):
     member unhealthy, then update Heat stack in place. In order to do that, the
     notifier needs to know:
 
-    - Heat stack ID.
+    - Heat top/root stack ID.
     - Heat autoscaling group ID.
     - The failed Octavia pool members.
 
-    The resource ID in the autoscaling group is saved in the Octavia member
-    tags. So, only Octavia stable/stein or later versions are supported.
+    In order to find which autoscaling group member that the failed pool member
+    belongs to, there are two ways supported(both ways require specific
+    definition in the Heat template):
+
+    1. The autoscaling group member resource ID is saved in the Octavia member
+       tag, the user should define that using 'tags' property of the
+       OS::Octavia::PoolMember resource. So, only Octavia stable/stein or later
+       versions are supported.
+    2. User customizes the autoscaling group member resource identifier
+       according to
+       https://docs.openstack.org/heat/latest/template_guide/composition.html#making-your-template-resource-more-transparent
     """
 
     def __init__(self, conf):
@@ -69,46 +78,61 @@ class TrustHeatAlarmNotifier(notifier.AlarmNotifier):
         trust_id = action.username
         stack_id = reason_data.get("stack_id")
         asg_id = reason_data.get("asg_id")
+        unhealthy_members = reason_data.get("unhealthy_members", [])
+        unhealthy_resources = []
 
         if not stack_id or not asg_id:
-            LOG.warning(
+            LOG.error(
                 "stack_id and asg_id must exist to notify alarm %s", alarm_id
             )
             return
 
-        resources = []
-        unhealthy_members = reason_data.get("unhealthy_members", [])
+        heat_client = aodh_keystone.get_heat_client_from_trust(
+            self.conf, trust_id
+        )
 
         for member in unhealthy_members:
             for tag in member.get("tags", []):
                 if uuidutils.is_uuid_like(tag):
-                    resources.append(tag)
+                    unhealthy_resources.append(tag)
 
-        if resources:
-            try:
-                heat_client = aodh_keystone.get_heat_client_from_trust(
-                    self.conf, trust_id
+        if not unhealthy_resources:
+            # Fall back to search resource by the pool member ID.
+            for member in unhealthy_members:
+                target_resources = heat_client.resources.list(
+                    stack_id, nested_depth=3, filters={"id": member["id"]})
+                if len(target_resources) > 0:
+                    # There should be only one item.
+                    unhealthy_resources.append(
+                        target_resources[0].resource_name)
+
+            # If we still can't find expected resources, do nothing.
+            if not unhealthy_resources:
+                LOG.warning("No unhealthy resource found for the alarm %s",
+                            alarm_id)
+                return
+
+        try:
+            for res in unhealthy_resources:
+                heat_client.resources.mark_unhealthy(
+                    asg_id,
+                    res,
+                    True,
+                    "unhealthy load balancer member"
+                )
+                LOG.info(
+                    "Heat resource %(resource_id)s is marked as unhealthy "
+                    "for alarm %(alarm_id)s",
+                    {"resource_id": res, "alarm_id": alarm_id}
                 )
 
-                for res in resources:
-                    heat_client.resources.mark_unhealthy(
-                        asg_id,
-                        res,
-                        True,
-                        "unhealthy load balancer member"
-                    )
-                    LOG.info(
-                        "Heat resource %(resource_id)s is marked as unhealthy "
-                        "for alarm %(alarm_id)s",
-                        {"resource_id": res, "alarm_id": alarm_id}
-                    )
-
-                    heat_client.stacks.update(stack_id, existing=True)
-                    LOG.info(
-                        "Heat stack %(stack_id)s is updated for alarm "
-                        "%(alarm_id)s",
-                        {"stack_id": stack_id, "alarm_id": alarm_id}
-                    )
-            except Exception as e:
-                LOG.exception("Failed to communicate with Heat service, "
-                              "error: %s", six.text_type(e))
+            heat_client.stacks.update(stack_id, existing=True)
+            LOG.info(
+                "Heat stack %(stack_id)s is updated for alarm "
+                "%(alarm_id)s",
+                {"stack_id": stack_id, "alarm_id": alarm_id}
+            )
+        except Exception as e:
+            LOG.exception("Failed to communicate with Heat service for alarm "
+                          "%s, error: %s",
+                          alarm_id, six.text_type(e))
