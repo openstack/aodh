@@ -13,7 +13,6 @@ ChangeLog
 cover/*
 dist/*
 doc/build
-doc/source/_static/
 etc/aodh/aodh.conf
 subunit.log
 
