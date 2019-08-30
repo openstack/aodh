@@ -6,35 +6,36 @@
 # Altinbek <altinbek.089@mail.ru>, 2015
 # Lucas Palm <lapalm@us.ibm.com>, 2015. #zanata
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
+# Roman Gorshunov <roman.gorshunov@att.com>, 2019. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: aodh VERSION\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2018-01-30 20:14+0000\n"
+"POT-Creation-Date: 2019-08-12 03:05+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2016-04-12 03:59+0000\n"
-"Last-Translator: Copied by Zanata <copied-by-zanata@zanata.org>\n"
+"PO-Revision-Date: 2019-08-20 06:45+0000\n"
+"Last-Translator: Roman Gorshunov <roman.gorshunov@att.com>\n"
 "Language: ru\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
 "%100>=11 && n%100<=14)? 2 : 3);\n"
 "Generated-By: Babel 2.0\n"
-"X-Generator: Zanata 3.9.6\n"
+"X-Generator: Zanata 4.3.3\n"
 "Language-Team: Russian\n"
 
 #, python-format
 msgid "%(name)s count exceeds maximum value %(maximum)d"
-msgstr "контент %(name)s превышает количество символов в  %(maximum)d"
+msgstr "%(name)s превышает максимальное значение %(maximum)d"
 
 #, python-format
 msgid "%(rule)s must be set for %(type)s type alarm"
-msgstr "%(rule)s  должны быть установлены для %(type)s сигналов тревоги"
+msgstr "%(rule)s должны быть установлены для сигналов тревоги типа%(type)s"
 
 #, python-format
 msgid "%(rule1)s and %(rule2)s cannot be set at the same time"
-msgstr "%(rule1)s и %(rule2)s не могут работать одновременно"
+msgstr "%(rule1)s и %(rule2)s нельзя задавать одновременно"
 
 #, python-format
 msgid "%s is not JSON serializable"
@@ -42,46 +43,67 @@ msgstr "%s не является сериализуемым с помощью JS
 
 #, python-format
 msgid "Alarm %(alarm_id)s not found in project %(project)s"
-msgstr "Сигнал   %(alarm_id)s не найдены в проекте %(project)s"
+msgstr "Предупреждение %(alarm_id)s не найдено в проекте %(project)s"
 
 #, python-format
 msgid "Alarm %s not found"
-msgstr "Сигнал  %s не найден"
+msgstr "Предупреждение %s не найдено"
 
 msgid "Alarm incorrect"
-msgstr "Сигнализация неисправна"
+msgstr "Некорректное предупреждение"
 
 #, python-format
 msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
-msgstr "количество ошибок пользователем %(u)s  превысила норму %(p)s"
+msgstr "Количество ошибок пользователя %(u)s превысило норму %(p)s"
+
+#, python-format
+msgid "Alarm when %s event occurred."
+msgstr "Сработал сигнал тревоги по событию %s."
 
 #, python-format
 msgid "Failed to parse the timestamp value %s"
-msgstr "Не удалось разобрать значение временной метки %s"
+msgstr "Ошибка анализа значения времени %s"
 
 #, python-format
 msgid "Filter expression not valid: %s"
-msgstr "Фильтр ввода не действует: %s"
+msgstr "Недопустимое выражение фильтра: %s"
+
+#, python-format
+msgid ""
+"Invalid input composite rule: %s, it should be a dict with an \"and\" or \"or"
+"\" as key, and the value of dict should be a list of basic threshold rules "
+"or sub composite rules, can be nested."
+msgstr ""
+"Некорректное композитное правило: %s, оно должно быть типа dict (словарь) с "
+"ключём \"and\" или \"or\" в качестве ключа, и значение в словаре должно быть "
+"списком основных граничных правил или частью композитного правила (они могут "
+"быть вложенными)."
 
 msgid "Limit should be positive"
-msgstr "Лимит должен быть точным"
+msgstr "Ограничение должно быть положительным"
 
 #, python-format
 msgid "Not Authorized to access %(aspect)s %(id)s"
-msgstr "Нет доступа к %(aspect)s %(id)s"
+msgstr "Нет прав доступа к %(aspect)s %(id)s"
 
 #, python-format
 msgid ""
 "Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s priority from "
 "%(previous)s to %(current)s with action %(action)s because %(reason)s."
 msgstr ""
-"Сигнал тревоги  %(alarm_name)s %(alarm_id)s не работает потому что "
-"%(reason)s  в %(severity)s  приоритетом на  %(previous)s  %(current)s   "
-"влияние на действие %(action)s"
+"Сигнал тревоги %(alarm_name)s %(alarm_id)s с приоритетом %(severity)s от "
+"%(previous)s и до %(current)s с действием %(action)s по причине %(reason)s."
 
 #, python-format
 msgid "Order-by expression not valid: %s"
-msgstr "вызов значения не активна: %s"
+msgstr "Недопустимое выражение сортировки: %s"
+
+#, python-format
+msgid "Query value or traits invalid: %s"
+msgstr "Значение запроса или признаки недействительны: %s"
+
+msgid "Sample Check"
+msgstr "Тестовая проверка"
 
 #, python-format
 msgid ""
@@ -91,44 +113,61 @@ msgstr ""
 "Тип данных %(type)s не поддерживается. Список поддерживаемых типов данных: "
 "%(supported)s"
 
+msgid "Threshold rules should be combined with \"and\" or \"or\""
+msgstr "Граничные правила должны комбинироваться с помощью \"and\" или \"or\""
+
 msgid "Time constraint names must be unique for a given alarm."
-msgstr "Название временного контента должна отличаться для сигнала превоги"
+msgstr ""
+"Названия диапазонов времени должны отличаться для данного сигнала тревоги."
 
 #, python-format
 msgid "Timezone %s is not valid"
-msgstr "таймер %s  не актевирован"
+msgstr "Временная зона %s не корректна"
 
 #, python-format
 msgid ""
 "Unable to convert the value %(value)s to the expected data type %(type)s."
 msgstr ""
-"Невозможно преобразовать значение %(value)s с ожидаемым типом данных "
-"%(type)s."
+"Преобразовать значение %(value)s в ожидаемый тип данных %(type)s невозможно."
 
 #, python-format
 msgid "Unable to parse action %s"
-msgstr "Невозможно разобрать действий %s"
+msgstr "Ошибка анализа действия %s"
 
 #, python-format
 msgid ""
 "Unexpected exception converting %(value)s to the expected data type %(type)s."
 msgstr ""
-"мгновенное  преобразования значения %(value)s с ожидаемым типом данных "
-"%(type)s."
+"Возникла непредвиденная исключительная ситуация при преобразовании %(value)s "
+"в ожидаемый тип данных %(type)s."
 
 #, python-format
 msgid "Unsupported action %s"
-msgstr "не поддерживается действие %s"
+msgstr "Неподдерживаемое действие %s"
+
+#, python-format
+msgid ""
+"Unsupported sub-rule type :%(rule)s in composite rule, should be one of: "
+"%(plugins)s"
+msgstr ""
+"Неподдерживаемый тип дочернего правила: %(rule)s в композитном правиле "
+"должно быть одним из %(plugins)s"
 
 #, python-format
 msgid "You are not authorized to create action: %s"
-msgstr "Вы не авторизованы, чтобы деиствовать: %s"
+msgstr "Вы не авторизованы, чтобы выполнять действие: %s"
 
 msgid "state invalid"
-msgstr "Неправильное состояние"
+msgstr "недопустимое состояние"
 
 msgid "state_timestamp should be datetime object"
-msgstr "В state_timestamp должен быть указан дата  объекта"
+msgstr "state_timestamp должен быть объектом datetime"
 
 msgid "timestamp should be datetime object"
-msgstr "должна быть указана дата вывода объекта"
+msgstr "системное время должно быть объектом datetime"
+
+msgid "trust URL cannot contain a trust ID."
+msgstr "URL доверия не может содержать ID доверия."
+
+msgid "type must be set in every rule"
+msgstr "тип должен быть указан для каждого правила"
