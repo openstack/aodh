@@ -18,6 +18,7 @@ import struct
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_utils import encodeutils
 from oslo_utils import uuidutils
 import six
 import tenacity
@@ -114,7 +115,8 @@ class PartitionCoordinator(object):
         self.backend_url = self.conf.coordination.backend_url
         self._coordinator = None
         self._groups = set()
-        self._my_id = my_id or uuidutils.generate_uuid()
+        self._my_id = my_id or \
+            encodeutils.safe_encode(uuidutils.generate_uuid())
 
     def start(self):
         if self.backend_url:
