@@ -6,13 +6,13 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - aodh-dsvm-tempest-plugin-mysql
-        - aodh-dsvm-tempest-plugin-postgresql
+        - aodh-tempest-plugin-mysql
+        - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration
     gate:
       jobs:
-        - aodh-dsvm-tempest-plugin-mysql
-        - aodh-dsvm-tempest-plugin-postgresql
+        - aodh-tempest-plugin-mysql
+        - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration
     experimental:
       jobs:
@@ -33,29 +33,29 @@
         - tripleo-ci-centos-7-scenario002-standalone
 
 - job:
-    name: aodh-dsvm-tempest-plugin-mysql
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/aodh-dsvm-tempest-plugin-mysql/run.yaml
-    post-run: playbooks/legacy/aodh-dsvm-tempest-plugin-mysql/post.yaml
-    timeout: 7800
-    required-projects:
-      - openstack/devstack-gate
-      - openstack/aodh
-      # To install Gnocchi
-      - openstack/ceilometer
-      - openstack/telemetry-tempest-plugin
-      - openstack/tempest
+    name: aodh-tempest-plugin-postgresql
+    parent: telemetry-tempest-base
+    irrelevant-files: &aodh-irrelevant-files
+      - ^(test-|)requirements.txt$
+      - ^setup.cfg$
+      - ^doc/.*$
+      - ^.*\.rst$
+      - ^releasenotes/.*$
+      - ^aodh/tests/.*$
+    vars:
+      devstack_services:
+        postgresql: true
+        mysql: false
+      devstack_localrc:
+        DATABASE_TYPE: "postgresql"
+        AODH_BACKEND: "postgresql"
+      tempest_test_regex: telemetry_tempest_plugin.aodh
 
 - job:
-    name: aodh-dsvm-tempest-plugin-postgresql
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/aodh-dsvm-tempest-plugin-postgresql/run.yaml
-    post-run: playbooks/legacy/aodh-dsvm-tempest-plugin-postgresql/post.yaml
-    timeout: 7800
-    required-projects:
-      - openstack/devstack-gate
-      - openstack/aodh
-      # To install Gnocchi
-      - openstack/ceilometer
-      - openstack/telemetry-tempest-plugin
-      - openstack/tempest
+    name: aodh-tempest-plugin-mysql
+    parent: telemetry-tempest-base
+    irrelevant-files: *aodh-irrelevant-files
+    vars:
+      devstack_localrc:
+        AODH_BACKEND: "mysql"
+      tempest_test_regex: telemetry_tempest_plugin.aodh
