@@ -9,11 +9,13 @@
         - aodh-tempest-plugin-mysql
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration
+        - telemetry-dsvm-integration-ipv6-only
     gate:
       jobs:
         - aodh-tempest-plugin-mysql
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration
+        - telemetry-dsvm-integration-ipv6-only
     experimental:
       jobs:
         # TripleO jobs that deploy Telemetry.
