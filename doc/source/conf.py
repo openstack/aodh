@@ -199,9 +199,24 @@ htmlhelp_basename = 'Aodhdoc'
 # (source start file, target name, title, author, documentclass
 # [howto/manual]).
 latex_documents = [
-    ('index', 'Aodh.tex', u'Aodh Documentation',
+    ('index', 'doc-aodh.tex', u'Aodh Documentation',
      u'OpenStack Foundation', 'manual'),
 ]
+
+latex_elements = {
+    'makeindex': '',
+    'printindex': '',
+    'preamble': r'\setcounter{tocdepth}{3}',
+    'maxlistdepth': '10',
+}
+
+# Disable usage of xindy https://bugzilla.redhat.com/show_bug.cgi?id=1643664
+latex_use_xindy = False
+
+# Disable smartquotes, they don't work in latex
+smartquotes_excludes = {'builders': ['latex']}
+
+latex_domain_indices = False
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
