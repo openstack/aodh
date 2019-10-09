@@ -13,7 +13,6 @@
 #    limitations under the License.
 
 from oslo_log import log
-from oslo_utils import uuidutils
 import six
 
 from aodh import keystone_client as aodh_keystone
@@ -42,18 +41,6 @@ class TrustHeatAlarmNotifier(notifier.AlarmNotifier):
     - Heat top/root stack ID.
     - Heat autoscaling group ID.
     - The failed Octavia pool members.
-
-    In order to find which autoscaling group member that the failed pool member
-    belongs to, there are two ways supported(both ways require specific
-    definition in the Heat template):
-
-    1. The autoscaling group member resource ID is saved in the Octavia member
-       tag, the user should define that using 'tags' property of the
-       OS::Octavia::PoolMember resource. So, only Octavia stable/stein or later
-       versions are supported.
-    2. User customizes the autoscaling group member resource identifier
-       according to
-       https://docs.openstack.org/heat/latest/template_guide/composition.html#making-your-template-resource-more-transparent
     """
 
     def __init__(self, conf):
@@ -92,25 +79,20 @@ class TrustHeatAlarmNotifier(notifier.AlarmNotifier):
         )
 
         for member in unhealthy_members:
-            for tag in member.get("tags", []):
-                if uuidutils.is_uuid_like(tag):
-                    unhealthy_resources.append(tag)
+            target_resources = heat_client.resources.list(
+                stack_id, nested_depth=3,
+                filters={"physical_resource_id": member["id"]}
+            )
+            if len(target_resources) > 0:
+                # There should be only one item.
+                unhealthy_resources.append(
+                    target_resources[0].parent_resource
+                )
 
         if not unhealthy_resources:
-            # Fall back to search resource by the pool member ID.
-            for member in unhealthy_members:
-                target_resources = heat_client.resources.list(
-                    stack_id, nested_depth=3, filters={"id": member["id"]})
-                if len(target_resources) > 0:
-                    # There should be only one item.
-                    unhealthy_resources.append(
-                        target_resources[0].resource_name)
-
-            # If we still can't find expected resources, do nothing.
-            if not unhealthy_resources:
-                LOG.warning("No unhealthy resource found for the alarm %s",
-                            alarm_id)
-                return
+            LOG.warning("No unhealthy resource found for the alarm %s",
+                        alarm_id)
+            return
 
         try:
             for res in unhealthy_resources:
