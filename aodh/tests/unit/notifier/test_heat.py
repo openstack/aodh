@@ -21,42 +21,7 @@ from aodh.tests.unit.notifier import base
 
 class TestTrustHeatAlarmNotifier(base.TestNotifierBase):
     @mock.patch("aodh.keystone_client.get_heat_client_from_trust")
-    def test_notify_with_tags(self, mock_heatclient):
-        action = netutils.urlsplit("trust+autohealer://fake_trust_id:delete@")
-        alarm_id = "fake_alarm_id"
-        alarm_name = "fake_alarm_name"
-        severity = "low"
-        previous = "ok"
-        current = "alarm"
-        reason = "no good reason"
-        reason_data = {
-            "stack_id": "fake_stack_id",
-            "asg_id": "fake_asg_id",
-            "unhealthy_members": [
-                {"tags": ["3bd8bc5a-7632-11e9-84cd-00224d6b7bc1"]}
-            ]
-        }
-
-        notifier = heat_notifier.TrustHeatAlarmNotifier(self.conf)
-        notifier.notify(action, alarm_id, alarm_name, severity, previous,
-                        current, reason, reason_data)
-
-        mock_heatclient.assert_called_once_with(self.conf, "fake_trust_id")
-
-        mock_client = mock_heatclient.return_value
-        mock_client.resources.mark_unhealthy.assert_called_once_with(
-            "fake_asg_id",
-            "3bd8bc5a-7632-11e9-84cd-00224d6b7bc1",
-            True,
-            "unhealthy load balancer member"
-        )
-
-        mock_client.stacks.update.assert_called_once_with(
-            "fake_stack_id", existing=True
-        )
-
-    @mock.patch("aodh.keystone_client.get_heat_client_from_trust")
-    def test_notify_without_tags(self, mock_heatclient):
+    def test_notify(self, mock_heatclient):
         action = netutils.urlsplit("trust+autohealer://fake_trust_id:delete@")
         alarm_id = "fake_alarm_id"
         alarm_name = "fake_alarm_name"
@@ -74,7 +39,7 @@ class TestTrustHeatAlarmNotifier(base.TestNotifierBase):
 
         class FakeResource(object):
             def __init__(self, resource_name):
-                self.resource_name = resource_name
+                self.parent_resource = resource_name
 
         mock_client = mock_heatclient.return_value
         mock_client.resources.list.return_value = [
