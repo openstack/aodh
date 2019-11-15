@@ -1,15 +1,16 @@
 # Andi Chandler <andi@gowling.com>, 2016. #zanata
 # Andi Chandler <andi@gowling.com>, 2017. #zanata
 # Andi Chandler <andi@gowling.com>, 2018. #zanata
+# Andi Chandler <andi@gowling.com>, 2019. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: aodh\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-23 11:09+0000\n"
+"POT-Creation-Date: 2019-10-31 03:03+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2018-08-17 09:21+0000\n"
+"PO-Revision-Date: 2019-11-14 11:06+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>\n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en_GB\n"
@@ -48,6 +49,12 @@ msgstr "5.0.0"
 
 msgid "6.0.0"
 msgstr "6.0.0"
+
+msgid "9.0.0"
+msgstr "9.0.0"
+
+msgid "9.0.0-3"
+msgstr "9.0.0-3"
 
 msgid ""
 "A healthcheck endpoint is provided by default at /healthcheck. It leverages "
@@ -127,6 +134,25 @@ msgstr ""
 "Add support for batch processing of messages from queue. This will allow the "
 "aodh-notifier to grab multiple messages per thread to enable more efficient "
 "processing."
+
+msgid ""
+"Added a new evaluator for the alarms of type ``loadbalancer_member_health`` "
+"which evaluates the alarm by checking the operating status of the members in "
+"a given load balancer pool."
+msgstr ""
+"Added a new evaluator for the alarms of type ``loadbalancer_member_health`` "
+"which evaluates the alarm by checking the operating status of the members in "
+"a given load balancer pool."
+
+msgid ""
+"Added a new notifier(``trust+heat``) that works together with "
+"``loadbalancer_member_health`` evaluator for auto-healing purpose."
+msgstr ""
+"Added a new notifier(``trust+heat``) that works together with "
+"``loadbalancer_member_health`` evaluator for auto-healing purpose."
+
+msgid "Added new tool ``aodh-status upgrade check``."
+msgstr "Added new tool ``aodh-status upgrade check``."
 
 msgid "Alarm name unique constraint for each project has been removed."
 msgstr "Alarm name unique constraint for each project has been removed."
@@ -256,11 +282,27 @@ msgstr "Mitaka Series Release Notes"
 msgid "New Features"
 msgstr "New Features"
 
+msgid ""
+"New framework for ``aodh-status upgrade check`` command is added. This "
+"framework allows adding various checks which can be run before a Aodh "
+"upgrade to ensure if the upgrade can be performed safely."
+msgstr ""
+"New framework for ``aodh-status upgrade check`` command is added. This "
+"framework allows adding various checks which can be run before a Aodh "
+"upgrade to ensure if the upgrade can be performed safely."
+
 msgid "Newton Series Release Notes"
 msgstr "Newton Series Release Notes"
 
 msgid "Ocata Series Release Notes"
 msgstr "Ocata Series Release Notes"
+
+msgid ""
+"Operator can now use new CLI tool ``aodh-status upgrade check`` to check if "
+"Aodh deployment can be safely upgraded from N-1 to N release."
+msgstr ""
+"Operator can now use new CLI tool ``aodh-status upgrade check`` to check if "
+"Aodh deployment can be safely upgraded from N-1 to N release."
 
 msgid "Other Notes"
 msgstr "Other Notes"
@@ -274,6 +316,18 @@ msgstr ""
 
 msgid "Pike Series Release Notes"
 msgstr "Pike Series Release Notes"
+
+msgid "Prelude"
+msgstr "Prelude"
+
+msgid ""
+"Python 2.7 support has been dropped. Last release of Aodh to support py2.7 "
+"is OpenStack Train. The minimum version of Python now supported by Aodh is "
+"Python 3.6."
+msgstr ""
+"Python 2.7 support has been dropped. Last release of Aodh to support py2.7 "
+"is OpenStack Train. The minimum version of Python now supported by Aodh is "
+"Python 3.6."
 
 msgid "Queens Series Release Notes"
 msgstr "Queens Series Release Notes"
@@ -298,6 +352,9 @@ msgstr "Security Issues"
 
 msgid "Start using reno to manage release notes."
 msgstr "Start using reno to manage release notes."
+
+msgid "Stein Series Release Notes"
+msgstr "Stein Series Release Notes"
 
 msgid ""
 "Support for queue based communication between alarm evaluator service and "
@@ -338,6 +395,9 @@ msgid ""
 msgstr ""
 "The reason of the state change is now part of the API as \"state_reason\" "
 "field of the alarm object."
+
+msgid "Train Series Release Notes"
+msgstr "Train Series Release Notes"
 
 msgid "Upgrade Notes"
 msgstr "Upgrade Notes"
