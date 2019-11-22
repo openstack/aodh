@@ -117,7 +117,8 @@ class CompositeEvaluator(evaluator.Evaluator):
     @property
     def threshold_evaluators(self):
         if not self._threshold_evaluators:
-            threshold_types = ('gnocchi_resources_threshold',
+            threshold_types = ('ceilometer',
+                               'gnocchi_resources_threshold',
                                'gnocchi_aggregation_by_metrics_threshold',
                                'gnocchi_aggregation_by_resources_threshold')
             self._threshold_evaluators = stevedore.NamedExtensionManager(
