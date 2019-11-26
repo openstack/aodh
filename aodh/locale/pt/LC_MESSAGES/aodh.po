@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aodh VERSION\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2018-01-30 20:14+0000\n"
+"POT-Creation-Date: 2019-11-25 10:56+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Language: pt\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Generated-By: Babel 2.0\n"
-"X-Generator: Zanata 3.9.6\n"
+"X-Generator: Zanata 4.3.3\n"
 "Language-Team: Portuguese\n"
 
 #, python-format
@@ -47,6 +47,14 @@ msgstr "Alarme incorreto"
 #, python-format
 msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
 msgstr "Aviso de quota excedida para o utilizador %(u)s no projeto %(p)s"
+
+#, python-format
+msgid ""
+"Alarm when %(meter_name)s is %(comparison_operator)s a %(statistic)s of "
+"%(threshold)s over %(period)s seconds"
+msgstr ""
+"Alarme quando %(meter_name)s é %(comparison_operator)s uma %(statistic)s de "
+"%(threshold)s em %(period)s segundos"
 
 #, python-format
 msgid "Alarm when %s event occurred."
@@ -120,6 +128,9 @@ msgstr "Ação não suportada %s"
 #, python-format
 msgid "You are not authorized to create action: %s"
 msgstr "Não tem permissão para criar a ação: %s"
+
+msgid "alarm stats retrieval failed"
+msgstr "a extração da estatística do alarme falhou"
 
 msgid "state invalid"
 msgstr "estato inválido"

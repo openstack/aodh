@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aodh VERSION\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2018-01-30 20:14+0000\n"
+"POT-Creation-Date: 2019-11-25 10:56+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Last-Translator: KATO Tomoyuki <kato.tomoyuki@jp.fujitsu.com>\n"
 "Language-Team: Italian\n"
 "Language: it\n"
-"X-Generator: Zanata 3.9.6\n"
+"X-Generator: Zanata 4.3.3\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 #, python-format
@@ -42,6 +42,14 @@ msgstr "Segnalazione non corretta"
 #, python-format
 msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
 msgstr "Quota di segnalazione superata per l'utente %(u)s nel progetto %(p)s"
+
+#, python-format
+msgid ""
+"Alarm when %(meter_name)s is %(comparison_operator)s a %(statistic)s of "
+"%(threshold)s over %(period)s seconds"
+msgstr ""
+"Segnalazione quando %(meter_name)s è %(comparison_operator)s un "
+"%(statistic)s di %(threshold)s in %(period)s secondi"
 
 #, python-format
 msgid "Failed to parse the timestamp value %s"
@@ -104,6 +112,9 @@ msgstr ""
 #, python-format
 msgid "Unsupported action %s"
 msgstr "Azione non supportata %s"
+
+msgid "alarm stats retrieval failed"
+msgstr "segnalazione richiamo statistiche non riuscito"
 
 msgid "state invalid"
 msgstr "stato non valido"
