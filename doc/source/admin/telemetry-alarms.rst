@@ -43,9 +43,13 @@ governed by:
 * A sliding time window to indicate how far back into the recent past
   you want to look.
 
-Valid threshold alarms are: ``gnocchi_resources_threshold``,
-``gnocchi_aggregation_by_metrics_threshold``, or
-``gnocchi_aggregation_by_resources_threshold``.
+Both Ceilometer and Gnocchi are supported as data source of the threshold rule
+alarm. Valid threshold alarms are:
+
+* threshold
+* gnocchi_resources_threshold
+* gnocchi_aggregation_by_metrics_threshold
+* gnocchi_aggregation_by_resources_threshold
 
 Composite rule alarms
 ---------------------
@@ -104,6 +108,18 @@ encoded as a JSON fragment.
 These are a lightweight alternative to webhooks, whereby the state
 transition is simply logged by the ``alarm-notifier``, and are
 intended primarily for testing purposes.
+
+**heat**
+
+This notifier works together with ``loadbalancer_member_health`` evaluator.
+Presumably, the end user defines a Heat template which contains an autoscaling
+group and all the members in the group are joined in an Octavia load balancer
+in order to expose highly available service to the outside, so that when the
+stack scales up or scales down, Heat makes sure the new members are joining the
+load balancer automatically and the old members are removed. However, this
+notifier deals with the situation that when some member fails, the Heat stack
+could be recovered automatically.
+
 
 Workload partitioning
 ---------------------

@@ -41,7 +41,7 @@ class CompositeRule(wtypes.UserType):
     threshold_plugins = None
 
     def __init__(self):
-        threshold_rules = ('ceilometer',
+        threshold_rules = ('threshold',
                            'gnocchi_resources_threshold',
                            'gnocchi_aggregation_by_metrics_threshold',
                            'gnocchi_aggregation_by_resources_threshold')

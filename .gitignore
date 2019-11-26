@@ -21,3 +21,5 @@ releasenotes/build
 /doc/source/contributor/api/
 doc/source/_static/aodh.policy.yaml.sample
 doc/source/_static/aodh.conf.sample
+
+.vscode/

@@ -2586,13 +2586,9 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
                                   expect_errors=True,
                                   headers=self.auth_headers)
 
-        err = ("Unsupported sub-rule type :non-type in composite "
-               "rule, should be one of: "
-               "['gnocchi_aggregation_by_metrics_threshold', "
-               "'gnocchi_aggregation_by_resources_threshold', "
-               "'gnocchi_resources_threshold']")
+        err = "Unsupported sub-rule type"
         faultstring = response.json['error_message']['faultstring']
-        self.assertEqual(err, faultstring)
+        self.assertIn(err, faultstring)
 
     def test_post_with_sub_rule_with_only_required_params(self):
         sub_rulea = {

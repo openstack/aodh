@@ -237,9 +237,13 @@ class EventAlarmEvaluator(evaluator.Evaluator):
 
         for condition in alarm.query:
             if not _compare(condition):
-                LOG.debug('Aborting evaluation of the alarm due to '
-                          'unmet condition=%s .', condition)
+                LOG.info('Aborting evaluation of the alarm %s due to '
+                         'unmet condition=%s .', alarm.id, condition)
                 return
+
+        LOG.info('Triggering the alarm %s by event for project %s, '
+                 'event_type: %s',
+                 alarm.id, event.project, event.obj.get('event_type'))
 
         self._fire_alarm(alarm, event)
 
