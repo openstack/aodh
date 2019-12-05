@@ -49,3 +49,11 @@ class TestEvaluatorBase(base.BaseTestCase):
     def _assert_all_alarms(self, state):
         for alarm in self.alarms:
             self.assertEqual(state, alarm.state)
+
+    def assertDictContains(self, parent, child):
+        """Checks whether child dict is a subset of parent.
+
+        assertDictContainsSubset() in standard Python 2.7 has been deprecated
+        since Python 3.2
+        """
+        self.assertEqual(parent, dict(parent, **child))

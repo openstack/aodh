@@ -76,6 +76,12 @@ severity_kind_enum = wtypes.Enum(str, *severity_kind)
 ALARM_REASON_DEFAULT = "Not evaluated yet"
 ALARM_REASON_MANUAL = "Manually set via API"
 
+ALARM_QUERY_FIELDS_ALLOWED = set([
+    'all_projects', 'user_id', 'project_id', 'type', 'name', 'enabled',
+    'state', 'severity', 'timestamp', 'repeat_actions'
+])
+ALARM_QUERY_OPS_ALLOWED = set(['eq'])
+
 
 class OverQuota(base.ClientSideError):
     def __init__(self, data):
@@ -101,14 +107,14 @@ def is_over_quota(conn, project_id, user_id):
     # Start by checking for user quota
     user_alarm_quota = pecan.request.cfg.api.user_alarm_quota
     if user_alarm_quota is not None:
-        user_alarms = list(conn.get_alarms(user=user_id))
+        user_alarms = conn.get_alarms(user_id=user_id)
         over_quota = len(user_alarms) >= user_alarm_quota
 
     # If the user quota isn't reached, we check for the project quota
     if not over_quota:
         project_alarm_quota = pecan.request.cfg.api.project_alarm_quota
         if project_alarm_quota is not None:
-            project_alarms = list(conn.get_alarms(project=project_id))
+            project_alarms = conn.get_alarms(project_id=project_id)
             over_quota = len(project_alarms) >= project_alarm_quota
 
     return over_quota
@@ -259,6 +265,9 @@ class Alarm(base.Base):
     severity = base.AdvEnum('severity', str, *severity_kind,
                             default='low')
     "The severity of the alarm"
+
+    evaluate_timestamp = datetime.datetime
+    "The latest alarm evaluation time"
 
     def __init__(self, rule=None, time_constraints=None, **kwargs):
         super(Alarm, self).__init__(**kwargs)
@@ -548,14 +557,16 @@ class AlarmController(rest.RestController):
         self._id = alarm_id
 
     def _enforce_rbac(self, rbac_directive):
-        # TODO(sileht): We should be able to relax this since we
-        # pass the alarm object to the enforcer.
-        auth_project = rbac.get_limited_to_project(pecan.request.headers,
-                                                   pecan.request.enforcer)
-        alarms = list(pecan.request.storage.get_alarms(alarm_id=self._id,
-                                                       project=auth_project))
+        auth_project = pecan.request.headers.get('X-Project-Id')
+
+        filters = {'alarm_id': self._id}
+        if not rbac.is_admin(pecan.request.headers):
+            filters['project_id'] = auth_project
+
+        alarms = pecan.request.storage.get_alarms(**filters)
         if not alarms:
-            raise base.AlarmNotFound(alarm=self._id, auth_project=auth_project)
+            raise base.AlarmNotFound(alarm=self._id, auth_project=None)
+
         alarm = alarms[0]
         target = {'user_id': alarm.user_id,
                   'project_id': alarm.project_id}
@@ -850,12 +861,50 @@ class AlarmsController(rest.RestController):
                      pecan.request.enforcer, target)
 
         q = q or []
-        # Timestamp is not supported field for Simple Alarm queries
-        kwargs = v2_utils.query_to_kwargs(
-            q, pecan.request.storage.get_alarms,
-            allow_timestamps=False)
+        filters = {}
+
+        # Check field
+        keys = set([query.field for query in q])
+        if not keys.issubset(ALARM_QUERY_FIELDS_ALLOWED):
+            raise wsme.exc.InvalidInput(
+                'field', keys,
+                'only fields %s are allowed' % ALARM_QUERY_FIELDS_ALLOWED
+            )
+        # Check op
+        ops = set([query.op for query in q])
+        if any([op not in ALARM_QUERY_OPS_ALLOWED for op in ops]):
+            raise wsme.exc.InvalidInput(
+                'op', ops,
+                'only operations %s are allowed' % ALARM_QUERY_OPS_ALLOWED
+            )
+
+        if 'all_projects' in keys:
+            if v2_utils.get_query_value(q, 'all_projects', 'boolean'):
+                rbac.enforce('get_alarms:all_projects', pecan.request.headers,
+                             pecan.request.enforcer, target)
+            keys.remove('all_projects')
+        else:
+            project_id = pecan.request.headers.get('X-Project-Id')
+            is_admin = rbac.is_admin(pecan.request.headers)
+
+            if not v2_utils.is_field_exist(q, 'project_id'):
+                q.append(
+                    base.Query(field='project_id', op='eq', value=project_id)
+                )
+            else:
+                request_project = v2_utils.get_query_value(q, 'project_id')
+                if not is_admin and request_project != project_id:
+                    raise base.ProjectNotAuthorized(request_project)
+
+        for query in q:
+            if query.field in keys:
+                filters[query.field] = {query.op: query.get_value(query.type)}
+
         if sort or limit or marker:
-            kwargs['pagination'] = v2_utils.get_pagination_options(
+            filters['pagination'] = v2_utils.get_pagination_options(
                 sort, limit, marker, models.Alarm)
+
+        LOG.debug('Getting alarms from database, filters: %s', filters)
+
         return [Alarm.from_db_model_scrubbed(m)
-                for m in pecan.request.storage.get_alarms(**kwargs)]
+                for m in pecan.request.storage.get_alarms(**filters)]

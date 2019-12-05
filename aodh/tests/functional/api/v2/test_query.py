@@ -35,121 +35,121 @@ class TestQuery(base.BaseTestCase):
         self.useFixture(fixtures.MonkeyPatch(
             'pecan.response', mock.MagicMock()))
 
-    def test_get_value_as_type_with_integer(self):
+    def test_get_value_with_integer(self):
         query = v2_base.Query(field='metadata.size',
                               op='eq',
                               value='123',
                               type='integer')
         expected = 123
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_with_float(self):
+    def test_get_value_with_float(self):
         query = v2_base.Query(field='metadata.size',
                               op='eq',
                               value='123.456',
                               type='float')
         expected = 123.456
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_with_boolean(self):
+    def test_get_value_with_boolean(self):
         query = v2_base.Query(field='metadata.is_public',
                               op='eq',
                               value='True',
                               type='boolean')
         expected = True
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_with_string(self):
+    def test_get_value_with_string(self):
         query = v2_base.Query(field='metadata.name',
                               op='eq',
                               value='linux',
                               type='string')
         expected = 'linux'
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_with_datetime(self):
+    def test_get_value_with_datetime(self):
         query = v2_base.Query(field='metadata.date',
                               op='eq',
                               value='2014-01-01T05:00:00',
                               type='datetime')
-        self.assertIsInstance(query._get_value_as_type(), datetime.datetime)
-        self.assertIsNone(query._get_value_as_type().tzinfo)
+        self.assertIsInstance(query.get_value(), datetime.datetime)
+        self.assertIsNone(query.get_value().tzinfo)
 
-    def test_get_value_as_type_with_integer_without_type(self):
+    def test_get_value_with_integer_without_type(self):
         query = v2_base.Query(field='metadata.size',
                               op='eq',
                               value='123')
         expected = 123
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_with_float_without_type(self):
+    def test_get_value_with_float_without_type(self):
         query = v2_base.Query(field='metadata.size',
                               op='eq',
                               value='123.456')
         expected = 123.456
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_with_boolean_without_type(self):
+    def test_get_value_with_boolean_without_type(self):
         query = v2_base.Query(field='metadata.is_public',
                               op='eq',
                               value='True')
         expected = True
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_with_string_without_type(self):
+    def test_get_value_with_string_without_type(self):
         query = v2_base.Query(field='metadata.name',
                               op='eq',
                               value='linux')
         expected = 'linux'
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_with_bad_type(self):
+    def test_get_value_with_bad_type(self):
         query = v2_base.Query(field='metadata.size',
                               op='eq',
                               value='123.456',
                               type='blob')
-        self.assertRaises(wsme.exc.ClientSideError, query._get_value_as_type)
+        self.assertRaises(wsme.exc.ClientSideError, query.get_value)
 
-    def test_get_value_as_type_with_bad_value(self):
+    def test_get_value_with_bad_value(self):
         query = v2_base.Query(field='metadata.size',
                               op='eq',
                               value='fake',
                               type='integer')
-        self.assertRaises(wsme.exc.ClientSideError, query._get_value_as_type)
+        self.assertRaises(wsme.exc.ClientSideError, query.get_value)
 
-    def test_get_value_as_type_integer_expression_without_type(self):
+    def test_get_value_integer_expression_without_type(self):
         # bug 1221736
         query = v2_base.Query(field='should_be_a_string',
                               op='eq',
                               value='WWW-Layer-4a80714f')
         expected = 'WWW-Layer-4a80714f'
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_boolean_expression_without_type(self):
+    def test_get_value_boolean_expression_without_type(self):
         # bug 1221736
         query = v2_base.Query(field='should_be_a_string',
                               op='eq',
                               value='True or False')
         expected = 'True or False'
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_with_syntax_error(self):
+    def test_get_value_with_syntax_error(self):
         # bug 1221736
         value = 'WWW-Layer-4a80714f-0232-4580-aa5e-81494d1a4147-uolhh25p5xxm'
         query = v2_base.Query(field='group_id',
                               op='eq',
                               value=value)
         expected = value
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
-    def test_get_value_as_type_with_syntax_error_colons(self):
+    def test_get_value_with_syntax_error_colons(self):
         # bug 1221736
         value = 'Ref::StackId'
         query = v2_base.Query(field='field_name',
                               op='eq',
                               value=value)
         expected = value
-        self.assertEqual(expected, query._get_value_as_type())
+        self.assertEqual(expected, query.get_value())
 
 
 class TestQueryToKwArgs(tests_base.BaseTestCase):
@@ -320,13 +320,8 @@ class TestQueryToKwArgs(tests_base.BaseTestCase):
         q = [v2_base.Query(field='abc',
                            op='eq',
                            value='abc')]
-        exc = self.assertRaises(
+        self.assertRaises(
             wsme.exc.UnknownArgument,
             utils.query_to_kwargs, q,
-            alarm_storage_base.Connection.get_alarms)
-        valid_keys = ['alarm_id', 'enabled', 'exclude', 'meter', 'name',
-                      'project', 'severity', 'state', 'type', 'user']
-        msg = ("unrecognized field in query: %s, "
-               "valid keys: %s") % (q, valid_keys)
-        expected_exc = wsme.exc.UnknownArgument('abc', msg)
-        self.assertEqual(str(expected_exc), str(exc))
+            alarm_storage_base.Connection.get_alarms
+        )

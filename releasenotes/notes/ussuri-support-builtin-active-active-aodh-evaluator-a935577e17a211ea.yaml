@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    The admin user can fetch alarms of all the projects, e.g.
+    ``curl -X GET "${aodh_prefix}/v2/alarms?q.field=all_projects&q.op=eq&q.value=true" X-Auth-Token:$token``

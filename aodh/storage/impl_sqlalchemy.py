@@ -25,7 +25,6 @@ from oslo_db.sqlalchemy import utils as oslo_sql_utils
 from oslo_log import log
 from oslo_utils import importutils
 from oslo_utils import timeutils
-import six
 import sqlalchemy
 from sqlalchemy import asc
 from sqlalchemy import desc
@@ -56,6 +55,41 @@ AVAILABLE_CAPABILITIES = {
 AVAILABLE_STORAGE_CAPABILITIES = {
     'storage': {'production_ready': True},
 }
+
+
+def apply_filters(query, model, **filters):
+    filter_dict = {}
+
+    for key, value in filters.items():
+        column_attr = getattr(model, key)
+
+        if isinstance(value, dict):
+            if 'in' in value:
+                query = query.filter(column_attr.in_(value['in']))
+            elif 'nin' in value:
+                query = query.filter(~column_attr.in_(value['nin']))
+            elif 'ne' in value:
+                query = query.filter(column_attr != value['ne'])
+            elif 'gt' in value:
+                query = query.filter(column_attr > value['gt'])
+            elif 'ge' in value:
+                query = query.filter(column_attr >= value['ge'])
+            elif 'lt' in value:
+                query = query.filter(column_attr < value['lt'])
+            elif 'le' in value:
+                query = query.filter(column_attr <= value['le'])
+            elif 'eq' in value:
+                query = query.filter(column_attr == value['eq'])
+            elif 'has' in value:
+                like_pattern = '%{0}%'.format(value['has'])
+                query = query.filter(column_attr.like(like_pattern))
+        else:
+            filter_dict[key] = value
+
+    if filter_dict:
+        query = query.filter_by(**filter_dict)
+
+    return query
 
 
 class Connection(base.Connection):
@@ -147,28 +181,30 @@ class Connection(base.Connection):
 
     @staticmethod
     def _row_to_alarm_model(row):
-        return alarm_api_models.Alarm(alarm_id=row.alarm_id,
-                                      enabled=row.enabled,
-                                      type=row.type,
-                                      name=row.name,
-                                      description=row.description,
-                                      timestamp=row.timestamp,
-                                      user_id=row.user_id,
-                                      project_id=row.project_id,
-                                      state=row.state,
-                                      state_timestamp=row.state_timestamp,
-                                      state_reason=row.state_reason,
-                                      ok_actions=row.ok_actions,
-                                      alarm_actions=row.alarm_actions,
-                                      insufficient_data_actions=(
-                                          row.insufficient_data_actions),
-                                      rule=row.rule,
-                                      time_constraints=row.time_constraints,
-                                      repeat_actions=row.repeat_actions,
-                                      severity=row.severity)
+        return alarm_api_models.Alarm(
+            alarm_id=row.alarm_id,
+            enabled=row.enabled,
+            type=row.type,
+            name=row.name,
+            description=row.description,
+            timestamp=row.timestamp,
+            user_id=row.user_id,
+            project_id=row.project_id,
+            state=row.state,
+            state_timestamp=row.state_timestamp,
+            state_reason=row.state_reason,
+            ok_actions=row.ok_actions,
+            alarm_actions=row.alarm_actions,
+            insufficient_data_actions=(row.insufficient_data_actions),
+            rule=row.rule,
+            time_constraints=row.time_constraints,
+            repeat_actions=row.repeat_actions,
+            severity=row.severity,
+            evaluate_timestamp=row.evaluate_timestamp
+        )
 
     def _retrieve_alarms(self, query):
-        return (self._row_to_alarm_model(x) for x in query.all())
+        return [self._row_to_alarm_model(x) for x in query.all()]
 
     @staticmethod
     def _get_pagination_query(session, query, pagination, api_model, model):
@@ -204,50 +240,15 @@ class Connection(base.Connection):
         return oslo_sql_utils.paginate_query(
             query, model, limit, sort_keys, sort_dirs=sort_dirs, marker=marker)
 
-    def get_alarms(self, name=None, user=None, state=None, meter=None,
-                   project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None, exclude=None,
-                   pagination=None):
-        """Yields a lists of alarms that match filters.
-
-        :param name: Optional name for alarm.
-        :param user: Optional ID for user that owns the resource.
-        :param state: Optional string for alarm state.
-        :param meter: Optional string for alarms associated with meter.
-        :param project: Optional ID for project that owns the resource.
-        :param enabled: Optional boolean to list disable alarm.
-        :param alarm_id: Optional alarm_id to return one alarm.
-        :param alarm_type: Optional alarm type.
-        :param severity: Optional alarm severity.
-        :param exclude: Optional dict for inequality constraint.
-        :param pagination: Pagination query parameters.
-        """
-
+    def get_alarms(self, meter=None, pagination=None, **kwargs):
+        """Yields a lists of alarms that match filters."""
         pagination = pagination or {}
         session = self._engine_facade.get_session()
         query = session.query(models.Alarm)
-        if name is not None:
-            query = query.filter(models.Alarm.name == name)
-        if enabled is not None:
-            query = query.filter(models.Alarm.enabled == enabled)
-        if user is not None:
-            query = query.filter(models.Alarm.user_id == user)
-        if project is not None:
-            query = query.filter(models.Alarm.project_id == project)
-        if alarm_id is not None:
-            query = query.filter(models.Alarm.alarm_id == alarm_id)
-        if state is not None:
-            query = query.filter(models.Alarm.state == state)
-        if alarm_type is not None:
-            query = query.filter(models.Alarm.type == alarm_type)
-        if severity is not None:
-            query = query.filter(models.Alarm.severity == severity)
-        if exclude is not None:
-            for key, value in six.iteritems(exclude):
-                query = query.filter(getattr(models.Alarm, key) != value)
-
+        query = apply_filters(query, models.Alarm, **kwargs)
         query = self._get_pagination_query(
             session, query, pagination, alarm_api_models.Alarm, models.Alarm)
+
         alarms = self._retrieve_alarms(query)
 
         # TODO(cmart): improve this by using sqlalchemy.func factory
@@ -416,3 +417,18 @@ class Connection(base.Connection):
                             .delete())
             LOG.info("%d alarm histories are removed from database",
                      deleted_rows)
+
+    def conditional_update(self, model, values, expected_values, filters=None):
+        """Compare-and-swap conditional update SQLAlchemy implementation."""
+        filters = filters or {}
+        filters.update(expected_values)
+
+        session = self._engine_facade.get_session()
+        query = session.query(model)
+        if filters:
+            query = query.filter_by(**filters)
+
+        update_args = {'synchronize_session': False}
+
+        result = query.update(values, **update_args)
+        return 0 != result

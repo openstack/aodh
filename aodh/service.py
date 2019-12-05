@@ -72,8 +72,15 @@ def prepare_service(argv=None, config_files=None):
     conf = cfg.ConfigOpts()
     oslo_i18n.enable_lazy()
     log.register_options(conf)
-    log_levels = (conf.default_log_levels +
-                  ['futurist=INFO', 'keystoneclient=INFO'])
+    log_levels = (
+        conf.default_log_levels +
+        [
+            'futurist=INFO',
+            'keystoneclient=INFO',
+            'oslo_db.sqlalchemy=WARN',
+            'cotyledon=INFO'
+        ]
+    )
     log.set_defaults(default_log_levels=log_levels)
     defaults.set_cors_middleware_defaults()
     db_options.set_defaults(conf)

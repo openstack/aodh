@@ -153,7 +153,7 @@ class Query(Base):
     def as_dict(self):
         return self.as_dict_from_keys(['field', 'op', 'type', 'value'])
 
-    def _get_value_as_type(self, forced_type=None):
+    def get_value(self, forced_type=None):
         """Convert metadata value to the specified data type.
 
         This method is called during metadata query to help convert the

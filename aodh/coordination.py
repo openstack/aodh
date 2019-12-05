@@ -220,10 +220,12 @@ class PartitionCoordinator(object):
         `tooz`. We then hash all the objects into buckets and return only
         the ones that hashed into *our* bucket.
         """
-        if not group_id:
+        if not group_id or not self.is_active():
             return universal_set
+
         if group_id not in self._groups:
             self.join_group(group_id)
+
         try:
             members = self._get_members(group_id)
             LOG.debug('Members of group: %s, Me: %s', members, self._my_id)

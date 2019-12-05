@@ -58,6 +58,17 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name="telemetry:get_alarms:all_projects",
+        check_str=RULE_CONTEXT_IS_ADMIN,
+        description='Get alarms of all projects.',
+        operations=[
+            {
+                'path': '/v2/alarms',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name="telemetry:query_alarm",
         check_str=RULE_ADMIN_OR_OWNER,
         description='Get all alarms, based on the query provided.',

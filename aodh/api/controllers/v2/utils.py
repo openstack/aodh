@@ -157,9 +157,9 @@ def validate_query(query, db_func, internal_keys=None,
             if key in valid_keys or _is_field_metadata(i.field):
                 if operator == 'eq':
                     if key == 'enabled':
-                        i._get_value_as_type('boolean')
+                        i.get_value('boolean')
                     elif _is_field_metadata(key):
-                        i._get_value_as_type()
+                        i.get_value()
                 else:
                     raise wsme.exc.InvalidInput('op', i.op,
                                                 'unimplemented operator for '
@@ -235,7 +235,7 @@ def query_to_kwargs(query, db_func, internal_keys=None,
                 if i.field == 'search_offset':
                     stamp['search_offset'] = i.value
                 elif i.field == 'enabled':
-                    kwargs[i.field] = i._get_value_as_type('boolean')
+                    kwargs[i.field] = i.get_value('boolean')
                 else:
                     key = translation.get(i.field, i.field)
                     kwargs[key] = i.value
@@ -320,3 +320,33 @@ def get_pagination_options(sort, limit, marker, api_model):
     return {'limit': limit,
             'marker': marker,
             'sort': sorts}
+
+
+def get_query_value(queries, field, type=None):
+    """Get value of the specified query field.
+
+    :param queries: A list of Query object.
+    :param field: Field name.
+    """
+    for q in queries:
+        if q.field == field:
+            return q.get_value(type)
+
+    raise wsme.exc.InvalidInput(
+        'field',
+        field,
+        "field %s is not provided" % field
+    )
+
+
+def is_field_exist(queries, field):
+    """Check if a given field exists in a query list.
+
+    :param queries: A list of Query object.
+    :param field: Field name.
+    """
+    for q in queries:
+        if q.field == field:
+            return True
+
+    return False

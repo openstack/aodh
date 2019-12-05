@@ -166,13 +166,12 @@ class AlarmTest(AlarmTestBase):
 
     def test_list_by_type(self):
         self.add_some_alarms()
-        alarms = list(self.alarm_conn.get_alarms(alarm_type=ALARM_TYPE))
+        alarms = list(self.alarm_conn.get_alarms(type=ALARM_TYPE))
         self.assertEqual(3, len(alarms))
 
     def test_list_excluded_by_name(self):
         self.add_some_alarms()
-        exclude = {'name': 'yellow-alert'}
-        alarms = list(self.alarm_conn.get_alarms(exclude=exclude))
+        alarms = list(self.alarm_conn.get_alarms(name={'ne': 'yellow-alert'}))
         self.assertEqual(2, len(alarms))
         alarm_names = sorted([a.name for a in alarms])
         self.assertEqual(['orange-alert', 'red-alert'], alarm_names)

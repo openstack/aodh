@@ -91,24 +91,8 @@ class Connection(object):
         """Migrate the database to `version` or the most recent version."""
 
     @staticmethod
-    def get_alarms(name=None, user=None, state=None, meter=None,
-                   project=None, enabled=None, alarm_id=None,
-                   alarm_type=None, severity=None, exclude=None,
-                   pagination=None):
-        """Yields a lists of alarms that match filters.
-
-        :param name: Optional name for alarm.
-        :param user: Optional ID for user that owns the resource.
-        :param state: Optional string for alarm state.
-        :param meter: Optional string for alarms associated with meter.
-        :param project: Optional ID for project that owns the resource.
-        :param enabled: Optional boolean to list disable alarm.
-        :param alarm_id: Optional alarm_id to return one alarm.
-        :param alarm_type: Optional alarm type.
-        :param severity: Optional alarm severity.
-        :param exclude: Optional dict for inequality constraint.
-        :param pagination: Pagination parameters.
-        """
+    def get_alarms(*args, **kwargs):
+        """Yields a lists of alarms that match filters."""
         raise aodh.NotImplementedError('Alarms not implemented')
 
     @staticmethod

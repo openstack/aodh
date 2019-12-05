@@ -106,6 +106,8 @@ class Alarm(Base):
     rule = Column(JSONEncodedDict)
     time_constraints = Column(JSONEncodedDict)
 
+    evaluate_timestamp = Column(DateTime, default=lambda: timeutils.utcnow())
+
 
 class AlarmChange(Base):
     """Define AlarmChange data."""

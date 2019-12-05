@@ -50,7 +50,7 @@ class AlarmEventRule(base.AlarmRule):
     def validate_alarm(cls, alarm):
         super(AlarmEventRule, cls).validate_alarm(alarm)
         for i in alarm.event_rule.query:
-            i._get_value_as_type()
+            i.get_value()
             try:
                 _q_validator({"field": i.field, "op": i.op,
                               "value": i.type})

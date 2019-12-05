@@ -14,6 +14,7 @@
 # under the License.
 """Tests alarm operation."""
 
+import copy
 import datetime
 import json as jsonlib
 import operator
@@ -206,9 +207,6 @@ class TestAlarms(TestAlarmsBase):
                                  'value': isotime}],
                              expect_errors=True)
         self.assertEqual(resp.status_code, 400)
-        self.assertEqual(resp.json['error_message']['faultstring'],
-                         'Unknown argument: "timestamp": '
-                         'not valid for this resource')
 
     def test_alarms_query_with_state(self):
         alarm = models.Alarm(name='disabled',
@@ -260,14 +258,38 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(set(['gnocchi_aggregation_by_metrics_threshold']),
                          set(alarm['type'] for alarm in alarms))
 
+    def test_list_alarms_all_projects_by_admin(self):
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Roles'] = 'admin'
+
+        alarms = self.get_json(
+            '/alarms',
+            headers=auth_headers,
+            q=[{'field': 'all_projects', 'op': 'eq', 'value': 'true'}]
+        )
+
+        self.assertEqual(3, len(alarms))
+
+    def test_list_alarms_all_projects_forbidden(self):
+        response = self.get_json(
+            '/alarms',
+            headers=self.auth_headers,
+            q=[{'field': 'all_projects', 'op': 'eq', 'value': 'true'}],
+            expect_errors=True,
+            status=401
+        )
+
+        faultstring = 'RBAC Authorization Failed'
+        self.assertIn(faultstring,
+                      response.json['error_message']['faultstring'])
+
     def test_get_not_existing_alarm(self):
         resp = self.get_json('/alarms/alarm-id-3',
                              headers=self.auth_headers,
                              expect_errors=True)
         self.assertEqual(404, resp.status_code)
-        self.assertEqual('Alarm alarm-id-3 not found in project %s' %
-                         self.auth_headers["X-Project-Id"],
-                         resp.json['error_message']['faultstring'])
+        self.assertIn('Alarm alarm-id-3 not found',
+                      resp.json['error_message']['faultstring'])
 
     def test_get_alarm(self):
         alarms = self.get_json('/alarms',
@@ -344,13 +366,11 @@ class TestAlarms(TestAlarmsBase):
                                      expect_errors=True,
                                      status=400,
                                      headers=self.auth_headers)
-            faultstring = ('Invalid input for field/attribute op. '
-                           'Value: \'%(op)s\'. unimplemented operator '
-                           'for %(field)s' % {'field': field, 'op': op})
-            self.assertEqual(faultstring,
-                             response.json['error_message']['faultstring'])
 
-        _test('project', 'ne')
+            faultstring = 'Invalid input for field/attribute op'
+            self.assertIn(faultstring,
+                          response.json['error_message']['faultstring'])
+
         _test('project_id', 'ne')
 
     def test_get_alarm_project_filter_normal_user(self):
@@ -364,7 +384,6 @@ class TestAlarms(TestAlarmsBase):
                                        'value': project}])
             self.assertEqual(3, len(alarms))
 
-        _test('project')
         _test('project_id')
 
     def test_get_alarm_other_project_normal_user(self):
@@ -376,11 +395,10 @@ class TestAlarms(TestAlarmsBase):
                                      expect_errors=True,
                                      status=401,
                                      headers=self.auth_headers)
-            faultstring = 'Not Authorized to access project other-project'
-            self.assertEqual(faultstring,
-                             response.json['error_message']['faultstring'])
+            faultstring = 'Not Authorized to access'
+            self.assertIn(faultstring,
+                          response.json['error_message']['faultstring'])
 
-        _test('project')
         _test('project_id')
 
     def test_get_alarm_forbiden(self):

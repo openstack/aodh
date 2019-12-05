@@ -71,6 +71,14 @@ class BaseTestCase(base.BaseTestCase):
         except (TypeError, AttributeError):
             self.fail("%s doesn't have length" % type(obj))
 
+    def assertDictContains(self, parent, child):
+        """Checks whether child dict is a subset of parent.
+
+        assertDictContainsSubset() in standard Python 2.7 has been deprecated
+        since Python 3.2
+        """
+        self.assertEqual(parent, dict(parent, **child))
+
     @staticmethod
     def path_get(project_file=None):
         root = os.path.abspath(os.path.join(os.path.dirname(__file__),

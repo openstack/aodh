@@ -38,6 +38,7 @@ from aodh import messaging
 from aodh import queue
 from aodh import storage
 from aodh.storage import models
+from aodh.storage.sqlalchemy import models as sql_models
 
 LOG = log.getLogger(__name__)
 
@@ -249,6 +250,7 @@ class AlarmEvaluationService(cotyledon.Service):
             alarms = self._assigned_alarms()
             LOG.info('initiating evaluation cycle on %d alarms',
                      len(alarms))
+
             for alarm in alarms:
                 self._evaluate_alarm(alarm)
         except Exception:
@@ -257,23 +259,49 @@ class AlarmEvaluationService(cotyledon.Service):
     def _evaluate_alarm(self, alarm):
         """Evaluate the alarms assigned to this evaluator."""
         if alarm.type not in self.evaluators:
-            LOG.debug('skipping alarm %s: type unsupported', alarm.alarm_id)
+            LOG.warning('Skipping alarm %s, unsupported type: %s',
+                        alarm.alarm_id, alarm.type)
             return
 
-        LOG.debug('evaluating alarm %s', alarm.alarm_id)
+        # If the coordinator is not available, fallback to database non-locking
+        # mechanism in order to support aodh-evaluator active/active
+        # deployment.
+        if not self.partition_coordinator.is_active():
+            modified = self.storage_conn.conditional_update(
+                sql_models.Alarm,
+                {'evaluate_timestamp': timeutils.utcnow()},
+                {
+                    'alarm_id': alarm.alarm_id,
+                    'evaluate_timestamp': alarm.evaluate_timestamp
+                },
+            )
+            if not modified:
+                LOG.debug(
+                    'Alarm %s has been already handled by another evaluator',
+                    alarm.alarm_id
+                )
+                return
+
+        LOG.debug('Evaluating alarm %s', alarm.alarm_id)
         try:
             self.evaluators[alarm.type].obj.evaluate(alarm)
         except Exception:
             LOG.exception('Failed to evaluate alarm %s', alarm.alarm_id)
 
     def _assigned_alarms(self):
-        # NOTE(r-mibu): The 'event' type alarms will be evaluated by the
-        # event-driven alarm evaluator, so this periodical evaluator skips
-        # those alarms.
-        all_alarms = self.storage_conn.get_alarms(enabled=True,
-                                                  exclude=dict(type='event'))
-        all_alarms = list(all_alarms)
-        all_alarm_ids = [a.alarm_id for a in all_alarms]
-        selected = self.partition_coordinator.extract_my_subset(
-            self.PARTITIONING_GROUP_NAME, all_alarm_ids)
-        return list(filter(lambda a: a.alarm_id in selected, all_alarms))
+        before = (timeutils.utcnow() - datetime.timedelta(
+            seconds=self.conf.evaluation_interval / 2))
+        selected = self.storage_conn.get_alarms(
+            enabled=True,
+            type={'ne': 'event'},
+            evaluate_timestamp={'lt': before},
+        )
+
+        if self.partition_coordinator.is_active():
+            all_alarm_ids = [a.alarm_id for a in selected]
+            selected_ids = self.partition_coordinator.extract_my_subset(
+                self.PARTITIONING_GROUP_NAME, all_alarm_ids
+            )
+            selected = [a for a in selected if a.alarm_id in selected_ids]
+
+        return selected

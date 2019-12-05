@@ -94,7 +94,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         alarm = mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
                           alarm_id="alarm_id1")
         self._fake_pc.extract_my_subset.return_value = ["alarm_id1"]
-        self._fake_pc.is_active.return_value = False
+        self._fake_pc.is_active.side_effect = [False, False, True, True]
         self._fake_conn.get_alarms.return_value = [alarm]
         self.threshold_eval.evaluate.side_effect = [Exception('Boom!'), None]
 
@@ -116,7 +116,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         ]
         self.threshold_eval.evaluate.side_effect = [Exception('Boom!'), None]
 
-        self._fake_pc.is_active.return_value = False
+        self._fake_pc.is_active.side_effect = [False, False, True, True, True]
         self._fake_pc.extract_my_subset.return_value = ['a', 'b']
         self._fake_conn.get_alarms.return_value = alarms
 
@@ -150,6 +150,42 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         svc = evaluator.AlarmEvaluationService(0, self.CONF)
         self.addCleanup(svc.terminate)
         time.sleep(1)
-        expected = [({'enabled': True, 'exclude': {'type': 'event'}},)]
-        self.assertEqual(expected,
-                         svc.storage_conn.get_alarms.call_args_list)
+
+        child = {'enabled': True, 'type': {'ne': 'event'}}
+        self.assertDictContains(svc.storage_conn.get_alarms.call_args[1],
+                                child)
+
+    def test_evaluation_cycle_no_coordination(self):
+        alarm = mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
+                          alarm_id="alarm_id1")
+
+        self._fake_pc.is_active.return_value = False
+        self._fake_conn.get_alarms.return_value = [alarm]
+        self._fake_conn.conditional_update.return_value = True
+
+        svc = evaluator.AlarmEvaluationService(0, self.CONF)
+        self.addCleanup(svc.terminate)
+
+        time.sleep(1)
+
+        target = svc.partition_coordinator.extract_my_subset
+        self.assertEqual(0, target.call_count)
+
+        self.threshold_eval.evaluate.assert_called_once_with(alarm)
+
+    def test_evaluation_cycle_no_coordination_alarm_modified(self):
+        alarm = mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
+                          alarm_id="alarm_id1")
+
+        self._fake_pc.is_active.return_value = False
+        self._fake_conn.get_alarms.return_value = [alarm]
+        self._fake_conn.conditional_update.return_value = False
+
+        svc = evaluator.AlarmEvaluationService(0, self.CONF)
+        self.addCleanup(svc.terminate)
+
+        time.sleep(1)
+
+        target = svc.partition_coordinator.extract_my_subset
+        self.assertEqual(0, target.call_count)
+        self.assertEqual(0, self.threshold_eval.evaluate.call_count)

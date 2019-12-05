@@ -193,8 +193,8 @@ class EventAlarmEvaluator(evaluator.Evaluator):
         # this function update only alarms changed from the last access.
         alarms = {a.alarm_id: Alarm(a) for a in
                   self._storage_conn.get_alarms(enabled=True,
-                                                alarm_type='event',
-                                                project=project)}
+                                                type='event',
+                                                project_id=project)}
 
         if self.conf.event_alarm_cache_ttl:
             self.caches[project] = {

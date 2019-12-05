@@ -105,3 +105,7 @@ def get_limited_to_project(headers, enforcer):
 
     """
     return get_limited_to(headers, enforcer)[1]
+
+
+def is_admin(headers):
+    return 'admin' in headers.get('X-Roles', "").split(",")

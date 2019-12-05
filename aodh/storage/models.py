@@ -68,12 +68,14 @@ class Alarm(base.Model):
     :param repeat_actions: Is the actions should be triggered on each
                            alarm evaluation.
     :param severity: Alarm level (low/moderate/critical)
+    :param evaluate_timestamp: The timestamp when the alarm is finished
+                               evaluating.
     """
     def __init__(self, alarm_id, type, enabled, name, description,
                  timestamp, user_id, project_id, state, state_timestamp,
                  state_reason, ok_actions, alarm_actions,
                  insufficient_data_actions, repeat_actions, rule,
-                 time_constraints, severity=None):
+                 time_constraints, severity=None, evaluate_timestamp=None):
         if not isinstance(timestamp, datetime.datetime):
             raise TypeError(_("timestamp should be datetime object"))
         if not isinstance(state_timestamp, datetime.datetime):
@@ -97,7 +99,8 @@ class Alarm(base.Model):
             repeat_actions=repeat_actions,
             rule=rule,
             time_constraints=time_constraints,
-            severity=severity)
+            severity=severity,
+            evaluate_timestamp=evaluate_timestamp)
 
 
 class AlarmChange(base.Model):

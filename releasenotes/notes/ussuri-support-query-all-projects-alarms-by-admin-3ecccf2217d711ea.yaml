@@ -1,0 +1,5 @@
+---
+features:
+  - Support to deploy aodh-evaluator in active/active mode by leveraging
+    database non-locking mechanism. With this feature, there could be multiple
+    aodh-evaluator processes running without dependency of etcd or zookeeper.

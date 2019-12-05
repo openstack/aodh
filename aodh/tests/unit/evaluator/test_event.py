@@ -100,8 +100,8 @@ class TestEventAlarmEvaluate(base.TestEvaluatorBase):
 
         if expect_db_queries is not None:
             expected = [mock.call(enabled=True,
-                                  alarm_type='event',
-                                  project=p) for p in expect_db_queries]
+                                  type='event',
+                                  project_id=p) for p in expect_db_queries]
             self.assertEqual(expected,
                              self.storage_conn.get_alarms.call_args_list)
 
