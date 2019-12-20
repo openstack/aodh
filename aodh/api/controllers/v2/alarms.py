@@ -891,6 +891,7 @@ class AlarmsController(rest.RestController):
                 q.append(
                     base.Query(field='project_id', op='eq', value=project_id)
                 )
+                keys.add('project_id')
             else:
                 request_project = v2_utils.get_query_value(q, 'project_id')
                 if not is_admin and request_project != project_id:

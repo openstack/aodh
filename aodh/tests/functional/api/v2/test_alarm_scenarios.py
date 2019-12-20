@@ -149,8 +149,13 @@ class TestAlarmsBase(v2.FunctionalTest):
             self.assertEqual(json[key], getattr(alarm, storage_key))
 
     def _get_alarm(self, id, auth_headers=None):
-        data = self.get_json('/alarms',
-                             headers=auth_headers or self.auth_headers)
+        headers = auth_headers or self.auth_headers
+        url_path = "/alarms"
+        if headers.get('X-Roles') == 'admin':
+            url_path = '/alarms?q.field=all_projects&q.op=eq&q.value=true'
+
+        data = self.get_json(url_path, headers=headers)
+
         match = [a for a in data if a['alarm_id'] == id]
         self.assertEqual(1, len(match), 'alarm %s not found' % id)
         return match[0]
@@ -282,6 +287,13 @@ class TestAlarms(TestAlarmsBase):
         faultstring = 'RBAC Authorization Failed'
         self.assertIn(faultstring,
                       response.json['error_message']['faultstring'])
+
+    def test_list_alarms_other_project(self):
+        auth_headers = {'X-User-Id': uuidutils.generate_uuid(),
+                        'X-Project-Id': uuidutils.generate_uuid()}
+        data = self.get_json('/alarms', headers=auth_headers)
+
+        self.assertEqual(0, len(data))
 
     def test_get_not_existing_alarm(self):
         resp = self.get_json('/alarms/alarm-id-3',
@@ -2049,7 +2061,7 @@ class TestAlarmsQuotas(TestAlarmsBase):
 
         self.auth_headers["X-roles"] = "admin"
         alarms = self.get_json('/alarms', headers=self.auth_headers)
-        self.assertEqual(2, len(alarms))
+        self.assertEqual(1, len(alarms))
 
 
 class TestAlarmsRuleThreshold(TestAlarmsBase):
