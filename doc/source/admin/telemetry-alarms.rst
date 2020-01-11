@@ -96,40 +96,39 @@ of datapoints involved and most recent of these. State transitions
 are detected by the ``alarm-evaluator``, whereas the
 ``alarm-notifier`` effects the actual notification action.
 
-**Webhooks**
+HTTP/HTTPS action
+  These are the *de facto* notification type used by Telemetry alarming and
+  simply involve an HTTP(S) POST request being sent to an endpoint, with a
+  request body containing a description of the state transition encoded as a
+  JSON fragment.
 
-These are the *de facto* notification type used by Telemetry alarming
-and simply involve an HTTP POST request being sent to an endpoint,
-with a request body containing a description of the state transition
-encoded as a JSON fragment.
+OpenStack Services
+  The user is able to define an alarm that simply trigger some OpenStack
+  service by directly specifying the service URL, e.g.
+  ``trust+http://127.0.0.1:7070/v1/webhooks/ab91ef39-3e4a-4750-a8b8-0271518cd481/invoke``.
+  ``aodh-notifier`` will prepare ``X-Auth-Token`` header and send HTTP(S) POST
+  request to that URL, containing the alarm information in the request body.
 
-**Log actions**
+Heat Autoscaling
+  This notifier works together with ``loadbalancer_member_health`` evaluator.
+  Presumably, the end user defines a Heat template which contains an
+  autoscaling group and all the members in the group are joined in an Octavia
+  load balancer in order to expose highly available service to the outside, so
+  that when the stack scales up or scales down, Heat makes sure the new members
+  are joining the load balancer automatically and the old members are removed.
+  However, this notifier deals with the situation that when some member fails,
+  the Heat stack could be recovered automatically. More information
+  `here <https://docs.openstack.org/self-healing-sig/latest/use-cases/loadbalancer-member.html>`_
 
-These are a lightweight alternative to webhooks, whereby the state
-transition is simply logged by the ``alarm-notifier``, and are
-intended primarily for testing purposes.
+Log actions
+  These are a lightweight alternative to webhooks, whereby the state transition
+  is simply logged by the ``alarm-notifier``, and are intended primarily for
+  testing purposes by admin users.
 
-**heat**
+If none of the above actions satisfy your requirement, you can implement your
+own alarm actions according to the current suppported actions in
+``aodh/notifier`` folder.
 
-This notifier works together with ``loadbalancer_member_health`` evaluator.
-Presumably, the end user defines a Heat template which contains an autoscaling
-group and all the members in the group are joined in an Octavia load balancer
-in order to expose highly available service to the outside, so that when the
-stack scales up or scales down, Heat makes sure the new members are joining the
-load balancer automatically and the old members are removed. However, this
-notifier deals with the situation that when some member fails, the Heat stack
-could be recovered automatically.
-
-
-Workload partitioning
----------------------
-
-The alarm evaluation process can be scaled horizontally but requires
-workload partitioning to function correctly. The
-`Tooz <https://pypi.org/project/tooz>`_ library provides the
-coordination within the groups of service instances. For further
-information about this approach, see the `high availability guide
-<https://docs.openstack.org/ha-guide/controller-ha-telemetry.html>`_.
 
 Using alarms
 ~~~~~~~~~~~~
