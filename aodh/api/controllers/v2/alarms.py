@@ -471,12 +471,14 @@ class Alarm(base.Base):
         if trust_id is not None and not trust_id_used:
             prev_trust_ids.add(trust_id)
         for old_trust_id in prev_trust_ids:
-            keystone_client.delete_trust_id(old_trust_id, auth_plugin)
+            keystone_client.delete_trust_id(pecan.request.cfg, old_trust_id,
+                                            auth_plugin)
 
     def delete_actions(self):
         auth_plugin = pecan.request.environ.get('keystone.token_auth')
         for trust_id in self._get_existing_trust_ids():
-            keystone_client.delete_trust_id(trust_id, auth_plugin)
+            keystone_client.delete_trust_id(pecan.request.cfg, trust_id,
+                                            auth_plugin)
 
 
 Alarm.add_attributes(**{"%s_rule" % ext.name: ext.plugin

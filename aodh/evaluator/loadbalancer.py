@@ -49,7 +49,7 @@ class LoadBalancerMemberHealthEvaluator(evaluator.Evaluator):
             endpoint = aodh_keystone.url_for(
                 self.conf,
                 service_type='load-balancer',
-                interface="internal",
+                interface=self.conf.service_credentials.interface,
                 region_name=self.conf.service_credentials.region_name
             )
             self._lb_client = octavia.OctaviaAPI(
