@@ -19,7 +19,6 @@ from heatclient import client as heatclient
 from keystoneauth1 import exceptions as ka_exception
 from keystoneauth1.identity.generic import password
 from keystoneauth1 import loading as ka_loading
-from keystoneauth1 import session
 from keystoneclient.v3 import client as ks_client_v3
 from oslo_config import cfg
 
@@ -52,7 +51,8 @@ def get_trusted_client(conf, trust_id):
         user_domain_name=conf[CFG_GROUP].user_domain_name,
         trust_id=trust_id)
 
-    sess = session.Session(auth=auth_plugin)
+    sess = ka_loading.load_session_from_conf_options(conf, CFG_GROUP,
+                                                     auth=auth_plugin)
     return ks_client_v3.Client(session=sess)
 
 
@@ -60,9 +60,10 @@ def get_auth_token(client):
     return client.session.auth.get_access(client.session).auth_token
 
 
-def get_client_on_behalf_user(auth_plugin):
+def get_client_on_behalf_user(conf, auth_plugin):
     """Return a client for keystone v3 endpoint."""
-    sess = session.Session(auth=auth_plugin)
+    sess = ka_loading.load_session_from_conf_options(conf, CFG_GROUP,
+                                                     auth=auth_plugin)
     return ks_client_v3.Client(session=sess)
 
 
@@ -72,7 +73,7 @@ def create_trust_id(conf, trustor_user_id, trustor_project_id, roles,
     admin_client = get_client(conf)
     trustee_user_id = admin_client.session.get_user_id()
 
-    client = get_client_on_behalf_user(auth_plugin)
+    client = get_client_on_behalf_user(conf, auth_plugin)
     trust = client.trusts.create(trustor_user=trustor_user_id,
                                  trustee_user=trustee_user_id,
                                  project=trustor_project_id,
@@ -81,9 +82,9 @@ def create_trust_id(conf, trustor_user_id, trustor_project_id, roles,
     return trust.id
 
 
-def delete_trust_id(trust_id, auth_plugin):
+def delete_trust_id(conf, trust_id, auth_plugin):
     """Delete a trust previously setup for the aodh user."""
-    client = get_client_on_behalf_user(auth_plugin)
+    client = get_client_on_behalf_user(conf, auth_plugin)
     try:
         client.trusts.delete(trust_id)
     except ka_exception.NotFound:
@@ -101,7 +102,7 @@ def get_heat_client_from_trust(conf, trust_id):
 
     endpoint = sess.get_endpoint(
         service_type='orchestration',
-        interface="internal",
+        interface=conf.service_credentials.interface,
         region_name=conf.service_credentials.region_name
     )
 
