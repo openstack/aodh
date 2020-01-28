@@ -151,3 +151,12 @@ class AlarmChange(base.Model):
             project_id=project_id,
             on_behalf_of=on_behalf_of,
             timestamp=timestamp)
+
+
+class Quota(base.Model):
+    def __init__(self, project_id, resource, limit):
+        base.Model.__init__(
+            self,
+            project_id=project_id,
+            resource=resource,
+            limit=limit)

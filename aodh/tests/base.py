@@ -91,6 +91,29 @@ class BaseTestCase(base.BaseTestCase):
         else:
             return root
 
+    def assert_single_item(self, items, **filters):
+        return self.assert_multiple_items(items, 1, **filters)[0]
+
+    def assert_multiple_items(self, items, count, **filters):
+        def _matches(item, **props):
+            for prop_name, prop_val in props.items():
+                v = (item[prop_name] if isinstance(item, dict)
+                     else getattr(item, prop_name))
+                if v != prop_val:
+                    return False
+            return True
+
+        filtered_items = list(
+            [item for item in items if _matches(item, **filters)]
+        )
+        found = len(filtered_items)
+
+        if found != count:
+            self.fail("Wrong number of items found [filters=%s, "
+                      "expected=%s, found=%s]" % (filters, count, found))
+
+        return filtered_items
+
 
 def _skip_decorator(func):
     @functools.wraps(func)

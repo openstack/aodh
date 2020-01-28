@@ -77,6 +77,7 @@ class AdvEnum(wtypes.wsproperty):
 
 
 class Base(wtypes.DynamicBase):
+    _wsme_attributes = []
 
     @classmethod
     def from_db_model(cls, m):
@@ -97,6 +98,14 @@ class Base(wtypes.DynamicBase):
                     for k in keys
                     if hasattr(self, k) and
                     getattr(self, k) != wsme.Unset)
+
+    def to_dict(self):
+        d = {}
+        for attr in self._wsme_attributes:
+            attr_val = getattr(self, attr.name)
+            if not isinstance(attr_val, wtypes.UnsetType):
+                d[attr.name] = attr_val
+        return d
 
 
 class Query(Base):

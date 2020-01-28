@@ -21,6 +21,7 @@
 from aodh.api.controllers.v2 import alarms
 from aodh.api.controllers.v2 import capabilities
 from aodh.api.controllers.v2 import query
+from aodh.api.controllers.v2 import quotas
 
 
 class V2Controller(object):
@@ -29,3 +30,4 @@ class V2Controller(object):
     alarms = alarms.AlarmsController()
     query = query.QueryController()
     capabilities = capabilities.CapabilitiesController()
+    quotas = quotas.QuotasController()

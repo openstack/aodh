@@ -432,3 +432,46 @@ class Connection(base.Connection):
 
         result = query.update(values, **update_args)
         return 0 != result
+
+    @staticmethod
+    def _row_to_quota_model(row):
+        return alarm_api_models.Quota(
+            project_id=row.project_id,
+            resource=row.resource,
+            limit=row.limit,
+        )
+
+    def _retrieve_quotas(self, query):
+        return [self._row_to_quota_model(x) for x in query.all()]
+
+    def get_quotas(self, project_id):
+        """Get resource quota for the given project."""
+        filters = {'project_id': project_id}
+        session = self._engine_facade.get_session()
+        query = session.query(models.Quota).filter_by(**filters)
+        return self._retrieve_quotas(query)
+
+    def set_quotas(self, project_id, quotas):
+        """Set resource quota for the given user."""
+        session = self._engine_facade.get_session()
+
+        with session.begin():
+            for q in quotas:
+                values = {
+                    'project_id': project_id,
+                    'resource': q['resource'],
+                }
+
+                quota = session.query(models.Quota).filter_by(**values).first()
+                if not quota:
+                    new_quota = models.Quota(project_id=project_id,
+                                             resource=q['resource'],
+                                             limit=q['limit'])
+                    session.add(new_quota)
+                else:
+                    values['limit'] = q['limit']
+                    quota.update(values.copy())
+
+        filters = {'project_id': project_id}
+        query = session.query(models.Quota).filter_by(**filters)
+        return self._retrieve_quotas(query)

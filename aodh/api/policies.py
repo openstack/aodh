@@ -155,6 +155,17 @@ rules = [
                 'method': 'POST'
             }
         ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:update_quotas",
+        check_str=RULE_CONTEXT_IS_ADMIN,
+        description='Update resources quotas for project.',
+        operations=[
+            {
+                'path': '/v2/quotas',
+                'method': 'POST'
+            }
+        ]
     )
 ]
 
