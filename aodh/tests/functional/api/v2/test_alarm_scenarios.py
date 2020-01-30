@@ -127,8 +127,10 @@ class TestAlarmsBase(v2.FunctionalTest):
 
     def setUp(self):
         super(TestAlarmsBase, self).setUp()
-        self.auth_headers = {'X-User-Id': uuidutils.generate_uuid(),
-                             'X-Project-Id': uuidutils.generate_uuid()}
+        self.project_id = uuidutils.generate_uuid()
+        self.user_id = uuidutils.generate_uuid()
+        self.auth_headers = {'X-User-Id': self.user_id,
+                             'X-Project-Id': self.project_id}
 
         c = mock.Mock()
         c.capabilities.list.return_value = {'aggregation_methods': [
@@ -1955,13 +1957,13 @@ class TestAlarmsHistory(TestAlarmsBase):
 
 
 class TestAlarmsQuotas(TestAlarmsBase):
-
-    def _test_alarm_quota(self):
-        alarm = {
+    def setUp(self):
+        super(TestAlarmsQuotas, self).setUp()
+        self.alarm = {
             'name': 'alarm',
             'type': 'gnocchi_aggregation_by_metrics_threshold',
-            'user_id': self.auth_headers['X-User-Id'],
-            'project_id': self.auth_headers['X-Project-Id'],
+            'user_id': self.user_id,
+            'project_id': self.project_id,
             RULE_KEY: {
                 'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3',
                             'a1fb80f4-c242-4f57-87c6-68f47521059e'],
@@ -1973,17 +1975,29 @@ class TestAlarmsQuotas(TestAlarmsBase):
             }
         }
 
+    def _create_alarm(self, alarm=None):
+        if not alarm:
+            alarm = self.alarm
+
         resp = self.post_json('/alarms', params=alarm,
-                              headers=self.auth_headers)
-        self.assertEqual(201, resp.status_code)
+                              headers=self.auth_headers,
+                              status=201)
+
+        return resp
+
+    def _test_alarm_quota(self):
+        """Failed on the second creation."""
+        resp = self._create_alarm()
+
         alarms = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(1, len(alarms))
 
+        alarm = copy.copy(self.alarm)
         alarm['name'] = 'another_user_alarm'
         resp = self.post_json('/alarms', params=alarm,
                               expect_errors=True,
-                              headers=self.auth_headers)
-        self.assertEqual(403, resp.status_code)
+                              headers=self.auth_headers,
+                              status=403)
         faultstring = 'Alarm quota exceeded for user'
         self.assertIn(faultstring,
                       resp.json['error_message']['faultstring'])
@@ -2062,6 +2076,83 @@ class TestAlarmsQuotas(TestAlarmsBase):
         self.auth_headers["X-roles"] = "admin"
         alarms = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(1, len(alarms))
+
+    def test_overquota_by_quota_api(self):
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Roles'] = 'admin'
+
+        # Update project quota.
+        self.post_json(
+            '/quotas',
+            {
+                "project_id": self.project_id,
+                "quotas": [
+                    {
+                        "resource": "alarms",
+                        "limit": 1
+                    }
+                ]
+            },
+            headers=auth_headers,
+            status=201
+        )
+
+        self._test_alarm_quota()
+
+        # Update project quota back
+        self.post_json(
+            '/quotas',
+            {
+                "project_id": self.project_id,
+                "quotas": [
+                    {
+                        "resource": "alarms",
+                        "limit": -1
+                    }
+                ]
+            },
+            headers=auth_headers,
+            status=201
+        )
+
+    def test_overquota_by_user_quota_config(self):
+        self.CONF.set_override('user_alarm_quota', 1, 'api')
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Roles'] = 'admin'
+
+        # Update project quota.
+        self.post_json(
+            '/quotas',
+            {
+                "project_id": self.project_id,
+                "quotas": [
+                    {
+                        "resource": "alarms",
+                        "limit": 2
+                    }
+                ]
+            },
+            headers=auth_headers,
+            status=201
+        )
+
+        self._test_alarm_quota()
+
+        # Update project quota back
+        self.post_json(
+            '/quotas',
+            {
+                "project_id": self.project_id,
+                "quotas": [
+                    {
+                        "resource": "alarms",
+                        "limit": -1
+                    }
+                ]
+            },
+            headers=auth_headers,
+            status=201
+        )
 
 
 class TestAlarmsRuleThreshold(TestAlarmsBase):

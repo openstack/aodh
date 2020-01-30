@@ -105,18 +105,24 @@ def is_over_quota(conn, project_id, user_id):
 
     over_quota = False
 
-    # Start by checking for user quota
-    user_alarm_quota = pecan.request.cfg.api.user_alarm_quota
-    if user_alarm_quota != -1:
-        user_alarms = conn.get_alarms(user_id=user_id)
-        over_quota = len(user_alarms) >= user_alarm_quota
+    project_quotas = conn.get_quotas(project_id)
+    project_alarms = conn.get_alarms(project_id=project_id)
+    user_alarms = conn.get_alarms(user_id=user_id)
+    user_default_alarm_quota = pecan.request.cfg.api.user_alarm_quota
+    project_default_alarm_quota = pecan.request.cfg.api.project_alarm_quota
 
-    # If the user quota isn't reached, we check for the project quota
-    if not over_quota:
-        project_alarm_quota = pecan.request.cfg.api.project_alarm_quota
-        if project_alarm_quota != -1:
-            project_alarms = conn.get_alarms(project_id=project_id)
-            over_quota = len(project_alarms) >= project_alarm_quota
+    # 1. Check project quota
+    if len(project_quotas) > 0:
+        for quota in project_quotas:
+            if quota.resource == 'alarms':
+                over_quota = len(user_alarms) >= quota.limit
+    else:
+        if project_default_alarm_quota != -1:
+            over_quota = len(project_alarms) >= project_default_alarm_quota
+
+    # 2. Check user quota
+    if not over_quota and user_default_alarm_quota != -1:
+        over_quota = len(user_alarms) >= user_default_alarm_quota
 
     return over_quota
 

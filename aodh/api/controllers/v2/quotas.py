@@ -28,7 +28,7 @@ ALLOWED_RESOURCES = ('alarms',)
 class Quota(base.Base):
     resource = wtypes.wsattr(wtypes.Enum(str, *ALLOWED_RESOURCES),
                              mandatory=True)
-    limit = wtypes.IntegerType(minimum=-1)
+    limit = wsme.wsattr(wtypes.IntegerType(minimum=-1), mandatory=True)
 
 
 class Quotas(base.Base):
@@ -79,6 +79,6 @@ class QuotasController(rest.RestController):
             input_quotas.append(i.to_dict())
 
         db_quotas = pecan.request.storage.set_quotas(project_id, input_quotas)
-
         quotas = [Quota.from_db_model(i) for i in db_quotas]
+
         return Quotas(project_id=project_id, quotas=quotas)

@@ -100,3 +100,93 @@ class TestQuotas(v2.FunctionalTest):
             expect_errors=True,
             status=403
         )
+
+    def test_post_quotas_no_limit_failed(self):
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Roles'] = 'admin'
+
+        resp = self.post_json(
+            '/quotas',
+            {
+                "project_id": self.project,
+                "quotas": [
+                    {
+                        "resource": "alarms"
+                    }
+                ]
+            },
+            headers=auth_headers,
+            expect_errors=True,
+            status=400
+        )
+
+        self.assertIn('Mandatory field missing',
+                      resp.json['error_message']['faultstring'])
+
+    def test_post_quotas_no_resource_failed(self):
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Roles'] = 'admin'
+
+        resp = self.post_json(
+            '/quotas',
+            {
+                "project_id": self.project,
+                "quotas": [
+                    {
+                        "limit": 1
+                    }
+                ]
+            },
+            headers=auth_headers,
+            expect_errors=True,
+            status=400
+        )
+
+        self.assertIn('Mandatory field missing',
+                      resp.json['error_message']['faultstring'])
+
+    def test_post_quotas_wrong_limit_failed(self):
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Roles'] = 'admin'
+
+        resp = self.post_json(
+            '/quotas',
+            {
+                "project_id": self.project,
+                "quotas": [
+                    {
+                        "resource": "alarms",
+                        "limit": -5
+                    }
+                ]
+            },
+            headers=auth_headers,
+            expect_errors=True,
+            status=400
+        )
+
+        self.assertIn('Value should be greater or equal to -1',
+                      resp.json['error_message']['faultstring'])
+
+    def test_post_quotas_unsupported_resource_failed(self):
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Roles'] = 'admin'
+
+        resp = self.post_json(
+            '/quotas',
+            {
+                "project_id": self.project,
+                "quotas": [
+                    {
+                        "resource": "other_resource",
+                        "limit": 1
+                    }
+                ]
+            },
+            headers=auth_headers,
+            expect_errors=True,
+            status=400
+        )
+
+        self.assertIn('Value should be one of',
+                      resp.json['error_message']['faultstring'])
