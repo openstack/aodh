@@ -82,3 +82,10 @@ class QuotasController(rest.RestController):
         quotas = [Quota.from_db_model(i) for i in db_quotas]
 
         return Quotas(project_id=project_id, quotas=quotas)
+
+    @wsme_pecan.wsexpose(None, str, status_code=204)
+    def delete(self, project_id):
+        """Delete quotas for the given project."""
+        rbac.enforce('delete_quotas', pecan.request.headers,
+                     pecan.request.enforcer, {})
+        pecan.request.storage.delete_quotas(project_id)

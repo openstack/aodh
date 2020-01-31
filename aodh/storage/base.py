@@ -215,3 +215,8 @@ class Connection(object):
         """Set resource quota for the given user."""
         raise aodh.NotImplementedError('Setting resource quota not '
                                        'implemented')
+
+    @staticmethod
+    def delete_quotas(project_id):
+        raise aodh.NotImplementedError('Deleting resource quota not '
+                                       'implemented')
