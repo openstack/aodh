@@ -1,0 +1,7 @@
+---
+features:
+  - Aodh Quota API is aiming for multi-tenancy support. By default, only the
+    admin user is able to change or delete the resource quota for projects as
+    defined by the default policy rule 'telemetry:update_quotas' and
+    'telemetry:delete_quotas'. User alarm quota and alarm action quota are not
+    supported in Quota API.
