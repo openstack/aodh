@@ -8,3 +8,4 @@ operate, and upgrade Aodh
 .. toctree::
 
    telemetry-alarms.rst
+   resource-quota.rst
