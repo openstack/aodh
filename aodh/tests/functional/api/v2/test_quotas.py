@@ -190,3 +190,43 @@ class TestQuotas(v2.FunctionalTest):
 
         self.assertIn('Value should be one of',
                       resp.json['error_message']['faultstring'])
+
+    def test_delete_project_quota_by_admin(self):
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Roles'] = 'admin'
+
+        self.post_json(
+            '/quotas',
+            {
+                "project_id": self.other_project,
+                "quotas": [
+                    {
+                        "resource": "alarms",
+                        "limit": 30
+                    }
+                ]
+            },
+            headers=auth_headers,
+            status=201
+        )
+
+        resp = self.get_json('/quotas?project_id=%s' % self.other_project,
+                             headers=auth_headers,
+                             status=200)
+        self.assert_single_item(resp['quotas'], resource='alarms',
+                                limit=30)
+
+        self.delete('/quotas/%s' % self.other_project, headers=auth_headers,
+                    status=204)
+
+        resp = self.get_json('/quotas?project_id=%s' % self.other_project,
+                             headers=auth_headers,
+                             status=200)
+        self.assert_multiple_items(resp['quotas'], 0, resource='alarms',
+                                   limit=30)
+
+    def test_delete_project_quota_by_user_failed(self):
+        self.delete('/quotas/%s' % self.other_project,
+                    headers=self.auth_headers,
+                    expect_errors=True,
+                    status=403)

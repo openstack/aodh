@@ -475,3 +475,8 @@ class Connection(base.Connection):
         filters = {'project_id': project_id}
         query = session.query(models.Quota).filter_by(**filters)
         return self._retrieve_quotas(query)
+
+    def delete_quotas(self, project_id):
+        filters = {'project_id': project_id}
+        session = self._engine_facade.get_session()
+        session.query(models.Quota).filter_by(**filters).delete()

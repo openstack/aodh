@@ -166,6 +166,17 @@ rules = [
                 'method': 'POST'
             }
         ]
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:delete_quotas",
+        check_str=RULE_CONTEXT_IS_ADMIN,
+        description='Delete resources quotas for project.',
+        operations=[
+            {
+                'path': '/v2/quotas/{project_id}',
+                'method': 'DELETE'
+            }
+        ]
     )
 ]
 
