@@ -16,8 +16,8 @@
 """
 
 import datetime
+from unittest import mock
 
-import mock
 from oslo_utils import timeutils
 
 from aodh import storage

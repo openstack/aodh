@@ -13,8 +13,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
 import time
+from unittest import mock
 
 from oslo_config import fixture as fixture_config
 import oslo_messaging

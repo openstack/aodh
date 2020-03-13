@@ -15,8 +15,8 @@
 import fixtures
 import json
 import time
+from unittest import mock
 
-import mock
 from oslo_config import cfg
 from oslo_config import fixture as fixture_config
 

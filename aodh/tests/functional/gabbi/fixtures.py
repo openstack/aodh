@@ -17,9 +17,9 @@
 
 import os
 import unittest
+from unittest import mock
 
 from gabbi import fixture
-import mock
 from oslo_config import cfg
 from oslo_config import fixture as fixture_config
 from oslo_policy import opts

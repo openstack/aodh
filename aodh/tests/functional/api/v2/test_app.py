@@ -16,8 +16,8 @@
 """Test basic aodh-api app
 """
 import json
+from unittest import mock
 
-import mock
 import six
 import wsme
 

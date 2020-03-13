@@ -18,9 +18,9 @@ import datetime
 import fixtures
 import json
 import unittest
+from unittest import mock
 
 from gnocchiclient import exceptions
-import mock
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 import pytz

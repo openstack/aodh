@@ -14,10 +14,10 @@
 #    under the License.
 """Test the methods related to complex query."""
 import datetime
+from unittest import mock
 
 import fixtures
 import jsonschema
-import mock
 from oslotest import base
 import wsme
 

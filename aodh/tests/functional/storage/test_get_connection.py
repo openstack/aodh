@@ -15,7 +15,8 @@
 # under the License.
 """Tests for aodh/storage/
 """
-import mock
+from unittest import mock
+
 from oslo_config import fixture as fixture_config
 from oslotest import base
 

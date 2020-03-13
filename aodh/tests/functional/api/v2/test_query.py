@@ -15,9 +15,9 @@
 #    under the License.
 """Test the methods related to query."""
 import datetime
+from unittest import mock
 
 import fixtures
-import mock
 from oslo_utils import timeutils
 from oslotest import base
 import wsme

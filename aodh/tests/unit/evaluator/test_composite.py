@@ -12,9 +12,9 @@
 # under the License.
 """Tests for aodh/evaluator/composite.py
 """
+from unittest import mock
 
 import fixtures
-import mock
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 import six

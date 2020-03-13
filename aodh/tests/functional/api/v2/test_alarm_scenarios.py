@@ -19,9 +19,9 @@ import datetime
 import json as jsonlib
 import operator
 import os
+from unittest import mock
 
 import fixtures
-import mock
 from oslo_utils import uuidutils
 import six
 from six import moves

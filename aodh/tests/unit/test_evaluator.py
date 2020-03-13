@@ -16,8 +16,8 @@
 """
 import fixtures
 import time
+from unittest import mock
 
-import mock
 from oslo_config import fixture as fixture_config
 from stevedore import extension
 
