@@ -2,15 +2,16 @@
 # Andi Chandler <andi@gowling.com>, 2017. #zanata
 # Andi Chandler <andi@gowling.com>, 2018. #zanata
 # Andi Chandler <andi@gowling.com>, 2019. #zanata
+# Andi Chandler <andi@gowling.com>, 2020. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: aodh\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-31 02:18+0000\n"
+"POT-Creation-Date: 2020-03-15 04:31+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2019-12-11 03:16+0000\n"
+"PO-Revision-Date: 2020-03-18 12:06+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>\n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en_GB\n"
@@ -52,6 +53,9 @@ msgstr "6.0.0"
 
 msgid "9.0.0"
 msgstr "9.0.0"
+
+msgid "9.0.0-20"
+msgstr "9.0.0-20"
 
 msgid ""
 "A healthcheck endpoint is provided by default at /healthcheck. It leverages "
@@ -166,6 +170,19 @@ msgstr ""
 "reporting/ingestion lag. An new option is introduced "
 "additional_ingestion_lag defaulted to 0. It represents the number of seconds "
 "of the window extension."
+
+msgid ""
+"Aodh Quota API is aiming for multi-tenancy support. By default, only the "
+"admin user is able to change or delete the resource quota for projects as "
+"defined by the default policy rule 'telemetry:update_quotas' and 'telemetry:"
+"delete_quotas'. User alarm quota and alarm action quota are not supported in "
+"Quota API."
+msgstr ""
+"Aodh Quota API is aiming for multi-tenancy support. By default, only the "
+"admin user is able to change or delete the resource quota for projects as "
+"defined by the default policy rule 'telemetry:update_quotas' and 'telemetry:"
+"delete_quotas'. User alarm quota and alarm action quota are not supported in "
+"Quota API."
 
 msgid "Aodh Release Notes"
 msgstr "Aodh Release Notes"
