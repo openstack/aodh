@@ -198,7 +198,7 @@ class AlarmEvaluationService(cotyledon.Service):
         super(AlarmEvaluationService, self).__init__(worker_id)
         self.conf = conf
 
-        ef = lambda: futures.ThreadPoolExecutor(max_workers=10)
+        ef = lambda: futures.ThreadPoolExecutor(max_workers=10)  # noqa: E731
         self.periodic = periodics.PeriodicWorker.create(
             [], executor_factory=ef)
 

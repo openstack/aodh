@@ -82,6 +82,7 @@ def run_migrations_online():
             context.run_migrations()
     conn.disconnect()
 
+
 if not hasattr(config, "conf"):
     from aodh import service
     config.conf = service.prepare_service([])

@@ -113,7 +113,7 @@ class ParsableErrorMiddleware(object):
                     if error is not None and 'faultstring' in fault:
                         fault['faultstring'] = i18n.translate(error,
                                                               user_locale)
-                except ValueError as err:
+                except ValueError:
                     fault = app_data
                 body = json.dumps({'error_message': fault})
                 if six.PY3:

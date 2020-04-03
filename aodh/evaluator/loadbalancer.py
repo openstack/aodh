@@ -86,7 +86,7 @@ class LoadBalancerMemberHealthEvaluator(evaluator.Evaluator):
         for m in ret.get("members", []):
             try:
                 created_time = parser.parse(m['created_at'], ignoretz=True)
-            except ValueError as e:
+            except ValueError:
                 LOG.warning('Failed to parse the member created time.')
                 continue
 

@@ -317,7 +317,7 @@ class AlarmHistoryTest(AlarmTestBase):
             "on_behalf_of": alarm.project_id,
             "severity": severity,
             "timestamp": datetime.datetime(2014, 4, 7, 7, 34)
-            }
+        }
         self.alarm_conn.record_alarm_change(alarm_change=alarm_change)
         filter_expr = {"=": {"severity": "low"}}
         history = list(self.alarm_conn.query_alarm_history(

@@ -18,8 +18,8 @@ from aodh.tests.functional.api import v2 as tests_api
 class TestCapabilitiesController(tests_api.FunctionalTest):
 
     def setUp(self):
-            super(TestCapabilitiesController, self).setUp()
-            self.url = '/capabilities'
+        super(TestCapabilitiesController, self).setUp()
+        self.url = '/capabilities'
 
     def test_capabilities(self):
         data = self.get_json(self.url)

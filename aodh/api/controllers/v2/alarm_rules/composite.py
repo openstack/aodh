@@ -116,4 +116,5 @@ class CompositeRule(wtypes.UserType):
     def __call__(**rule):
         return rule
 
+
 composite_rule = CompositeRule()

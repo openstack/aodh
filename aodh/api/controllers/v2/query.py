@@ -100,7 +100,7 @@ class ValidatedComplexQuery(object):
         valid_fields = _list_to_regexp(valid_keys)
 
         if metadata_allowed:
-            valid_filter_fields = valid_fields + "|^metadata\.[\S]+$"
+            valid_filter_fields = valid_fields + r"|^metadata\.[\S]+$"
         else:
             valid_filter_fields = valid_fields
 

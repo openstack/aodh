@@ -32,14 +32,14 @@ class TestQuotas(v2.FunctionalTest):
         resp = self.get_json('/quotas', headers=self.auth_headers, status=200)
 
         self.assertEqual(self.project, resp.get('project_id'))
-        self.assertTrue(len(resp.get('quotas', [])) > 0)
+        self.assertGreater(len(resp.get('quotas', [])), 0)
 
     def test_get_project_quotas_by_user(self):
         resp = self.get_json('/quotas?project_id=%s' % self.project,
                              headers=self.auth_headers, status=200)
 
         self.assertEqual(self.project, resp.get('project_id'))
-        self.assertTrue(len(resp.get('quotas', [])) > 0)
+        self.assertGreater(len(resp.get('quotas', [])), 0)
 
     def test_get_other_project_quotas_by_user_failed(self):
         self.get_json(
@@ -58,7 +58,7 @@ class TestQuotas(v2.FunctionalTest):
                              status=200)
 
         self.assertEqual(self.other_project, resp.get('project_id'))
-        self.assertTrue(len(resp.get('quotas', [])) > 0)
+        self.assertGreater(len(resp.get('quotas', [])), 0)
 
     def test_post_quotas_by_admin(self):
         auth_headers = copy.copy(self.auth_headers)
