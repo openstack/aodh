@@ -26,7 +26,7 @@ Glossary
    API server
      HTTP REST API service for Aodh.
 
-   http callback
+   HTTP callback
      HTTP callback is used for calling a predefined URL, whenever an
      alarm has been set off. The payload of the request contains
      all the details of why the alarm was triggered.
