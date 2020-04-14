@@ -18,6 +18,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import json
 
 import jsonschema
@@ -317,7 +318,8 @@ class ValidatedComplexQuery(object):
     @staticmethod
     def lowercase_keys(mapping):
         """Converts the values of the keys in mapping to lowercase."""
-        items = mapping.items()
+        loop_mapping = copy.deepcopy(mapping)
+        items = loop_mapping.items()
         for key, value in items:
             del mapping[key]
             mapping[key.lower()] = value
