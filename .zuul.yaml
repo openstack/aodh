@@ -7,14 +7,27 @@
       jobs:
         - aodh-tempest-plugin-mysql
         - aodh-tempest-plugin-postgresql
-        - telemetry-dsvm-integration
-        - telemetry-dsvm-integration-ipv6-only
+        - telemetry-dsvm-integration:
+            irrelevant-files: &aodh-irrelevant-files
+              - ^(test-|)requirements.txt$
+              - ^setup.cfg$
+              - ^doc/.*$
+              - ^.*\.rst$
+              - ^releasenotes/.*$
+              - ^aodh/tests/.*$
+              - ^aodh/locale/.*$
+              - ^tools/.*$
+              - ^tox.ini$
+        - telemetry-dsvm-integration-ipv6-only:
+            irrelevant-files: *aodh-irrelevant-files
     gate:
       jobs:
         - aodh-tempest-plugin-mysql
         - aodh-tempest-plugin-postgresql
-        - telemetry-dsvm-integration
-        - telemetry-dsvm-integration-ipv6-only
+        - telemetry-dsvm-integration:
+            irrelevant-files: *aodh-irrelevant-files
+        - telemetry-dsvm-integration-ipv6-only:
+            irrelevant-files: *aodh-irrelevant-files
     experimental:
       jobs:
         # TripleO jobs that deploy Telemetry.
@@ -36,13 +49,7 @@
 - job:
     name: aodh-tempest-plugin-postgresql
     parent: telemetry-tempest-base
-    irrelevant-files: &aodh-irrelevant-files
-      - ^(test-|)requirements.txt$
-      - ^setup.cfg$
-      - ^doc/.*$
-      - ^.*\.rst$
-      - ^releasenotes/.*$
-      - ^aodh/tests/.*$
+    irrelevant-files: *aodh-irrelevant-files
     vars:
       devstack_services:
         postgresql: true
