@@ -107,7 +107,7 @@ exclude_patterns = ['**/#*', '**~', '**/#*#', '**/*alembic*']
 show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'native'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -148,9 +148,10 @@ html_theme = 'openstackdocs'
 html_static_path = ['_static']
 
 # openstackdocstheme options
-repository_name = 'openstack/aodh'
-bug_project = 'aodh'
-bug_tag = ''
+openstackdocs_repo_name = 'openstack/aodh'
+openstackdocs_pdf_link = True
+openstackdocs_bug_project = 'aodh'
+openstackdocs_bug_tag = ''
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
