@@ -398,21 +398,23 @@ class Connection(base.Connection):
             alarm_change_row.update(alarm_change)
             session.add(alarm_change_row)
 
-    def clear_expired_alarm_history_data(self, alarm_history_ttl):
+    def clear_expired_alarm_history_data(self, ttl, max_count=100):
         """Clear expired alarm history data from the backend storage system.
 
         Clearing occurs according to the time-to-live.
 
-        :param alarm_history_ttl: Number of seconds to keep alarm history
-                                  records for.
+        :param ttl: Number of seconds to keep alarm history records for.
+        :param max_count: Number of records to delete.
         """
         session = self._engine_facade.get_session()
         with session.begin():
-            valid_start = (timeutils.utcnow() -
-                           datetime.timedelta(seconds=alarm_history_ttl))
-            deleted_rows = (session.query(models.AlarmChange)
-                            .filter(models.AlarmChange.timestamp < valid_start)
-                            .delete())
+            end = timeutils.utcnow() - datetime.timedelta(seconds=ttl)
+            alarm_history_q = (session.query(models.AlarmChange.event_id)
+                               .filter(models.AlarmChange.timestamp < end))
+            event_ids = [i[0] for i in alarm_history_q.limit(max_count)]
+            deleted_rows = session.query(models.AlarmChange).filter(
+                models.AlarmChange.event_id.in_(event_ids)
+            ).delete(synchronize_session="fetch")
             LOG.info("%d alarm histories are removed from database",
                      deleted_rows)
 

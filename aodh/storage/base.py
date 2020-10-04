@@ -191,13 +191,13 @@ class Connection(object):
         return cls.STORAGE_CAPABILITIES
 
     @staticmethod
-    def clear_expired_alarm_history_data(alarm_history_ttl):
+    def clear_expired_alarm_history_data(ttl, max_count=None):
         """Clear expired alarm history data from the backend storage system.
 
         Clearing occurs according to the time-to-live.
 
-        :param alarm_history_ttl: Number of seconds to keep alarm history
-                                  records for.
+        :param ttl: Number of seconds to keep alarm history records for.
+        :param max_count: Number of records to delete.
         """
         raise aodh.NotImplementedError('Clearing alarm history '
                                        'not implemented')

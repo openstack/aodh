@@ -33,9 +33,22 @@ def expirer():
 
     if conf.database.alarm_history_time_to_live > 0:
         LOG.debug("Clearing expired alarm history data")
-        storage_conn = storage.get_connection_from_config(conf)
-        storage_conn.clear_expired_alarm_history_data(
-            conf.database.alarm_history_time_to_live)
+        conn = storage.get_connection_from_config(conf)
+        max_count = conf.database.alarm_histories_delete_batch_size
+        try:
+            if max_count > 0:
+                conn.clear_expired_alarm_history_data(
+                    conf.database.alarm_history_time_to_live,
+                    max_count)
+            else:
+                deleted = max_count = 100
+                while deleted and deleted > 0:
+                    deleted = conn.clear_expired_alarm_history_data(
+                        conf.database.alarm_history_time_to_live,
+                        max_count)
+        except TypeError:
+            LOG.warning("Storage driver does not support "
+                        "'alarm_histories_delete_batch_size' config option.")
     else:
         LOG.info("Nothing to clean, database alarm history time to live "
                  "is disabled")
