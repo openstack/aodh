@@ -23,8 +23,7 @@ import datetime
 
 from oslo_utils import timeutils
 import pecan
-import six
-from six.moves.urllib import parse as urllib_parse
+from urllib import parse as urllib_parse
 import wsme
 
 from aodh.api.controllers.v2 import base
@@ -294,8 +293,6 @@ def set_resp_location_hdr(location):
     # str in py2 and py3 even this is not the same thing in both
     # version
     # see: http://legacy.python.org/dev/peps/pep-3333/#unicode-issues
-    if six.PY2 and isinstance(location, six.text_type):
-        location = location.encode('utf-8')
     location = urllib_parse.quote(location)
     pecan.response.headers['Location'] = location
 

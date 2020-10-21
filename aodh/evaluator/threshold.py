@@ -15,7 +15,6 @@
 
 import datetime
 import operator
-import six
 
 from oslo_config import cfg
 from oslo_log import log
@@ -118,7 +117,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
                       ' %(limit)s', {'value': value, 'limit': limit})
             return op(value, limit)
 
-        compared = list(six.moves.map(_compare, statistics))
+        compared = list(map(_compare, statistics))
         distilled = all(compared)
         unequivocal = distilled or not any(compared)
         number_outside = len([c for c in compared if c])

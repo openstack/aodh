@@ -16,8 +16,6 @@
 """
 import copy
 
-import six
-
 import aodh
 from aodh.utils import get_func_valid_keys
 
@@ -28,7 +26,7 @@ def update_nested(original_dict, updates):
      Updates occur without replacing entire sub-dicts.
     """
     dict_to_update = copy.deepcopy(original_dict)
-    for key, value in six.iteritems(updates):
+    for key, value in updates.items():
         if isinstance(value, dict):
             sub_dict = update_nested(dict_to_update.get(key, {}), value)
             dict_to_update[key] = sub_dict
@@ -38,11 +36,11 @@ def update_nested(original_dict, updates):
 
 
 class Model(object):
-    """Base class for storage API models."""
+    """base class for storage api models."""
 
     def __init__(self, **kwds):
         self.fields = list(kwds)
-        for k, v in six.iteritems(kwds):
+        for k, v in kwds.items():
             setattr(self, k, v)
 
     def as_dict(self):

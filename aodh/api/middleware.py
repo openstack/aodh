@@ -23,7 +23,6 @@ import json
 
 from lxml import etree
 from oslo_log import log
-import six
 import webob
 
 from aodh import i18n
@@ -101,13 +100,11 @@ class ParsableErrorMiddleware(object):
                     LOG.error('Error parsing HTTP response: %s', err)
                     error_message = state['status_code']
                     body = '<error_message>%s</error_message>' % error_message
-                    if six.PY3:
-                        body = body.encode('utf-8')
+                    body = body.encode('utf-8')
             else:
                 content_type = 'application/json'
                 app_data = b'\n'.join(app_iter)
-                if six.PY3:
-                    app_data = app_data.decode('utf-8')
+                app_data = app_data.decode('utf-8')
                 try:
                     fault = json.loads(app_data)
                     if error is not None and 'faultstring' in fault:
@@ -116,8 +113,7 @@ class ParsableErrorMiddleware(object):
                 except ValueError:
                     fault = app_data
                 body = json.dumps({'error_message': fault})
-                if six.PY3:
-                    body = body.encode('utf-8')
+                body = body.encode('utf-8')
 
             state['headers'].append(('Content-Length', str(len(body))))
             state['headers'].append(('Content-Type', content_type))

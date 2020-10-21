@@ -31,9 +31,8 @@ from oslo_utils import uuidutils
 import pecan
 from pecan import rest
 import pytz
-import six
-from six.moves.urllib import parse as urlparse
 from stevedore import extension
+from urllib import parse as urlparse
 import wsme
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
@@ -129,7 +128,7 @@ def is_over_quota(conn, project_id, user_id):
 
 class CronType(wtypes.UserType):
     """A user type that represents a cron format."""
-    basetype = six.string_types
+    basetype = str
     name = 'cron'
 
     @staticmethod
@@ -215,7 +214,7 @@ class Alarm(base.Base):
         rule = getattr(self, '%s_rule' % self.type, None)
         if not self._description:
             if hasattr(rule, 'default_description'):
-                return six.text_type(rule.default_description)
+                return str(rule.default_description)
             return "%s alarm rule" % self.type
         return self._description
 
@@ -549,7 +548,7 @@ def stringify_timestamps(data):
     """Stringify any datetimes in given dict."""
     return dict((k, v.isoformat()
                  if isinstance(v, datetime.datetime) else v)
-                for (k, v) in six.iteritems(data))
+                for (k, v) in data.items())
 
 
 @profiler.trace_cls('api')

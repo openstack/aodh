@@ -13,7 +13,6 @@
 #
 
 from oslo_log import log
-import six
 import stevedore
 
 from aodh import evaluator
@@ -87,7 +86,7 @@ class AndOp(object):
         return all(self.rule_targets)
 
     def __str__(self):
-        return '(' + ' and '.join(six.moves.map(str, self.rule_targets)) + ')'
+        return '(' + ' and '.join(map(str, self.rule_targets)) + ')'
 
     __nonzero__ = __bool__
 
@@ -100,7 +99,7 @@ class OrOp(object):
         return any(self.rule_targets)
 
     def __str__(self):
-        return '(' + ' or '.join(six.moves.map(str, self.rule_targets)) + ')'
+        return '(' + ' or '.join(map(str, self.rule_targets)) + ')'
 
     __nonzero__ = __bool__
 

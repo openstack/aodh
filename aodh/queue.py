@@ -14,7 +14,6 @@
 from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging
-import six
 
 from aodh import messaging
 from aodh.storage import models
@@ -53,6 +52,6 @@ class AlarmNotifier(object):
                    'severity': alarm.severity,
                    'previous': previous,
                    'current': alarm.state,
-                   'reason': six.text_type(reason),
+                   'reason': str(reason),
                    'reason_data': reason_data}
         self.notifier.sample({}, 'alarm.update', payload)

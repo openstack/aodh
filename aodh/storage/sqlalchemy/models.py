@@ -17,7 +17,6 @@ import json
 
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
-import six
 import sqlalchemy as sa
 from sqlalchemy import Column, String, Index, Boolean, Text, DateTime, Integer
 from sqlalchemy.dialects import mysql
@@ -68,7 +67,7 @@ class AodhBase(object):
 
     def update(self, values):
         """Make the model object behave like a dict."""
-        for k, v in six.iteritems(values):
+        for k, v in values.items():
             setattr(self, k, v)
 
 

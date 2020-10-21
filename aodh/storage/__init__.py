@@ -19,9 +19,9 @@ import datetime
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
-import six.moves.urllib.parse as urlparse
 from stevedore import driver
 import tenacity
+from urllib import parse as urlparse
 
 _NAMESPACE = 'aodh.storage'
 

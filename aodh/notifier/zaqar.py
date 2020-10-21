@@ -17,7 +17,7 @@
 
 from oslo_config import cfg
 from oslo_log import log
-import six.moves.urllib.parse as urlparse
+from urllib import parse as urlparse
 
 from aodh import keystone_client
 from aodh import notifier

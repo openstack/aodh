@@ -20,7 +20,6 @@ from oslo_config import cfg
 from oslo_log import log
 import oslo_messaging
 from oslo_utils import netutils
-import six
 from stevedore import extension
 
 from aodh import messaging
@@ -40,8 +39,7 @@ OPTS = [
 ]
 
 
-@six.add_metaclass(abc.ABCMeta)
-class AlarmNotifier(object):
+class AlarmNotifier(object, metaclass=abc.ABCMeta):
     """Base class for alarm notifier plugins."""
 
     @staticmethod

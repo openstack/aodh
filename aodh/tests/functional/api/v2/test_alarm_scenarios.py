@@ -23,8 +23,6 @@ from unittest import mock
 
 import fixtures
 from oslo_utils import uuidutils
-import six
-from six import moves
 import webtest
 
 from aodh.api import app
@@ -468,7 +466,7 @@ class TestAlarms(TestAlarmsBase):
                 }
             },
         }
-        for field, json in six.iteritems(jsons):
+        for field, json in jsons.items():
             resp = self.post_json('/alarms', params=json, expect_errors=True,
                                   status=400, headers=self.auth_headers)
             self.assertEqual("Invalid input for field/attribute %s."
@@ -912,7 +910,7 @@ class TestAlarms(TestAlarmsBase):
                 'granularity': 180,
             }
         }
-        for aspect, id in six.iteritems(identifiers):
+        for aspect, id in identifiers.items():
             json['%s_id' % aspect] = id
         return json
 
@@ -1636,7 +1634,7 @@ class TestAlarmsHistory(TestAlarmsBase):
         return resp
 
     def _assert_is_subset(self, expected, actual):
-        for k, v in six.iteritems(expected):
+        for k, v in expected.items():
             current = actual.get(k)
             if k == 'detail' and isinstance(v, dict):
                 current = jsonlib.loads(current)
@@ -1645,7 +1643,7 @@ class TestAlarmsHistory(TestAlarmsBase):
 
     def _assert_in_json(self, expected, actual):
         actual = jsonlib.dumps(jsonlib.loads(actual), sort_keys=True)
-        for k, v in six.iteritems(expected):
+        for k, v in expected.items():
             fragment = jsonlib.dumps({k: v}, sort_keys=True)[1:-1]
             self.assertIn(fragment, actual,
                           '%s not in %s' % (fragment, actual))
@@ -1870,14 +1868,14 @@ class TestAlarmsHistory(TestAlarmsBase):
         self._get_alarm_history('a', expect_errors=True, status=404)
 
     def test_get_alarm_history_ordered_by_recentness(self):
-        for i in moves.xrange(10):
+        for i in range(10):
             self._update_alarm('a', dict(name='%s' % i))
         history = self._get_alarm_history('a')
         self.assertEqual(10, len(history), 'hist: %s' % history)
         self._assert_is_subset(dict(alarm_id='a',
                                     type='rule change'),
                                history[0])
-        for i in moves.xrange(1, 11):
+        for i in range(1, 11):
             detail = '{"name": "%s"}' % (10 - i)
             self._assert_is_subset(dict(alarm_id='a',
                                         detail=detail,
@@ -2844,7 +2842,7 @@ class TestPaginationQuery(TestAlarmsBase):
         self.assertEqual(['name1', 'name2', 'name3'], names)
 
     def test_pagination_query_history_data(self):
-        for i in moves.xrange(10):
+        for i in range(10):
             self._update_alarm('a', dict(name='%s' % i))
         url = '/alarms/a/history?sort=event_id:desc&sort=timestamp:desc'
         data = self.get_json(url, headers=self.auth_headers)

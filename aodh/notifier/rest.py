@@ -19,7 +19,7 @@ from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import uuidutils
 import requests
-import six.moves.urllib.parse as urlparse
+import urllib.parse as urlparse
 
 from aodh import notifier
 

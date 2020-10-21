@@ -17,15 +17,12 @@ import copy
 import datetime
 import fixtures
 import json
-import unittest
 from unittest import mock
 
 from gnocchiclient import exceptions
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 import pytz
-import six
-from six import moves
 
 from aodh.evaluator import gnocchi
 from aodh import messaging
@@ -126,7 +123,7 @@ class TestGnocchiEvaluatorBase(base.TestEvaluatorBase):
     @staticmethod
     def _get_stats(granularity, values):
         now = timeutils.utcnow_ts()
-        return [[six.text_type(now - len(values) * granularity),
+        return [[str(now - len(values) * granularity),
                  granularity, value] for value in values]
 
     @staticmethod
@@ -171,7 +168,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
 
     def test_retry_transient_api_failure(self):
         means = self._get_stats(60, [self.alarms[0].rule['threshold'] - v
-                                     for v in moves.xrange(5)])
+                                     for v in range(5)])
         self.client.metric.get_measures.side_effect = [
             exceptions.ClientException(501, "error2"), means]
         self._test_retry_transient()
@@ -185,7 +182,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
         utcnow.return_value = datetime.datetime(2015, 1, 26, 12, 57, 0, 0)
         self._set_all_alarms('ok')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
-                                    for v in moves.xrange(1, 6)])
+                                    for v in range(1, 6)])
         self.client.metric.get_measures.side_effect = [avgs]
         self._evaluate_all_alarms()
         start_alarm = "2015-01-26T12:51:00"
@@ -207,7 +204,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
     def test_simple_alarm_clear(self):
         self._set_all_alarms('alarm')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] - v
-                                    for v in moves.xrange(5)])
+                                    for v in range(5)])
 
         self.client.metric.get_measures.side_effect = [avgs]
 
@@ -263,7 +260,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
 
         self._set_all_alarms('ok')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
-                                    for v in moves.xrange(1, 6)])
+                                    for v in range(1, 6)])
 
         self.client.metric.get_measures.side_effect = [avgs]
 
@@ -287,7 +284,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
     def test_equivocal_from_known_state_ok(self):
         self._set_all_alarms('ok')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
-                                    for v in moves.xrange(5)])
+                                    for v in range(5)])
         self.client.metric.get_measures.side_effect = [avgs]
 
         self._evaluate_all_alarms()
@@ -300,7 +297,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
         self._set_all_alarms('ok')
         self.alarms[0].repeat_actions = True
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
-                                    for v in moves.xrange(1, 6)])
+                                    for v in range(1, 6)])
 
         self.client.metric.get_measures.side_effect = [avgs]
 
@@ -319,7 +316,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
     def test_equivocal_from_unknown(self):
         self._set_all_alarms('insufficient data')
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
-                                    for v in moves.xrange(1, 6)])
+                                    for v in range(1, 6)])
 
         self.client.metric.get_measures.side_effect = [avgs]
 
@@ -336,8 +333,6 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
                              reason, reason_data)
         self.assertEqual(expected, self.notifier.notify.call_args)
 
-    @unittest.skipIf(six.PY3,
-                     "the aodh base class is not python 3 ready")
     @mock.patch.object(timeutils, 'utcnow')
     def test_no_state_change_outside_time_constraint(self, mock_utcnow):
         self._set_all_alarms('ok')
@@ -360,8 +355,6 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
                          " time is outside its time constraint.")
         self.assertEqual([], self.notifier.notify.call_args_list)
 
-    @unittest.skipIf(six.PY3,
-                     "the aodh base class is not python 3 ready")
     @mock.patch.object(timeutils, 'utcnow')
     def test_state_change_inside_time_constraint(self, mock_utcnow):
         self._set_all_alarms('ok')
@@ -419,7 +412,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
         self._set_all_alarms('ok')
         original_alarms = copy.deepcopy(self.alarms)
         avgs = self._get_stats(60, [self.alarms[0].rule['threshold'] + v
-                                    for v in moves.xrange(1, 6)])
+                                    for v in range(1, 6)])
         self.client.metric.get_measures.side_effect = [avgs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('alarm')
@@ -439,7 +432,7 @@ class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
 
     def test_retry_transient_api_failure(self):
         maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] + v
-                                     for v in moves.xrange(4)])
+                                     for v in range(4)])
         self.client.metric.aggregation.side_effect = [Exception('boom'), maxs]
         self._test_retry_transient()
 
@@ -453,7 +446,7 @@ class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
         self._set_all_alarms('ok')
 
         maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
-                                     for v in moves.xrange(4)])
+                                     for v in range(4)])
         self.client.metric.aggregation.side_effect = [maxs]
         self._evaluate_all_alarms()
         start_alarm = "2015-01-26T12:32:00"
@@ -482,7 +475,7 @@ class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
     def test_simple_alarm_clear(self):
         self._set_all_alarms('alarm')
         maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] + v
-                                     for v in moves.xrange(1, 5)])
+                                     for v in range(1, 5)])
         self.client.metric.aggregation.side_effect = [maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
@@ -499,7 +492,7 @@ class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
     def test_equivocal_from_known_state_ok(self):
         self._set_all_alarms('ok')
         maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
-                                     for v in moves.xrange(-1, 3)])
+                                     for v in range(-1, 3)])
         self.client.metric.aggregation.side_effect = [maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
@@ -513,7 +506,7 @@ class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
         # NOTE(sileht): we add one useless point (81.0) that will break
         # the test if the evaluator doesn't remove it.
         maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
-                                     for v in moves.xrange(-1, 5)])
+                                     for v in range(-1, 5)])
         self.client.metric.aggregation.side_effect = [maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('alarm')
@@ -522,7 +515,7 @@ class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
         self._set_all_alarms('ok')
         self.alarms[0].repeat_actions = True
         maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
-                                     for v in moves.xrange(-1, 3)])
+                                     for v in range(-1, 3)])
         self.client.metric.aggregation.side_effect = [maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
@@ -538,7 +531,7 @@ class TestGnocchiAggregationMetricsThresholdEvaluate(TestGnocchiEvaluatorBase):
         self.alarms[0].repeat_actions = True
 
         maxs = self._get_stats(300, [self.alarms[0].rule['threshold'] - v
-                                     for v in moves.xrange(4)])
+                                     for v in range(4)])
         self.client.metric.aggregation.side_effect = [maxs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('alarm')
@@ -560,7 +553,7 @@ class TestGnocchiAggregationResourcesThresholdEvaluate(
 
     def test_retry_transient_api_failure(self):
         avgs2 = self._get_stats(50, [self.alarms[0].rule['threshold'] - v
-                                     for v in moves.xrange(6)])
+                                     for v in range(6)])
         self.client.metric.aggregation.side_effect = [
             exceptions.ClientException(500, "error"), avgs2]
         self._test_retry_transient()
@@ -574,7 +567,7 @@ class TestGnocchiAggregationResourcesThresholdEvaluate(
         utcnow.return_value = datetime.datetime(2015, 1, 26, 12, 57, 0, 0)
         self._set_all_alarms('ok')
         avgs = self._get_stats(50, [self.alarms[0].rule['threshold'] + v
-                                    for v in moves.xrange(1, 7)])
+                                    for v in range(1, 7)])
 
         self.client.metric.aggregation.side_effect = [avgs]
         self._evaluate_all_alarms()
@@ -602,7 +595,7 @@ class TestGnocchiAggregationResourcesThresholdEvaluate(
     def test_simple_alarm_clear(self):
         self._set_all_alarms('alarm')
         avgs = self._get_stats(50, [self.alarms[0].rule['threshold'] - v
-                                    for v in moves.xrange(6)])
+                                    for v in range(6)])
         self.client.metric.aggregation.side_effect = [avgs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
@@ -618,7 +611,7 @@ class TestGnocchiAggregationResourcesThresholdEvaluate(
     def test_equivocal_from_known_state_ok(self):
         self._set_all_alarms('ok')
         avgs = self._get_stats(50, [self.alarms[0].rule['threshold'] + v
-                                    for v in moves.xrange(6)])
+                                    for v in range(6)])
         self.client.metric.aggregation.side_effect = [avgs]
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')

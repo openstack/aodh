@@ -21,8 +21,7 @@ import os
 import fixtures
 from oslo_config import fixture as fixture_config
 from oslo_utils import uuidutils
-import six
-from six.moves.urllib import parse as urlparse
+from urllib import parse as urlparse
 
 from aodh import service
 from aodh import storage
@@ -70,8 +69,8 @@ class SQLiteManager(fixtures.Fixture):
         self.url = "sqlite://"
 
 
-@six.add_metaclass(test_base.SkipNotImplementedMeta)
-class TestBase(test_base.BaseTestCase):
+class TestBase(test_base.BaseTestCase,
+               metaclass=test_base.SkipNotImplementedMeta):
 
     DRIVER_MANAGERS = {
         'mysql': MySQLManager,

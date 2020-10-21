@@ -23,7 +23,7 @@ devstack).
 import os
 
 from gabbi import driver
-import six.moves.urllib.parse as urlparse
+from urllib import parse as urlparse
 
 
 TESTS_DIR = 'gabbits-live'
