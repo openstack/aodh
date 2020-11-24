@@ -271,8 +271,6 @@ function start_aodh {
     if [[ "$AODH_DEPLOY" == "mod_wsgi" ]]; then
         enable_apache_site aodh
         restart_apache_server
-        tail_log aodh /var/log/$APACHE_NAME/aodh.log
-        tail_log aodh-api /var/log/$APACHE_NAME/aodh_access.log
     elif [ "$AODH_DEPLOY" == "uwsgi" ]; then
         run_process aodh-api "$AODH_BIN_DIR/uwsgi $AODH_UWSGI_FILE"
     else
