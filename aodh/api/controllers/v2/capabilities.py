@@ -20,7 +20,6 @@
 
 import pecan
 from pecan import rest
-import six
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
@@ -36,7 +35,7 @@ def _decode_unicode(input):
         # predictable insertion order to avoid inconsistencies in the
         # message signature computation for equivalent payloads modulo
         # ordering
-        for key, value in sorted(six.iteritems(input)):
+        for key, value in sorted(input.items()):
             temp[_decode_unicode(key)] = _decode_unicode(value)
         return temp
     elif isinstance(input, (tuple, list)):
@@ -44,7 +43,7 @@ def _decode_unicode(input):
         # the tuple would become list. So we have to generate the value as
         # list here.
         return [_decode_unicode(element) for element in input]
-    elif isinstance(input, six.text_type):
+    elif isinstance(input, str):
         return input.encode('utf-8')
     else:
         return input
@@ -52,7 +51,7 @@ def _decode_unicode(input):
 
 def _recursive_keypairs(d, separator=':'):
     """Generator that produces sequence of keypairs for nested dictionaries."""
-    for name, value in sorted(six.iteritems(d)):
+    for name, value in sorted(d.items()):
         if isinstance(value, dict):
             for subname, subvalue in _recursive_keypairs(value, separator):
                 yield ('%s%s%s' % (name, separator, subname), subvalue)

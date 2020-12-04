@@ -13,7 +13,6 @@
 #    limitations under the License.
 
 from oslo_log import log
-import six
 
 from aodh import keystone_client as aodh_keystone
 from aodh import notifier
@@ -117,4 +116,4 @@ class TrustHeatAlarmNotifier(notifier.AlarmNotifier):
         except Exception as e:
             LOG.exception("Failed to communicate with Heat service for alarm "
                           "%s, error: %s",
-                          alarm_id, six.text_type(e))
+                          alarm_id, str(e))

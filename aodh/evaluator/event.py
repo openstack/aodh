@@ -19,7 +19,6 @@ from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import fnmatch
 from oslo_utils import timeutils
-import six
 
 from aodh import evaluator
 
@@ -50,7 +49,7 @@ def _sanitize_trait_value(value, trait_type):
     elif trait_type in (4, 'datetime'):
         return timeutils.normalize_time(timeutils.parse_isotime(value))
     else:
-        return six.text_type(value)
+        return str(value)
 
 
 class InvalidEvent(Exception):
@@ -170,8 +169,7 @@ class EventAlarmEvaluator(evaluator.Evaluator):
                             'for it.', e)
                 continue
 
-            for id, alarm in six.iteritems(
-                    self._get_project_alarms(event.project)):
+            for id, alarm in self._get_project_alarms(event.project).items():
                 try:
                     self._evaluate_alarm(alarm, event)
                 except Exception:

@@ -13,11 +13,6 @@
 #  under the License.
 import inspect
 
-import six
-
 
 def get_func_valid_keys(func):
-    if six.PY2:
-        return inspect.getargspec(func)[0]
-    else:
-        return inspect.getfullargspec(func)[0]
+    return inspect.getfullargspec(func)[0]

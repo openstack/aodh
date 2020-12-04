@@ -20,7 +20,6 @@ from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import encodeutils
 from oslo_utils import uuidutils
-import six
 import tenacity
 import tooz.coordination
 
@@ -73,7 +72,7 @@ class HashRing(object):
         self._sorted_keys = []
 
         for node in nodes:
-            for r in six.moves.range(replicas):
+            for r in range(replicas):
                 hashed_key = self._hash('%s-%s' % (node, r))
                 self._ring[hashed_key] = node
                 self._sorted_keys.append(hashed_key)

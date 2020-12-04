@@ -14,7 +14,7 @@
 # under the License.
 """Rest alarm notifier with trusted authentication."""
 
-from six.moves.urllib import parse
+from urllib import parse
 
 from aodh import keystone_client
 from aodh.notifier import rest

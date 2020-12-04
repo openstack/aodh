@@ -18,7 +18,6 @@ import os
 import subprocess
 
 from oslo_utils import fileutils
-import six
 
 from aodh.tests import base
 
@@ -28,8 +27,7 @@ class BinTestCase(base.BaseTestCase):
         super(BinTestCase, self).setUp()
         content = ("[database]\n"
                    "connection=log://localhost\n")
-        if six.PY3:
-            content = content.encode('utf-8')
+        content = content.encode('utf-8')
         self.tempfile = fileutils.write_to_tempfile(content=content,
                                                     prefix='aodh',
                                                     suffix='.conf')
@@ -58,8 +56,7 @@ class BinTestCase(base.BaseTestCase):
         content = ("[database]\n"
                    "alarm_history_time_to_live=1\n"
                    "connection=log://localhost\n")
-        if six.PY3:
-            content = content.encode('utf-8')
+        content = content.encode('utf-8')
         self.tempfile = fileutils.write_to_tempfile(content=content,
                                                     prefix='aodh',
                                                     suffix='.conf')
@@ -71,8 +68,7 @@ class BinTestCase(base.BaseTestCase):
         out, __ = subp.communicate()
         self.assertEqual(0, subp.poll())
         msg = "Dropping alarm history data with TTL 1"
-        if six.PY3:
-            msg = msg.encode('utf-8')
+        msg = msg.encode('utf-8')
         self.assertIn(msg, out)
 
 
@@ -81,8 +77,7 @@ class BinEvaluatorTestCase(base.BaseTestCase):
         super(BinEvaluatorTestCase, self).setUp()
         content = ("[database]\n"
                    "connection=log://localhost\n")
-        if six.PY3:
-            content = content.encode('utf-8')
+        content = content.encode('utf-8')
         self.tempfile = fileutils.write_to_tempfile(content=content,
                                                     prefix='aodh',
                                                     suffix='.conf')

@@ -24,8 +24,8 @@ from oslo_config import cfg
 from oslo_config import fixture as fixture_config
 from oslo_policy import opts
 from oslo_utils import uuidutils
-from six.moves.urllib import parse as urlparse
 import sqlalchemy_utils
+from urllib import parse as urlparse
 
 from aodh.api import app
 from aodh.api import rbac

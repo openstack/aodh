@@ -28,7 +28,6 @@ from oslo_log import log
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 import pytz
-import six
 from stevedore import extension
 
 import aodh
@@ -55,8 +54,7 @@ OPTS = [
 ]
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Evaluator(object):
+class Evaluator(object, metaclass=abc.ABCMeta):
     """Base class for alarm rule evaluator plugins."""
 
     def __init__(self, conf):

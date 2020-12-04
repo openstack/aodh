@@ -16,7 +16,6 @@ import abc
 from unittest import mock
 
 from oslo_db.sqlalchemy import test_migrations
-import six
 
 from aodh.storage.sqlalchemy import models
 from aodh.tests import base
@@ -27,10 +26,9 @@ class ABCSkip(base.SkipNotImplementedMeta, abc.ABCMeta):
     pass
 
 
-class ModelsMigrationsSync(
-        six.with_metaclass(ABCSkip,
-                           tests_db.TestBase,
-                           test_migrations.ModelsMigrationsSync)):
+class ModelsMigrationsSync(tests_db.TestBase,
+                           test_migrations.ModelsMigrationsSync,
+                           metaclass=ABCSkip):
 
     def setUp(self):
         super(ModelsMigrationsSync, self).setUp()

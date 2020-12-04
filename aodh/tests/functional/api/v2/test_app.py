@@ -18,7 +18,6 @@
 import json
 from unittest import mock
 
-import six
 import wsme
 
 from aodh import i18n
@@ -142,9 +141,7 @@ class TestApiMiddleware(v2.FunctionalTest):
     def test_translated_then_untranslated_error(self):
         resp = self.get_json('/alarms/alarm-id-3', expect_errors=True)
         self.assertEqual(404, resp.status_code)
-        body = resp.body
-        if six.PY3:
-            body = body.decode('utf-8')
+        body = resp.body.decode('utf-8')
         self.assertEqual("Alarm alarm-id-3 not found",
                          json.loads(body)['error_message']
                          ['faultstring'])
@@ -156,9 +153,7 @@ class TestApiMiddleware(v2.FunctionalTest):
             resp = self.get_json('/alarms/alarm-id-5', expect_errors=True)
 
         self.assertEqual(404, resp.status_code)
-        body = resp.body
-        if six.PY3:
-            body = body.decode('utf-8')
+        body = resp.body.decode('utf-8')
         self.assertEqual("untranslated_error",
                          json.loads(body)['error_message']
                          ['faultstring'])

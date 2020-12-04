@@ -19,7 +19,6 @@ from octaviaclient.api.v2 import octavia
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
-import six
 
 from aodh import evaluator
 from aodh.evaluator import threshold
@@ -73,7 +72,7 @@ class LoadBalancerMemberHealthEvaluator(evaluator.Evaluator):
             ret = self.lb_client.member_list(pool_id)
         except Exception as e:
             LOG.warning("Failed to communicate with load balancing service, "
-                        "error: %s", six.text_type(e))
+                        "error: %s", str(e))
             raise threshold.InsufficientDataError(
                 'failed to communicate with load balancing service',
                 []
