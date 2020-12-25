@@ -87,7 +87,7 @@ def prepare_service(argv=None, config_files=None):
     if profiler_opts:
         profiler_opts.set_defaults(conf)
     policy_opts.set_defaults(conf, policy_file=os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "api", "policy.json")))
+        os.path.join(os.path.dirname(__file__), "api", "policy.yaml")))
     from aodh import opts
     # Register our own Aodh options
     for group, options in opts.list_opts():

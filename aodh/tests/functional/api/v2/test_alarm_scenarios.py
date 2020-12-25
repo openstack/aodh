@@ -414,7 +414,7 @@ class TestAlarms(TestAlarmsBase):
         _test('project_id')
 
     def test_get_alarm_forbiden(self):
-        pf = os.path.abspath('aodh/tests/functional/api/v2/policy.json-test')
+        pf = os.path.abspath('aodh/tests/functional/api/v2/policy.yaml-test')
         self.CONF.set_override('policy_file', pf, group='oslo_policy')
         self.CONF.set_override('auth_mode', None, group='api')
         self.app = webtest.TestApp(app.load_app(self.CONF))

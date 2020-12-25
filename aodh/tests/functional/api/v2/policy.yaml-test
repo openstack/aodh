@@ -1,0 +1,8 @@
+# WARNING: Below rules are either deprecated rules
+# or extra rules in policy file, it is strongly
+# recommended to switch to new rules.
+"context_is_admin": "role:admin"
+"segregation": "rule:context_is_admin"
+"admin_or_owner": "rule:context_is_admin or project_id:%(project_id)s"
+"default": "rule:admin_or_owner"
+"telemetry:get_alarms": "role:admin"
