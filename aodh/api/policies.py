@@ -19,6 +19,26 @@ RULE_CONTEXT_IS_ADMIN = 'rule:context_is_admin'
 RULE_ADMIN_OR_OWNER = 'rule:context_is_admin or project_id:%(project_id)s'
 UNPROTECTED = ''
 
+# Constants that represent common personas.
+SYSTEM_ADMIN = 'role:admin and system_scope:all'
+SYSTEM_READER = 'role:reader and system_scope:all'
+PROJECT_MEMBER = 'role:member and project_id:%(project_id)s'
+PROJECT_READER = 'role:reader and project_id:%(project_id)s'
+
+# Composite check strings built using the personas defined above, where a
+# particular API is designed to work with multiple scopes. For example,
+# listing alarms for all projects (system-scope) or listing alarms for a single
+# project (project-scope).
+SYSTEM_ADMIN_OR_PROJECT_MEMBER = (
+    '(' + SYSTEM_ADMIN + ')'
+    ' or (' + PROJECT_MEMBER + ')'
+)
+SYSTEM_OR_PROJECT_READER = (
+    '(' + SYSTEM_READER + ')'
+    ' or (' + PROJECT_READER + ')'
+)
+
+
 rules = [
     policy.RuleDefault(
         name="context_is_admin",
