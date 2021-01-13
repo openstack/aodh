@@ -12,7 +12,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_config import cfg
 from oslo_middleware import cors
+from oslo_policy import opts as policy_opts
+
+
+def set_lib_defaults():
+    """Update default value for configuration options from other namespace.
+
+    Example, oslo lib config options. This is needed for
+    config generator tool to pick these default value changes.
+    https://docs.openstack.org/oslo.config/latest/cli/
+    generator.html#modifying-defaults-from-other-namespaces
+    """
+    set_cors_middleware_defaults()
+
+    # Update default value of oslo.policy policy_file config option.
+    policy_opts.set_defaults(cfg.CONF, 'policy.yaml')
 
 
 def set_cors_middleware_defaults():
