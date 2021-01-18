@@ -13,6 +13,7 @@
 #    under the License.
 
 
+from oslo_log import versionutils
 from oslo_policy import policy
 
 RULE_CONTEXT_IS_ADMIN = 'rule:context_is_admin'
@@ -38,8 +39,68 @@ SYSTEM_OR_PROJECT_READER = (
     ' or (' + PROJECT_READER + ')'
 )
 
+DEPRECATED_REASON = """
+The alarm and quota APIs now support system-scope and default roles.
+"""
+
+deprecated_get_alarm = policy.DeprecatedRule(
+    name="telemetry:get_alarm",
+    check_str=RULE_ADMIN_OR_OWNER
+)
+deprecated_get_alarms = policy.DeprecatedRule(
+    name="telemetry:get_alarms",
+    check_str=RULE_ADMIN_OR_OWNER
+)
+deprecated_get_all_alarms = policy.DeprecatedRule(
+    name="telemetry:get_alarms:all_projects",
+    check_str=RULE_CONTEXT_IS_ADMIN
+)
+deprecated_query_alarm = policy.DeprecatedRule(
+    name="telemetry:query_alarm",
+    check_str=RULE_ADMIN_OR_OWNER
+)
+deprecated_create_alarm = policy.DeprecatedRule(
+    name="telemetry:create_alarm",
+    check_str=UNPROTECTED
+)
+deprecated_change_alarm = policy.DeprecatedRule(
+    name="telemetry:change_alarm",
+    check_str=RULE_ADMIN_OR_OWNER
+)
+deprecated_delete_alarm = policy.DeprecatedRule(
+    name="telemetry:delete_alarm",
+    check_str=RULE_ADMIN_OR_OWNER
+)
+deprecated_get_alarm_state = policy.DeprecatedRule(
+    name="telemetry:get_alarm_state",
+    check_str=RULE_ADMIN_OR_OWNER
+)
+deprecated_change_alarm_state = policy.DeprecatedRule(
+    name="telemetry:change_alarm_state",
+    check_str=RULE_ADMIN_OR_OWNER
+)
+deprecated_alarm_history = policy.DeprecatedRule(
+    name="telemetry:alarm_history",
+    check_str=RULE_ADMIN_OR_OWNER
+)
+deprecated_query_alarm_history = policy.DeprecatedRule(
+    name="telemetry:query_alarm_history",
+    check_str=RULE_ADMIN_OR_OWNER
+)
+deprecated_update_quotas = policy.DeprecatedRule(
+    name="telemetry:update_quotas",
+    check_str=RULE_CONTEXT_IS_ADMIN
+)
+deprecated_delete_quotas = policy.DeprecatedRule(
+    name="telemetry:delete_quotas",
+    check_str=RULE_CONTEXT_IS_ADMIN
+)
+
 
 rules = [
+    # This policy can be removed once all the policies in this file are no
+    # longer deprecated and are using the new default policies with proper
+    # scope support.
     policy.RuleDefault(
         name="context_is_admin",
         check_str="role:admin"
@@ -47,156 +108,217 @@ rules = [
     policy.RuleDefault(
         name="segregation",
         check_str=RULE_CONTEXT_IS_ADMIN),
+    # This policy can be removed once all the policies in this file are no
+    # longer deprecated and are using the new default policies with proper
+    # scope support.
     policy.RuleDefault(
         name="admin_or_owner",
         check_str=RULE_ADMIN_OR_OWNER
     ),
+    # This policy can be removed once all the policies in this file are no
+    # longer deprecated and are using the new default policies with proper
+    # scope support. We shouldn't need a "default" policy if each policy has a
+    # reasonable default. This concept of a broad "default" existed prior to
+    # registering policies in code with their own default values.
     policy.RuleDefault(
         name="default",
         check_str=RULE_ADMIN_OR_OWNER
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:get_alarm",
-        check_str=RULE_ADMIN_OR_OWNER,
+        check_str=SYSTEM_OR_PROJECT_READER,
+        scope_types=['system', 'project'],
         description='Get an alarm.',
         operations=[
             {
                 'path': '/v2/alarms/{alarm_id}',
                 'method': 'GET'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_get_alarm,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
+
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:get_alarms",
-        check_str=RULE_ADMIN_OR_OWNER,
+        check_str=SYSTEM_OR_PROJECT_READER,
+        scope_types=['system', 'project'],
         description='Get all alarms, based on the query provided.',
         operations=[
             {
                 'path': '/v2/alarms',
                 'method': 'GET'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_get_alarms,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:get_alarms:all_projects",
-        check_str=RULE_CONTEXT_IS_ADMIN,
+        check_str=SYSTEM_READER,
+        scope_types=['system', 'project'],
         description='Get alarms of all projects.',
         operations=[
             {
                 'path': '/v2/alarms',
                 'method': 'GET'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_get_all_alarms,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:query_alarm",
-        check_str=RULE_ADMIN_OR_OWNER,
+        check_str=SYSTEM_OR_PROJECT_READER,
+        scope_types=['system', 'project'],
         description='Get all alarms, based on the query provided.',
         operations=[
             {
                 'path': '/v2/query/alarms',
                 'method': 'POST'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_query_alarm,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:create_alarm",
-        check_str=UNPROTECTED,
+        check_str=SYSTEM_ADMIN_OR_PROJECT_MEMBER,
+        scope_types=['system', 'project'],
         description='Create a new alarm.',
         operations=[
             {
                 'path': '/v2/alarms',
                 'method': 'POST'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_create_alarm,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:change_alarm",
-        check_str=RULE_ADMIN_OR_OWNER,
+        check_str=SYSTEM_ADMIN_OR_PROJECT_MEMBER,
+        scope_types=['system', 'project'],
         description='Modify this alarm.',
         operations=[
             {
                 'path': '/v2/alarms/{alarm_id}',
                 'method': 'PUT'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_change_alarm,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:delete_alarm",
-        check_str=RULE_ADMIN_OR_OWNER,
+        check_str=SYSTEM_ADMIN_OR_PROJECT_MEMBER,
+        scope_types=['system', 'project'],
         description='Delete this alarm.',
         operations=[
             {
                 'path': '/v2/alarms/{alarm_id}',
                 'method': 'DELETE'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_delete_alarm,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:get_alarm_state",
-        check_str=RULE_ADMIN_OR_OWNER,
+        check_str=SYSTEM_OR_PROJECT_READER,
+        scope_types=['system', 'project'],
         description='Get the state of this alarm.',
         operations=[
             {
                 'path': '/v2/alarms/{alarm_id}/state',
                 'method': 'GET'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_get_alarm_state,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:change_alarm_state",
-        check_str=RULE_ADMIN_OR_OWNER,
+        check_str=SYSTEM_ADMIN_OR_PROJECT_MEMBER,
+        scope_types=['system', 'project'],
         description='Set the state of this alarm.',
         operations=[
             {
                 'path': '/v2/alarms/{alarm_id}/state',
                 'method': 'PUT'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_change_alarm_state,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:alarm_history",
-        check_str=RULE_ADMIN_OR_OWNER,
+        check_str=SYSTEM_OR_PROJECT_READER,
+        scope_types=['system', 'project'],
         description='Assembles the alarm history requested.',
         operations=[
             {
                 'path': '/v2/alarms/{alarm_id}/history',
                 'method': 'GET'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_alarm_history,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:query_alarm_history",
-        check_str=RULE_ADMIN_OR_OWNER,
+        check_str=SYSTEM_OR_PROJECT_READER,
+        scope_types=['system', 'project'],
         description='Define query for retrieving AlarmChange data.',
         operations=[
             {
                 'path': '/v2/query/alarms/history',
                 'method': 'POST'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_query_alarm_history,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:update_quotas",
-        check_str=RULE_CONTEXT_IS_ADMIN,
+        check_str=SYSTEM_ADMIN,
+        scope_types=['system'],
         description='Update resources quotas for project.',
         operations=[
             {
                 'path': '/v2/quotas',
                 'method': 'POST'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_update_quotas,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:delete_quotas",
-        check_str=RULE_CONTEXT_IS_ADMIN,
+        check_str=SYSTEM_ADMIN,
+        scope_types=['system'],
         description='Delete resources quotas for project.',
         operations=[
             {
                 'path': '/v2/quotas/{project_id}',
                 'method': 'DELETE'
             }
-        ]
+        ],
+        deprecated_rule=deprecated_delete_quotas,
+        deprecated_reason=DEPRECATED_REASON,
+        deprecated_since=versionutils.deprecated.WALLABY
     )
 ]
 
