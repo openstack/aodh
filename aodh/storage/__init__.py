@@ -34,6 +34,11 @@ OPTS = [
                default=-1,
                help=("Number of seconds that alarm histories are kept "
                      "in the database for (<= 0 means forever).")),
+    cfg.IntOpt('alarm_histories_delete_batch_size',
+               default=0,
+               min=0,
+               help=("Number of alarm histories to be deleted in one "
+                     "iteration from the database (0 means all).")),
 ]
 
 

@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    A new ``alarm_histories_delete_bacth_size`` option has been added to limit
+    a number of alarm histories deleted from the database by aodh-expirer in
+    a single iteration. This parameter is useful when there are a lot of alarm
+    histories in the database.

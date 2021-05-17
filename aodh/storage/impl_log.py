@@ -56,13 +56,12 @@ class Connection(base.Connection):
         """Delete an alarm and its history data."""
 
     @staticmethod
-    def clear_expired_alarm_history_data(alarm_history_ttl):
+    def clear_expired_alarm_history_data(ttl, max_count=None):
         """Clear expired alarm history data from the backend storage system.
 
         Clearing occurs according to the time-to-live.
 
-        :param alarm_history_ttl: Number of seconds to keep alarm history
-                                  records for.
+        :param ttl: Number of seconds to keep alarm history records for.
+        :param max_count: Number of records to delete.
         """
-        LOG.info('Dropping alarm history data with TTL %d',
-                 alarm_history_ttl)
+        LOG.info('Dropping alarm history %d data with TTL %d', max_count, ttl)

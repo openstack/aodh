@@ -55,6 +55,7 @@ class BinTestCase(base.BaseTestCase):
     def test_run_expirer_ttl_enabled(self):
         content = ("[database]\n"
                    "alarm_history_time_to_live=1\n"
+                   "alarm_histories_delete_batch_size=10\n"
                    "connection=log://localhost\n")
         content = content.encode('utf-8')
         self.tempfile = fileutils.write_to_tempfile(content=content,
@@ -67,7 +68,7 @@ class BinTestCase(base.BaseTestCase):
                                 stderr=subprocess.PIPE)
         out, __ = subp.communicate()
         self.assertEqual(0, subp.poll())
-        msg = "Dropping alarm history data with TTL 1"
+        msg = "Dropping alarm history 10 data with TTL 1"
         msg = msg.encode('utf-8')
         self.assertIn(msg, out)
 

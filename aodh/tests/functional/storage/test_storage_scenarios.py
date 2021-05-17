@@ -277,7 +277,7 @@ class AlarmHistoryTest(AlarmTestBase):
 
     def _clear_alarm_history(self, utcnow, ttl, count):
         self.mock_utcnow.return_value = utcnow
-        self.alarm_conn.clear_expired_alarm_history_data(ttl)
+        self.alarm_conn.clear_expired_alarm_history_data(ttl, 100)
         history = list(self.alarm_conn.query_alarm_history())
         self.assertEqual(count, len(history))
 
