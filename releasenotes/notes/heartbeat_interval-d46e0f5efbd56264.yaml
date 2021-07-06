@@ -1,0 +1,7 @@
+---
+deprecations:
+  - |
+    The ``[coordination] heartbeat`` parameter has been renamed to
+    the ``[coordination] heartbeat_interval``.
+    The old ``[coordination] heartbeat`` parameter is deprecated and will be
+    removed in a future release.
