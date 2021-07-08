@@ -18,7 +18,7 @@ import os.path
 from alembic import command
 from alembic import config
 from alembic import migration
-from oslo_db.sqlalchemy import session as db_session
+from oslo_db.sqlalchemy import enginefacade
 from oslo_db.sqlalchemy import utils as oslo_sql_utils
 from oslo_log import log
 from oslo_utils import importutils
@@ -109,8 +109,9 @@ class Connection(base.Connection):
         # oslo.db doesn't support options defined by Aodh
         for opt in storage.OPTS:
             options.pop(opt.name, None)
-        self._engine_facade = db_session.EngineFacade(self.dress_url(url),
-                                                      **options)
+        self._engine_facade = enginefacade.LegacyEngineFacade(
+            self.dress_url(url),
+            **options)
 
         if osprofiler_sqlalchemy:
             osprofiler_sqlalchemy.add_tracing(sqlalchemy,
@@ -123,7 +124,7 @@ class Connection(base.Connection):
         # If no explicit driver has been set, we default to pymysql
         if url.startswith("mysql://"):
             url = sqlalchemy_url.make_url(url)
-            url.drivername = "mysql+pymysql"
+            url = url.set(drivername="mysql+pymysql")
             return str(url)
         return url
 
