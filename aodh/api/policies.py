@@ -45,55 +45,81 @@ The alarm and quota APIs now support system-scope and default roles.
 
 deprecated_get_alarm = policy.DeprecatedRule(
     name="telemetry:get_alarm",
-    check_str=RULE_ADMIN_OR_OWNER
+    check_str=RULE_ADMIN_OR_OWNER,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_get_alarms = policy.DeprecatedRule(
     name="telemetry:get_alarms",
-    check_str=RULE_ADMIN_OR_OWNER
+    check_str=RULE_ADMIN_OR_OWNER,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_get_all_alarms = policy.DeprecatedRule(
     name="telemetry:get_alarms:all_projects",
-    check_str=RULE_CONTEXT_IS_ADMIN
+    check_str=RULE_CONTEXT_IS_ADMIN,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_query_alarm = policy.DeprecatedRule(
     name="telemetry:query_alarm",
-    check_str=RULE_ADMIN_OR_OWNER
+    check_str=RULE_ADMIN_OR_OWNER,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_create_alarm = policy.DeprecatedRule(
     name="telemetry:create_alarm",
-    check_str=UNPROTECTED
+    check_str=UNPROTECTED,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_change_alarm = policy.DeprecatedRule(
     name="telemetry:change_alarm",
-    check_str=RULE_ADMIN_OR_OWNER
+    check_str=RULE_ADMIN_OR_OWNER,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_delete_alarm = policy.DeprecatedRule(
     name="telemetry:delete_alarm",
-    check_str=RULE_ADMIN_OR_OWNER
+    check_str=RULE_ADMIN_OR_OWNER,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_get_alarm_state = policy.DeprecatedRule(
     name="telemetry:get_alarm_state",
-    check_str=RULE_ADMIN_OR_OWNER
+    check_str=RULE_ADMIN_OR_OWNER,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_change_alarm_state = policy.DeprecatedRule(
     name="telemetry:change_alarm_state",
-    check_str=RULE_ADMIN_OR_OWNER
+    check_str=RULE_ADMIN_OR_OWNER,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_alarm_history = policy.DeprecatedRule(
     name="telemetry:alarm_history",
-    check_str=RULE_ADMIN_OR_OWNER
+    check_str=RULE_ADMIN_OR_OWNER,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_query_alarm_history = policy.DeprecatedRule(
     name="telemetry:query_alarm_history",
-    check_str=RULE_ADMIN_OR_OWNER
+    check_str=RULE_ADMIN_OR_OWNER,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_update_quotas = policy.DeprecatedRule(
     name="telemetry:update_quotas",
-    check_str=RULE_CONTEXT_IS_ADMIN
+    check_str=RULE_CONTEXT_IS_ADMIN,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 deprecated_delete_quotas = policy.DeprecatedRule(
     name="telemetry:delete_quotas",
-    check_str=RULE_CONTEXT_IS_ADMIN
+    check_str=RULE_CONTEXT_IS_ADMIN,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since=versionutils.deprecated.WALLABY
 )
 
 
@@ -135,9 +161,7 @@ rules = [
                 'method': 'GET'
             }
         ],
-        deprecated_rule=deprecated_get_alarm,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_get_alarm
 
     ),
     policy.DocumentedRuleDefault(
@@ -151,9 +175,7 @@ rules = [
                 'method': 'GET'
             }
         ],
-        deprecated_rule=deprecated_get_alarms,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_get_alarms
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:get_alarms:all_projects",
@@ -166,9 +188,7 @@ rules = [
                 'method': 'GET'
             }
         ],
-        deprecated_rule=deprecated_get_all_alarms,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_get_all_alarms
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:query_alarm",
@@ -181,9 +201,7 @@ rules = [
                 'method': 'POST'
             }
         ],
-        deprecated_rule=deprecated_query_alarm,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_query_alarm
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:create_alarm",
@@ -196,9 +214,7 @@ rules = [
                 'method': 'POST'
             }
         ],
-        deprecated_rule=deprecated_create_alarm,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_create_alarm
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:change_alarm",
@@ -211,9 +227,7 @@ rules = [
                 'method': 'PUT'
             }
         ],
-        deprecated_rule=deprecated_change_alarm,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_change_alarm
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:delete_alarm",
@@ -226,9 +240,7 @@ rules = [
                 'method': 'DELETE'
             }
         ],
-        deprecated_rule=deprecated_delete_alarm,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_delete_alarm
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:get_alarm_state",
@@ -241,9 +253,7 @@ rules = [
                 'method': 'GET'
             }
         ],
-        deprecated_rule=deprecated_get_alarm_state,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_get_alarm_state
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:change_alarm_state",
@@ -256,9 +266,7 @@ rules = [
                 'method': 'PUT'
             }
         ],
-        deprecated_rule=deprecated_change_alarm_state,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_change_alarm_state
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:alarm_history",
@@ -271,9 +279,7 @@ rules = [
                 'method': 'GET'
             }
         ],
-        deprecated_rule=deprecated_alarm_history,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_alarm_history
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:query_alarm_history",
@@ -286,9 +292,7 @@ rules = [
                 'method': 'POST'
             }
         ],
-        deprecated_rule=deprecated_query_alarm_history,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_query_alarm_history
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:update_quotas",
@@ -301,9 +305,7 @@ rules = [
                 'method': 'POST'
             }
         ],
-        deprecated_rule=deprecated_update_quotas,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_update_quotas
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:delete_quotas",
@@ -316,9 +318,7 @@ rules = [
                 'method': 'DELETE'
             }
         ],
-        deprecated_rule=deprecated_delete_quotas,
-        deprecated_reason=DEPRECATED_REASON,
-        deprecated_since=versionutils.deprecated.WALLABY
+        deprecated_rule=deprecated_delete_quotas
     )
 ]
 
