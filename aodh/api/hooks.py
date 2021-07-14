@@ -36,6 +36,13 @@ class ConfigHook(hooks.PecanHook):
     def __init__(self, conf):
         self.conf = conf
         self.enforcer = policy.Enforcer(conf, default_rule="default")
+        # NOTE(gmann): Explictly disable the warnings for policies
+        # changing their default check_str. With new RBAC policy
+        # work, all the policy defaults have been changed and warning for
+        # each policy started filling the logs limit for various tool.
+        # Once we move to new defaults only world then we can enable these
+        # warning again.
+        self.enforcer.suppress_default_change_warnings = True
         self.enforcer.register_defaults(policies.list_rules())
 
     def before(self, state):
