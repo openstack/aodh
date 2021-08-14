@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Aodh now supports generation of Guru Meditation Reports using oslo.reports
+    library. Each service prints a report output when it receives SIGUSR1.

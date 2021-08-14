@@ -40,6 +40,7 @@ Developer Documentation
    testing
    contributing
    event-alarm
+   gmr
 
 Appendix
 ========
