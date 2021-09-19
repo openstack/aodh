@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aodh VERSION\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2019-11-25 10:56+0000\n"
+"POT-Creation-Date: 2021-09-15 16:30+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -47,14 +47,6 @@ msgstr "Alaram inkorrekt"
 #, python-format
 msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
 msgstr "Alarmquote überschritten für Benutzer %(u)s bei Projekt %(p)s"
-
-#, python-format
-msgid ""
-"Alarm when %(meter_name)s is %(comparison_operator)s a %(statistic)s of "
-"%(threshold)s over %(period)s seconds"
-msgstr ""
-"Alarm, wenn %(meter_name)s %(comparison_operator)s ein %(statistic)s von "
-"%(threshold)s über %(period)s Sekunden ist"
 
 #, python-format
 msgid "Alarm when %s event occurred."
@@ -131,9 +123,6 @@ msgstr "Nicht unterstützte Aktion %s"
 #, python-format
 msgid "You are not authorized to create action: %s"
 msgstr "Sie sind nicht zur Erstellung der Aktion berechtigt: %s"
-
-msgid "alarm stats retrieval failed"
-msgstr "Abrufen der Alarmstatistiken ist fehlgeschlagen"
 
 msgid "state invalid"
 msgstr "Zustand ungültig"

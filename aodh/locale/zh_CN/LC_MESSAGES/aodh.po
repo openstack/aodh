@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aodh VERSION\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2019-11-25 10:56+0000\n"
+"POT-Creation-Date: 2021-09-15 16:30+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -47,14 +47,6 @@ msgstr "警报不正确"
 #, python-format
 msgid "Alarm quota exceeded for user %(u)s on project %(p)s"
 msgstr "用户%(u)s在项目%(p)s中的告警配额已溢出"
-
-#, python-format
-msgid ""
-"Alarm when %(meter_name)s is %(comparison_operator)s a %(statistic)s of "
-"%(threshold)s over %(period)s seconds"
-msgstr ""
-"请在 %(meter_name)s 是 %(comparison_operator)s（%(threshold)s 的 "
-"%(statistic)s）的时间超过 %(period)s 秒时发出警报"
 
 #, python-format
 msgid "Failed to parse the timestamp value %s"
@@ -114,9 +106,6 @@ msgstr "动作%s不支持"
 #, python-format
 msgid "You are not authorized to create action: %s"
 msgstr "你没有权限创建动作：%s"
-
-msgid "alarm stats retrieval failed"
-msgstr "警报统计信息获取失败"
 
 msgid "state invalid"
 msgstr "状态无效"
