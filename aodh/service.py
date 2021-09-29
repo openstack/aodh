@@ -22,12 +22,14 @@ from oslo_db import options as db_options
 import oslo_i18n
 from oslo_log import log
 from oslo_policy import opts as policy_opts
+from oslo_reports import guru_meditation_report as gmr
 from oslo_utils import importutils
 
 from aodh.conf import defaults
 from aodh import keystone_client
 from aodh import messaging
 from aodh import profiler
+from aodh import version
 
 profiler_opts = importutils.try_import('osprofiler.opts')
 
@@ -96,10 +98,17 @@ def prepare_service(argv=None, config_files=None):
     keystone_client.register_keystoneauth_opts(conf)
 
     conf(argv, project='aodh', validate_default_values=True,
-         default_config_files=config_files)
+         default_config_files=config_files,
+         version=version.version_info.version_string())
 
     ka_loading.load_auth_from_conf_options(conf, "service_credentials")
     log.setup(conf, 'aodh')
+
+    # NOTE(tkajinam): guru cannot run with service under apache daemon, so when
+    # aod-api running with mod_wsgi, the argv is [], we don't start guru.
+    if argv:
+        gmr.TextGuruMeditation.setup_autorun(version)
+
     profiler.setup(conf)
     messaging.setup()
     return conf
