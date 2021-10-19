@@ -62,13 +62,13 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         ))
 
     def _do_test_start(self, test_interval=120,
-                       coordination_heartbeat=1.0,
+                       coordination_heartbeat_interval=1.0,
                        coordination_active=False):
 
         self.CONF.set_override('evaluation_interval',
                                test_interval)
-        self.CONF.set_override('heartbeat',
-                               coordination_heartbeat,
+        self.CONF.set_override('heartbeat_interval',
+                               coordination_heartbeat_interval,
                                group='coordination')
 
         self._fake_pc.is_active.return_value = coordination_active
@@ -88,7 +88,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
 
     def test_start_coordinated_high_hb_interval(self):
         self._do_test_start(coordination_active=True, test_interval=10,
-                            coordination_heartbeat=5)
+                            coordination_heartbeat_interval=5)
 
     def test_evaluation_cycle(self):
         alarm = mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',

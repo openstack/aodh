@@ -224,7 +224,7 @@ class AlarmEvaluationService(cotyledon.Service):
             self.periodic.add(evaluate_alarms)
 
         if self.partition_coordinator.is_active():
-            heartbeat_interval = min(self.conf.coordination.heartbeat,
+            heartbeat_interval = min(self.conf.coordination.heartbeat_interval,
                                      self.conf.evaluation_interval / 4)
 
             @periodics.periodic(spacing=heartbeat_interval,
