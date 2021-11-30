@@ -17,7 +17,6 @@
 import os
 import uuid
 
-from oslo_config import cfg
 from oslo_log import log
 from paste import deploy
 import pecan
@@ -62,7 +61,10 @@ def load_app(conf):
         cfg_path = conf.find_file(cfg_path)
 
     if cfg_path is None or not os.path.exists(cfg_path):
-        raise cfg.ConfigFilesNotFoundError([conf.api.paste_config])
+        LOG.debug("No api-paste configuration file found! Using default.")
+        cfg_path = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), "api-paste.ini"))
 
     config = dict(conf=conf)
     configkey = str(uuid.uuid4())

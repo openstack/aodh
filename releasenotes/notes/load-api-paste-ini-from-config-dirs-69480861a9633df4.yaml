@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Now the ``aodh-api`` service look for the paste config file (a.k.a.
+    ``api-paste.ini`` from configruation directories like ``/etc/aodh``.
+    If the file is not found in the configuration directories, it uses
+    the default file. To use only a specific file, use a full file path for
+    the ``[api] paste_confing`` parameter

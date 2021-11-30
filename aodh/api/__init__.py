@@ -12,16 +12,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import os
-
 from oslo_config import cfg
 
 # Register options for the service
 OPTS = [
     cfg.StrOpt('paste_config',
-               default=os.path.abspath(
-                   os.path.join(
-                       os.path.dirname(__file__), "api-paste.ini")),
+               default='api-paste.ini',
                help="Configuration file for WSGI definition of API."),
     cfg.StrOpt(
         'auth_mode',
