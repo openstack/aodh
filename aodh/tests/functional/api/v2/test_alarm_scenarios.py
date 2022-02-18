@@ -2384,14 +2384,16 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
             self.post_json('/alarms', params=json, headers=self.auth_headers)
 
             self.assertEqual([mock.call(
-                aggregation='count',
-                metrics='ameter',
+                operations=[
+                    'aggregate', 'count',
+                    ['metric', 'ameter', 'count']
+                ],
                 needed_overlap=0,
                 start="-1 day",
                 stop="now",
-                query=expected_query,
+                search=expected_query,
                 resource_type="instance")],
-                c.metric.aggregation.mock_calls),
+                c.aggregates.fetch.mock_calls),
 
         alarms = list(self.alarm_conn.get_alarms(enabled=False))
         self.assertEqual(1, len(alarms))
