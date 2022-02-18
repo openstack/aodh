@@ -200,10 +200,15 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
                 'interface': conf.service_credentials.interface,
                 'region_name': conf.service_credentials.region_name})
         try:
-            gnocchi_client.metric.aggregation(
-                metrics=rule.metric,
-                query=query,
-                aggregation=rule.aggregation_method,
+            gnocchi_client.aggregates.fetch(
+                operations=[
+                    'aggregate', rule.aggregation_method,
+                    [
+                        'metric', rule.metric,
+                        rule.aggregation_method.lstrip('rate:')
+                    ]
+                ],
+                search=query,
                 needed_overlap=0,
                 start="-1 day",
                 stop="now",
