@@ -5,7 +5,7 @@
 .*.swp
 .*sw?
 .coverage
-.testrepository
+.stestr
 .tox
 AUTHORS
 build/*
