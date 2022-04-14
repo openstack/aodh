@@ -66,7 +66,8 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
                        coordination_active=False):
 
         self.CONF.set_override('evaluation_interval',
-                               test_interval)
+                               test_interval,
+                               group='evaluator')
         self.CONF.set_override('heartbeat_interval',
                                coordination_heartbeat_interval,
                                group='coordination')

@@ -215,8 +215,10 @@ class AlarmEvaluationService(cotyledon.Service):
         # allow time for coordination if necessary
         delay_start = self.partition_coordinator.is_active()
 
+        evaluation_interval = self.conf.evaluator.evaluation_interval
+
         if self.evaluators:
-            @periodics.periodic(spacing=self.conf.evaluation_interval,
+            @periodics.periodic(spacing=evaluation_interval,
                                 run_immediately=not delay_start)
             def evaluate_alarms():
                 self._evaluate_assigned_alarms()
@@ -225,7 +227,7 @@ class AlarmEvaluationService(cotyledon.Service):
 
         if self.partition_coordinator.is_active():
             heartbeat_interval = min(self.conf.coordination.heartbeat_interval,
-                                     self.conf.evaluation_interval / 4)
+                                     evaluation_interval / 4)
 
             @periodics.periodic(spacing=heartbeat_interval,
                                 run_immediately=True)
@@ -288,7 +290,7 @@ class AlarmEvaluationService(cotyledon.Service):
 
     def _assigned_alarms(self):
         before = (timeutils.utcnow() - datetime.timedelta(
-            seconds=self.conf.evaluation_interval / 2))
+            seconds=self.conf.evaluator.evaluation_interval / 2))
         selected = self.storage_conn.get_alarms(
             enabled=True,
             type={'ne': 'event'},
