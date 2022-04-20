@@ -225,9 +225,9 @@ class TestPartitioning(base.BaseTestCase):
                        expected_resources=[],
                        coordinator_cls=MockToozCoordExceptionRaiser)]
         self._usage_simulation(*agents)
-        called = [mock.call(u'Error connecting to coordination backend.'),
-                  mock.call(u'Error getting group membership info from '
-                            u'coordination backend.')]
+        called = [mock.call('Error connecting to coordination backend.'),
+                  mock.call('Error getting group membership info from '
+                            'coordination backend.')]
         self.assertEqual(called, mocked_exception.call_args_list)
 
     @mock.patch.object(coordination.LOG, 'exception')
@@ -238,16 +238,16 @@ class TestPartitioning(base.BaseTestCase):
         with mock.patch('tooz.coordination.get_coordinator',
                         return_value=MockToozCoordExceptionRaiser('a', {})):
             coord.heartbeat()
-        called = [mock.call(u'Error connecting to coordination backend.'),
-                  mock.call(u'Error connecting to coordination backend.'),
-                  mock.call(u'Error sending a heartbeat to coordination '
-                            u'backend.')]
+        called = [mock.call('Error connecting to coordination backend.'),
+                  mock.call('Error connecting to coordination backend.'),
+                  mock.call('Error sending a heartbeat to coordination '
+                            'backend.')]
         self.assertEqual(called, mocked_exception.call_args_list)
         with mock.patch('tooz.coordination.get_coordinator',
                         return_value=MockToozCoordinator('a', {})):
             coord.heartbeat()
-        mock_info.assert_called_with(u'Coordination backend started '
-                                     u'successfully.')
+        mock_info.assert_called_with('Coordination backend started '
+                                     'successfully.')
 
     def test_group_id_none(self):
         coord = self._get_new_started_coordinator({}, 'a')

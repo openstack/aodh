@@ -305,14 +305,14 @@ Sample output of alarm type **event**:
    +---------------------------+---------------------------------------------------------------+
    | Field                     | Value                                                         |
    +---------------------------+---------------------------------------------------------------+
-   | alarm_actions             | [u'log://']                                                   |
+   | alarm_actions             | ['log://']                                                    |
    | alarm_id                  | 15c0da26-524d-40ad-8fba-3e55ee0ddc91                          |
    | description               | Instance powered ON but in error state                        |
    | enabled                   | True                                                          |
    | event_type                | compute.instance.power_on.*                                   |
-   | insufficient_data_actions | [u'log://']                                                   |
+   | insufficient_data_actions | ['log://']                                                    |
    | name                      | instance_on_state_err                                         |
-   | ok_actions                | [u'log://']                                                   |
+   | ok_actions                | ['log://']                                                    |
    | project_id                | 9ee200732f4c4d10a6530bac746f1b6e                              |
    | query                     | traits.instance_id = bb912729-fa51-443b-bac6-bf4c795f081d AND |
    |                           | traits.state = error                                          |
@@ -343,7 +343,7 @@ brevity):
    +----------+-----------+--------+-------------------+----------+---------+
    | alarm_id | type      | name   | state             | severity | enabled |
    +----------+-----------+--------+-------------------+----------+---------+
-   | ALARM_ID | threshold | cpu_hi | insufficient data | low     | True    |
+   | ALARM_ID | threshold | cpu_hi | insufficient data | low      | True    |
    +----------+-----------+--------+-------------------+----------+---------+
 
 In this case, the state is reported as ``insufficient data`` which

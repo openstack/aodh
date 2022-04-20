@@ -1925,7 +1925,7 @@ class TestAlarmsHistory(TestAlarmsBase):
                " {value!r} Unset>], valid keys: ['project', "
                "'search_offset', 'severity', 'timestamp',"
                " 'type', 'user']")
-        msg = msg.format(key=u'alarm_id', value=u'a')
+        msg = msg.format(key='alarm_id', value='a')
         self.assertEqual(msg,
                          resp.json['error_message']['faultstring'])
 
@@ -1938,7 +1938,7 @@ class TestAlarmsHistory(TestAlarmsBase):
                " {value!r} Unset>], valid keys: ['project', "
                "'search_offset', 'severity', 'timestamp',"
                " 'type', 'user']")
-        msg = msg.format(key=u'abcd', value=u'abcd')
+        msg = msg.format(key='abcd', value='abcd')
         self.assertEqual(msg,
                          resp.json['error_message']['faultstring'])
 
