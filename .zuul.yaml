@@ -20,9 +20,9 @@
               - ^tox.ini$
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
-        - telemetry-dsvm-integration-centos-8s:
+        - telemetry-dsvm-integration-centos-9s:
             irrelevant-files: *aodh-irrelevant-files
-        - telemetry-dsvm-integration-centos-8s-fips:
+        - telemetry-dsvm-integration-centos-9s-fips:
             irrelevant-files: *aodh-irrelevant-files
     gate:
       jobs:
@@ -32,9 +32,9 @@
             irrelevant-files: *aodh-irrelevant-files
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
-        - telemetry-dsvm-integration-centos-8s:
+        - telemetry-dsvm-integration-centos-9s:
             irrelevant-files: *aodh-irrelevant-files
-        - telemetry-dsvm-integration-centos-8s-fips:
+        - telemetry-dsvm-integration-centos-9s-fips:
             irrelevant-files: *aodh-irrelevant-files
     experimental:
       jobs:
