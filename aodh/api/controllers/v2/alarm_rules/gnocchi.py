@@ -212,7 +212,10 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
             if e.code == 404:
                 # NOTE(sileht): We are fine here, we just want to ensure the
                 # 'query' payload is valid for Gnocchi If the metric
-                # doesn't exists yet, it doesn't matter
+                # doesn't exists yet, it doesn't matter.
+                return
+            if e.code == 400 and 'Metrics not found' in e.message["cause"]:
+                # NOTE(tkajinam): Gnocchi<4.5 returns 400 instead of 404
                 return
             raise base.ClientSideError(e.message, status_code=e.code)
         except Exception as e:
