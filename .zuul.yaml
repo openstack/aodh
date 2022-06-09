@@ -40,18 +40,6 @@
             irrelevant-files: *aodh-irrelevant-files
             # TODO(tkajinam): fix the job
             voting: false
-    experimental:
-      jobs:
-        # TripleO jobs that deploy Telemetry.
-        # Note we don't use a project-template here, so it's easier
-        # to disable voting on one specific job if things go wrong.
-        # If you need any support to debug these jobs in case of
-        # failures, please reach us on #tripleo IRC channel.
-        # NOTE(sileht): These job takes 3 hours and fail most of the times.
-        # While other jobs take 20-30 minutes
-        # We can reenable it when they take less times.
-        - tripleo-ci-centos-8-scenario001-standalone
-        - tripleo-ci-centos-8-scenario002-standalone
 
 - job:
     name: aodh-tempest-plugin-postgresql
