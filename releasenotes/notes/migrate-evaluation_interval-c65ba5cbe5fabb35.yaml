@@ -1,0 +1,6 @@
+---
+deprecations:
+  - |
+    The ``[DEFAULT] evaluation_interval`` parameter has been migrated to
+    the ``[evaluator]`` section. The old parameter is still kept for backword
+    compatibility but will be removed in a future release.

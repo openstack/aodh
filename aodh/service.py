@@ -41,11 +41,6 @@ OPTS = [
                                   'effect.'),
                help='Timeout seconds for HTTP requests. Set it to None to '
                     'disable timeout.'),
-    cfg.IntOpt('evaluation_interval',
-               default=60,
-               help='Period of evaluation cycle, should'
-               ' be >= than configured pipeline interval for'
-               ' collection of underlying meters.'),
 ]
 
 EVALUATOR_OPTS = [
@@ -53,7 +48,13 @@ EVALUATOR_OPTS = [
                default=1,
                min=1,
                help='Number of workers for evaluator service. '
-               'default value is 1.')
+               'default value is 1.'),
+    cfg.IntOpt('evaluation_interval',
+               default=60,
+               deprecated_group='DEFAULT',
+               help='Period of evaluation cycle, should'
+               ' be >= than configured pipeline interval for'
+               ' collection of underlying meters.'),
 ]
 
 NOTIFIER_OPTS = [
