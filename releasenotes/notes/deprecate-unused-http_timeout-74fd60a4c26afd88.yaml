@@ -1,0 +1,5 @@
+---
+deprecations:
+  - |
+    The ``[DEFAULT] http_timeout`` parameter has been deprecated. This
+    parameter has been unused thus has had no effect.
