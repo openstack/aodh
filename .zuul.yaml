@@ -1,4 +1,5 @@
 - project:
+    queue: telemetry
     templates:
       - openstack-python3-zed-jobs
       - publish-openstack-docs-pti
