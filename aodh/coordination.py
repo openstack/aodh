@@ -37,12 +37,6 @@ OPTS = [
                  deprecated_name='heartbeat',
                  help='Number of seconds between heartbeats for distributed '
                       'coordination.'),
-    cfg.FloatOpt('check_watchers',
-                 default=10.0,
-                 deprecated_for_removal=True,
-                 deprecated_reason='This parameter is no longer used.',
-                 help='Number of seconds between checks to see if group '
-                      'membership has changed'),
     cfg.IntOpt('retry_backoff',
                default=1,
                help='Retry backoff factor when retrying to connect with'
