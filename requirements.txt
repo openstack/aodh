@@ -9,7 +9,7 @@ jsonschema>=3.2.0 # MIT
 keystonemiddleware>=5.1.0 # Apache-2.0
 gnocchiclient>=6.0.0  # Apache-2.0
 lxml>=2.3
-oslo.db>=4.8.0,!=4.13.1,!=4.13.2,!=4.15.0 # Apache-2.0
+oslo.db>=11.0.0 # Apache-2.0
 oslo.config>=6.8.0 # Apache-2.0
 oslo.context>=2.22.0 # Apache-2.0
 oslo.i18n>=1.5.0 # Apache-2.0
@@ -27,15 +27,15 @@ python-keystoneclient>=1.6.0
 pytz>=2013.6
 requests>=2.5.2
 stevedore>=1.5.0 # Apache-2.0
-sqlalchemy>=1.4.1
+SQLAlchemy>=1.4.1
 tooz>=1.28.0 # Apache-2.0
 voluptuous>=0.8.10
 WebOb>=1.2.3
 WSME>=0.8
 cachetools>=1.1.6
-cotyledon
+cotyledon>=1.7.3
 keystoneauth1>=2.1
 debtcollector>=1.2.0  # Apache-2.0
 python-octaviaclient>=1.8.0
-python-dateutil  # BSD
+python-dateutil>=2.8.2  # BSD
 python-heatclient>=1.17.0
