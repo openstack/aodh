@@ -106,6 +106,10 @@ class Connection(base.Connection):
         # in storage.__init__.get_connection_from_config function
         options = dict(conf.database.items())
         options['max_retries'] = 0
+        # FIXME(stephenfin): Remove this (and ideally use of
+        # LegacyEngineFacade) asap since it's not compatible with SQLAlchemy
+        # 2.0
+        options['autocommit'] = True
         # oslo.db doesn't support options defined by Aodh
         for opt in storage.OPTS:
             options.pop(opt.name, None)
