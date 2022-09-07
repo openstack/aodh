@@ -25,8 +25,6 @@
             irrelevant-files: *aodh-irrelevant-files
         - telemetry-dsvm-integration-centos-9s-fips:
             irrelevant-files: *aodh-irrelevant-files
-            # TODO(tkajinam): fix the job
-            voting: false
     gate:
       jobs:
         - aodh-tempest-plugin-mysql
@@ -39,8 +37,6 @@
             irrelevant-files: *aodh-irrelevant-files
         - telemetry-dsvm-integration-centos-9s-fips:
             irrelevant-files: *aodh-irrelevant-files
-            # TODO(tkajinam): fix the job
-            voting: false
 
 - job:
     name: aodh-tempest-plugin-postgresql
