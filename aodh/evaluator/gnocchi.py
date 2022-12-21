@@ -47,6 +47,12 @@ class GnocchiBase(threshold.ThresholdEvaluator):
         # but not a stddev-of-stddevs).
         # TODO(sileht): support alarm['exclude_outliers']
         LOG.debug('sanitize stats %s', statistics)
+        # NOTE(jamespage)
+        # Dynamic Aggregates are returned in a dict struct so
+        # check for this first.
+        if isinstance(statistics, dict):
+            # Pop array of measures from aggregated subdict
+            statistics = statistics['measures']['aggregated']
         statistics = [stats[VALUE] for stats in statistics
                       if stats[GRANULARITY] == rule['granularity']]
         if not statistics:
@@ -93,6 +99,16 @@ class GnocchiResourceThresholdEvaluator(GnocchiBase):
 class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
     def _statistics(self, rule, start, end):
         try:
+            _operations = [
+                'aggregate', rule['aggregation_method']
+            ]
+            for metric in rule['metrics']:
+                _operations.append(
+                    [
+                        'metric', metric,
+                        rule['aggregation_method'].lstrip('rate:')
+                    ]
+                )
             # FIXME(sileht): In case of a heat autoscaling stack decide to
             # delete an instance, the gnocchi metrics associated to this
             # instance will be no more updated and when the alarm will ask
@@ -101,11 +117,10 @@ class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
             # So temporary set 'needed_overlap' to 0 to disable the
             # gnocchi checks about missing points. For more detail see:
             #   https://bugs.launchpad.net/gnocchi/+bug/1479429
-            return self._gnocchi_client.metric.aggregation(
-                metrics=rule['metrics'],
+            return self._gnocchi_client.aggregates.fetch(
+                operations=_operations,
                 granularity=rule['granularity'],
                 start=start, stop=end,
-                aggregation=rule['aggregation_method'],
                 needed_overlap=0)
         except exceptions.MetricNotFound:
             raise threshold.InsufficientDataError(
@@ -128,24 +143,28 @@ class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
 
 class GnocchiAggregationResourcesThresholdEvaluator(GnocchiBase):
     def _statistics(self, rule, start, end):
-        # FIXME(sileht): In case of a heat autoscaling stack decide to
-        # delete an instance, the gnocchi metrics associated to this
-        # instance will be no more updated and when the alarm will ask
-        # for the aggregation, gnocchi will raise a 'No overlap'
-        # exception.
-        # So temporary set 'needed_overlap' to 0 to disable the
-        # gnocchi checks about missing points. For more detail see:
-        #   https://bugs.launchpad.net/gnocchi/+bug/1479429
         try:
-            return self._gnocchi_client.metric.aggregation(
-                metrics=rule['metric'],
+            # FIXME(sileht): In case of a heat autoscaling stack decide to
+            # delete an instance, the gnocchi metrics associated to this
+            # instance will be no more updated and when the alarm will ask
+            # for the aggregation, gnocchi will raise a 'No overlap'
+            # exception.
+            # So temporary set 'needed_overlap' to 0 to disable the
+            # gnocchi checks about missing points. For more detail see:
+            #   https://bugs.launchpad.net/gnocchi/+bug/1479429
+            return self._gnocchi_client.aggregates.fetch(
+                operations=[
+                    'aggregate', rule['aggregation_method'],
+                    [
+                        'metric', rule['metric'],
+                        rule['aggregation_method'].lstrip('rate:')
+                    ]
+                ],
                 granularity=rule['granularity'],
-                query=json.loads(rule['query']),
+                search=json.loads(rule['query']),
                 resource_type=rule["resource_type"],
                 start=start, stop=end,
-                aggregation=rule['aggregation_method'],
-                needed_overlap=0,
-            )
+                needed_overlap=0)
         except exceptions.MetricNotFound:
             raise threshold.InsufficientDataError(
                 'metric %s does not exists' % rule['metric'], [])
