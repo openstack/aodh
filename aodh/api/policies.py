@@ -13,6 +13,7 @@
 #    under the License.
 
 
+from oslo_config import cfg
 from oslo_log import versionutils
 from oslo_policy import policy
 
@@ -325,3 +326,23 @@ rules = [
 
 def list_rules():
     return rules
+
+
+def init(conf):
+    enforcer = policy.Enforcer(conf, default_rule="default")
+    # NOTE(gmann): Explictly disable the warnings for policies
+    # changing their default check_str. With new RBAC policy
+    # work, all the policy defaults have been changed and warning for
+    # each policy started filling the logs limit for various tool.
+    # Once we move to new defaults only world then we can enable these
+    # warning again.
+    enforcer.suppress_default_change_warnings = True
+    enforcer.register_defaults(list_rules())
+    return enforcer
+
+
+def get_enforcer():
+    # This method is used by oslopolicy CLI scripts in order to generate policy
+    # files from overrides on disk and defaults in code.
+    cfg.CONF([], project='aodh')
+    return init(cfg.CONF)
