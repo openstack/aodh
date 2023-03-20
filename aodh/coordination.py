@@ -28,6 +28,7 @@ LOG = log.getLogger(__name__)
 
 OPTS = [
     cfg.StrOpt('backend_url',
+               secret=True,
                help='The backend URL to use for distributed coordination. If '
                     'left empty, alarm evaluation won\'t do workload '
                     'partitioning and will only function correctly if a '
