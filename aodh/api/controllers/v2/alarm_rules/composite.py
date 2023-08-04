@@ -41,7 +41,8 @@ class CompositeRule(wtypes.UserType):
     threshold_plugins = None
 
     def __init__(self):
-        threshold_rules = ('gnocchi_resources_threshold',
+        threshold_rules = ('prometheus',
+                           'gnocchi_resources_threshold',
                            'gnocchi_aggregation_by_metrics_threshold',
                            'gnocchi_aggregation_by_resources_threshold')
         CompositeRule.threshold_plugins = named.NamedExtensionManager(

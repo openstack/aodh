@@ -23,6 +23,7 @@ import aodh.evaluator
 import aodh.evaluator.event
 import aodh.evaluator.gnocchi
 import aodh.evaluator.loadbalancer
+import aodh.evaluator.prometheus
 import aodh.evaluator.threshold
 import aodh.event
 import aodh.keystone_client
@@ -38,6 +39,7 @@ def list_opts():
          itertools.chain(
              aodh.evaluator.OPTS,
              aodh.evaluator.event.OPTS,
+             aodh.evaluator.prometheus.OPTS,
              aodh.evaluator.threshold.OPTS,
              aodh.evaluator.loadbalancer.OPTS,
              aodh.notifier.rest.OPTS,
