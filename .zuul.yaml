@@ -20,8 +20,16 @@
               - ^aodh/locale/.*$
               - ^tools/.*$
               - ^tox.ini$
+            vars:
+              # TODO: Update the plugins so they work with global venv
+              devstack_localrc:
+                GLOBAL_VENV: False
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
+            vars:
+              # TODO: Update the plugins so they work with global venv
+              devstack_localrc:
+                GLOBAL_VENV: False
         - telemetry-dsvm-integration-centos-9s:
             irrelevant-files: *aodh-irrelevant-files
         - telemetry-dsvm-integration-centos-9s-fips:
@@ -32,8 +40,16 @@
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
             irrelevant-files: *aodh-irrelevant-files
+            vars:
+              # TODO: Update the plugins so they work with global venv
+              devstack_localrc:
+                GLOBAL_VENV: False
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
+            vars:
+              # TODO: Update the plugins so they work with global venv
+              devstack_localrc:
+                GLOBAL_VENV: False
         - telemetry-dsvm-integration-centos-9s:
             irrelevant-files: *aodh-irrelevant-files
         - telemetry-dsvm-integration-centos-9s-fips:
@@ -51,6 +67,8 @@
         DATABASE_TYPE: "postgresql"
         AODH_BACKEND: "postgresql"
         USE_PYTHON3: True
+        # TODO: Update the plugins so they work with global venv
+        GLOBAL_VENV: False
       tempest_test_regex: telemetry_tempest_plugin.aodh
 
 - job:
@@ -61,4 +79,6 @@
       devstack_localrc:
         AODH_BACKEND: "mysql"
         USE_PYTHON3: True
+        # TODO: Update the plugins so they work with global venv
+        GLOBAL_VENV: False
       tempest_test_regex: telemetry_tempest_plugin.aodh
