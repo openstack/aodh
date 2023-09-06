@@ -4,8 +4,9 @@ libpq-dev [platform:dpkg]
 postgresql-devel [platform:rpm]
 postgresql-server [platform:rpm]
 
-mysql-server
-mysql-client [platform:dpkg]
+mysql-server [!platform:debian]
+mariadb-server [platform:debian]
+mysql-client [platform:dpkg !platform:debian]
 mysql [platform:rpm]
 
 gettext [platform:dpkg]
