@@ -72,7 +72,7 @@ def get_connection_from_config(conf):
         reraise=True)
     def _get_connection():
         """Return an open connection to the database."""
-        return mgr.driver(conf, url)
+        return mgr.driver(conf)
 
     return _get_connection()
 

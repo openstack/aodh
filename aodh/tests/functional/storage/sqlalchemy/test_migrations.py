@@ -1,4 +1,3 @@
-#
 # Copyright 2015 Huawei Technologies Co., Ltd.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -12,9 +11,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 import abc
 from unittest import mock
 
+from oslo_db.sqlalchemy import enginefacade
 from oslo_db.sqlalchemy import test_migrations
 
 from aodh.storage.sqlalchemy import models
@@ -39,7 +40,7 @@ class ModelsMigrationsSync(tests_db.TestBase,
         return models.Base.metadata
 
     def get_engine(self):
-        return self.alarm_conn._engine_facade.get_engine()
+        return enginefacade.writer.get_engine()
 
     def db_sync(self, engine):
         pass

@@ -1,4 +1,3 @@
-#
 # Copyright 2012 New Dream Network, LLC (DreamHost)
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -12,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from oslo_config import cfg
 from oslotest import base
 
@@ -21,4 +21,4 @@ from aodh.storage import impl_log
 class ConnectionTest(base.BaseTestCase):
     @staticmethod
     def test_get_connection():
-        impl_log.Connection(cfg.CONF, None)
+        impl_log.Connection(cfg.CONF)

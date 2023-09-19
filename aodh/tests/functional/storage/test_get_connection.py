@@ -61,7 +61,7 @@ class ConnectionRetryTest(base.BaseTestCase):
             class ConnectionError(Exception):
                 pass
 
-            def x(a, b):
+            def x(conf):
                 raise ConnectionError
 
             log_init.side_effect = x

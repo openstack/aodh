@@ -66,7 +66,11 @@ class BinTestCase(base.BaseTestCase):
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         out, __ = subp.communicate()
-        self.assertEqual(0, subp.poll())
+        self.assertEqual(
+            0,
+            subp.poll(),
+            f'Failed with stdout:\n{out.decode()}',
+        )
         msg = "Dropping alarm history 10 data with TTL 1"
         msg = msg.encode('utf-8')
         self.assertIn(msg, out)

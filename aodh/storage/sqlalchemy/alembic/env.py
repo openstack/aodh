@@ -12,10 +12,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from alembic import context
+
 from logging.config import fileConfig
 
-from aodh.storage import impl_sqlalchemy
+from alembic import context
+from oslo_db.sqlalchemy import enginefacade
+
 from aodh.storage.sqlalchemy import models
 
 
@@ -66,11 +68,8 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    conf = config.conf
-    conn = impl_sqlalchemy.Connection(conf, conf.database.connection)
-    connectable = conn._engine_facade.get_engine()
-
-    with connectable.connect() as connection:
+    engine = enginefacade.writer.get_engine()
+    with engine.connect() as connection:
         context.configure(
             connection=connection,
             target_metadata=target_metadata
@@ -78,12 +77,12 @@ def run_migrations_online():
 
         with context.begin_transaction():
             context.run_migrations()
-    conn.disconnect()
 
 
 if not hasattr(config, "conf"):
     from aodh import service
     config.conf = service.prepare_service([])
+
 
 if context.is_offline_mode():
     run_migrations_offline()
