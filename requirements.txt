@@ -1,7 +1,3 @@
-# The order of packages is significant, because pip processes them in the order
-# of appearance. Changing the order has an impact on the overall integration
-# process, which may cause wedges in the gate later.
-
 tenacity>=3.2.1  # Apache-2.0
 croniter>=0.3.4 # MIT License
 futurist>=0.11.0  # Apache-2.0
@@ -11,7 +7,6 @@ gnocchiclient>=6.0.0  # Apache-2.0
 lxml>=2.3
 oslo.db>=11.0.0 # Apache-2.0
 oslo.config>=6.8.0 # Apache-2.0
-oslo.context>=2.22.0 # Apache-2.0
 oslo.i18n>=1.5.0 # Apache-2.0
 oslo.log>=4.3.0 # Apache-2.0
 oslo.reports>=1.18.0 # Apache-2.0
@@ -35,7 +30,6 @@ WSME>=0.12.1
 cachetools>=1.1.6
 cotyledon>=1.7.3
 keystoneauth1>=2.1
-debtcollector>=1.2.0  # Apache-2.0
 python-observabilityclient>=0.0.4
 python-octaviaclient>=1.8.0
 python-dateutil>=2.8.2  # BSD
