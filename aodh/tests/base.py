@@ -14,23 +14,108 @@
 # under the License.
 """Test base classes.
 """
+
 import fixtures
 import functools
 import os.path
 import unittest
+import warnings
 
 import oslo_messaging.conffixture
 from oslo_utils import timeutils
 from oslotest import base
+from sqlalchemy import exc as sqla_exc
 import webtest
 
 import aodh
 from aodh import messaging
 
 
+class WarningsFixture(fixtures.Fixture):
+    """Filters out warnings during test runs."""
+
+    def setUp(self):
+        super().setUp()
+
+        self._original_warning_filters = warnings.filters[:]
+
+        warnings.simplefilter('once', DeprecationWarning)
+
+        # FIXME(stephenfin): Determine if we need to replace use of best_match
+        warnings.filterwarnings(
+            'ignore',
+            module='webob',
+            message='The behavior of AcceptValidHeader.best_match is ',
+            category=DeprecationWarning,
+        )
+
+        # FIXME(stephenfin): Determine if we need to replace use of best_match
+        warnings.filterwarnings(
+            'ignore',
+            module='webob',
+            message='The behavior of .best_match for the Accept classes is ',
+            category=DeprecationWarning,
+        )
+
+        # FIXME(stephenfin): Update tests to resolve these issues
+        warnings.filterwarnings(
+            'ignore',
+            module='oslo_policy',
+            message='Policy ".*": ".*" failed scope check. ',
+            category=UserWarning,
+        )
+
+        # Enable deprecation warnings for aodh itself to capture upcoming
+        # SQLAlchemy changes
+
+        warnings.filterwarnings(
+            'ignore',
+            category=sqla_exc.SADeprecationWarning,
+        )
+
+        warnings.filterwarnings(
+            'error',
+            module='aodh',
+            category=sqla_exc.SADeprecationWarning,
+        )
+
+        # ...but filter everything out until we get around to fixing them
+        # TODO(stephenfin): Fix all of these
+
+        warnings.filterwarnings(
+            'ignore',
+            module='aodh',
+            message=r'The Engine.execute\(\) method is considered legacy ',
+            category=sqla_exc.SADeprecationWarning,
+        )
+
+        warnings.filterwarnings(
+            'ignore',
+            module='aodh',
+            message='The current statement is being autocommitted using ',
+            category=sqla_exc.SADeprecationWarning,
+        )
+
+        # Enable general SQLAlchemy warnings also to ensure we're not doing
+        # silly stuff. It's possible that we'll need to filter things out here
+        # with future SQLAlchemy versions, but that's a good thing
+
+        warnings.filterwarnings(
+            'error',
+            module='aodh',
+            category=sqla_exc.SAWarning,
+        )
+
+        self.addCleanup(self._reset_warning_filters)
+
+    def _reset_warning_filters(self):
+        warnings.filters[:] = self._original_warning_filters
+
+
 class BaseTestCase(base.BaseTestCase):
     def setup_messaging(self, conf, exchange=None):
         self.useFixture(oslo_messaging.conffixture.ConfFixture(conf))
+        self.useFixture(WarningsFixture())
         conf.set_override("notification_driver", ["messaging"])
         if not exchange:
             exchange = 'aodh'
