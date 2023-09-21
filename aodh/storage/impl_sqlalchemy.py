@@ -127,9 +127,6 @@ class Connection(base.Connection):
             options['connection'] = self.dress_url(conf.database.connection)
             options['max_retries'] = 0
             options['sqlite_fk'] = True
-            # FIXME(stephenfin): Remove this asap since it's not compatible
-            # with SQLAlchemy 2.0
-            options['__autocommit'] = True
             # oslo.db doesn't support options defined by Aodh
             for opt in storage.OPTS:
                 options.pop(opt.name, None)
