@@ -171,7 +171,8 @@ class Connection(base.Connection):
     def clear(self):
         engine = enginefacade.writer.get_engine()
         for table in reversed(models.Base.metadata.sorted_tables):
-            engine.execute(table.delete())
+            with engine.connect() as conn, conn.begin():
+                conn.execute(table.delete())
         engine.dispose()
 
     def _retrieve_data(self, filter_expr, orderby, limit, table):
