@@ -28,6 +28,7 @@ class JSONEncodedDict(TypeDecorator):
     """Represents an immutable structure as a json-encoded string."""
 
     impl = Text
+    cache_ok = True
 
     @staticmethod
     def process_bind_param(value, dialect):
@@ -46,6 +47,7 @@ class TimestampUTC(TypeDecorator):
     """Represents a timestamp precise to the microsecond."""
 
     impl = DateTime
+    cache_ok = True
 
     def load_dialect_impl(self, dialect):
         if dialect.name == 'mysql':
