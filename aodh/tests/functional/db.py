@@ -52,7 +52,9 @@ class PgSQLManager(SQLManager):
     @staticmethod
     def _create_db(conn, db_name):
         conn.connection.set_isolation_level(0)
-        conn.execute('CREATE DATABASE %s WITH TEMPLATE template0;' % db_name)
+        conn.exec_driver_sql(
+            'CREATE DATABASE %s WITH TEMPLATE template0;' % db_name
+        )
         conn.connection.set_isolation_level(1)
 
 
@@ -60,7 +62,7 @@ class MySQLManager(SQLManager):
 
     @staticmethod
     def _create_db(conn, db_name):
-        conn.execute('CREATE DATABASE %s;' % db_name)
+        conn.exec_driver_sql('CREATE DATABASE %s;' % db_name)
 
 
 class SQLiteManager(fixtures.Fixture):
