@@ -16,11 +16,9 @@
 """Base classes for API tests.
 """
 
-from oslo_config import fixture as fixture_config
 import webtest
 
 from aodh.api import app
-from aodh import service
 from aodh.tests.functional import db as db_test_base
 
 
@@ -35,8 +33,6 @@ class FunctionalTest(db_test_base.TestBase):
 
     def setUp(self):
         super(FunctionalTest, self).setUp()
-        conf = service.prepare_service(argv=[], config_files=[])
-        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
 
         self.CONF.set_override('auth_mode', None, group='api')
