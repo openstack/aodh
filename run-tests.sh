@@ -6,6 +6,10 @@ export GABBI_LIVE_FAIL_IF_NO_TEST=1
 export AODH_SERVICE_TOKEN=foobar # Needed for gabbi
 export AODH_SERVICE_ROLES=admin
 
+# mysqld may be installed to /usr/sbin, which isn't in
+# PATH on some distributions
+export PATH=$PATH:/usr/sbin
+
 # unit tests
 
 export OS_TEST_PATH=aodh/tests/unit
