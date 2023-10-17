@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #
 # Copyright 2013-2017 Red Hat, Inc
 # Copyright 2012-2015 eNovance <licensing@enovance.com>
