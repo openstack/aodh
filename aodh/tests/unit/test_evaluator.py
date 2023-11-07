@@ -18,11 +18,14 @@ import fixtures
 import time
 from unittest import mock
 
+from observabilityclient import prometheus_client
 from oslo_config import fixture as fixture_config
 from stevedore import extension
 
 from aodh import evaluator
 from aodh import service
+
+from aodh.evaluator import prometheus
 from aodh.tests import base as tests_base
 
 
@@ -190,3 +193,59 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         target = svc.partition_coordinator.extract_my_subset
         self.assertEqual(0, target.call_count)
         self.assertEqual(0, self.threshold_eval.evaluate.call_count)
+
+
+class TestPrometheusEvaluator(tests_base.BaseTestCase):
+    def setUp(self):
+        super(TestPrometheusEvaluator, self).setUp()
+        conf = service.prepare_service(argv=[], config_files=[])
+        self.CONF = self.useFixture(fixture_config.Config(conf)).conf
+
+    def test_rule_evaluation(self):
+        metric_list = [
+            prometheus_client.PrometheusMetric({'metric': 'mtr',
+                                                'value': (0, 10)}),
+            prometheus_client.PrometheusMetric({'metric': 'mtr',
+                                                'value': (1, 15)}),
+            prometheus_client.PrometheusMetric({'metric': 'mtr',
+                                                'value': (2, 20)}),
+            prometheus_client.PrometheusMetric({'metric': 'mtr',
+                                                'value': (3, 25)}),
+            prometheus_client.PrometheusMetric({'metric': 'mtr',
+                                                'value': (4, 30)}),
+            prometheus_client.PrometheusMetric({'metric': 'mtr',
+                                                'value': (5, 15)}),
+        ]
+        with mock.patch.object(prometheus.PrometheusEvaluator,
+                               '_set_obsclient', return_value=None):
+            # mock Prometheus client
+            ev = prometheus.PrometheusEvaluator(self.CONF)
+            ev._get_metric_data = mock.Mock(return_value=metric_list)
+
+            # test transfer to alarm state
+            state, trend, stats, outside, reason = ev.evaluate_rule(
+                {'query': 'mtr', 'threshold': 9,
+                 'comparison_operator': 'gt'})
+            self.assertEqual('alarm', state)
+            self.assertEqual(6, outside)
+
+            # test transfer to ok state
+            state, trend, stats, outside, reason = ev.evaluate_rule(
+                {'query': 'mtr', 'threshold': 31,
+                 'comparison_operator': 'gt'})
+            self.assertEqual('ok', state)
+            self.assertEqual(0, outside)
+
+            # test trending to alarm state
+            state, trend, stats, outside, reason = ev.evaluate_rule(
+                {'query': 'mtr', 'threshold': 14,
+                 'comparison_operator': 'gt'})
+            self.assertEqual('alarm', trend)
+            self.assertEqual(5, outside)
+
+            # test trending to ok state
+            state, trend, stats, outside, reason = ev.evaluate_rule(
+                {'query': 'mtr', 'threshold': 20,
+                 'comparison_operator': 'gt'})
+            self.assertEqual('ok', trend)
+            self.assertEqual(2, outside)

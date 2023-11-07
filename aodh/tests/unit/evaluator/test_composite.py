@@ -15,6 +15,7 @@
 from unittest import mock
 
 import fixtures
+import os
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 
@@ -23,6 +24,12 @@ from aodh.evaluator import composite
 from aodh.storage import models
 from aodh.tests import constants
 from aodh.tests.unit.evaluator import base
+
+
+# NOTE(mmagr): Overriding PrometheusEvaluator setting to avoid
+# complains during init.
+os.environ['PROMETHEUS_HOST'] = '127.0.0.1'
+os.environ['PROMETHEUS_PORT'] = '666'
 
 
 class BaseCompositeEvaluate(base.TestEvaluatorBase):

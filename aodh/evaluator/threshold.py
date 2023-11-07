@@ -96,19 +96,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
                 ' %(disposition)s threshold, most recent: %(most_recent)s'
                 % dict(reason_data, state=state), reason_data)
 
-    def evaluate_rule(self, alarm_rule):
-        """Evaluate alarm rule.
-
-        :returns: state, trending state and statistics.
-        """
-        start, end = self._bound_duration(alarm_rule)
-        statistics = self._statistics(alarm_rule, start, end)
-        statistics = self._sanitize(alarm_rule, statistics)
-        sufficient = len(statistics) >= alarm_rule['evaluation_periods']
-        if not sufficient:
-            raise InsufficientDataError(
-                '%d datapoints are unknown' % alarm_rule['evaluation_periods'],
-                statistics)
+    def _process_statistics(self, alarm_rule, statistics):
 
         def _compare(value):
             op = COMPARATORS[alarm_rule['comparison_operator']]
@@ -129,6 +117,31 @@ class ThresholdEvaluator(evaluator.Evaluator):
             trending_state = evaluator.ALARM if compared[-1] else evaluator.OK
             return None, trending_state, statistics, number_outside, None
 
+    def evaluate_rule(self, alarm_rule):
+        """Evaluate alarm rule.
+
+        :returns: state, trending state and statistics.
+        """
+        start, end = self._bound_duration(alarm_rule)
+        statistics = self._statistics(alarm_rule, start, end)
+        statistics = self._sanitize(alarm_rule, statistics)
+        sufficient = len(statistics) >= alarm_rule['evaluation_periods']
+        if not sufficient:
+            raise InsufficientDataError(
+                '%d datapoints are unknown' % alarm_rule['evaluation_periods'],
+                statistics)
+
+        return self._process_statistics(alarm_rule, statistics)
+
+    def _unknown_reason_data(self, alarm, statistics):
+        LOG.warning(f'Expecting {alarm.rule["evaluation_periods"]} datapoints'
+                    f' but only get {len(statistics)}')
+        # Reason is not same as log message because we want to keep
+        # consistent since thirdparty software may depend on old format.
+        last = None if not statistics else statistics[-1]
+        return self._reason_data('unknown', alarm.rule['evaluation_periods'],
+                                 last)
+
     def _transition_alarm(self, alarm, state, trending_state, statistics,
                           outside_count, unknown_reason):
         unknown = alarm.state == evaluator.UNKNOWN
@@ -143,16 +156,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
                 return
 
         if state == evaluator.UNKNOWN and not unknown:
-            LOG.warning('Expecting %(expected)d datapoints but only get '
-                        '%(actual)d'
-                        % {'expected': alarm.rule['evaluation_periods'],
-                           'actual': len(statistics)})
-            # Reason is not same as log message because we want to keep
-            # consistent since thirdparty software may depend on old format.
-            last = None if not statistics else statistics[-1]
-            reason_data = self._reason_data('unknown',
-                                            alarm.rule['evaluation_periods'],
-                                            last)
+            reason_data = self._unknown_reason_data(alarm, statistics)
             self._refresh(alarm, state, unknown_reason, reason_data)
 
         elif state and (alarm.state != state or continuous):
