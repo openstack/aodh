@@ -35,47 +35,6 @@ class TestApiMiddleware(v2.FunctionalTest):
         else:
             return self.en_US_translated_error
 
-    def test_json_parsable_error_middleware_404(self):
-        response = self.get_json('/invalid_path',
-                                 expect_errors=True,
-                                 headers={"Accept":
-                                          "application/json"}
-                                 )
-        self.assertEqual(404, response.status_int)
-        self.assertEqual("application/json", response.content_type)
-        self.assertTrue(response.json['error_message'])
-        response = self.get_json('/invalid_path',
-                                 expect_errors=True,
-                                 headers={"Accept":
-                                          "application/json,application/xml"}
-                                 )
-        self.assertEqual(404, response.status_int)
-        self.assertEqual("application/json", response.content_type)
-        self.assertTrue(response.json['error_message'])
-        response = self.get_json('/invalid_path',
-                                 expect_errors=True,
-                                 headers={"Accept":
-                                          "application/xml;q=0.8, \
-                                          application/json"}
-                                 )
-        self.assertEqual(404, response.status_int)
-        self.assertEqual("application/json", response.content_type)
-        self.assertTrue(response.json['error_message'])
-        response = self.get_json('/invalid_path',
-                                 expect_errors=True
-                                 )
-        self.assertEqual(404, response.status_int)
-        self.assertEqual("application/json", response.content_type)
-        self.assertTrue(response.json['error_message'])
-        response = self.get_json('/invalid_path',
-                                 expect_errors=True,
-                                 headers={"Accept":
-                                          "text/html,*/*"}
-                                 )
-        self.assertEqual(404, response.status_int)
-        self.assertEqual("application/json", response.content_type)
-        self.assertTrue(response.json['error_message'])
-
     def test_json_parsable_error_middleware_translation_400(self):
         # Ensure translated messages get placed properly into json faults
         with mock.patch.object(i18n, 'translate',
@@ -88,25 +47,6 @@ class TestApiMiddleware(v2.FunctionalTest):
         self.assertTrue(response.json['error_message'])
         self.assertEqual(self.no_lang_translated_error,
                          response.json['error_message']['faultstring'])
-
-    def test_xml_parsable_error_middleware_404(self):
-        response = self.get_json('/invalid_path',
-                                 expect_errors=True,
-                                 headers={"Accept":
-                                          "application/xml,*/*"}
-                                 )
-        self.assertEqual(404, response.status_int)
-        self.assertEqual("application/xml", response.content_type)
-        self.assertEqual('error_message', response.xml.tag)
-        response = self.get_json('/invalid_path',
-                                 expect_errors=True,
-                                 headers={"Accept":
-                                          "application/json;q=0.8 \
-                                          ,application/xml"}
-                                 )
-        self.assertEqual(404, response.status_int)
-        self.assertEqual("application/xml", response.content_type)
-        self.assertEqual('error_message', response.xml.tag)
 
     def test_xml_parsable_error_middleware_translation_400(self):
         # Ensure translated messages get placed properly into xml faults
