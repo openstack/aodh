@@ -18,24 +18,33 @@
               - ^aodh/locale/.*$
               - ^tools/.*$
               - ^tox.ini$
+            vars: &integration-tests-vars
+              tempest_test_regex: telemetry_tempest_plugin(?!.scenario.test_telemetry_integration_prometheus)
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
+            vars: *integration-tests-vars
         - telemetry-dsvm-integration-centos-8s:
             irrelevant-files: *aodh-irrelevant-files
+            vars: *integration-tests-vars
         - telemetry-dsvm-integration-centos-8s-fips:
             irrelevant-files: *aodh-irrelevant-files
+            vars: *integration-tests-vars
     gate:
       jobs:
         - aodh-tempest-plugin-mysql
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
             irrelevant-files: *aodh-irrelevant-files
+            vars: *integration-tests-vars
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
+            vars: *integration-tests-vars
         - telemetry-dsvm-integration-centos-8s:
             irrelevant-files: *aodh-irrelevant-files
+            vars: *integration-tests-vars
         - telemetry-dsvm-integration-centos-8s-fips:
             irrelevant-files: *aodh-irrelevant-files
+            vars: *integration-tests-vars
 
 - job:
     name: aodh-tempest-plugin-postgresql
