@@ -34,6 +34,7 @@ AODH_COORDINATION_URL=${AODH_COORDINATION_URL:-}
 
 # Set up default directories for client
 GITDIR["python-aodhclient"]=$DEST/python-aodhclient
+GITREPO["python-aodhclient"]=$GIT_BASE/openstack/python-aodhclient.git
 
 # Get rid of this before done.
 # Tell emacs to use shell-script-mode
