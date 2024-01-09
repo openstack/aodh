@@ -86,4 +86,6 @@ def app_factory(global_config, **local_conf):
 
 
 def build_wsgi_app(argv=None):
-    return load_app(service.prepare_service(argv=argv))
+    conf = service.prepare_service(argv=argv)
+    conf.log_opt_values(LOG, log.DEBUG)
+    return load_app(conf)

@@ -16,15 +16,19 @@
 # under the License.
 
 import cotyledon
+from oslo_log import log
 
 from aodh import evaluator as evaluator_svc
 from aodh import event as event_svc
 from aodh import notifier as notifier_svc
 from aodh import service
 
+LOG = log.getLogger(__name__)
+
 
 def notifier():
     conf = service.prepare_service()
+    conf.log_opt_values(LOG, log.DEBUG)
     sm = cotyledon.ServiceManager()
     sm.add(notifier_svc.AlarmNotifierService,
            workers=conf.notifier.workers, args=(conf,))
@@ -33,6 +37,7 @@ def notifier():
 
 def evaluator():
     conf = service.prepare_service()
+    conf.log_opt_values(LOG, log.DEBUG)
     sm = cotyledon.ServiceManager()
     sm.add(evaluator_svc.AlarmEvaluationService,
            workers=conf.evaluator.workers, args=(conf,))
@@ -41,6 +46,7 @@ def evaluator():
 
 def listener():
     conf = service.prepare_service()
+    conf.log_opt_values(LOG, log.DEBUG)
     sm = cotyledon.ServiceManager()
     sm.add(event_svc.EventAlarmEvaluationService,
            workers=conf.listener.workers, args=(conf,))
