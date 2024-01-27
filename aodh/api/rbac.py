@@ -21,7 +21,7 @@ import pecan
 
 
 def target_from_segregation_rule(headers, enforcer):
-    """Return a target that corresponds of an alarm returned by segregation rule
+    """Return a target corresponding to an alarm returned by segregation rule
 
     This allows to use project_id: in an oslo_policy rule for query/listing.
 
