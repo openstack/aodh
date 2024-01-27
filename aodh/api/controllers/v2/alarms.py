@@ -30,13 +30,19 @@ from oslo_utils import timeutils
 from oslo_utils import uuidutils
 import pecan
 from pecan import rest
-import pytz
-import pytz.exceptions
 from stevedore import extension
 from urllib import parse as urlparse
 import wsme
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
+
+try:
+    import zoneinfo
+except ImportError:
+    # zoneinfo is available in Python >= 3.9
+    import pytz
+    import pytz.exceptions
+    zoneinfo = None
 
 import aodh
 from aodh.api.controllers.v2 import base
@@ -176,9 +182,12 @@ class AlarmTimeConstraint(base.Base):
     @staticmethod
     def validate(tc):
         if tc.timezone:
+            checker = zoneinfo.ZoneInfo if zoneinfo else pytz.timezone
+            exc = (zoneinfo.ZoneInfoNotFoundError if zoneinfo else
+                   pytz.exceptions.UnknownTimeZoneError)
             try:
-                pytz.timezone(tc.timezone)
-            except pytz.exceptions.UnknownTimeZoneError:
+                checker(tc.timezone)
+            except exc:
                 raise base.ClientSideError(_("Timezone %s is not valid")
                                            % tc.timezone)
         return tc

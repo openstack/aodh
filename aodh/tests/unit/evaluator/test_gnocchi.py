@@ -22,7 +22,13 @@ from unittest import mock
 from gnocchiclient import exceptions
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
-import pytz
+
+try:
+    import zoneinfo
+except ImportError:
+    # zoneinfo is available in Python >= 3.9
+    import pytz
+    zoneinfo = None
 
 from aodh.evaluator import gnocchi
 from aodh import messaging
@@ -351,9 +357,12 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
              'duration': 10800,  # 3 hours
              'timezone': 'Europe/Ljubljana'}
         ]
-        dt = datetime.datetime(2014, 1, 1, 15, 0, 0,
-                               tzinfo=pytz.timezone('Europe/Ljubljana'))
-        mock_utcnow.return_value = dt.astimezone(pytz.UTC)
+        if zoneinfo:
+            tzinfo = zoneinfo.ZoneInfo('Europe/Ljubljana')
+        else:
+            tzinfo = pytz.timezone('Europe/Ljubljana')
+        dt = datetime.datetime(2014, 1, 1, 15, 0, 0, tzinfo=tzinfo)
+        mock_utcnow.return_value = dt.astimezone(datetime.timezone.utc)
         self.client.metric.get_measures.return_value = []
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
@@ -373,9 +382,12 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
              'duration': 10800,  # 3 hours
              'timezone': 'Europe/Ljubljana'}
         ]
-        dt = datetime.datetime(2014, 1, 1, 12, 0, 0,
-                               tzinfo=pytz.timezone('Europe/Ljubljana'))
-        mock_utcnow.return_value = dt.astimezone(pytz.UTC)
+        if zoneinfo:
+            tzinfo = zoneinfo.ZoneInfo('Europe/Ljubljana')
+        else:
+            tzinfo = pytz.timezone('Europe/Ljubljana')
+        dt = datetime.datetime(2014, 1, 1, 12, 0, 0, tzinfo=tzinfo)
+        mock_utcnow.return_value = dt.astimezone(datetime.timezone.utc)
         self.client.metric.get_measures.return_value = []
         self._evaluate_all_alarms()
         self._assert_all_alarms('insufficient data')
