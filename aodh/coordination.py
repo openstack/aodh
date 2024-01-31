@@ -13,12 +13,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import bisect
-import hashlib
 import struct
 
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import encodeutils
+from oslo_utils.secretutils import md5
 from oslo_utils import uuidutils
 import tenacity
 import tooz.coordination
@@ -78,8 +78,8 @@ class HashRing(object):
 
     @staticmethod
     def _hash(key):
-        return struct.unpack_from('>I',
-                                  hashlib.md5(str(key).encode()).digest())[0]
+        return struct.unpack_from(
+            '>I', md5(str(key).encode(), usedforsecurity=False).digest())[0]
 
     def _get_position_on_ring(self, key):
         hashed_key = self._hash(key)
