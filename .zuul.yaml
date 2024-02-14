@@ -64,11 +64,16 @@
         postgresql: true
         mysql: false
       devstack_localrc:
-        DATABASE_TYPE: "postgresql"
-        AODH_BACKEND: "postgresql"
+        DATABASE_TYPE: postgresql
+        AODH_BACKEND: postgresql
         USE_PYTHON3: True
         # TODO: Update the plugins so they work with global venv
         GLOBAL_VENV: False
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            telemetry_services:
+              alarm_backend: postgresql
       tempest_test_regex: telemetry_tempest_plugin.aodh
 
 - job:
