@@ -31,6 +31,7 @@ from oslo_utils import uuidutils
 import pecan
 from pecan import rest
 import pytz
+import pytz.exceptions
 from stevedore import extension
 from urllib import parse as urlparse
 import wsme
@@ -177,7 +178,7 @@ class AlarmTimeConstraint(base.Base):
         if tc.timezone:
             try:
                 pytz.timezone(tc.timezone)
-            except Exception:
+            except pytz.exceptions.UnknownTimeZoneError:
                 raise base.ClientSideError(_("Timezone %s is not valid")
                                            % tc.timezone)
         return tc
