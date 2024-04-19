@@ -156,17 +156,19 @@ class Connection(base.Connection):
     def upgrade(self, nocreate=False):
         cfg = self._get_alembic_config()
         cfg.conf = self.conf
-        if nocreate:
-            command.upgrade(cfg, "head")
-        else:
-            engine = enginefacade.writer.get_engine()
-            ctxt = migration.MigrationContext.configure(engine.connect())
-            current_version = ctxt.get_current_revision()
-            if current_version is None:
-                models.Base.metadata.create_all(engine, checkfirst=False)
-                command.stamp(cfg, "head")
-            else:
+        engine = enginefacade.writer.get_engine()
+        with engine.connect() as conn, conn.begin():
+            cfg.attributes['connection'] = conn
+            if nocreate:
                 command.upgrade(cfg, "head")
+            else:
+                ctxt = migration.MigrationContext.configure(conn)
+                current_version = ctxt.get_current_revision()
+                if current_version is None:
+                    models.Base.metadata.create_all(conn, checkfirst=False)
+                    command.stamp(cfg, "head")
+                else:
+                    command.upgrade(cfg, "head")
 
     def clear(self):
         engine = enginefacade.writer.get_engine()
