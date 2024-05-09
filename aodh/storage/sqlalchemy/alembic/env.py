@@ -68,10 +68,21 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    engine = enginefacade.writer.get_engine()
-    with engine.connect() as connection:
+    connectable = config.attributes.get('connection', None)
+
+    if connectable is None:
+        engine = enginefacade.writer.get_engine()
+        with engine.connect() as connection:
+            context.configure(
+                connection=connection,
+                target_metadata=target_metadata
+            )
+
+            with context.begin_transaction():
+                context.run_migrations()
+    else:
         context.configure(
-            connection=connection,
+            connection=connectable,
             target_metadata=target_metadata
         )
 
