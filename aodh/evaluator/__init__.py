@@ -27,8 +27,14 @@ from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
-import pytz
 from stevedore import extension
+
+try:
+    import zoneinfo
+except ImportError:
+    # zoneinfo is available in Python >= 3.9
+    import pytz
+    zoneinfo = None
 
 import aodh
 from aodh import coordination
@@ -148,9 +154,13 @@ class Evaluator(object, metaclass=abc.ABCMeta):
         if not alarm.time_constraints:
             return True
 
-        now_utc = timeutils.utcnow().replace(tzinfo=pytz.utc)
+        now_utc = timeutils.utcnow().replace(tzinfo=datetime.timezone.utc)
         for tc in alarm.time_constraints:
-            tz = pytz.timezone(tc['timezone']) if tc['timezone'] else None
+            if zoneinfo:
+                tz = (zoneinfo.ZoneInfo(tc['timezone'])
+                      if tc['timezone'] else None)
+            else:
+                tz = pytz.timezone(tc['timezone']) if tc['timezone'] else None
             now_tz = now_utc.astimezone(tz) if tz else now_utc
             start_cron = croniter.croniter(tc['start'], now_tz)
             if cls._is_exact_match(start_cron, now_tz):
