@@ -18,6 +18,7 @@ import abc
 import datetime
 import json
 import threading
+import zoneinfo
 
 from concurrent import futures
 import cotyledon
@@ -28,13 +29,6 @@ from oslo_log import log
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 from stevedore import extension
-
-try:
-    import zoneinfo
-except ImportError:
-    # zoneinfo is available in Python >= 3.9
-    import pytz
-    zoneinfo = None
 
 import aodh
 from aodh import coordination
@@ -156,11 +150,7 @@ class Evaluator(object, metaclass=abc.ABCMeta):
 
         now_utc = timeutils.utcnow().replace(tzinfo=datetime.timezone.utc)
         for tc in alarm.time_constraints:
-            if zoneinfo:
-                tz = (zoneinfo.ZoneInfo(tc['timezone'])
-                      if tc['timezone'] else None)
-            else:
-                tz = pytz.timezone(tc['timezone']) if tc['timezone'] else None
+            tz = zoneinfo.ZoneInfo(tc['timezone']) if tc['timezone'] else None
             now_tz = now_utc.astimezone(tz) if tz else now_utc
             start_cron = croniter.croniter(tc['start'], now_tz)
             if cls._is_exact_match(start_cron, now_tz):
