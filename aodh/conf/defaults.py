@@ -27,8 +27,11 @@ def set_lib_defaults():
     """
     set_cors_middleware_defaults()
 
-    # Update default value of oslo.policy policy_file config option.
-    policy_opts.set_defaults(cfg.CONF, 'policy.yaml')
+    # Update default value of oslo.policy policy_file, ,
+    # enforce_scope, and enforce_new_defaults config options.
+    policy_opts.set_defaults(cfg.CONF, 'policy.yaml',
+                             enforce_scope=False,
+                             enforce_new_defaults=False)
 
 
 def set_cors_middleware_defaults():
