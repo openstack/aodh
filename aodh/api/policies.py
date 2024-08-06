@@ -329,7 +329,19 @@ rules = [
             }
         ],
         deprecated_rule=deprecated_delete_quotas
-    )
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:get_metrics",
+        check_str=PROJECT_READER,
+        scope_types=['project'],
+        description='Get all metrics.',
+        operations=[
+            {
+                'path': '/v2/metrics',
+                'method': 'GET'
+            }
+        ]
+    ),
 ]
 
 

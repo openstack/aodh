@@ -56,6 +56,9 @@ AVAILABLE_STORAGE_CAPABILITIES = {
     'storage': {'production_ready': True},
 }
 
+# int type should be 32b long in both mysql and postgresql
+COUNTER_RESET_AT_VALUE = 2000000000
+
 
 def apply_filters(query, model, **filters):
     filter_dict = {}
@@ -314,6 +317,9 @@ class Connection(base.Connection):
         :param alarm_id: ID of the alarm to delete
         """
         with _session_for_write() as session:
+            session.query(models.AlarmCounter).filter(
+                models.AlarmCounter.alarm_id == alarm_id,
+            ).delete()
             session.query(models.Alarm).filter(
                 models.Alarm.alarm_id == alarm_id,
             ).delete()
@@ -321,6 +327,45 @@ class Connection(base.Connection):
             session.query(models.AlarmChange).filter(
                 models.AlarmChange.alarm_id == alarm_id,
             ).delete()
+
+    def increment_alarm_counter(self, alarm_id, project_id, state):
+        """Increment a counter.
+
+        :param alarm_id: the id of alarm to which the counter belongs
+        :param project_id: the id of the project of the alarm
+        :param state: the state of the alarm to increment
+        """
+        with _session_for_write() as session:
+            LOG.debug("Incrementing counter %(state)s for alarm %(alarm_id)s",
+                      {'alarm_id': alarm_id, 'state': state})
+
+            counter = self.get_alarm_counters(alarm_id, project_id, state)
+            counter_value = 0
+            if len(counter) == 1:
+                counter_value = counter[0].value
+            new_value = counter_value + 1
+            if counter_value >= COUNTER_RESET_AT_VALUE:
+                LOG.debug("Resetting counter %(state)s for alarm %(alarm_id)s",
+                          {'alarm_id': alarm_id, 'state': state})
+                new_value = 1
+
+            elif counter_value == 0:
+                # We have a new uninitialized counter
+                counter = models.AlarmCounter(
+                    alarm_id=alarm_id,
+                    project_id=project_id,
+                    state=state
+                )
+                counter.update({'value': new_value})
+                session.add(counter)
+            else:
+                session.query(models.AlarmCounter).filter(
+                    models.AlarmCounter.alarm_id == alarm_id,
+                    models.AlarmCounter.project_id == project_id,
+                    models.AlarmCounter.state == state,
+                ).update({'value': new_value})
+
+        return state
 
     @staticmethod
     def _row_to_alarm_change_model(row):
@@ -337,6 +382,23 @@ class Connection(base.Connection):
     def query_alarms(self, filter_expr=None, orderby=None, limit=None):
         """Yields a lists of alarms that match filter."""
         return self._retrieve_data(filter_expr, orderby, limit, models.Alarm)
+
+    def get_alarm_counters(self, alarm_id=None, project_id=None, state=None):
+        """Yields a counter based on its alarm_id, project_id and state."""
+        filters = {}
+        if alarm_id is not None:
+            filters['alarm_id'] = alarm_id
+        if project_id is not None:
+            filters['project_id'] = project_id
+        if state is not None:
+            filters['state'] = state
+        with _session_for_read() as session:
+            counters = session.query(models.AlarmCounter).filter_by(
+                **filters
+            ).all()
+            if counters is None:
+                return []
+        return counters
 
     def _retrieve_alarm_history(self, query):
         return (self._row_to_alarm_change_model(x) for x in query.all())

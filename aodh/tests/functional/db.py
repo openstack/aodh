@@ -96,6 +96,7 @@ class TestBase(test_base.BaseTestCase,
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.CONF.set_override('connection', db_url, group="database")
+        self.CONF.set_override('enable_evaluation_results_metrics', True)
 
         manager = self.DRIVER_MANAGERS.get(self.engine)
         if not manager:

@@ -112,6 +112,16 @@ class Connection(object):
         raise aodh.NotImplementedError('Alarms not implemented')
 
     @staticmethod
+    def increment_alarm_counter(alarm_id, project_id, state):
+        """Increment a counter."""
+        raise aodh.NotImplementedError('Alarm counters not implemented')
+
+    @staticmethod
+    def get_alarm_counters(alarm_id=None, project_id=None, state=None):
+        """Get value of a counter."""
+        raise aodh.NotImplementedError('Alarm counters not implemented')
+
+    @staticmethod
     def get_alarm_changes(alarm_id, on_behalf_of,
                           user=None, project=None, alarm_type=None,
                           severity=None, start_timestamp=None,
