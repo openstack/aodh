@@ -22,23 +22,9 @@ RULE_ADMIN_OR_OWNER = 'rule:context_is_admin or project_id:%(project_id)s'
 UNPROTECTED = ''
 
 # Constants that represent common personas.
-SYSTEM_ADMIN = 'role:admin and system_scope:all'
-SYSTEM_READER = 'role:reader and system_scope:all'
+PROJECT_ADMIN = 'role:admin and project_id:%(project_id)s'
 PROJECT_MEMBER = 'role:member and project_id:%(project_id)s'
 PROJECT_READER = 'role:reader and project_id:%(project_id)s'
-
-# Composite check strings built using the personas defined above, where a
-# particular API is designed to work with multiple scopes. For example,
-# listing alarms for all projects (system-scope) or listing alarms for a single
-# project (project-scope).
-SYSTEM_ADMIN_OR_PROJECT_MEMBER = (
-    '(' + SYSTEM_ADMIN + ')'
-    ' or (' + PROJECT_MEMBER + ')'
-)
-SYSTEM_OR_PROJECT_READER = (
-    '(' + SYSTEM_READER + ')'
-    ' or (' + PROJECT_READER + ')'
-)
 
 DEPRECATED_REASON = """
 The alarm and quota APIs now support system-scope and default roles.
@@ -153,8 +139,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:get_alarm",
-        check_str=SYSTEM_OR_PROJECT_READER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_READER,
+        scope_types=['project'],
         description='Get an alarm.',
         operations=[
             {
@@ -167,8 +153,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:get_alarms",
-        check_str=SYSTEM_OR_PROJECT_READER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_READER,
+        scope_types=['project'],
         description='Get all alarms, based on the query provided.',
         operations=[
             {
@@ -180,8 +166,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:get_alarms:all_projects",
-        check_str=SYSTEM_READER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_ADMIN,
+        scope_types=['project'],
         description='Get alarms of all projects.',
         operations=[
             {
@@ -193,8 +179,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:query_alarm",
-        check_str=SYSTEM_OR_PROJECT_READER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_READER,
+        scope_types=['project'],
         description='Get all alarms, based on the query provided.',
         operations=[
             {
@@ -206,8 +192,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:create_alarm",
-        check_str=SYSTEM_ADMIN_OR_PROJECT_MEMBER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_MEMBER,
+        scope_types=['project'],
         description='Create a new alarm.',
         operations=[
             {
@@ -219,8 +205,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:change_alarm",
-        check_str=SYSTEM_ADMIN_OR_PROJECT_MEMBER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_MEMBER,
+        scope_types=['project'],
         description='Modify this alarm.',
         operations=[
             {
@@ -232,8 +218,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:delete_alarm",
-        check_str=SYSTEM_ADMIN_OR_PROJECT_MEMBER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_MEMBER,
+        scope_types=['project'],
         description='Delete this alarm.',
         operations=[
             {
@@ -245,8 +231,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:get_alarm_state",
-        check_str=SYSTEM_OR_PROJECT_READER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_READER,
+        scope_types=['project'],
         description='Get the state of this alarm.',
         operations=[
             {
@@ -258,8 +244,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:change_alarm_state",
-        check_str=SYSTEM_ADMIN_OR_PROJECT_MEMBER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_MEMBER,
+        scope_types=['project'],
         description='Set the state of this alarm.',
         operations=[
             {
@@ -271,8 +257,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:alarm_history",
-        check_str=SYSTEM_OR_PROJECT_READER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_READER,
+        scope_types=['project'],
         description='Assembles the alarm history requested.',
         operations=[
             {
@@ -284,8 +270,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:query_alarm_history",
-        check_str=SYSTEM_OR_PROJECT_READER,
-        scope_types=['system', 'project'],
+        check_str=PROJECT_READER,
+        scope_types=['project'],
         description='Define query for retrieving AlarmChange data.',
         operations=[
             {
@@ -297,8 +283,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:update_quotas",
-        check_str=SYSTEM_ADMIN,
-        scope_types=['system'],
+        check_str=PROJECT_ADMIN,
+        scope_types=['project'],
         description='Update resources quotas for project.',
         operations=[
             {
@@ -310,8 +296,8 @@ rules = [
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:delete_quotas",
-        check_str=SYSTEM_ADMIN,
-        scope_types=['system'],
+        check_str=PROJECT_ADMIN,
+        scope_types=['project'],
         description='Delete resources quotas for project.',
         operations=[
             {
