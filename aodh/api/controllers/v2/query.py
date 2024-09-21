@@ -273,7 +273,7 @@ class ValidatedComplexQuery(object):
         "and <visibility_field>=<tenant's project_id>" clause to the query.
         """
         authorized_project = rbac.get_limited_to_project(
-            pecan.request.headers, pecan.request.enforcer)
+            pecan.request, pecan.request.enforcer)
         is_admin = authorized_project is None
         if not is_admin:
             self._restrict_to_project(authorized_project, visibility_field)
@@ -354,8 +354,8 @@ class QueryAlarmHistoryController(rest.RestController):
         :param body: Query rules for the alarm history to be returned.
         """
         target = rbac.target_from_segregation_rule(
-            pecan.request.headers, pecan.request.enforcer)
-        rbac.enforce('query_alarm_history', pecan.request.headers,
+            pecan.request, pecan.request.enforcer)
+        rbac.enforce('query_alarm_history', pecan.request,
                      pecan.request.enforcer, target)
 
         query = ValidatedComplexQuery(body,
@@ -380,8 +380,8 @@ class QueryAlarmsController(rest.RestController):
         """
 
         target = rbac.target_from_segregation_rule(
-            pecan.request.headers, pecan.request.enforcer)
-        rbac.enforce('query_alarm', pecan.request.headers,
+            pecan.request, pecan.request.enforcer)
+        rbac.enforce('query_alarm', pecan.request,
                      pecan.request.enforcer, target)
 
         query = ValidatedComplexQuery(body,

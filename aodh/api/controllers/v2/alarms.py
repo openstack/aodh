@@ -366,7 +366,7 @@ class Alarm(base.Base):
                                             "maximum": max_actions}
                 raise base.ClientSideError(error)
 
-            limited = rbac.get_limited_to_project(pecan.request.headers,
+            limited = rbac.get_limited_to_project(pecan.request,
                                                   pecan.request.enforcer)
 
             for action in actions:
@@ -578,7 +578,8 @@ class AlarmController(rest.RestController):
         auth_project = pecan.request.headers.get('X-Project-Id')
 
         filters = {'alarm_id': self._id}
-        if not rbac.is_admin(pecan.request.headers):
+        is_admin = rbac.is_admin(pecan.request, pecan.request.enforcer)
+        if not is_admin:
             filters['project_id'] = auth_project
 
         alarms = pecan.request.storage.get_alarms(**filters)
@@ -588,7 +589,7 @@ class AlarmController(rest.RestController):
         alarm = alarms[0]
         target = {'user_id': alarm.user_id,
                   'project_id': alarm.project_id}
-        rbac.enforce(rbac_directive, pecan.request.headers,
+        rbac.enforce(rbac_directive, pecan.request,
                      pecan.request.enforcer, target)
         return alarm
 
@@ -662,7 +663,7 @@ class AlarmController(rest.RestController):
 
         data.alarm_id = self._id
 
-        user, project = rbac.get_limited_to(pecan.request.headers,
+        user, project = rbac.get_limited_to(pecan.request,
                                             pecan.request.enforcer)
         if user:
             data.user_id = user
@@ -727,7 +728,7 @@ class AlarmController(rest.RestController):
         # allow history to be returned for deleted alarms, but scope changes
         # returned to those carried out on behalf of the auth'd tenant, to
         # avoid inappropriate cross-tenant visibility of alarm history
-        auth_project = rbac.get_limited_to_project(pecan.request.headers,
+        auth_project = rbac.get_limited_to_project(pecan.request,
                                                    pecan.request.enforcer)
         conn = pecan.request.storage
         kwargs = v2_utils.query_to_kwargs(
@@ -813,14 +814,14 @@ class AlarmsController(rest.RestController):
 
         :param data: an alarm within the request body.
         """
-        rbac.enforce('create_alarm', pecan.request.headers,
+        rbac.enforce('create_alarm', pecan.request,
                      pecan.request.enforcer, {})
 
         conn = pecan.request.storage
         now = timeutils.utcnow()
 
         data.alarm_id = uuidutils.generate_uuid()
-        user_limit, project_limit = rbac.get_limited_to(pecan.request.headers,
+        user_limit, project_limit = rbac.get_limited_to(pecan.request,
                                                         pecan.request.enforcer)
 
         def _set_ownership(aspect, owner_limitation, header):
@@ -874,8 +875,8 @@ class AlarmsController(rest.RestController):
         :param marker: The pagination query marker.
         """
         target = rbac.target_from_segregation_rule(
-            pecan.request.headers, pecan.request.enforcer)
-        rbac.enforce('get_alarms', pecan.request.headers,
+            pecan.request, pecan.request.enforcer)
+        rbac.enforce('get_alarms', pecan.request,
                      pecan.request.enforcer, target)
 
         q = q or []
@@ -898,12 +899,12 @@ class AlarmsController(rest.RestController):
 
         if 'all_projects' in keys:
             if v2_utils.get_query_value(q, 'all_projects', 'boolean'):
-                rbac.enforce('get_alarms:all_projects', pecan.request.headers,
+                rbac.enforce('get_alarms:all_projects', pecan.request,
                              pecan.request.enforcer, target)
             keys.remove('all_projects')
         else:
             project_id = pecan.request.headers.get('X-Project-Id')
-            is_admin = rbac.is_admin(pecan.request.headers)
+            is_admin = rbac.is_admin(pecan.request, pecan.request.enforcer)
 
             if not v2_utils.is_field_exist(q, 'project_id'):
                 q.append(
