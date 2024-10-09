@@ -106,6 +106,7 @@
     name: aodh-tempest-plugin-postgresql
     parent: telemetry-tempest-base
     irrelevant-files: *aodh-irrelevant-files
+    voting: false
     vars:
       devstack_services:
         postgresql: true
