@@ -21,9 +21,6 @@
               - ^tools/.*$
               - ^tox.ini$
             vars:
-              # TODO: Update the plugins so they work with global venv
-              devstack_localrc:
-                GLOBAL_VENV: False
               devstack_local_conf:
                 test-config:
                   $TEMPEST_CONFIG:
@@ -32,9 +29,6 @@
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
             vars:
-              # TODO: Update the plugins so they work with global venv
-              devstack_localrc:
-                GLOBAL_VENV: False
               devstack_local_conf:
                 test-config:
                   $TEMPEST_CONFIG:
@@ -63,9 +57,6 @@
         - telemetry-dsvm-integration:
             irrelevant-files: *aodh-irrelevant-files
             vars:
-              # TODO: Update the plugins so they work with global venv
-              devstack_localrc:
-                GLOBAL_VENV: False
               devstack_local_conf:
                 test-config:
                   $TEMPEST_CONFIG:
@@ -77,9 +68,6 @@
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
             vars:
-              # TODO: Update the plugins so they work with global venv
-              devstack_localrc:
-                GLOBAL_VENV: False
               devstack_local_conf:
                 test-config:
                   $TEMPEST_CONFIG:
@@ -114,8 +102,6 @@
         DATABASE_TYPE: postgresql
         AODH_BACKEND: postgresql
         USE_PYTHON3: True
-        # TODO: Update the plugins so they work with global venv
-        GLOBAL_VENV: False
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
@@ -135,8 +121,6 @@
       devstack_localrc:
         AODH_BACKEND: "mysql"
         USE_PYTHON3: True
-        # TODO: Update the plugins so they work with global venv
-        GLOBAL_VENV: False
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:

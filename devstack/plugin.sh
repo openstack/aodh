@@ -20,24 +20,6 @@ else
     AODH_BIN_DIR=$(get_python_exec_prefix)
 fi
 
-
-if [ -z "$AODH_DEPLOY" ]; then
-    # Default
-    AODH_DEPLOY=simple
-
-    # Fallback to common wsgi devstack configuration
-    if [ "$ENABLE_HTTPD_MOD_WSGI_SERVICES" == "True" ]; then
-        AODH_DEPLOY=mod_wsgi
-
-    # Deprecated config
-    elif [ -n "$AODH_USE_MOD_WSGI" ] ; then
-        echo_summary "AODH_USE_MOD_WSGI is deprecated, use AODH_DEPLOY instead"
-        if [ "$AODH_USE_MOD_WSGI" == True ]; then
-            AODH_DEPLOY=mod_wsgi
-        fi
-    fi
-fi
-
 # Test if any Aodh services are enabled
 # is_aodh_enabled
 function is_aodh_enabled {
