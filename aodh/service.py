@@ -22,6 +22,7 @@ import oslo_i18n
 from oslo_log import log
 from oslo_policy import opts as policy_opts
 from oslo_reports import guru_meditation_report as gmr
+from oslo_reports import opts as gmr_opts
 from oslo_utils import importutils
 
 from aodh.conf import defaults
@@ -110,7 +111,8 @@ def prepare_service(argv=None, config_files=None):
     # NOTE(tkajinam): guru cannot run with service under apache daemon, so when
     # aod-api running with mod_wsgi, the argv is [], we don't start guru.
     if argv:
-        gmr.TextGuruMeditation.setup_autorun(version)
+        gmr_opts.set_defaults(conf)
+        gmr.TextGuruMeditation.setup_autorun(version, conf=conf)
 
     profiler.setup(conf)
     messaging.setup()
