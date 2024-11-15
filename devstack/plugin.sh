@@ -178,7 +178,7 @@ function configure_aodh {
     iniset $AODH_CONF service_credentials region_name $REGION_NAME
     iniset $AODH_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
 
-    configure_auth_token_middleware $AODH_CONF aodh $AODH_AUTH_CACHE_DIR
+    configure_keystone_authtoken_middleware $AODH_CONF aodh
 
     # Configured storage
     _aodh_configure_storage_backend
@@ -219,9 +219,6 @@ function configure_aodh {
 function init_aodh {
     # Get aodh keystone settings in place
     _aodh_create_accounts
-    # Create cache dir
-    sudo install -d -o $STACK_USER $AODH_AUTH_CACHE_DIR
-    rm -f $AODH_AUTH_CACHE_DIR/*
 
     if is_service_enabled mysql postgresql; then
         if [ "$AODH_BACKEND" = 'mysql' ] || [ "$AODH_BACKEND" = 'postgresql' ] ; then
