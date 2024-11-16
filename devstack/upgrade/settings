@@ -1,0 +1,8 @@
+register_project_for_upgrade aodh
+register_db_to_save aodh
+
+devstack_localrc base enable_plugin aodh https://opendev.org/openstack/aodh
+devstack_localrc base enable_service aodh-api aodh-evaluator aodh-listener tempest
+
+devstack_localrc target enable_plugin aodh https://opendev.org/openstack/aodh
+devstack_localrc target enable_service aodh-api aodh-evaluator aodh-listener tempest
