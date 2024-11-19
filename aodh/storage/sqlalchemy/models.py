@@ -138,6 +138,6 @@ class Quota(Base):
     )
 
     id = Column(String(36), primary_key=True, default=uuidutils.generate_uuid)
-    project_id = Column(String(128))
-    resource = Column(String(50))
-    limit = Column(Integer)
+    project_id = Column(String(128), nullable=False)
+    resource = Column(String(50), nullable=False)
+    limit = Column(Integer, nullable=False)
