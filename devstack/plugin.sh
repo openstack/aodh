@@ -218,7 +218,7 @@ function init_aodh {
 function install_aodh {
     _aodh_prepare_coordination
     install_aodhclient
-    pip_install -e "$AODH_DIR"[test,$AODH_BACKEND]
+    setup_develop $AODH_DIR $AODH_BACKEND
     sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR
 
     if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
