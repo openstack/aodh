@@ -169,7 +169,7 @@ function configure_aodh {
     # call cleanup_aodh which will wipe the WSGI config.
     if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
         _aodh_config_apache_wsgi
-    elif [ "$AODH_DEPLOY" == "uwsgi" ]; then
+    else
         # iniset creates these files when it's called if they don't exist.
         AODH_UWSGI_FILE=$AODH_CONF_DIR/aodh-uwsgi.ini
 
@@ -223,7 +223,7 @@ function install_aodh {
 
     if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
         install_apache_wsgi
-    elif [ "$AODH_DEPLOY" == "uwsgi" ]; then
+    else
         pip_install uwsgi
     fi
 }
@@ -244,10 +244,8 @@ function start_aodh {
     if [[ "$AODH_DEPLOY" == "mod_wsgi" ]]; then
         enable_apache_site aodh
         restart_apache_server
-    elif [ "$AODH_DEPLOY" == "uwsgi" ]; then
-        run_process aodh-api "$AODH_BIN_DIR/uwsgi $AODH_UWSGI_FILE"
     else
-        run_process aodh-api "$AODH_BIN_DIR/aodh-api -p $AODH_SERVICE_PORT"
+        run_process aodh-api "$AODH_BIN_DIR/uwsgi $AODH_UWSGI_FILE"
     fi
 
     # Only die on API if it was actually intended to be turned on
@@ -274,6 +272,7 @@ function configure_tempest_for_aodh {
 
 # stop_aodh() - Stop running processes
 function stop_aodh {
+    local serv
     if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
         disable_apache_site aodh
         restart_apache_server
