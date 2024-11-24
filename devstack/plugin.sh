@@ -46,31 +46,6 @@ function _aodh_install_redis {
     pip_install_gr redis
 }
 
-# Configure mod_wsgi
-function _aodh_config_apache_wsgi {
-    sudo mkdir -p $AODH_WSGI_DIR
-
-    local aodh_apache_conf=$(apache_site_config_for aodh)
-    local venv_path=""
-
-    # Copy proxy vhost and wsgi file
-    sudo cp $AODH_DIR/aodh/api/app.wsgi $AODH_WSGI_DIR/app
-
-    if [[ ${USE_VENV} = True ]]; then
-        venv_path="python-path=${PROJECT_VENV["aodh"]}/lib/$(python_version)/site-packages"
-    fi
-
-    sudo cp $AODH_DIR/devstack/apache-aodh.template $aodh_apache_conf
-    sudo sed -e "
-        s|%PORT%|$AODH_SERVICE_PORT|g;
-        s|%APACHE_NAME%|$APACHE_NAME|g;
-        s|%WSGIAPP%|$AODH_WSGI_DIR/app|g;
-        s|%USER%|$STACK_USER|g;
-        s|%APIWORKERS%|$API_WORKERS|g;
-        s|%VIRTUALENV%|$venv_path|g
-    " -i $aodh_apache_conf
-}
-
 # Install required services for coordination
 function _aodh_prepare_coordination {
     if echo $AODH_COORDINATION_URL | grep -q '^memcached:'; then
@@ -106,18 +81,10 @@ function preinstall_aodh {
     fi
 }
 
-# Remove WSGI files, disable and remove Apache vhost file
-function _aodh_cleanup_apache_wsgi {
-    sudo rm -f $AODH_WSGI_DIR/*
-    sudo rm -f $(apache_site_config_for aodh)
-}
-
 # cleanup_aodh() - Remove residual data files, anything left over
 # from previous runs that a clean run would need to clean up
 function cleanup_aodh {
-    if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
-        _aodh_cleanup_apache_wsgi
-    fi
+    :
 }
 
 # Set configuration for storage backend.
@@ -141,14 +108,10 @@ function configure_aodh {
     fi
 
     # Set up logging
-    if [ "$SYSLOG" != "False" ]; then
-        iniset $AODH_CONF DEFAULT use_syslog "True"
-    fi
+    iniset $AODH_CONF DEFAULT use_syslog $SYSLOG
 
     # Format logging
-    if [ "$LOG_COLOR" == "True" ] && [ "$SYSLOG" == "False" ] && [ "$AODH_DEPLOY" != "mod_wsgi" ]; then
-        setup_colorized_logging $AODH_CONF DEFAULT
-    fi
+    setup_logging $AODH_CONF DEFAULT
 
     # The alarm evaluator needs these options to call gnocchi/ceilometer APIs
     iniset $AODH_CONF service_credentials auth_type password
@@ -167,34 +130,30 @@ function configure_aodh {
 
     # NOTE: This must come after database configuration as those can
     # call cleanup_aodh which will wipe the WSGI config.
-    if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
-        _aodh_config_apache_wsgi
-    else
-        # iniset creates these files when it's called if they don't exist.
-        AODH_UWSGI_FILE=$AODH_CONF_DIR/aodh-uwsgi.ini
 
-        rm -f "$AODH_UWSGI_FILE"
+    # iniset creates these files when it's called if they don't exist.
+    AODH_UWSGI_FILE=$AODH_CONF_DIR/aodh-uwsgi.ini
 
-        iniset "$AODH_UWSGI_FILE" uwsgi http $AODH_SERVICE_HOST:$AODH_SERVICE_PORT
-        iniset "$AODH_UWSGI_FILE" uwsgi wsgi-file "$AODH_DIR/aodh/api/app.wsgi"
-        # This is running standalone
-        iniset "$AODH_UWSGI_FILE" uwsgi master true
-        # Set die-on-term & exit-on-reload so that uwsgi shuts down
-        iniset "$AODH_UWSGI_FILE" uwsgi die-on-term true
-        iniset "$AODH_UWSGI_FILE" uwsgi exit-on-reload true
-        iniset "$AODH_UWSGI_FILE" uwsgi threads 10
-        iniset "$AODH_UWSGI_FILE" uwsgi processes $API_WORKERS
-        iniset "$AODH_UWSGI_FILE" uwsgi enable-threads true
-        iniset "$AODH_UWSGI_FILE" uwsgi plugins python
-        iniset "$AODH_UWSGI_FILE" uwsgi lazy-apps true
-        # uwsgi recommends this to prevent thundering herd on accept.
-        iniset "$AODH_UWSGI_FILE" uwsgi thunder-lock true
-        # Override the default size for headers from the 4k default.
-        iniset "$AODH_UWSGI_FILE" uwsgi buffer-size 65535
-        # Make sure the client doesn't try to re-use the connection.
-        iniset "$AODH_UWSGI_FILE" uwsgi add-header "Connection: close"
-    fi
+    rm -f "$AODH_UWSGI_FILE"
 
+    iniset "$AODH_UWSGI_FILE" uwsgi http $AODH_SERVICE_HOST:$AODH_SERVICE_PORT
+    iniset "$AODH_UWSGI_FILE" uwsgi wsgi-file "$AODH_DIR/aodh/api/app.wsgi"
+    # This is running standalone
+    iniset "$AODH_UWSGI_FILE" uwsgi master true
+    # Set die-on-term & exit-on-reload so that uwsgi shuts down
+    iniset "$AODH_UWSGI_FILE" uwsgi die-on-term true
+    iniset "$AODH_UWSGI_FILE" uwsgi exit-on-reload true
+    iniset "$AODH_UWSGI_FILE" uwsgi threads 10
+    iniset "$AODH_UWSGI_FILE" uwsgi processes $API_WORKERS
+    iniset "$AODH_UWSGI_FILE" uwsgi enable-threads true
+    iniset "$AODH_UWSGI_FILE" uwsgi plugins python
+    iniset "$AODH_UWSGI_FILE" uwsgi lazy-apps true
+    # uwsgi recommends this to prevent thundering herd on accept.
+    iniset "$AODH_UWSGI_FILE" uwsgi thunder-lock true
+    # Override the default size for headers from the 4k default.
+    iniset "$AODH_UWSGI_FILE" uwsgi buffer-size 65535
+    # Make sure the client doesn't try to re-use the connection.
+    iniset "$AODH_UWSGI_FILE" uwsgi add-header "Connection: close"
 }
 
 # init_aodh() - Initialize etc.
@@ -221,11 +180,7 @@ function install_aodh {
     pip_install -e "$AODH_DIR"[test,$AODH_BACKEND]
     sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR
 
-    if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
-        install_apache_wsgi
-    else
-        pip_install uwsgi
-    fi
+    pip_install uwsgi
 }
 
 # install_aodhclient() - Collect source and prepare
@@ -241,12 +196,7 @@ function install_aodhclient {
 
 # start_aodh() - Start running processes, including screen
 function start_aodh {
-    if [[ "$AODH_DEPLOY" == "mod_wsgi" ]]; then
-        enable_apache_site aodh
-        restart_apache_server
-    else
-        run_process aodh-api "$AODH_BIN_DIR/uwsgi $AODH_UWSGI_FILE"
-    fi
+    run_process aodh-api "$AODH_BIN_DIR/uwsgi $AODH_UWSGI_FILE"
 
     # Only die on API if it was actually intended to be turned on
     if is_service_enabled aodh-api; then
@@ -273,10 +223,6 @@ function configure_tempest_for_aodh {
 # stop_aodh() - Stop running processes
 function stop_aodh {
     local serv
-    if [ "$AODH_DEPLOY" == "mod_wsgi" ]; then
-        disable_apache_site aodh
-        restart_apache_server
-    fi
     # Kill the aodh screen windows
     for serv in aodh-api aodh-notifier aodh-evaluator aodh-listener; do
         stop_process $serv
