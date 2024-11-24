@@ -28,7 +28,7 @@ function is_aodh_enabled {
 }
 
 function aodh_service_url {
-    echo "$AODH_SERVICE_PROTOCOL://$AODH_SERVICE_HOST:$AODH_SERVICE_PORT"
+    echo "$AODH_SERVICE_PROTOCOL://$AODH_SERVICE_HOST/alarming"
 }
 
 
@@ -61,13 +61,8 @@ function _aodh_create_accounts {
 
         create_service_user "aodh" "admin"
 
-        local aodh_service=$(get_or_create_service "aodh" \
-            "alarming" "OpenStack Alarming Service")
-        get_or_create_endpoint $aodh_service \
-            "$REGION_NAME" \
-            "$(aodh_service_url)" \
-            "$(aodh_service_url)" \
-            "$(aodh_service_url)"
+        get_or_create_service "aodh" "alarming" "OpenStack Alarming Service"
+        get_or_create_endpoint 'alarming' "$REGION_NAME" "$(aodh_service_url)"
     fi
 }
 
@@ -84,7 +79,7 @@ function preinstall_aodh {
 # cleanup_aodh() - Remove residual data files, anything left over
 # from previous runs that a clean run would need to clean up
 function cleanup_aodh {
-    :
+    remove_uwsgi_config "$AODH_UWSGI_CONF" "aodh"
 }
 
 # Set configuration for storage backend.
@@ -132,28 +127,7 @@ function configure_aodh {
     # call cleanup_aodh which will wipe the WSGI config.
 
     # iniset creates these files when it's called if they don't exist.
-    AODH_UWSGI_FILE=$AODH_CONF_DIR/aodh-uwsgi.ini
-
-    rm -f "$AODH_UWSGI_FILE"
-
-    iniset "$AODH_UWSGI_FILE" uwsgi http $AODH_SERVICE_HOST:$AODH_SERVICE_PORT
-    iniset "$AODH_UWSGI_FILE" uwsgi wsgi-file "$AODH_DIR/aodh/api/app.wsgi"
-    # This is running standalone
-    iniset "$AODH_UWSGI_FILE" uwsgi master true
-    # Set die-on-term & exit-on-reload so that uwsgi shuts down
-    iniset "$AODH_UWSGI_FILE" uwsgi die-on-term true
-    iniset "$AODH_UWSGI_FILE" uwsgi exit-on-reload true
-    iniset "$AODH_UWSGI_FILE" uwsgi threads 10
-    iniset "$AODH_UWSGI_FILE" uwsgi processes $API_WORKERS
-    iniset "$AODH_UWSGI_FILE" uwsgi enable-threads true
-    iniset "$AODH_UWSGI_FILE" uwsgi plugins python
-    iniset "$AODH_UWSGI_FILE" uwsgi lazy-apps true
-    # uwsgi recommends this to prevent thundering herd on accept.
-    iniset "$AODH_UWSGI_FILE" uwsgi thunder-lock true
-    # Override the default size for headers from the 4k default.
-    iniset "$AODH_UWSGI_FILE" uwsgi buffer-size 65535
-    # Make sure the client doesn't try to re-use the connection.
-    iniset "$AODH_UWSGI_FILE" uwsgi add-header "Connection: close"
+    write_uwsgi_config "$AODH_UWSGI_CONF" "$AODH_UWSGI" "/alarming" "" "aodh"
 }
 
 # init_aodh() - Initialize etc.
@@ -196,7 +170,7 @@ function install_aodhclient {
 
 # start_aodh() - Start running processes, including screen
 function start_aodh {
-    run_process aodh-api "$AODH_BIN_DIR/uwsgi $AODH_UWSGI_FILE"
+    run_process aodh-api "$AODH_BIN_DIR/uwsgi --ini $AODH_UWSGI_CONF"
 
     # Only die on API if it was actually intended to be turned on
     if is_service_enabled aodh-api; then
