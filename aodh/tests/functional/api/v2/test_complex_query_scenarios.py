@@ -23,12 +23,12 @@ from aodh.storage import models
 from aodh.tests.functional.api import v2 as tests_api
 
 
-admin_header = {"X-Roles": "admin",
-                "X-Project-Id":
-                "project-id1"}
-non_admin_header = {"X-Roles": "Member",
-                    "X-Project-Id":
-                    "project-id1"}
+admin_header = {"X-Roles": "admin,member,reader",
+                "X-Project-Id": "project-id1",
+                "X-User-Id": "admin-id"}
+non_admin_header = {"X-Roles": "member,reader",
+                    "X-Project-Id": "project-id1",
+                    "X-User-Id": "member-id"}
 
 RULE_TYPE = 'gnocchi_aggregation_by_metrics_threshold'
 

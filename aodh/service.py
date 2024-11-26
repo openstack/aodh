@@ -13,14 +13,12 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-import os
 
 from keystoneauth1 import loading as ka_loading
 from oslo_config import cfg
 from oslo_db import options as db_options
 import oslo_i18n
 from oslo_log import log
-from oslo_policy import opts as policy_opts
 from oslo_reports import guru_meditation_report as gmr
 from oslo_reports import opts as gmr_opts
 from oslo_utils import importutils
@@ -80,8 +78,6 @@ def prepare_service(argv=None, config_files=None, with_gmr=True,
     db_options.set_defaults(conf)
     if profiler_opts:
         profiler_opts.set_defaults(conf)
-    policy_opts.set_defaults(conf, policy_file=os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "api", "policy.yaml")))
     from aodh import opts
     # Register our own Aodh options
     for group, options in opts.list_opts():

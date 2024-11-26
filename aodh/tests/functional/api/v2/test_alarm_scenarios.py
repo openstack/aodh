@@ -127,7 +127,8 @@ class TestAlarmsBase(v2.FunctionalTest):
         self.project_id = uuidutils.generate_uuid()
         self.user_id = uuidutils.generate_uuid()
         self.auth_headers = {'X-User-Id': self.user_id,
-                             'X-Project-Id': self.project_id}
+                             'X-Project-Id': self.project_id,
+                             'X-Roles': 'member,reader'}
 
         c = mock.Mock()
         c.capabilities.list.return_value = {'aggregation_methods': [
@@ -255,22 +256,9 @@ class TestAlarms(TestAlarmsBase):
                 'granularity': '180',
             }
         }
-        self.post_json('/alarms', params=json, status=201)
+        self.post_json('/alarms', params=json, status=403)
         alarms = list(self.alarm_conn.get_alarms(enabled=False))
-        self.assertEqual(1, len(alarms))
-        # to check to BoundedInt type conversion
-        json[RULE_KEY]['evaluation_periods'] = 3
-        json[RULE_KEY]['granularity'] = 180
-        if alarms[0].name == 'added_alarm':
-            for key in json:
-                if key.endswith('_rule'):
-                    storage_key = 'rule'
-                else:
-                    storage_key = key
-                self.assertEqual(getattr(alarms[0], storage_key),
-                                 json[key])
-        else:
-            self.fail("Alarm not found")
+        self.assertEqual(0, len(alarms))
 
     @staticmethod
     def _alarm_representation_owned_by(identifiers):
@@ -482,7 +470,7 @@ class TestAlarms(TestAlarmsBase):
                     trustee_user='my_user',
                     project=self.auth_headers['X-Project-Id'],
                     impersonation=True,
-                    role_names=[])
+                    role_names=['member', 'reader'])
         alarms = list(self.alarm_conn.get_alarms())
         for alarm in alarms:
             if alarm.name == 'added_alarm_defaults':

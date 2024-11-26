@@ -12,9 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
 from oslo_middleware import cors
-from oslo_policy import opts as policy_opts
 
 
 def set_lib_defaults():
@@ -26,12 +24,6 @@ def set_lib_defaults():
     generator.html#modifying-defaults-from-other-namespaces
     """
     set_cors_middleware_defaults()
-
-    # Update default value of oslo.policy policy_file, ,
-    # enforce_scope, and enforce_new_defaults config options.
-    policy_opts.set_defaults(cfg.CONF, 'policy.yaml',
-                             enforce_scope=False,
-                             enforce_new_defaults=False)
 
 
 def set_cors_middleware_defaults():

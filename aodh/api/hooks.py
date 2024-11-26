@@ -13,19 +13,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
-from oslo_policy import opts
 from pecan import hooks
 
 from aodh.api import policies
-
-# TODO(gmann): Remove overriding the default value of config options:
-# - 'enforce_scope', and 'enforce_new_defaults' once aodh is ready with the
-# new RBAC (oslo_policy enable them by default)
-opts.set_defaults(
-    cfg.CONF,
-    enforce_scope=False,
-    enforce_new_defaults=False)
 
 
 class ConfigHook(hooks.PecanHook):
