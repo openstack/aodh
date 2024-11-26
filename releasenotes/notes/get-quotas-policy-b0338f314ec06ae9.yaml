@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    The new ``telemetry::get_quotas`` policy has been added.

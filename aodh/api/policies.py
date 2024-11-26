@@ -96,6 +96,12 @@ deprecated_query_alarm_history = policy.DeprecatedRule(
     deprecated_reason=DEPRECATED_REASON,
     deprecated_since=versionutils.deprecated.WALLABY
 )
+deprecated_get_quotas = policy.DeprecatedRule(
+    name="telemetry:get_quotas",
+    check_str=RULE_ADMIN_OR_OWNER,
+    deprecated_reason=DEPRECATED_REASON,
+    deprecated_since='Epoxy'
+)
 deprecated_update_quotas = policy.DeprecatedRule(
     name="telemetry:update_quotas",
     check_str=RULE_CONTEXT_IS_ADMIN,
@@ -280,6 +286,23 @@ rules = [
             }
         ],
         deprecated_rule=deprecated_query_alarm_history
+    ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:get_quotas",
+        check_str=PROJECT_READER,
+        scope_types=['project'],
+        description='Get resources quotas for project.',
+        operations=[
+            {
+                'path': '/v2/quotas',
+                'method': 'Get'
+            },
+            {
+                'path': '/v2/quotas/{project_id}',
+                'method': 'Get'
+            }
+        ],
+        deprecated_rule=deprecated_get_quotas
     ),
     policy.DocumentedRuleDefault(
         name="telemetry:update_quotas",
