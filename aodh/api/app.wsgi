@@ -19,5 +19,9 @@
 See http://pecan.readthedocs.org/en/latest/deployment.html for details.
 """
 from aodh.api import app
+import warnings
+
+
+warnings.warn('Using app.wsgi is deprecated. Use aodh.wsgi.api instead')
 
 application = app.build_wsgi_app(argv=[])
