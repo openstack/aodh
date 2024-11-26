@@ -67,17 +67,8 @@ def get_limited_to(req, enforcer):
     one of these.
 
     """
-    # TODO(sileht): Only filtering on role work currently for segregation
-    # oslo.policy expects the target to be the alarm. That will allow
-    # creating more enhanced rbac. But for now we enforce the
-    # scoping of request to the project-id, so...
-    target = {}
     ctxt = context.RequestContext.from_environ(req.environ)
-    # maintain backward compat with Juno and previous by using context_is_admin
-    # rule if the segregation rule (added in Kilo) is not defined
-    rules = enforcer.rules.keys()
-    rule_name = 'segregation' if 'segregation' in rules else 'context_is_admin'
-    if not enforcer.enforce(rule_name, target, ctxt.to_dict()):
+    if not enforcer.enforce('segregation', {}, ctxt.to_dict()):
         return ctxt.user_id, ctxt.project_id
 
     return None, None
