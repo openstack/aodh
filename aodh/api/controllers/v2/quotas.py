@@ -48,10 +48,9 @@ class QuotasController(rest.RestController):
         """
         request_project = pecan.request.headers.get('X-Project-Id')
         project_id = project_id if project_id else request_project
-        is_admin = rbac.is_admin(pecan.request, pecan.request.enforcer)
-
-        if project_id != request_project and not is_admin:
-            raise base.ProjectNotAuthorized(project_id)
+        rbac.enforce(
+            'get_quotas', pecan.request,
+            pecan.request.enforcer, {'project_id': project_id})
 
         LOG.debug('Getting resource quotas for project %s', project_id)
 
@@ -68,11 +67,11 @@ class QuotasController(rest.RestController):
     @wsme_pecan.wsexpose(Quotas, body=Quotas, status_code=201)
     def post(self, body):
         """Create or update quota."""
-        rbac.enforce('update_quotas', pecan.request,
-                     pecan.request.enforcer, {})
-
         params = body.to_dict()
         project_id = params['project_id']
+
+        rbac.enforce('update_quotas', pecan.request,
+                     pecan.request.enforcer, {'project_id': project_id})
 
         input_quotas = []
         for i in params.get('quotas', []):
@@ -87,5 +86,5 @@ class QuotasController(rest.RestController):
     def delete(self, project_id):
         """Delete quotas for the given project."""
         rbac.enforce('delete_quotas', pecan.request,
-                     pecan.request.enforcer, {})
+                     pecan.request.enforcer, {'project_id': project_id})
         pecan.request.storage.delete_quotas(project_id)
