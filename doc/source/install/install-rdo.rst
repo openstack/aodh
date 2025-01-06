@@ -26,7 +26,7 @@ Install and configure components
 
    .. code-block:: console
 
-      # yum install openstack-aodh-api \
+      # dnf install openstack-aodh-api \
         openstack-aodh-evaluator openstack-aodh-notifier \
         openstack-aodh-listener openstack-aodh-expirer \
         python-aodhclient
