@@ -13,6 +13,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import os
 import webtest
 
@@ -58,7 +59,9 @@ class TestMetrics(v2.FunctionalTest):
     def setUp(self):
         super(TestMetrics, self).setUp()
         self.project_id = "some_project_id"
+        self.project_id2 = "some_project_id2"
         self.alarm_id = "some_alarm_id"
+        self.alarm_id2 = "some_alarm_id2"
         self.user_id = "some_user_id"
         self.role = "reader"
         self.auth_headers = {'X-User-Id': self.user_id,
@@ -67,6 +70,11 @@ class TestMetrics(v2.FunctionalTest):
         self.alarm_conn.create_alarm(getTestAlarm(
             self.alarm_id,
             self.project_id,
+            self.user_id)
+        )
+        self.alarm_conn.create_alarm(getTestAlarm(
+            self.alarm_id2,
+            self.project_id2,
             self.user_id)
         )
         self.alarm_conn.increment_alarm_counter(
@@ -83,6 +91,11 @@ class TestMetrics(v2.FunctionalTest):
             self.alarm_id,
             self.project_id,
             "insufficient_data"
+        )
+        self.alarm_conn.increment_alarm_counter(
+            self.alarm_id2,
+            self.project_id2,
+            "alarm"
         )
 
     def test_get_all_metrics_inside_project(self):
@@ -111,6 +124,49 @@ class TestMetrics(v2.FunctionalTest):
         self.app = webtest.TestApp(app.load_app(self.CONF))
 
         response = self.get_json('/metrics',
+                                 expect_errors=True,
+                                 status=403,
+                                 headers=self.auth_headers)
+        faultstring = 'RBAC Authorization Failed'
+        self.assertEqual(403, response.status_code)
+        self.assertEqual(faultstring,
+                         response.json['error_message']['faultstring'])
+
+    def test_get_all_metrics_all_projects(self):
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Roles'] = 'admin'
+        expected = {
+            "evaluation_results": [{
+                "alarm_id": self.alarm_id,
+                "project_id": self.project_id,
+                "state_counters": {
+                    "ok": 1,
+                    "insufficient data": 2,
+                    "alarm": 0
+                }
+            }, {
+                "alarm_id": self.alarm_id2,
+                "project_id": self.project_id2,
+                "state_counters": {
+                    "ok": 0,
+                    "insufficient data": 0,
+                    "alarm": 1
+                }
+            }]
+        }
+        metrics = self.get_json(
+            '/metrics?all_projects=true',
+            headers=auth_headers,
+        )
+        self.assertEqual(expected, metrics)
+
+    def test_get_all_metrics_all_projects_forbidden(self):
+        pf = os.path.abspath('aodh/tests/functional/api/v2/policy.yaml-test')
+        self.CONF.set_override('policy_file', pf, group='oslo_policy')
+        self.CONF.set_override('auth_mode', None, group='api')
+        self.app = webtest.TestApp(app.load_app(self.CONF))
+
+        response = self.get_json('/metrics?all_projects=true',
                                  expect_errors=True,
                                  status=403,
                                  headers=self.auth_headers)

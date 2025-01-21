@@ -342,6 +342,18 @@ rules = [
             }
         ]
     ),
+    policy.DocumentedRuleDefault(
+        name="telemetry:get_metrics:all_projects",
+        check_str=PROJECT_ADMIN,
+        scope_types=['project'],
+        description='Get all metrics from all projects.',
+        operations=[
+            {
+                'path': '/v2/metrics',
+                'method': 'GET'
+            }
+        ]
+    ),
 ]
 
 

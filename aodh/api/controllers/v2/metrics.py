@@ -80,8 +80,8 @@ class MetricsController(rest.RestController):
             result[c.project_id][c.alarm_id][c.state] = c.value
         return result
 
-    @wsme_pecan.wsexpose(MetricsOutput)
-    def get_all(self):
+    @wsme_pecan.wsexpose(MetricsOutput, bool)
+    def get_all(self, all_projects=False):
         """Return all metrics"""
         if not pecan.request.cfg.enable_evaluation_results_metrics:
             raise base.ClientSideError(_(
@@ -91,16 +91,23 @@ class MetricsController(rest.RestController):
         project_id = pecan.request.headers.get('X-Project-Id')
         target = {"project_id": project_id}
 
-        rbac.enforce('get_metrics', pecan.request.headers,
-                     pecan.request.enforcer, target)
+        counters = []
+        LOG.debug('Getting evaluation result counters from database')
+        if all_projects is True:
+            rbac.enforce('get_metrics:all_projects', pecan.request.headers,
+                         pecan.request.enforcer, target)
+            counters = pecan.request.storage.get_alarm_counters()
+        else:
+            rbac.enforce('get_metrics', pecan.request.headers,
+                         pecan.request.enforcer, target)
+            counters = pecan.request.storage.get_alarm_counters(
+                project_id=project_id
+            )
 
         content = MetricsOutput()
         alarm_states = [evaluator.UNKNOWN, evaluator.OK, evaluator.ALARM]
 
-        LOG.debug('Getting evaluation result counters from database')
-        grouped_counters = self.group_counters(
-            pecan.request.storage.get_alarm_counters(project_id=project_id)
-        )
+        grouped_counters = self.group_counters(counters)
         evaluation_results = []
         for project, alarms in grouped_counters.items():
             for alarm, states in alarms.items():
