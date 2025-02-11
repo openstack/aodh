@@ -265,5 +265,5 @@ class TestPartitioning(base.BaseTestCase):
         self.assertTrue(coord._coordinator.is_started)
         coord.join_group("123")
         coord.stop()
-        self.assertIsEmpty(coord._groups)
+        self.assertEqual(0, len(coord._groups))
         self.assertIsNone(coord._coordinator)
