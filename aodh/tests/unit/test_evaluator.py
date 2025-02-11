@@ -156,8 +156,9 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         time.sleep(1)
 
         child = {'enabled': True, 'type': {'ne': 'event'}}
-        self.assertDictContains(svc.storage_conn.get_alarms.call_args[1],
-                                child)
+        self.assertLessEqual(
+            child.items(),
+            svc.storage_conn.get_alarms.call_args[1].items())
 
     def test_evaluation_cycle_no_coordination(self):
         alarm = mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
