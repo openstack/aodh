@@ -36,6 +36,7 @@ COMPARATORS = {
 OPTS = [
     cfg.IntOpt('additional_ingestion_lag',
                min=0,
+               max=3600 * 24,
                default=0,
                help='The number of seconds to extend the evaluation windows '
                'to compensate the reporting/ingestion lag.')
