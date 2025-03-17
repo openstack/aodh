@@ -12,6 +12,7 @@
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
             irrelevant-files: &aodh-irrelevant-files
+              - ^\.gitreview$
               - ^(test-|)requirements.txt$
               - ^setup.cfg$
               - ^doc/.*$
