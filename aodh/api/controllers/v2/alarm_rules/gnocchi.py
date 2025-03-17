@@ -59,10 +59,12 @@ class AlarmGnocchiThresholdRule(base.AlarmRule):
     aggregation_method = wsme.wsattr(wtypes.text, mandatory=True)
     "The aggregation_method to compare to the threshold"
 
-    evaluation_periods = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
+    evaluation_periods = wsme.wsattr(wtypes.IntegerType(
+        minimum=1, maximum=100), default=1)
     "The number of historical periods to evaluate the threshold"
 
-    granularity = wsme.wsattr(wtypes.IntegerType(minimum=1), default=60)
+    granularity = wsme.wsattr(wtypes.IntegerType(
+        minimum=1, maximum=3600 * 24 * 365), default=60)
     "The time range in seconds over which query"
 
     cache = cachetools.TTLCache(maxsize=1, ttl=3600)
