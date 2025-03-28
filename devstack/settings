@@ -10,6 +10,8 @@ enable_service aodh-listener
 AODH_DIR=$DEST/aodh
 AODH_CONF_DIR=/etc/aodh
 AODH_CONF=$AODH_CONF_DIR/aodh.conf
+AODH_UWSGI_CONF=$AODH_CONF_DIR/aodh-uwsgi.ini
+AODH_UWSGI=$AODH_DIR/aodh/api/app.wsgi
 
 # Set up database backend
 AODH_BACKEND=${AODH_BACKEND:-mysql}
