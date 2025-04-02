@@ -1,0 +1,10 @@
+---
+deprecations:
+  - >
+    Deprecate the prometheus_disable_rbac config option.
+    The observabilityclient rbac feature isn't meant for services and will
+    always be disabled from now on.
+fixes:
+  - >
+    [`bug 2106029 <https://bugs.launchpad.net/aodh/+bug/2106029>`_]
+    Fix Prometheus type queries misusing observabilityclient rbac feature.

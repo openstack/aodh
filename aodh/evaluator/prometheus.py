@@ -26,7 +26,13 @@ LOG = log.getLogger(__name__)
 OPTS = [
     cfg.BoolOpt('prometheus_disable_rbac',
                 default=False,
-                help='Disable RBAC for Prometheus evaluator.'),
+                help='Disable RBAC for Prometheus evaluator.',
+                deprecated_for_removal=True,
+                deprecated_reason="Prometheus RBAC is always disabled. "
+                                  "It's not possible to correctly use "
+                                  "client-side rbac enforcement from within "
+                                  "services. Using it can cause issues.",
+                deprecated_since="Flamingo")
 ]
 
 
@@ -34,7 +40,6 @@ class PrometheusBase(threshold.ThresholdEvaluator):
     def __init__(self, conf):
         super(PrometheusBase, self).__init__(conf)
         self._set_obsclient(conf)
-        self._no_rbac = conf.prometheus_disable_rbac
 
     def _set_obsclient(self, conf):
         session = keystone_client.get_session(conf)
@@ -44,7 +49,7 @@ class PrometheusBase(threshold.ThresholdEvaluator):
 
     def _get_metric_data(self, query):
         LOG.debug(f'Querying Prometheus instance on: {query}')
-        return self._prom.query.query(query, disable_rbac=self._no_rbac)
+        return self._prom.query.query(query, disable_rbac=True)
 
 
 class PrometheusEvaluator(PrometheusBase):
