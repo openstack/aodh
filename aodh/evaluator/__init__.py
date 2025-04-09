@@ -112,6 +112,11 @@ class Evaluator(object, metaclass=abc.ABCMeta):
         self.alarm_change_notifier.info({},
                                         notification, payload)
 
+    def _increment_evaluation_result(self, alarm_id, project_id, state):
+        if self.conf.enable_evaluation_results_metrics:
+            self._storage_conn.increment_alarm_counter(
+                alarm_id, project_id, state)
+
     def _refresh(self, alarm, state, reason, reason_data, always_record=False):
         """Refresh alarm state."""
         try:

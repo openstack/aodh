@@ -6,3 +6,4 @@
 "admin_or_owner": "rule:context_is_admin or project_id:%(project_id)s"
 "default": "rule:admin_or_owner"
 "telemetry:get_alarms": "role:admin"
+"telemetry:get_metrics": "role:admin"

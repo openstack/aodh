@@ -150,12 +150,21 @@ class TestGnocchiEvaluatorBase(base.TestEvaluatorBase):
         self._assert_all_alarms('ok')
 
     def _test_simple_insufficient(self):
+        self.conf.set_override('enable_evaluation_results_metrics', True)
         self._set_all_alarms('ok')
         self._evaluate_all_alarms()
         self._assert_all_alarms('insufficient data')
         expected = [mock.call(alarm) for alarm in self.alarms]
         update_calls = self.storage_conn.update_alarm.call_args_list
         self.assertEqual(expected, update_calls)
+        expected = [mock.call(
+            alarm.alarm_id,
+            alarm.project_id,
+            "insufficient_data")
+            for alarm in self.alarms]
+        counter_increments = (
+            self.storage_conn.increment_alarm_counter.call_args_list)
+        self.assertEqual(expected, counter_increments)
         expected = [mock.call(
             alarm,
             'ok',

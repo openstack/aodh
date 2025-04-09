@@ -141,3 +141,23 @@ class Quota(Base):
     project_id = Column(String(128), nullable=False)
     resource = Column(String(50), nullable=False)
     limit = Column(Integer, nullable=False)
+
+
+class AlarmCounter(Base):
+    __tablename__ = 'alarm_counter'
+    __table_args__ = (
+        sa.UniqueConstraint('alarm_id', 'project_id', 'state'),
+        Index('ix_%s_alarm_id' % __tablename__,
+              'alarm_id'),
+        Index('ix_%s_state' % __tablename__,
+              'state'),
+        Index('ix_%s_project_id' % __tablename__,
+              'project_id'),
+    )
+
+    id = Column(String(36), primary_key=True, default=uuidutils.generate_uuid)
+    alarm_id = Column(String(128), sa.ForeignKey('alarm.alarm_id'),
+                      nullable=False)
+    project_id = Column(String(128), nullable=False)
+    state = Column(String(128), nullable=False)
+    value = Column(Integer, nullable=False)

@@ -177,3 +177,7 @@ class ThresholdEvaluator(evaluator.Evaluator):
             evaluation = (evaluator.UNKNOWN, None, e.statistics, 0,
                           e.reason)
         self._transition_alarm(alarm, *evaluation)
+        if evaluation[0] is not None:
+            self._increment_evaluation_result(alarm.alarm_id,
+                                              alarm.project_id,
+                                              evaluation[0].replace(" ", "_"))

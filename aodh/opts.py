@@ -14,6 +14,7 @@
 import itertools
 
 from keystoneauth1 import loading
+from oslo_config import cfg
 
 import aodh.api
 import aodh.api.controllers.v2.alarm_rules.gnocchi
@@ -32,6 +33,12 @@ import aodh.notifier.zaqar
 import aodh.service
 import aodh.storage
 
+OPTS = [
+    cfg.BoolOpt('enable_evaluation_results_metrics',
+                default=False,
+                help=("Whether metric collection should be enabled.")),
+]
+
 
 def list_opts():
     return [
@@ -44,7 +51,8 @@ def list_opts():
              aodh.evaluator.loadbalancer.OPTS,
              aodh.notifier.rest.OPTS,
              aodh.queue.OPTS,
-             aodh.service.OPTS)),
+             aodh.service.OPTS,
+             OPTS)),
         ('api',
          itertools.chain(
              aodh.api.OPTS,

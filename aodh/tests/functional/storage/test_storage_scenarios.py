@@ -245,9 +245,30 @@ class AlarmTest(AlarmTestBase):
     def test_delete(self):
         self.add_some_alarms()
         victim = list(self.alarm_conn.get_alarms(name='orange-alert'))[0]
+        self.alarm_conn.increment_alarm_counter(
+            victim.alarm_id,
+            victim.project_id,
+            "ok"
+        )
+        self.assertEqual(
+            1,
+            self.alarm_conn.get_alarm_counters(
+                victim.alarm_id,
+                victim.project_id,
+                "ok"
+            )[0].value
+        )
         self.alarm_conn.delete_alarm(victim.alarm_id)
         survivors = list(self.alarm_conn.get_alarms())
         self.assertEqual(2, len(survivors))
+        self.assertEqual(
+            [],
+            self.alarm_conn.get_alarm_counters(
+                victim.alarm_id,
+                victim.project_id,
+                "ok"
+            )
+        )
         for s in survivors:
             self.assertNotEqual(victim.name, s.name)
 
@@ -506,3 +527,55 @@ class ComplexAlarmHistoryQueryTest(AlarmTestBase):
                           alarm_models.AlarmChange.RULE_CHANGE,
                           alarm_models.AlarmChange.STATE_TRANSITION],
                          [h.type for h in history])
+
+
+class AlarmCounterTest(AlarmTestBase):
+    def test_get_value_of_empty_counter(self):
+        counter_name = "some_empty_unused_counter"
+        self.assertEqual([], self.alarm_conn.get_alarm_counters(
+            "some_alarm_id",
+            "some_project_id",
+            counter_name))
+
+    def test_counter_increment(self):
+        self.add_some_alarms()
+        alarm = list(self.alarm_conn.get_alarms(name='orange-alert'))[0]
+        counter_name = "counter_for_increment_testing"
+        project_id = alarm.project_id
+        alarm_id = alarm.alarm_id
+
+        self.assertEqual([], self.alarm_conn.get_alarm_counters(
+            alarm_id,
+            project_id,
+            counter_name
+        ))
+
+        for i in range(5):
+            self.alarm_conn.increment_alarm_counter(
+                alarm_id,
+                project_id,
+                counter_name
+            )
+        self.assertEqual(
+            5,
+            self.alarm_conn.get_alarm_counters(
+                alarm_id,
+                project_id,
+                counter_name
+            )[0].value
+        )
+
+        for i in range(3):
+            self.alarm_conn.increment_alarm_counter(
+                alarm_id,
+                project_id,
+                counter_name
+            )
+        self.assertEqual(
+            8,
+            self.alarm_conn.get_alarm_counters(
+                alarm_id,
+                project_id,
+                counter_name
+            )[0].value
+        )

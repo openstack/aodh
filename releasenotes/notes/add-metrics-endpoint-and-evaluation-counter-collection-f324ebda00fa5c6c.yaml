@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Added collection of alarm evaluation counters. These show the number of
+    times alarms were evaluated as ``alarm``, ``ok`` and ``insufficient data``
+    per alarm. These counters are presented by the /v2/metrics API endpoint.
+    This feature can be enabled or disabled with
+    the ``[DEFAULT].enable_evaluation_results_metrics`` configuration option.
+    It's disabled by default.

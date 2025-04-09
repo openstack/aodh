@@ -160,3 +160,14 @@ class Quota(base.Model):
             project_id=project_id,
             resource=resource,
             limit=limit)
+
+
+class AlarmCounter(base.Model):
+    def __init__(self, alarm_id, project_id, state):
+        base.Model.__init__(
+            self,
+            alarm_id=alarm_id,
+            project_id=project_id,
+            state=state,
+            value=0
+        )
