@@ -22,7 +22,7 @@ from aodh.tests import base
 class TestUpgradeChecks(base.BaseTestCase):
 
     def setUp(self):
-        super(TestUpgradeChecks, self).setUp()
+        super().setUp()
         self.cmd = status.Checks()
         cfg.CONF(args=[], project='aodh')
 

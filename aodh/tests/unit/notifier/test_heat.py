@@ -38,7 +38,7 @@ class TestTrustHeatAlarmNotifier(base.TestNotifierBase):
             ]
         }
 
-        class FakeResource(object):
+        class FakeResource:
             def __init__(self, resource_name):
                 self.parent_resource = resource_name
 

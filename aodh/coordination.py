@@ -51,19 +51,19 @@ OPTS = [
 
 class ErrorJoiningPartitioningGroup(Exception):
     def __init__(self):
-        super(ErrorJoiningPartitioningGroup, self).__init__((
-            'Error occurred when joining partitioning group'))
+        super().__init__(
+            'Error occurred when joining partitioning group')
 
 
 class MemberNotInGroupError(Exception):
     def __init__(self, group_id, members, my_id):
-        super(MemberNotInGroupError, self).__init__((
+        super().__init__((
             'Group ID: %(group_id)s, Members: %(members)s, Me: %(me)s: '
             'Current agent is not part of group and cannot take tasks') %
             {'group_id': group_id, 'members': members, 'me': my_id})
 
 
-class HashRing(object):
+class HashRing:
 
     def __init__(self, nodes, replicas=100):
         self._ring = dict()
@@ -71,7 +71,7 @@ class HashRing(object):
 
         for node in nodes:
             for r in range(replicas):
-                hashed_key = self._hash('%s-%s' % (node, r))
+                hashed_key = self._hash('{}-{}'.format(node, r))
                 self._ring[hashed_key] = node
                 self._sorted_keys.append(hashed_key)
         self._sorted_keys.sort()
@@ -94,7 +94,7 @@ class HashRing(object):
         return self._ring[self._sorted_keys[pos]]
 
 
-class PartitionCoordinator(object):
+class PartitionCoordinator:
     """Workload partitioning coordinator.
 
     This class uses the `tooz` library to manage group membership.

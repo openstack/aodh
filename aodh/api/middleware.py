@@ -30,7 +30,7 @@ from aodh import i18n
 LOG = log.getLogger(__name__)
 
 
-class ParsableErrorMiddleware(object):
+class ParsableErrorMiddleware:
     """Replace error body with something the client can parse."""
 
     @staticmethod
@@ -59,10 +59,10 @@ class ParsableErrorMiddleware(object):
                 status_code = int(status.split(' ')[0])
                 state['status_code'] = status_code
             except (ValueError, TypeError):  # pragma: nocover
-                raise Exception((
+                raise Exception(
                     'ErrorDocumentMiddleware received an invalid '
                     'status %s' % status
-                ))
+                )
             else:
                 if (state['status_code'] // 100) not in (2, 3):
                     # Remove some headers so we can replace them later

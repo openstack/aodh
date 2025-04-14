@@ -54,7 +54,7 @@ def _recursive_keypairs(d, separator=':'):
     for name, value in sorted(d.items()):
         if isinstance(value, dict):
             for subname, subvalue in _recursive_keypairs(value, separator):
-                yield ('%s%s%s' % (name, separator, subname), subvalue)
+                yield ('{}{}{}'.format(name, separator, subname), subvalue)
         elif isinstance(value, (tuple, list)):
             yield name, _decode_unicode(value)
         else:
@@ -62,7 +62,7 @@ def _recursive_keypairs(d, separator=':'):
 
 
 def _flatten_capabilities(capabilities):
-    return dict((k, v) for k, v in _recursive_keypairs(capabilities))
+    return {k: v for k, v in _recursive_keypairs(capabilities)}
 
 
 class Capabilities(base.Base):

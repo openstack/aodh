@@ -20,7 +20,7 @@ from aodh import service
 
 class TestNotifierBase(base.BaseTestCase):
     def setUp(self):
-        super(TestNotifierBase, self).setUp()
+        super().setUp()
 
         conf = service.prepare_service(argv=[], config_files=[])
 

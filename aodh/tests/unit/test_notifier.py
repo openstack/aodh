@@ -49,7 +49,7 @@ NOTIFICATION = dict(alarm_id='foobar',
 class TestAlarmNotifierService(tests_base.BaseTestCase):
 
     def setUp(self):
-        super(TestAlarmNotifierService, self).setUp()
+        super().setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
@@ -61,7 +61,7 @@ class TestAlarmNotifierService(tests_base.BaseTestCase):
 
 class TestKeystoneClient(tests_base.BaseTestCase):
     def setUp(self):
-        super(TestKeystoneClient, self).setUp()
+        super().setUp()
         self.config = fixture_config.Config(
             service.prepare_service(argv=[], config_files=[]))
         self.config.setUp()
@@ -107,7 +107,7 @@ class TestKeystoneClient(tests_base.BaseTestCase):
 
 class TestAlarmNotifier(tests_base.BaseTestCase):
     def setUp(self):
-        super(TestAlarmNotifier, self).setUp()
+        super().setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.setup_messaging(self.CONF)
@@ -471,7 +471,7 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.assertEqual(1, self.zaqar.posts)
 
 
-class FakeZaqarClient(object):
+class FakeZaqarClient:
 
     def __init__(self, testcase):
         self.testcase = testcase
@@ -491,7 +491,7 @@ class FakeZaqarClient(object):
         self.subscriptions += 1
 
 
-class FakeZaqarQueue(object):
+class FakeZaqarQueue:
 
     def __init__(self, client):
         self.client = client

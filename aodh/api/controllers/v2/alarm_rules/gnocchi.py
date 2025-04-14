@@ -76,7 +76,7 @@ class AlarmGnocchiThresholdRule(base.AlarmRule):
         aggregation_method = alarm_rule.aggregation_method
         if aggregation_method not in cls._get_aggregation_methods():
             raise base.ClientSideError(
-                'aggregation_method should be in %s not %s' % (
+                'aggregation_method should be in {} not {}'.format(
                     cls._get_aggregation_methods(), aggregation_method))
 
     @staticmethod
@@ -164,8 +164,7 @@ class AggregationMetricByResourcesLookupRule(AlarmGnocchiThresholdRule):
 
     @classmethod
     def validate_alarm(cls, alarm):
-        super(AggregationMetricByResourcesLookupRule,
-              cls).validate_alarm(alarm)
+        super().validate_alarm(alarm)
 
         rule = alarm.gnocchi_aggregation_by_resources_threshold_rule
 

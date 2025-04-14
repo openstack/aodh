@@ -39,7 +39,7 @@ OPTS = [
 
 class LoadBalancerMemberHealthEvaluator(evaluator.Evaluator):
     def __init__(self, conf):
-        super(LoadBalancerMemberHealthEvaluator, self).__init__(conf)
+        super().__init__(conf)
         self._lb_client = None
 
     @property

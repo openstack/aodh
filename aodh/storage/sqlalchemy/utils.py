@@ -21,7 +21,7 @@ from sqlalchemy import not_
 from sqlalchemy import or_
 
 
-class QueryTransformer(object):
+class QueryTransformer:
     operators = {"=": operator.eq,
                  "<": operator.lt,
                  ">": operator.gt,

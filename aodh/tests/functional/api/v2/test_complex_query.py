@@ -27,17 +27,16 @@ from aodh.storage import models as alarm_models
 
 class FakeComplexQuery(query.ValidatedComplexQuery):
     def __init__(self, db_model, additional_name_mapping=None, metadata=False):
-        super(FakeComplexQuery, self).__init__(query=None,
-                                               db_model=db_model,
-                                               additional_name_mapping=(
-                                                   additional_name_mapping or
-                                                   {}),
-                                               metadata_allowed=metadata)
+        super().__init__(
+            query=None,
+            db_model=db_model,
+            additional_name_mapping=(additional_name_mapping or {}),
+            metadata_allowed=metadata)
 
 
 class TestComplexQuery(base.BaseTestCase):
     def setUp(self):
-        super(TestComplexQuery, self).setUp()
+        super().setUp()
         self.useFixture(fixtures.MonkeyPatch(
             'pecan.response', mock.MagicMock()))
         self.query = FakeComplexQuery(alarm_models.Alarm)

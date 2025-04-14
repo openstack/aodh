@@ -55,7 +55,7 @@ class TimestampUTC(TypeDecorator):
         return self.impl
 
 
-class AodhBase(object):
+class AodhBase:
     """Base class for Aodh Models."""
     __table_args__ = {'mysql_charset': "utf8",
                       'mysql_engine': "InnoDB"}

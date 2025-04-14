@@ -56,7 +56,7 @@ class InvalidEvent(Exception):
     """Error raised when the received event is missing mandatory fields."""
 
 
-class Event(object):
+class Event:
     """Wrapped event object to hold converted values for this evaluator."""
 
     TRAIT_FIELD = 0
@@ -110,7 +110,7 @@ class Event(object):
         return v
 
 
-class Alarm(object):
+class Alarm:
     """Wrapped alarm object to hold converted values for this evaluator."""
 
     TRAIT_TYPES = {
@@ -149,7 +149,7 @@ class Alarm(object):
 class EventAlarmEvaluator(evaluator.Evaluator):
 
     def __init__(self, conf):
-        super(EventAlarmEvaluator, self).__init__(conf)
+        super().__init__(conf)
         self.caches = {}
 
     def evaluate_events(self, events):
@@ -260,9 +260,9 @@ class EventAlarmEvaluator(evaluator.Evaluator):
         self._refresh(alarm.obj, state, reason, reason_data, always_record)
 
     def _refresh(self, alarm, state, reason, reason_data, always_record):
-        super(EventAlarmEvaluator, self)._refresh(alarm, state,
-                                                  reason, reason_data,
-                                                  always_record)
+        super()._refresh(alarm, state,
+                         reason, reason_data,
+                         always_record)
 
         project = alarm.project_id
         if self.conf.event_alarm_cache_ttl and project in self.caches:

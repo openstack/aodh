@@ -118,7 +118,7 @@ class TestGnocchiEvaluatorBase(base.TestEvaluatorBase):
                          ),
 
         ]
-        super(TestGnocchiEvaluatorBase, self).setUp()
+        super().setUp()
 
     @staticmethod
     def _get_stats(granularity, values, aggregated=False):

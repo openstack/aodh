@@ -58,7 +58,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
     """
 
     def __init__(self, conf):
-        super(ZaqarAlarmNotifier, self).__init__(conf)
+        super().__init__(conf)
         self.conf = conf
         self._zclient = None
         self._zendpoint = None
@@ -169,8 +169,8 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
 
             if queue_name is None:
                 # queue_name is a combination of <alarm-id>-<topic>
-                queue_name = "%s-%s" % (message['body']['alarm_id'],
-                                        queue_info.get('topic')[-1])
+                queue_name = "{}-{}".format(message['body']['alarm_id'],
+                                            queue_info.get('topic')[-1])
 
             # create a queue in zaqar
             queue = zaqar_client.queue(queue_name)

@@ -31,7 +31,7 @@ VALUE = 2
 
 class GnocchiBase(threshold.ThresholdEvaluator):
     def __init__(self, conf):
-        super(GnocchiBase, self).__init__(conf)
+        super().__init__(conf)
         self._gnocchi_client = client.Client(
             '1', keystone_client.get_session(conf),
             adapter_options={

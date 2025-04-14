@@ -21,7 +21,7 @@ from aodh import messaging
 
 class MessagingTests(base.BaseTestCase):
     def setUp(self):
-        super(MessagingTests, self).setUp()
+        super().setUp()
         self.CONF = self.useFixture(fixture_config.Config()).conf
         self.useFixture(oslo_messaging.conffixture.ConfFixture(self.CONF))
 

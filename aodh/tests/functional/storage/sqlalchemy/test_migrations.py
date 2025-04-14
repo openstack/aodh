@@ -32,7 +32,7 @@ class ModelsMigrationsSync(tests_db.TestBase,
                            metaclass=ABCSkip):
 
     def setUp(self):
-        super(ModelsMigrationsSync, self).setUp()
+        super().setUp()
         self.db = mock.Mock()
 
     @staticmethod

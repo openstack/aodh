@@ -25,7 +25,7 @@ from aodh.api.controllers.v2 import query
 from aodh.api.controllers.v2 import quotas
 
 
-class V2Controller(object):
+class V2Controller:
     """Version 2 API controller root."""
 
     alarms = alarms.AlarmsController()

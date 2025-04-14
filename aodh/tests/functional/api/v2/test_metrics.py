@@ -56,7 +56,7 @@ def getTestAlarm(alarm_id, project_id, user_id):
 
 class TestMetrics(v2.FunctionalTest):
     def setUp(self):
-        super(TestMetrics, self).setUp()
+        super().setUp()
         self.project_id = "some_project_id"
         self.alarm_id = "some_alarm_id"
         self.user_id = "some_user_id"

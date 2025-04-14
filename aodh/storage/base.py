@@ -35,7 +35,7 @@ def update_nested(original_dict, updates):
     return dict_to_update
 
 
-class Model(object):
+class Model:
     """base class for storage api models."""
 
     def __init__(self, **kwds):
@@ -63,10 +63,10 @@ class Model(object):
     @classmethod
     def get_field_names(cls):
         fields = get_func_valid_keys(cls.__init__)
-        return set(fields) - set(["self"])
+        return set(fields) - {"self"}
 
 
-class Connection(object):
+class Connection:
     """Base class for alarm storage system connections."""
 
     # A dictionary representing the capabilities of this driver.

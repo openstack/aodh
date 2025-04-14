@@ -42,7 +42,7 @@ class DBTestBase(tests_db.TestBase):
         return side_effect
 
     def setUp(self):
-        super(DBTestBase, self).setUp()
+        super().setUp()
         patcher = mock.patch.object(timeutils, 'utcnow')
         self.addCleanup(patcher.stop)
         self.mock_utcnow = patcher.start()
@@ -371,7 +371,7 @@ class ComplexAlarmQueryTest(AlarmTestBase):
 
         self.assertEqual(1, len(result))
         for a in result:
-            self.assertIn(a.name, set(["yellow-alert", "red-alert"]))
+            self.assertIn(a.name, {"yellow-alert", "red-alert"})
             self.assertTrue(a.enabled)
 
     def test_filter_with_regexp(self):

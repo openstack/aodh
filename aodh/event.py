@@ -39,7 +39,7 @@ OPTS = [
 ]
 
 
-class EventAlarmEndpoint(object):
+class EventAlarmEndpoint:
 
     def __init__(self, evaluator):
         self.evaluator = evaluator
@@ -52,7 +52,7 @@ class EventAlarmEndpoint(object):
 
 class EventAlarmEvaluationService(cotyledon.Service):
     def __init__(self, worker_id, conf):
-        super(EventAlarmEvaluationService, self).__init__(worker_id)
+        super().__init__(worker_id)
         self.conf = conf
         self.storage_conn = storage.get_connection_from_config(self.conf)
         self.evaluator = event.EventAlarmEvaluator(self.conf)

@@ -39,7 +39,7 @@ class BaseCompositeEvaluate(base.TestEvaluatorBase):
         self.client = self.useFixture(fixtures.MockPatch(
             'aodh.evaluator.gnocchi.client'
         )).mock.Client.return_value
-        super(BaseCompositeEvaluate, self).setUp()
+        super().setUp()
 
     @staticmethod
     def _get_gnocchi_stats(granularity, values, aggregated=False):

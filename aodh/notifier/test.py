@@ -21,7 +21,7 @@ class TestAlarmNotifier(notifier.AlarmNotifier):
     "Test alarm notifier."""
 
     def __init__(self, conf):
-        super(TestAlarmNotifier, self).__init__(conf)
+        super().__init__(conf)
         self.notifications = []
 
     def notify(self, action, alarm_id, alarm_name, severity,

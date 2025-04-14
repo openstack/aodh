@@ -23,7 +23,7 @@ from aodh import service
 from aodh.tests import base
 
 
-class MockToozCoordinator(object):
+class MockToozCoordinator:
     def __init__(self, member_id, shared_storage):
         self._member_id = member_id
         self._groups = shared_storage
@@ -124,7 +124,7 @@ class TestHashRing(base.BaseTestCase):
             assignments[k] = n
 
         # at least something in each bucket
-        self.assertTrue(all((c > 0 for c in buckets)))
+        self.assertTrue(all(c > 0 for c in buckets))
 
         # approximately even distribution
         diff = max(buckets) - min(buckets)
@@ -144,7 +144,7 @@ class TestHashRing(base.BaseTestCase):
 class TestPartitioning(base.BaseTestCase):
 
     def setUp(self):
-        super(TestPartitioning, self).setUp()
+        super().setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.shared_storage = {}
@@ -195,7 +195,7 @@ class TestPartitioning(base.BaseTestCase):
                          sorted(self.shared_storage.keys()))
 
     def test_member_id(self):
-        agent = 'agent'.encode('ascii')
+        agent = b'agent'
         coord = self._get_new_started_coordinator({}, agent)
         self.assertEqual(agent, coord._my_id)
 

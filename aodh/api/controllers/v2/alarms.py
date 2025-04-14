@@ -76,11 +76,11 @@ severity_kind_enum = wtypes.Enum(str, *severity_kind)
 ALARM_REASON_DEFAULT = "Not evaluated yet"
 ALARM_REASON_MANUAL = "Manually set via API"
 
-ALARM_QUERY_FIELDS_ALLOWED = set([
+ALARM_QUERY_FIELDS_ALLOWED = {
     'all_projects', 'user_id', 'project_id', 'type', 'name', 'enabled',
     'state', 'severity', 'timestamp', 'repeat_actions'
-])
-ALARM_QUERY_OPS_ALLOWED = set(['eq'])
+}
+ALARM_QUERY_OPS_ALLOWED = {'eq'}
 
 
 class OverQuota(base.ClientSideError):
@@ -89,7 +89,7 @@ class OverQuota(base.ClientSideError):
             'u': data.user_id,
             'p': data.project_id
         }
-        super(OverQuota, self).__init__(
+        super().__init__(
             _("Alarm quota exceeded for user %(u)s on project %(p)s") % d,
             status_code=403)
 
@@ -276,7 +276,7 @@ class Alarm(base.Base):
     "The latest alarm evaluation time"
 
     def __init__(self, rule=None, time_constraints=None, **kwargs):
-        super(Alarm, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         if rule:
             setattr(self, '%s_rule' % self.type,
@@ -395,7 +395,7 @@ class Alarm(base.Base):
                    )
 
     def as_dict(self, db_model):
-        d = super(Alarm, self).as_dict(db_model)
+        d = super().as_dict(db_model)
         for k in d:
             if k.endswith('_rule'):
                 del d[k]
@@ -469,7 +469,7 @@ class Alarm(base.Base):
                         else:
                             pw = ':delete'
                             trust_id_used = True
-                        netloc = '%s%s@%s' % (trust_id, pw, url.netloc)
+                        netloc = '{}{}@{}'.format(trust_id, pw, url.netloc)
                         url = urlparse.SplitResult(url.scheme, netloc,
                                                    url.path, url.query,
                                                    url.fragment)
@@ -546,9 +546,9 @@ def _send_notification(event, payload):
 
 def stringify_timestamps(data):
     """Stringify any datetimes in given dict."""
-    return dict((k, v.isoformat()
-                 if isinstance(v, datetime.datetime) else v)
-                for (k, v) in data.items())
+    return {k: v.isoformat()
+            if isinstance(v, datetime.datetime) else v
+            for (k, v) in data.items()}
 
 
 @profiler.trace_cls('api')
@@ -685,9 +685,9 @@ class AlarmController(rest.RestController):
 
         alarm = pecan.request.storage.update_alarm(alarm_in)
 
-        change = dict((k, v) for k, v in updated_alarm.items()
-                      if v != old_alarm[k] and k not in
-                      ['timestamp', 'state_timestamp'])
+        change = {k: v for k, v in updated_alarm.items()
+                  if v != old_alarm[k] and k not in
+                  ['timestamp', 'state_timestamp']}
         self._record_change(change, now, on_behalf_of=alarm.project_id)
         return Alarm.from_db_model_scrubbed(alarm)
 
@@ -873,14 +873,14 @@ class AlarmsController(rest.RestController):
         filters = {}
 
         # Check field
-        keys = set([query.field for query in q])
+        keys = {query.field for query in q}
         if not keys.issubset(ALARM_QUERY_FIELDS_ALLOWED):
             raise wsme.exc.InvalidInput(
                 'field', keys,
                 'only fields %s are allowed' % ALARM_QUERY_FIELDS_ALLOWED
             )
         # Check op
-        ops = set([query.op for query in q])
+        ops = {query.op for query in q}
         if any([op not in ALARM_QUERY_OPS_ALLOWED for op in ops]):
             raise wsme.exc.InvalidInput(
                 'op', ops,
