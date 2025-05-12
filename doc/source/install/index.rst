@@ -5,7 +5,6 @@ Installation Guide
 .. toctree::
 
    get_started.rst
-   install-obs.rst
    install-rdo.rst
    install-ubuntu.rst
    next-steps.rst
