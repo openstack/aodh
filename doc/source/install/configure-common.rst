@@ -68,8 +68,4 @@
      Replace ``AODH_PASS`` with the password you chose for
      the ``aodh`` user in the Identity service.
 
-.. todo:
-
-   Workaround for https://bugs.launchpad.net/ubuntu/+source/aodh/+bug/1513599.
-
 3. In order to initialize the database please run the ``aodh-dbsync`` script.
