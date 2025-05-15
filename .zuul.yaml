@@ -36,22 +36,6 @@
                   $TEMPEST_CONFIG:
                     telemetry_services:
                       metric_backends: gnocchi
-        - telemetry-dsvm-integration-centos-9s:
-            irrelevant-files: *aodh-irrelevant-files
-            vars:
-              devstack_local_conf:
-                test-config:
-                  $TEMPEST_CONFIG:
-                    telemetry_services:
-                      metric_backends: gnocchi
-        - telemetry-dsvm-integration-centos-9s-fips:
-            irrelevant-files: *aodh-irrelevant-files
-            vars:
-              devstack_local_conf:
-                test-config:
-                  $TEMPEST_CONFIG:
-                    telemetry_services:
-                      metric_backends: gnocchi
     gate:
       jobs:
         - aodh-tempest-plugin-mysql
@@ -69,22 +53,6 @@
                       gnocchi: True
                       sg-core: True
         - telemetry-dsvm-integration-ipv6-only:
-            irrelevant-files: *aodh-irrelevant-files
-            vars:
-              devstack_local_conf:
-                test-config:
-                  $TEMPEST_CONFIG:
-                    telemetry_services:
-                      metric_backends: gnocchi
-        - telemetry-dsvm-integration-centos-9s:
-            irrelevant-files: *aodh-irrelevant-files
-            vars:
-              devstack_local_conf:
-                test-config:
-                  $TEMPEST_CONFIG:
-                    telemetry_services:
-                      metric_backends: gnocchi
-        - telemetry-dsvm-integration-centos-9s-fips:
             irrelevant-files: *aodh-irrelevant-files
             vars:
               devstack_local_conf:
