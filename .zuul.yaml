@@ -8,7 +8,6 @@
     check:
       jobs:
         - aodh-tempest-plugin-mysql
-        - aodh-tempest-plugin-mysql-ubuntu-jammy
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
             irrelevant-files: &aodh-irrelevant-files
@@ -39,7 +38,6 @@
     gate:
       jobs:
         - aodh-tempest-plugin-mysql
-        - aodh-tempest-plugin-mysql-ubuntu-jammy
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
             irrelevant-files: *aodh-irrelevant-files
@@ -103,10 +101,3 @@
               gnocchi: True
               sg-core: False
       tempest_test_regex: telemetry_tempest_plugin.aodh
-
-# TODO(gmann): As per the 2025.1 testing runtime, we need to run at least
-# one job on jammy. This job can be removed in the next cycle(2025.2)
-- job:
-    name: aodh-tempest-plugin-mysql-ubuntu-jammy
-    parent: aodh-tempest-plugin-mysql
-    nodeset: openstack-single-node-jammy
