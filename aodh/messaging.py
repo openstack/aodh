@@ -51,7 +51,7 @@ def get_batch_notification_listener(transport, targets, endpoints,
                                     batch_size=1, batch_timeout=None):
     """Return a configured oslo_messaging notification listener."""
     return oslo_messaging.get_batch_notification_listener(
-        transport, targets, endpoints, executor='threading',
+        transport, targets, endpoints,
         allow_requeue=allow_requeue,
         batch_size=batch_size, batch_timeout=batch_timeout)
 
