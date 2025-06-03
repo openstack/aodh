@@ -72,7 +72,6 @@
         mysql: false
       devstack_localrc:
         DATABASE_TYPE: postgresql
-        AODH_BACKEND: postgresql
         USE_PYTHON3: True
       devstack_local_conf:
         test-config:
@@ -91,7 +90,6 @@
     irrelevant-files: *aodh-irrelevant-files
     vars:
       devstack_localrc:
-        AODH_BACKEND: "mysql"
         USE_PYTHON3: True
       devstack_local_conf:
         test-config:

@@ -13,9 +13,6 @@ AODH_CONF=$AODH_CONF_DIR/aodh.conf
 AODH_UWSGI_CONF=$AODH_CONF_DIR/aodh-uwsgi.ini
 AODH_UWSGI=aodh.wsgi.api:application
 
-# Set up database backend
-AODH_BACKEND=${AODH_BACKEND:-mysql}
-
 # Aodh connection info.
 AODH_SERVICE_PROTOCOL=http
 AODH_SERVICE_HOST=${AODH_SERVICE_HOST:-$SERVICE_HOST}
