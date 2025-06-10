@@ -78,7 +78,7 @@ def _list_to_regexp(items, regexp_prefix=""):
 
 
 @profiler.trace_cls('api')
-class ValidatedComplexQuery(object):
+class ValidatedComplexQuery:
     complex_operators = ["and", "or"]
     order_directions = ["asc", "desc"]
     simple_ops = ["=", "!=", "<", ">", "<=", "=<", ">=", "=>", "=~"]

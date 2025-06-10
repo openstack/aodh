@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 #
 # Copyright 2014 OpenStack Foundation
 # Copyright 2015 Red Hat, Inc.

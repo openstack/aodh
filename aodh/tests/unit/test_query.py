@@ -31,7 +31,7 @@ from aodh.tests import base as tests_base
 
 class TestQuery(base.BaseTestCase):
     def setUp(self):
-        super(TestQuery, self).setUp()
+        super().setUp()
         self.useFixture(fixtures.MonkeyPatch(
             'pecan.response', mock.MagicMock()))
 
@@ -154,7 +154,7 @@ class TestQuery(base.BaseTestCase):
 
 class TestQueryToKwArgs(tests_base.BaseTestCase):
     def setUp(self):
-        super(TestQueryToKwArgs, self).setUp()
+        super().setUp()
         self.useFixture(fixtures.MockPatchObject(
             utils, 'sanitize_query', side_effect=lambda x, y, **z: x))
         self.useFixture(fixtures.MockPatchObject(

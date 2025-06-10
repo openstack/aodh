@@ -28,7 +28,7 @@ OPTS = [
 LOG = log.getLogger(__name__)
 
 
-class AlarmNotifier(object):
+class AlarmNotifier:
     def __init__(self, conf):
         self.notifier = oslo_messaging.Notifier(
             messaging.get_transport(conf),

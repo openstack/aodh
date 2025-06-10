@@ -32,7 +32,7 @@ class FunctionalTest(db_test_base.TestBase):
     PATH_PREFIX = ''
 
     def setUp(self):
-        super(FunctionalTest, self).setUp()
+        super().setUp()
         self.setup_messaging(self.CONF)
 
         self.CONF.set_override('auth_mode', None, group='api')

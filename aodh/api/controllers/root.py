@@ -19,7 +19,7 @@ MEDIA_TYPE_JSON = 'application/vnd.openstack.telemetry-%s+json'
 MEDIA_TYPE_XML = 'application/vnd.openstack.telemetry-%s+xml'
 
 
-class VersionsController(object):
+class VersionsController:
 
     @pecan.expose('json')
     def index(self):
@@ -48,4 +48,4 @@ def version_descriptor(base_url, version, released_on):
 
 
 def version_url(base_url, version_number):
-    return '%s/%s' % (base_url, version_number)
+    return '{}/{}'.format(base_url, version_number)

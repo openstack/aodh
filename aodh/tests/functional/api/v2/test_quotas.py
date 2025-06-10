@@ -21,7 +21,7 @@ from aodh.tests.functional.api import v2
 class TestQuotas(v2.FunctionalTest):
     @classmethod
     def setUpClass(cls):
-        super(TestQuotas, cls).setUpClass()
+        super().setUpClass()
 
         cls.project = uuidutils.generate_uuid()
         cls.user = uuidutils.generate_uuid()

@@ -27,7 +27,7 @@ from aodh.tests import base as tests_base
 class TestEventAlarmEvaluationService(tests_base.BaseTestCase):
 
     def setUp(self):
-        super(TestEventAlarmEvaluationService, self).setUp()
+        super().setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.CONF.set_override("batch_size", 2, 'listener')

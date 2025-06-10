@@ -24,7 +24,7 @@ from aodh import queue
 
 class TestEvaluatorBaseClass(base.BaseTestCase):
     def setUp(self):
-        super(TestEvaluatorBaseClass, self).setUp()
+        super().setUp()
         self.called = False
 
     def _notify(self, alarm, previous, reason, details):

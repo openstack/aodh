@@ -51,7 +51,7 @@ class AlarmNotFound(Exception):
 
     def __init__(self, alarm_id):
         self.alarm_id = alarm_id
-        super(AlarmNotFound, self).__init__("Alarm %s not found" % alarm_id)
+        super().__init__("Alarm %s not found" % alarm_id)
 
 
 class InvalidMarker(Exception):
@@ -77,7 +77,7 @@ def get_connection_from_config(conf):
     return _get_connection()
 
 
-class SampleFilter(object):
+class SampleFilter:
     """Holds the properties for building a query from a meter/sample filter.
 
     :param user: The sample owner.

@@ -43,12 +43,12 @@ class AlarmEventRule(base.AlarmRule):
     def __init__(self, event_type=None, query=None):
         event_type = event_type or '*'
         query = [base.Query(**q) for q in query or []]
-        super(AlarmEventRule, self).__init__(event_type=event_type,
-                                             query=query)
+        super().__init__(event_type=event_type,
+                         query=query)
 
     @classmethod
     def validate_alarm(cls, alarm):
-        super(AlarmEventRule, cls).validate_alarm(alarm)
+        super().validate_alarm(alarm)
         for i in alarm.event_rule.query:
             i.get_value()
             try:

@@ -81,7 +81,7 @@ class TestBase(test_base.BaseTestCase,
     }
 
     def setUp(self):
-        super(TestBase, self).setUp()
+        super().setUp()
 
         db_url = os.environ.get(
             'AODH_TEST_STORAGE_URL', 'sqlite://',
@@ -119,7 +119,7 @@ class TestBase(test_base.BaseTestCase,
     def tearDown(self):
         self.alarm_conn.clear()
         self.alarm_conn = None
-        super(TestBase, self).tearDown()
+        super().tearDown()
 
     def _get_connection(self, conf):
         return self.alarm_conn

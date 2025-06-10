@@ -26,7 +26,7 @@ class InvalidCompositeRule(base.ClientSideError):
                 'be a dict with an "and" or "or" as key, and the '
                 'value of dict should be a list of basic threshold '
                 'rules or sub composite rules, can be nested.') % error
-        super(InvalidCompositeRule, self).__init__(err)
+        super().__init__(err)
 
 
 class CompositeRule(wtypes.UserType):
@@ -47,7 +47,7 @@ class CompositeRule(wtypes.UserType):
                            'gnocchi_aggregation_by_resources_threshold')
         CompositeRule.threshold_plugins = named.NamedExtensionManager(
             "aodh.alarm.rule", threshold_rules)
-        super(CompositeRule, self).__init__()
+        super().__init__()
 
     @staticmethod
     def valid_composite_rule(rules):

@@ -20,7 +20,7 @@ from aodh import keystone_client
 from aodh.notifier import rest
 
 
-class TrustAlarmNotifierMixin(object):
+class TrustAlarmNotifierMixin:
     """Mixin class to add Keystone trust support to an AlarmNotifier.
 
     Provides a notify() method that interprets the trust ID and then calls
@@ -43,7 +43,7 @@ class TrustAlarmNotifierMixin(object):
                                    action.fragment)
 
         headers = {'X-Auth-Token': keystone_client.get_auth_token(client)}
-        super(TrustAlarmNotifierMixin, self).notify(
+        super().notify(
             action, alarm_id, alarm_name, severity, previous, current, reason,
             reason_data, headers)
 

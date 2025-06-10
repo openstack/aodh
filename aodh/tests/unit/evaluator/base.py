@@ -23,7 +23,7 @@ from aodh import service
 
 class TestEvaluatorBase(base.BaseTestCase):
     def setUp(self):
-        super(TestEvaluatorBase, self).setUp()
+        super().setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.conf = self.useFixture(fixture.Config(conf)).conf
         self.evaluator = self.EVALUATOR(self.conf)

@@ -54,7 +54,7 @@ OPTS = [
 ]
 
 
-class Evaluator(object, metaclass=abc.ABCMeta):
+class Evaluator(metaclass=abc.ABCMeta):
     """Base class for alarm rule evaluator plugins."""
 
     def __init__(self, conf):
@@ -198,7 +198,7 @@ class AlarmEvaluationService(cotyledon.Service):
     EVALUATOR_EXTENSIONS_NAMESPACE = "aodh.evaluator"
 
     def __init__(self, worker_id, conf):
-        super(AlarmEvaluationService, self).__init__(worker_id)
+        super().__init__(worker_id)
         self.conf = conf
 
         ef = lambda: futures.ThreadPoolExecutor(max_workers=10)  # noqa: E731

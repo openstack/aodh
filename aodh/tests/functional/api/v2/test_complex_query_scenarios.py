@@ -36,7 +36,7 @@ RULE_TYPE = 'gnocchi_aggregation_by_metrics_threshold'
 class TestQueryAlarmsController(tests_api.FunctionalTest):
 
     def setUp(self):
-        super(TestQueryAlarmsController, self).setUp()
+        super().setUp()
         self.alarm_url = '/query/alarms'
 
         for state in ['ok', 'alarm', 'insufficient data']:
@@ -154,7 +154,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
 
         self.assertEqual(6, len(data.json))
         for alarm in data.json:
-            self.assertIn(alarm['project_id'], set(["project-id2"]))
+            self.assertIn(alarm['project_id'], {"project-id2"})
 
     def test_query_with_field_project(self):
         data = self.post_json(self.alarm_url,
@@ -164,7 +164,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
 
         self.assertEqual(6, len(data.json))
         for alarm_item in data.json:
-            self.assertIn(alarm_item['project_id'], set(["project-id2"]))
+            self.assertIn(alarm_item['project_id'], {"project-id2"})
 
     def test_query_with_field_user_in_orderby(self):
         data = self.post_json(self.alarm_url,
@@ -228,7 +228,7 @@ class TestQueryAlarmsController(tests_api.FunctionalTest):
 class TestQueryAlarmsHistoryController(tests_api.FunctionalTest):
 
     def setUp(self):
-        super(TestQueryAlarmsHistoryController, self).setUp()
+        super().setUp()
         self.url = '/query/alarms/history'
         for id in [1, 2]:
             for type in ["creation", "state transition"]:

@@ -25,7 +25,7 @@ STATE_CHANGE = {evaluator.ALARM: 'outside their threshold.',
                 evaluator.UNKNOWN: 'state evaluated to unknown.'}
 
 
-class RuleTarget(object):
+class RuleTarget:
 
     def __init__(self, rule, rule_evaluator, rule_name):
         self.rule = rule
@@ -52,7 +52,7 @@ class RuleTarget(object):
             self.evaluated = True
 
 
-class RuleEvaluationBase(object):
+class RuleEvaluationBase:
     def __init__(self, rule_target):
         self.rule_target = rule_target
 
@@ -78,7 +78,7 @@ class AlarmEvaluation(RuleEvaluationBase):
     __nonzero__ = __bool__
 
 
-class AndOp(object):
+class AndOp:
     def __init__(self, rule_targets):
         self.rule_targets = rule_targets
 
@@ -91,7 +91,7 @@ class AndOp(object):
     __nonzero__ = __bool__
 
 
-class OrOp(object):
+class OrOp:
     def __init__(self, rule_targets):
         self.rule_targets = rule_targets
 
@@ -106,7 +106,7 @@ class OrOp(object):
 
 class CompositeEvaluator(evaluator.Evaluator):
     def __init__(self, conf):
-        super(CompositeEvaluator, self).__init__(conf)
+        super().__init__(conf)
         self.conf = conf
         self._threshold_evaluators = None
         self.rule_targets = []

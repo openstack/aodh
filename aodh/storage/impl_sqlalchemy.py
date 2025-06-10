@@ -84,7 +84,7 @@ def apply_filters(query, model, **filters):
             elif 'eq' in value:
                 query = query.filter(column_attr == value['eq'])
             elif 'has' in value:
-                like_pattern = '%{0}%'.format(value['has'])
+                like_pattern = '%{}%'.format(value['has'])
                 query = query.filter(column_attr.like(like_pattern))
         else:
             filter_dict[key] = value

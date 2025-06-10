@@ -74,7 +74,7 @@ class TestLoadBalancerMemberHealthEvaluator(base.TestEvaluatorBase):
         self.assertEqual(evaluator.ALARM, alarm.state)
 
     def test_evaluate_octavia_error(self, mock_session, mock_octavia):
-        class Response(object):
+        class Response:
             def __init__(self, status_code, content):
                 self.status_code = status_code
                 self.content = content

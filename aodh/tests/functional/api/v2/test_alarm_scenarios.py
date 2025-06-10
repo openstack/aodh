@@ -123,7 +123,7 @@ def default_alarms(auth_headers):
 class TestAlarmsBase(v2.FunctionalTest):
 
     def setUp(self):
-        super(TestAlarmsBase, self).setUp()
+        super().setUp()
         self.project_id = uuidutils.generate_uuid()
         self.user_id = uuidutils.generate_uuid()
         self.auth_headers = {'X-User-Id': self.user_id,
@@ -175,7 +175,7 @@ class TestAlarmsBase(v2.FunctionalTest):
 class TestAlarms(TestAlarmsBase):
 
     def setUp(self):
-        super(TestAlarms, self).setUp()
+        super().setUp()
         for alarm in default_alarms(self.auth_headers):
             self.alarm_conn.create_alarm(alarm)
 
@@ -621,9 +621,9 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(['41869681-5776-46d6-91ed-cccc43b6e4e3',
                           'a1fb80f4-c242-4f57-87c6-68f47521059e'],
                          payload['detail']['rule']['metrics'])
-        self.assertTrue(set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
-                             'project_id', 'timestamp', 'type',
-                             'user_id']).issubset(payload.keys()))
+        self.assertTrue({'alarm_id', 'detail', 'event_id', 'on_behalf_of',
+                         'project_id', 'timestamp', 'type',
+                         'user_id'}.issubset(payload.keys()))
 
     def test_alarm_sends_notification(self):
         with mock.patch.object(messaging, 'get_notifier') as get_notifier:
@@ -637,9 +637,9 @@ class TestAlarms(TestAlarmsBase):
         context, event_type, payload = args
         self.assertEqual('alarm.rule_change', event_type)
         self.assertEqual('new_name', payload['detail']['name'])
-        self.assertTrue(set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
-                             'project_id', 'timestamp', 'type',
-                             'user_id']).issubset(payload.keys()))
+        self.assertTrue({'alarm_id', 'detail', 'event_id', 'on_behalf_of',
+                         'project_id', 'timestamp', 'type',
+                         'user_id'}.issubset(payload.keys()))
 
     def test_delete_alarm_sends_notification(self):
         with mock.patch.object(messaging, 'get_notifier') as get_notifier:
@@ -653,15 +653,15 @@ class TestAlarms(TestAlarmsBase):
         context, event_type, payload = args
         self.assertEqual('alarm.deletion', event_type)
         self.assertEqual('insufficient data', payload['detail']['state'])
-        self.assertTrue(set(['alarm_id', 'detail', 'event_id', 'on_behalf_of',
-                             'project_id', 'timestamp', 'type', 'severity',
-                             'user_id']).issubset(payload.keys()))
+        self.assertTrue({'alarm_id', 'detail', 'event_id', 'on_behalf_of',
+                         'project_id', 'timestamp', 'type', 'severity',
+                         'user_id'}.issubset(payload.keys()))
 
 
 class TestAlarmsHistory(TestAlarmsBase):
 
     def setUp(self):
-        super(TestAlarmsHistory, self).setUp()
+        super().setUp()
         alarm = models.Alarm(
             name='name1',
             type='gnocchi_aggregation_by_metrics_threshold',
@@ -716,7 +716,7 @@ class TestAlarmsHistory(TestAlarmsBase):
         for k, v in expected.items():
             fragment = jsonlib.dumps({k: v}, sort_keys=True)[1:-1]
             self.assertIn(fragment, actual,
-                          '%s not in %s' % (fragment, actual))
+                          '{} not in {}'.format(fragment, actual))
 
     def test_record_alarm_history_config(self):
         self.CONF.set_override('record_history', False)
@@ -911,7 +911,7 @@ class TestAlarmsHistory(TestAlarmsBase):
 
 class TestAlarmsQuotas(TestAlarmsBase):
     def setUp(self):
-        super(TestAlarmsQuotas, self).setUp()
+        super().setUp()
         self.alarm = {
             'name': 'alarm',
             'type': 'gnocchi_aggregation_by_metrics_threshold',
@@ -1159,7 +1159,7 @@ class TestAlarmsRuleThreshold(TestAlarmsBase):
 class TestAlarmsRuleGnocchi(TestAlarmsBase):
 
     def setUp(self):
-        super(TestAlarmsRuleGnocchi, self).setUp()
+        super().setUp()
         for alarm in [
             models.Alarm(name='name1',
                          type='gnocchi_resources_threshold',
@@ -1250,12 +1250,12 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
     def test_list_alarms(self):
         data = self.get_json('/alarms', headers=self.auth_headers)
         self.assertEqual(3, len(data))
-        self.assertEqual(set(['name1', 'name2', 'name3']),
-                         set(r['name'] for r in data))
-        self.assertEqual(set(['meter.test']),
-                         set(r['gnocchi_resources_threshold_rule']['metric']
+        self.assertEqual({'name1', 'name2', 'name3'},
+                         {r['name'] for r in data})
+        self.assertEqual({'meter.test'},
+                         {r['gnocchi_resources_threshold_rule']['metric']
                              for r in data
-                             if 'gnocchi_resources_threshold_rule' in r))
+                             if 'gnocchi_resources_threshold_rule' in r})
 
     def test_post_gnocchi_metrics_alarm_cached(self):
         # NOTE(gordc):  cache is a decorator and therefore, gets mocked across
@@ -1368,7 +1368,7 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
 class TestAlarmsCompositeRule(TestAlarmsBase):
 
     def setUp(self):
-        super(TestAlarmsCompositeRule, self).setUp()
+        super().setUp()
         self.sub_rule1 = {
             "type": "gnocchi_aggregation_by_metrics_threshold",
             "metrics": ['41869681-5776-46d6-91ed-cccc43b6e4e3',
@@ -1472,14 +1472,14 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
                                   headers=self.auth_headers)
         faultstring = ("Invalid input for field/attribute threshold. "
                        "Value: 'False'. Wrong type. Expected '%s', got '%s'"
-                       % (type(1.0), type(True)))
+                       % (float, bool))
         self.assertEqual(faultstring,
                          response.json['error_message']['faultstring'])
 
 
 class TestPaginationQuery(TestAlarmsBase):
     def setUp(self):
-        super(TestPaginationQuery, self).setUp()
+        super().setUp()
         for alarm in default_alarms(self.auth_headers):
             self.alarm_conn.create_alarm(alarm)
 

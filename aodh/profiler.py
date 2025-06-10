@@ -26,7 +26,7 @@ profiler_web = importutils.try_import('osprofiler.web')
 LOG = log.getLogger(__name__)
 
 
-class WsgiMiddleware(object):
+class WsgiMiddleware:
 
     def __init__(self, application, **kwargs):
         self.application = application

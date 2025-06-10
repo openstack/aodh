@@ -31,7 +31,7 @@ from aodh.tests import base as tests_base
 
 class TestAlarmEvaluationService(tests_base.BaseTestCase):
     def setUp(self):
-        super(TestAlarmEvaluationService, self).setUp()
+        super().setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
         self.CONF.set_override('workers', 1, 'evaluator')
@@ -198,7 +198,7 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
 
 class TestPrometheusEvaluator(tests_base.BaseTestCase):
     def setUp(self):
-        super(TestPrometheusEvaluator, self).setUp()
+        super().setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 

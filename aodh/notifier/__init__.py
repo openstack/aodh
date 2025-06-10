@@ -39,7 +39,7 @@ OPTS = [
 ]
 
 
-class AlarmNotifier(object, metaclass=abc.ABCMeta):
+class AlarmNotifier(metaclass=abc.ABCMeta):
     """Base class for alarm notifier plugins."""
 
     @staticmethod
@@ -66,7 +66,7 @@ class AlarmNotifierService(cotyledon.Service):
     NOTIFIER_EXTENSIONS_NAMESPACE = "aodh.notifier"
 
     def __init__(self, worker_id, conf):
-        super(AlarmNotifierService, self).__init__(worker_id)
+        super().__init__(worker_id)
         self.conf = conf
         transport = messaging.get_transport(self.conf)
         self.notifiers = extension.ExtensionManager(
@@ -85,7 +85,7 @@ class AlarmNotifierService(cotyledon.Service):
         self.listener.wait()
 
 
-class AlarmEndpoint(object):
+class AlarmEndpoint:
 
     def __init__(self, notifiers):
         self.notifiers = notifiers

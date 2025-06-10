@@ -23,7 +23,7 @@ from aodh.tests import base
 
 class BinTestCase(base.BaseTestCase):
     def setUp(self):
-        super(BinTestCase, self).setUp()
+        super().setUp()
         content = ("[database]\n"
                    "connection=log://localhost\n")
         content = content.encode('utf-8')
@@ -32,7 +32,7 @@ class BinTestCase(base.BaseTestCase):
                                                     suffix='.conf')
 
     def tearDown(self):
-        super(BinTestCase, self).tearDown()
+        super().tearDown()
         os.remove(self.tempfile)
 
     def test_dbsync_run(self):
@@ -78,7 +78,7 @@ class BinTestCase(base.BaseTestCase):
 
 class BinEvaluatorTestCase(base.BaseTestCase):
     def setUp(self):
-        super(BinEvaluatorTestCase, self).setUp()
+        super().setUp()
         content = ("[database]\n"
                    "connection=log://localhost\n")
         content = content.encode('utf-8')
@@ -88,7 +88,7 @@ class BinEvaluatorTestCase(base.BaseTestCase):
         self.subp = None
 
     def tearDown(self):
-        super(BinEvaluatorTestCase, self).tearDown()
+        super().tearDown()
         if self.subp:
             self.subp.kill()
         os.remove(self.tempfile)

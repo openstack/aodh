@@ -39,13 +39,13 @@ operation_kind_enum = wtypes.Enum(str, *operation_kind)
 class ClientSideError(wsme.exc.ClientSideError):
     def __init__(self, error, status_code=400):
         pecan.response.translatable_error = error
-        super(ClientSideError, self).__init__(error, status_code)
+        super().__init__(error, status_code)
 
 
 class ProjectNotAuthorized(ClientSideError):
     def __init__(self, id, aspect='project'):
         params = dict(aspect=aspect, id=id)
-        super(ProjectNotAuthorized, self).__init__(
+        super().__init__(
             _("Not Authorized to access %(aspect)s %(id)s") % params,
             status_code=401)
 
@@ -57,8 +57,8 @@ class AdvEnum(wtypes.wsproperty):
         self._default = kwargs.pop('default', None)
         mandatory = kwargs.pop('mandatory', False)
         enum = wtypes.Enum(*args, **kwargs)
-        super(AdvEnum, self).__init__(datatype=enum, fget=self._get,
-                                      fset=self._set, mandatory=mandatory)
+        super().__init__(datatype=enum, fget=self._get,
+                         fset=self._set, mandatory=mandatory)
 
     def _get(self, parent):
         if hasattr(parent, self._name):
@@ -93,10 +93,10 @@ class Base(wtypes.DynamicBase):
         return self.as_dict_from_keys(valid_keys)
 
     def as_dict_from_keys(self, keys):
-        return dict((k, getattr(self, k))
-                    for k in keys
-                    if hasattr(self, k) and
-                    getattr(self, k) != wsme.Unset)
+        return {k: getattr(self, k)
+                for k in keys
+                if hasattr(self, k) and
+                getattr(self, k) != wsme.Unset}
 
     def to_dict(self):
         d = {}
@@ -145,10 +145,10 @@ class Query(Base):
 
     def __repr__(self):
         # for logging calls
-        return '<Query %r %s %r %s>' % (self.field,
-                                        self.op,
-                                        self.value,
-                                        self.type)
+        return '<Query {!r} {} {!r} {}>'.format(self.field,
+                                                self.op,
+                                                self.value,
+                                                self.type)
 
     @classmethod
     def sample(cls):
@@ -223,7 +223,7 @@ class AlarmNotFound(ClientSideError):
             msg = _('Alarm %(alarm_id)s not found in project %'
                     '(project)s') % {
                         'alarm_id': alarm, 'project': auth_project}
-        super(AlarmNotFound, self).__init__(msg, status_code=404)
+        super().__init__(msg, status_code=404)
 
 
 class AlarmRule(Base):

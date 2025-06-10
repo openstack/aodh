@@ -47,7 +47,7 @@ class InsufficientDataError(Exception):
     def __init__(self, reason, statistics):
         self.reason = reason
         self.statistics = statistics
-        super(InsufficientDataError, self).__init__(reason)
+        super().__init__(reason)
 
 
 class ThresholdEvaluator(evaluator.Evaluator):

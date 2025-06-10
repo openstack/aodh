@@ -43,7 +43,7 @@ class TrustHeatAlarmNotifier(notifier.AlarmNotifier):
     """
 
     def __init__(self, conf):
-        super(TrustHeatAlarmNotifier, self).__init__(conf)
+        super().__init__(conf)
         self.conf = conf
 
     def notify(self, action, alarm_id, alarm_name, severity, previous, current,

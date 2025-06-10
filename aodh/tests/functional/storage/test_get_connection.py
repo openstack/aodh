@@ -27,7 +27,7 @@ from aodh.storage import impl_log
 
 class EngineTest(base.BaseTestCase):
     def setUp(self):
-        super(EngineTest, self).setUp()
+        super().setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
@@ -49,7 +49,7 @@ class EngineTest(base.BaseTestCase):
 
 class ConnectionRetryTest(base.BaseTestCase):
     def setUp(self):
-        super(ConnectionRetryTest, self).setUp()
+        super().setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 
@@ -76,7 +76,7 @@ class ConnectionRetryTest(base.BaseTestCase):
 
 class ConnectionConfigTest(base.BaseTestCase):
     def setUp(self):
-        super(ConnectionConfigTest, self).setUp()
+        super().setUp()
         conf = service.prepare_service(argv=[], config_files=[])
         self.CONF = self.useFixture(fixture_config.Config(conf)).conf
 

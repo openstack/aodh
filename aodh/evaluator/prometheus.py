@@ -38,7 +38,7 @@ OPTS = [
 
 class PrometheusBase(threshold.ThresholdEvaluator):
     def __init__(self, conf):
-        super(PrometheusBase, self).__init__(conf)
+        super().__init__(conf)
         self._set_obsclient(conf)
 
     def _set_obsclient(self, conf):
