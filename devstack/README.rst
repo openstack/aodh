@@ -17,7 +17,7 @@ Enabling Aodh in DevStack
 
     enable_plugin aodh https://opendev.org/openstack/aodh stable/mitaka
 
-   There are some options, such as AODH_BACKEND, defined in
+   There are some options, such as AODH_COORDINATION_URL, defined in
    ``aodh/devstack/settings``, they can be used to configure the installation
    of Aodh. If you don't want to use their default value, you can set a new
    one in ``local.conf``.

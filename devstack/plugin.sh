@@ -9,7 +9,6 @@
 # By default all aodh services are started (see
 # devstack/settings).
 #
-#   AODH_BACKEND:            Database backend (e.g. 'mysql')
 #   AODH_COORDINATION_URL:   URL for group membership service provided by tooz.
 
 # Support potential entry-points console scripts in VENV or not
@@ -82,15 +81,6 @@ function cleanup_aodh {
     remove_uwsgi_config "$AODH_UWSGI_CONF" "aodh"
 }
 
-# Set configuration for storage backend.
-function _aodh_configure_storage_backend {
-    if [ "$AODH_BACKEND" = 'mysql' ] || [ "$AODH_BACKEND" = 'postgresql' ] ; then
-        iniset $AODH_CONF database connection $(database_connection_url aodh)
-    else
-        die $LINENO "Unable to configure unknown AODH_BACKEND $AODH_BACKEND"
-    fi
-}
-
 # Configure Aodh
 function configure_aodh {
     iniset_rpc_backend aodh $AODH_CONF
@@ -120,8 +110,7 @@ function configure_aodh {
 
     configure_keystone_authtoken_middleware $AODH_CONF aodh
 
-    # Configured storage
-    _aodh_configure_storage_backend
+    iniset $AODH_CONF database connection $(database_connection_url aodh)
 
     # NOTE: This must come after database configuration as those can
     # call cleanup_aodh which will wipe the WSGI config.
@@ -135,12 +124,8 @@ function init_aodh {
     # Get aodh keystone settings in place
     _aodh_create_accounts
 
-    if is_service_enabled mysql postgresql; then
-        if [ "$AODH_BACKEND" = 'mysql' ] || [ "$AODH_BACKEND" = 'postgresql' ] ; then
-            recreate_database aodh
-            $AODH_BIN_DIR/aodh-dbsync
-        fi
-    fi
+    recreate_database aodh
+    $AODH_BIN_DIR/aodh-dbsync
 }
 
 # Install Aodh.
