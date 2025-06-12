@@ -151,7 +151,7 @@ function init_aodh {
 function install_aodh {
     _aodh_prepare_coordination
     install_aodhclient
-    setup_develop $AODH_DIR $AODH_BACKEND
+    setup_develop $AODH_DIR
     sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR
 
     pip_install uwsgi
