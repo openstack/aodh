@@ -2,25 +2,25 @@
 Installing the API with uwsgi
 =============================
 
-Aodh comes with a few example files for configuring the API
-service to run behind Apache with ``mod_wsgi``.
+The module ``aodh.wsgi.api`` provides the function to set up the V2 API WSGI
+application. The module is installed with the rest of the Aodh application
+code, and should not need to be modified.
 
-app.wsgi
-========
+Install uwsgi.
 
-The file ``aodh/api/app.wsgi`` sets up the V2 API WSGI
-application. The file is installed with the rest of the Aodh
-application code, and should not need to be modified.
+On RHEL/CentOS/Fedora::
 
-Example of uwsgi configuration file
-===================================
+    sudo dnf install uwsgi-plugin-python3
 
+On Ubuntu/Debian::
+
+    sudo apt-get install uwsgi-plugin-python3
 
 Create aodh-uwsgi.ini file::
 
     [uwsgi]
     http = 0.0.0.0:8041
-    wsgi-file = <path_to_aodh>/aodh/api/app.wsgi
+    module = aodh.wsgi.api:application
     plugins = python
     # This is running standalone
     master = true
@@ -48,15 +48,3 @@ Then start the uwsgi server::
 Or start in background with::
 
     uwsgi -d ./aodh-uwsgi.ini
-
-Configuring with uwsgi-plugin-python on Debian/Ubuntu
-=====================================================
-
-Install the Python plugin for uwsgi:
-
-    apt-get install uwsgi-plugin-python
-
-Run the server:
-
-    uwsgi_python --master --die-on-term --logto /var/log/aodh/aodh-api.log \
-        --http-socket :8042 --wsgi-file /usr/share/aodh-common/app.wsgi
