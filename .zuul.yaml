@@ -70,7 +70,6 @@
         mysql: false
       devstack_localrc:
         DATABASE_TYPE: postgresql
-        USE_PYTHON3: True
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
@@ -87,8 +86,6 @@
     parent: telemetry-tempest-base
     irrelevant-files: *aodh-irrelevant-files
     vars:
-      devstack_localrc:
-        USE_PYTHON3: True
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
