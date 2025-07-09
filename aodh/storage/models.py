@@ -80,8 +80,7 @@ class Alarm(base.Model):
             raise TypeError(_("timestamp should be datetime object"))
         if not isinstance(state_timestamp, datetime.datetime):
             raise TypeError(_("state_timestamp should be datetime object"))
-        base.Model.__init__(
-            self,
+        super().__init__(
             alarm_id=alarm_id,
             type=type,
             enabled=enabled,
@@ -140,8 +139,7 @@ class AlarmChange(base.Model):
                  severity=None,
                  timestamp=None
                  ):
-        base.Model.__init__(
-            self,
+        super().__init__(
             event_id=event_id,
             alarm_id=alarm_id,
             type=type,
@@ -155,8 +153,7 @@ class AlarmChange(base.Model):
 
 class Quota(base.Model):
     def __init__(self, project_id, resource, limit):
-        base.Model.__init__(
-            self,
+        super().__init__(
             project_id=project_id,
             resource=resource,
             limit=limit)
@@ -164,8 +161,7 @@ class Quota(base.Model):
 
 class AlarmCounter(base.Model):
     def __init__(self, alarm_id, project_id, state):
-        base.Model.__init__(
-            self,
+        super().__init__(
             alarm_id=alarm_id,
             project_id=project_id,
             state=state,
