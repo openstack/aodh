@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aodh\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-10 10:53+0000\n"
+"POT-Creation-Date: 2025-07-01 15:51+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -45,9 +45,6 @@ msgstr "15.0.0"
 
 msgid "19.0.0"
 msgstr "19.0.0"
-
-msgid "19.0.0-19"
-msgstr "19.0.0-19"
 
 msgid "2.0.0"
 msgstr "2.0.0"
