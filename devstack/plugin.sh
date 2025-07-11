@@ -99,14 +99,8 @@ function configure_aodh {
     setup_logging $AODH_CONF DEFAULT
 
     # The alarm evaluator needs these options to call gnocchi/ceilometer APIs
-    iniset $AODH_CONF service_credentials auth_type password
-    iniset $AODH_CONF service_credentials username aodh
-    iniset $AODH_CONF service_credentials user_domain_id default
-    iniset $AODH_CONF service_credentials project_domain_id default
-    iniset $AODH_CONF service_credentials password $SERVICE_PASSWORD
-    iniset $AODH_CONF service_credentials project_name $SERVICE_PROJECT_NAME
+    configure_keystoneauth $AODH_CONF aodh service_credentials
     iniset $AODH_CONF service_credentials region_name $REGION_NAME
-    iniset $AODH_CONF service_credentials auth_url $KEYSTONE_SERVICE_URI
 
     configure_keystone_authtoken_middleware $AODH_CONF aodh
 
