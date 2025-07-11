@@ -20,7 +20,7 @@ from oslo_utils import uuidutils
 import sqlalchemy as sa
 from sqlalchemy import Column, String, Index, Boolean, Text, DateTime, Integer
 from sqlalchemy.dialects import mysql
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.types import TypeDecorator
 
 
