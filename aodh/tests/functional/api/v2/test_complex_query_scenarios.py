@@ -231,12 +231,32 @@ class TestQueryAlarmsHistoryController(tests_api.FunctionalTest):
         super().setUp()
         self.url = '/query/alarms/history'
         for id in [1, 2]:
+            alarm_id = "alarm-id%d" % id
+            alarm = models.Alarm(name=alarm_id,
+                                 type=RULE_TYPE,
+                                 enabled=True,
+                                 alarm_id=alarm_id,
+                                 description='a',
+                                 state='ok',
+                                 state_reason="state_reason",
+                                 state_timestamp=datetime.datetime(2013, 1, 1),
+                                 timestamp=datetime.datetime(2013, 1, 1),
+                                 ok_actions=[],
+                                 insufficient_data_actions=[],
+                                 alarm_actions=[],
+                                 repeat_actions=True,
+                                 user_id="user-id",
+                                 project_id="proj-id",
+                                 time_constraints=[],
+                                 rule=dict(),
+                                 severity='critical')
+            self.alarm_conn.create_alarm(alarm)
             for type in ["creation", "state transition"]:
                 for date in [datetime.datetime(2013, 1, 1),
                              datetime.datetime(2013, 2, 2)]:
                     event_id = "-".join([str(id), type, date.isoformat()])
                     alarm_change = {"event_id": event_id,
-                                    "alarm_id": "alarm-id%d" % id,
+                                    "alarm_id": alarm_id,
                                     "type": type,
                                     "detail": "",
                                     "user_id": "user-id%d" % id,

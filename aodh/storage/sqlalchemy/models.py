@@ -119,7 +119,8 @@ class AlarmChange(Base):
         Index('ix_alarm_history_alarm_id', 'alarm_id'),
     )
     event_id = Column(String(128), primary_key=True)
-    alarm_id = Column(String(128))
+    alarm_id = Column(String(128), sa.ForeignKey('alarm.alarm_id'),
+                      nullable=False)
     on_behalf_of = Column(String(128))
     project_id = Column(String(128))
     user_id = Column(String(128))
