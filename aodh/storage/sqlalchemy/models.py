@@ -119,7 +119,8 @@ class AlarmChange(Base):
         Index('ix_alarm_history_alarm_id', 'alarm_id'),
     )
     event_id = Column(String(128), primary_key=True)
-    alarm_id = Column(String(128), sa.ForeignKey('alarm.alarm_id'),
+    alarm_id = Column(String(128),
+                      sa.ForeignKey('alarm.alarm_id', ondelete='CASCADE'),
                       nullable=False)
     on_behalf_of = Column(String(128))
     project_id = Column(String(128))
@@ -157,7 +158,8 @@ class AlarmCounter(Base):
     )
 
     id = Column(String(36), primary_key=True, default=uuidutils.generate_uuid)
-    alarm_id = Column(String(128), sa.ForeignKey('alarm.alarm_id'),
+    alarm_id = Column(String(128),
+                      sa.ForeignKey('alarm.alarm_id', ondelete='CASCADE'),
                       nullable=False)
     project_id = Column(String(128), nullable=False)
     state = Column(String(128), nullable=False)
