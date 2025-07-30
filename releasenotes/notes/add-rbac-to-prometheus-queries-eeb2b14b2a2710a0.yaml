@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Prometheus queries for nonadmin users or for admin users who
+    specify a particular project are now being restricted to that
+    project or to the nonadmin user's current project. Admins can
+    still create alarms for resources across multiple projects without
+    restrictions. This works similarly to how gnocchi alarms work for
+    some time already. Use the [DEFAULT].prometheus_project_label_name
+    configuration option to configure label name used for
+    distinguishing between projects.

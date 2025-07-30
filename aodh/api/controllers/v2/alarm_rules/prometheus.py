@@ -18,6 +18,7 @@ import wsme
 from wsme import types as wtypes
 
 from aodh.api.controllers.v2 import base
+from aodh.api.controllers.v2 import utils as v2_utils
 
 
 LOG = log.getLogger(__name__)
@@ -35,12 +36,19 @@ class PrometheusRule(base.AlarmRule):
     query = wsme.wsattr(wtypes.text, mandatory=True)
     "The Prometheus query"
 
-    @staticmethod
-    def validate(rule):
-        # TO-DO(mmagr): validate Prometheus query maybe?
+    @classmethod
+    def validate_alarm(cls, alarm):
+        super().validate_alarm(alarm)
+
+        rule = alarm.prometheus_rule
+
+        auth_project = v2_utils.get_auth_project(alarm.project_id)
+        cls.scope_to_project = None
+        if auth_project:
+            cls.scope_to_project = auth_project
         return rule
 
     def as_dict(self):
         rule = self.as_dict_from_keys(['comparison_operator', 'threshold',
-                                       'query'])
+                                       'query', 'scope_to_project'])
         return rule

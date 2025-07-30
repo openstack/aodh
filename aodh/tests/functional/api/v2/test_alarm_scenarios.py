@@ -1365,6 +1365,74 @@ class TestAlarmsRuleGnocchi(TestAlarmsBase):
         self._verify_alarm(json, alarms[0])
 
 
+class TestAlarmsRulePrometheus(TestAlarmsBase):
+
+    def _do_post_alarm(self, headers={}, project=None, status=201):
+        json = {
+            'name': 'added_prometheus_alarm',
+            'enabled': True,
+            'type': 'prometheus',
+            'ok_actions': ['http://something/ok'],
+            'prometheus_rule': {
+                'query': 'ceilometer_cpu',
+                'comparison_operator': 'le',
+                'threshold': 50,
+            }
+        }
+        if project:
+            json['project_id'] = project
+
+        response = self.post_json(
+            '/alarms', params=json, headers=headers, status=status
+        )
+        return response
+
+    def test_post_prometheus_alarm_as_admin(self):
+        auth_headers = self.auth_headers
+        auth_headers['X-Roles'] = 'admin'
+        resp = self._do_post_alarm(headers=auth_headers)
+
+        alarms = list(self.alarm_conn.get_alarms(
+            alarm_id=resp.json['alarm_id']))
+
+        self.assertEqual(1, len(alarms))
+        self.assertIsNone(alarms[0].rule['scope_to_project'])
+
+    def test_post_prometheus_alarm_as_admin_on_behalf_of_another_project(self):
+        auth_headers = self.auth_headers
+        auth_headers['X-Roles'] = 'admin'
+        project_id = uuidutils.generate_uuid()
+        resp = self._do_post_alarm(
+            headers=auth_headers, project=project_id
+        )
+
+        alarms = list(self.alarm_conn.get_alarms(
+            alarm_id=resp.json['alarm_id']))
+        self.assertEqual(1, len(alarms))
+        self.assertEqual(project_id, alarms[0].rule['scope_to_project'])
+
+    def test_post_prometheus_alarm_as_nonadmin(self):
+        auth_headers = self.auth_headers
+        auth_headers['X-Roles'] = 'nonadmin'
+        resp = self._do_post_alarm(headers=auth_headers)
+
+        alarms = list(self.alarm_conn.get_alarms(
+            alarm_id=resp.json['alarm_id']))
+        self.assertEqual(1, len(alarms))
+        self.assertEqual(self.project_id, alarms[0].rule['scope_to_project'])
+
+    def test_post_prometheus_alarm_as_nonadmin_on_behalf_of_another_project(
+        self
+    ):
+        auth_headers = self.auth_headers
+        auth_headers['X-Roles'] = 'nonadmin'
+        resp = self._do_post_alarm(
+            headers=auth_headers, project='another_project_id', status=401
+        )
+        self.assertEqual("Not Authorized to access project another_project_id",
+                         resp.json['error_message']['faultstring'])
+
+
 class TestAlarmsCompositeRule(TestAlarmsBase):
 
     def setUp(self):
