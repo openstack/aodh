@@ -150,16 +150,20 @@ class Connection(base.Connection):
         return url
 
     def _get_alembic_config(self):
-        cfg = config.Config(
-            "%s/sqlalchemy/alembic/alembic.ini" % os.path.dirname(__file__))
-        cfg.set_main_option('sqlalchemy.url',
-                            self.conf.database.connection.replace("%", "%%"))
+        path = os.path.join(os.path.dirname(__file__),
+                            "sqlalchemy/alembic/alembic.ini")
+        cfg = config.Config(os.path.abspath(path))
+        cfg.attributes['configure_logger'] = False
         return cfg
 
     def upgrade(self, nocreate=False):
         cfg = self._get_alembic_config()
-        cfg.conf = self.conf
+
         engine = enginefacade.writer.get_engine()
+        engine_url = engine.url.render_as_string(
+            hide_password=False).replace('%', '%%')
+        cfg.set_main_option('sqlalchemy.url', engine_url)
+
         with engine.connect() as conn, conn.begin():
             cfg.attributes['connection'] = conn
             if nocreate:

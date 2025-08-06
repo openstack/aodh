@@ -102,11 +102,6 @@ def run_migrations_online():
             context.run_migrations()
 
 
-if not hasattr(config, "conf"):
-    from aodh import service
-    config.conf = service.prepare_service([])
-
-
 if context.is_offline_mode():
     run_migrations_offline()
 else:
