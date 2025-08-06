@@ -102,7 +102,6 @@
 - job:
     name: grenade-aodh
     parent: grenade
-    voting: false
     required-projects:
       - openstack/aodh
       - openstack/ceilometer
