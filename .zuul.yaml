@@ -7,6 +7,7 @@
       - check-requirements
     check:
       jobs:
+        - grenade-aodh
         - aodh-tempest-plugin-mysql
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
@@ -37,6 +38,7 @@
                       metric_backends: gnocchi
     gate:
       jobs:
+        - grenade-aodh
         - aodh-tempest-plugin-mysql
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
@@ -96,3 +98,30 @@
               gnocchi: True
               sg-core: False
       tempest_test_regex: telemetry_tempest_plugin.aodh
+
+- job:
+    name: grenade-aodh
+    parent: grenade
+    voting: false
+    required-projects:
+      - openstack/aodh
+      - openstack/ceilometer
+      - name: gnocchixyz/gnocchi
+        override-checkout: stable/4.6
+    vars:
+      configure_swap_size: 8192
+      grenade_devstack_localrc:
+        shared:
+          CEILOMETER_BACKEND: gnocchi
+      devstack_plugins:
+        ceilometer: https://opendev.org/openstack/ceilometer
+        aodh: https://opendev.org/openstack/aodh
+      devstack_services:
+        ceilometer-acompute: true
+        ceilometer-acentral: true
+        ceilometer-aipmi: true
+        ceilometer-anotification: true
+        aodh-api: true
+        aodh-evaluator: true
+        aodh-listener: true
+    irrelevant-files: *aodh-irrelevant-files
