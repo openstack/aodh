@@ -51,7 +51,6 @@ def list_opts():
              aodh.evaluator.loadbalancer.OPTS,
              aodh.notifier.rest.OPTS,
              aodh.queue.OPTS,
-             aodh.service.OPTS,
              OPTS)),
         ('api',
          itertools.chain(
