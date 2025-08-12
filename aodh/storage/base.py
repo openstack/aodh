@@ -15,9 +15,9 @@
 """Base classes for storage engines
 """
 import copy
+import inspect
 
 import aodh
-from aodh.utils import get_func_valid_keys
 
 
 def update_nested(original_dict, updates):
@@ -62,7 +62,7 @@ class Model:
 
     @classmethod
     def get_field_names(cls):
-        fields = get_func_valid_keys(cls.__init__)
+        fields = inspect.getfullargspec(cls.__init__)[0]
         return set(fields) - {"self"}
 
 
