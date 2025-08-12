@@ -317,13 +317,6 @@ class Connection(base.Connection):
         :param alarm_id: ID of the alarm to delete
         """
         with _session_for_write() as session:
-            # FIXME(liusheng): we should use delete cascade
-            session.query(models.AlarmCounter).filter(
-                models.AlarmCounter.alarm_id == alarm_id,
-            ).delete()
-            session.query(models.AlarmChange).filter(
-                models.AlarmChange.alarm_id == alarm_id,
-            ).delete()
             session.query(models.Alarm).filter(
                 models.Alarm.alarm_id == alarm_id,
             ).delete()
