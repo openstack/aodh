@@ -8,8 +8,6 @@
     check:
       jobs:
         - grenade-aodh
-        - aodh-tempest-plugin-mysql
-        - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
             irrelevant-files: &aodh-irrelevant-files
               - ^\.gitreview$
@@ -39,8 +37,6 @@
     gate:
       jobs:
         - grenade-aodh
-        - aodh-tempest-plugin-mysql
-        - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
             irrelevant-files: *aodh-irrelevant-files
             vars:
@@ -60,44 +56,6 @@
                   $TEMPEST_CONFIG:
                     telemetry_services:
                       metric_backends: gnocchi
-
-- job:
-    name: aodh-tempest-plugin-postgresql
-    parent: telemetry-tempest-base
-    irrelevant-files: *aodh-irrelevant-files
-    voting: false
-    vars:
-      devstack_services:
-        postgresql: true
-        mysql: false
-      devstack_localrc:
-        DATABASE_TYPE: postgresql
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            telemetry_services:
-              metric_backends: gnocchi
-              alarm_backend: postgresql
-            service_available:
-              gnocchi: True
-              sg-core: False
-      tempest_test_regex: telemetry_tempest_plugin.aodh
-
-- job:
-    name: aodh-tempest-plugin-mysql
-    parent: telemetry-tempest-base
-    irrelevant-files: *aodh-irrelevant-files
-    vars:
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            telemetry_services:
-              metric_backends: gnocchi
-              alarm_backend: mysql
-            service_available:
-              gnocchi: True
-              sg-core: False
-      tempest_test_regex: telemetry_tempest_plugin.aodh
 
 - job:
     name: grenade-aodh
