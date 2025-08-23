@@ -74,7 +74,7 @@ LISTENER_OPTS = [
 ]
 
 
-def prepare_service(argv=None, config_files=None):
+def prepare_service(argv=None, config_files=None, with_gmr=True):
     conf = cfg.ConfigOpts()
     oslo_i18n.enable_lazy()
     log.register_options(conf)
@@ -108,9 +108,9 @@ def prepare_service(argv=None, config_files=None):
     ka_loading.load_auth_from_conf_options(conf, "service_credentials")
     log.setup(conf, 'aodh')
 
-    # NOTE(tkajinam): guru cannot run with service under apache daemon, so when
-    # aod-api running with mod_wsgi, the argv is [], we don't start guru.
-    if argv:
+    # NOTE(tkajinam): disable GMR when app is run by mod_wsgi/uwsgi because
+    # signal handler can't be installed.
+    if with_gmr:
         gmr_opts.set_defaults(conf)
         gmr.TextGuruMeditation.setup_autorun(version, conf=conf)
 
