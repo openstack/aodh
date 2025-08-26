@@ -82,4 +82,6 @@
         aodh-api: true
         aodh-evaluator: true
         aodh-listener: true
+      tempest_test_regex: '\[.*\bsmoke\b.*\]|^telemetry_tempest_plugin'
+      tox_envlist: all
     irrelevant-files: *aodh-irrelevant-files
