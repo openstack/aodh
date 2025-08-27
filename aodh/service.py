@@ -33,16 +33,6 @@ from aodh import version
 
 profiler_opts = importutils.try_import('osprofiler.opts')
 
-OPTS = [
-    cfg.IntOpt('http_timeout',
-               default=600,
-               deprecated_for_removal=True,
-               deprecated_reason=('This parameter is not used now and has no '
-                                  'effect.'),
-               help='Timeout seconds for HTTP requests. Set it to None to '
-                    'disable timeout.'),
-]
-
 EVALUATOR_OPTS = [
     cfg.IntOpt('workers',
                default=1,
