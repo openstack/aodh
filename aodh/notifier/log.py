@@ -16,7 +16,6 @@
 
 from oslo_log import log
 
-from aodh.i18n import _
 from aodh import notifier
 
 LOG = log.getLogger(__name__)
@@ -28,13 +27,14 @@ class LogAlarmNotifier(notifier.AlarmNotifier):
     @staticmethod
     def notify(action, alarm_id, alarm_name, severity, previous, current,
                reason, reason_data):
-        LOG.info(_(
+        LOG.info(
             "Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s "
             "priority from %(previous)s to %(current)s with action %(action)s"
-            " because %(reason)s.") % ({'alarm_name': alarm_name,
-                                        'alarm_id': alarm_id,
-                                        'severity': severity,
-                                        'previous': previous,
-                                        'current': current,
-                                        'action': action.geturl(),
-                                        'reason': reason}))
+            " because %(reason)s.",
+            {'alarm_name': alarm_name,
+             'alarm_id': alarm_id,
+             'severity': severity,
+             'previous': previous,
+             'current': current,
+             'action': action.geturl(),
+             'reason': reason})

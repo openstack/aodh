@@ -51,7 +51,7 @@ class TrustHeatAlarmNotifier(notifier.AlarmNotifier):
         LOG.info(
             "Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s "
             "priority from %(previous)s to %(current)s with action %(action)s"
-            " because %(reason)s." %
+            " because %(reason)s.",
             {'alarm_name': alarm_name,
              'alarm_id': alarm_id,
              'severity': severity,

@@ -91,9 +91,9 @@ class GnocchiResourceThresholdEvaluator(GnocchiBase):
                                               rule['resource_id']),
                 [])
         except Exception as e:
-            msg = 'alarm statistics retrieval failed: %s' % e
-            LOG.warning(msg)
-            raise threshold.InsufficientDataError(msg, [])
+            msg = 'alarm statistics retrieval failed: %s'
+            LOG.warning(msg, e)
+            raise threshold.InsufficientDataError(msg % e, [])
 
 
 class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
@@ -136,9 +136,9 @@ class GnocchiAggregationMetricsThresholdEvaluator(GnocchiBase):
                 'metrics in %s' % (rule['aggregation_method'],
                                    rule['metrics']), [])
         except Exception as e:
-            msg = 'alarm statistics retrieval failed: %s' % e
-            LOG.warning(msg)
-            raise threshold.InsufficientDataError(msg, [])
+            msg = 'alarm statistics retrieval failed: %s'
+            LOG.warning(msg, e)
+            raise threshold.InsufficientDataError(msg % e, [])
 
 
 class GnocchiAggregationResourcesThresholdEvaluator(GnocchiBase):
@@ -177,6 +177,6 @@ class GnocchiAggregationResourcesThresholdEvaluator(GnocchiBase):
                 'aggregation %s does not exist for at least one '
                 'metric of the query' % rule['aggregation_method'], [])
         except Exception as e:
-            msg = 'alarm statistics retrieval failed: %s' % e
-            LOG.warning(msg)
-            raise threshold.InsufficientDataError(msg, [])
+            msg = 'alarm statistics retrieval failed: %s'
+            LOG.warning(msg, e)
+            raise threshold.InsufficientDataError(msg % e, [])

@@ -67,11 +67,11 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
         LOG.info(
             "Notifying alarm %(alarm_name)s %(alarm_id)s with severity"
             " %(severity)s from %(previous)s to %(current)s with action "
-            "%(action)s because %(reason)s. request-id: %(request_id)s " %
-            ({'alarm_name': alarm_name, 'alarm_id': alarm_id,
-              'severity': severity, 'previous': previous,
-              'current': current, 'action': action, 'reason': reason,
-              'request_id': headers['x-openstack-request-id']}))
+            "%(action)s because %(reason)s. request-id: %(request_id)s",
+            {'alarm_name': alarm_name, 'alarm_id': alarm_id,
+             'severity': severity, 'previous': previous,
+             'current': current, 'action': action, 'reason': reason,
+             'request_id': headers['x-openstack-request-id']})
         body = {'alarm_name': alarm_name, 'alarm_id': alarm_id,
                 'severity': severity, 'previous': previous,
                 'current': current, 'reason': reason,
