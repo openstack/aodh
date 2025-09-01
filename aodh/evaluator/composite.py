@@ -158,7 +158,7 @@ class CompositeEvaluator(evaluator.Evaluator):
             self.rule_targets.append(rule)
             return AlarmEvaluation(rule), OkEvaluation(rule)
         else:
-            LOG.error("Invalid rule type: %s" % alarm_rule['type'])
+            LOG.error("Invalid rule type: %s", alarm_rule['type'])
             return False, False
 
     def _reason(self, alarm, new_state, rule_target_alarm):

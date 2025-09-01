@@ -192,7 +192,7 @@ class AlarmTimeConstraint(base.Base):
 
 
 ALARMS_RULES = extension.ExtensionManager("aodh.alarm.rule")
-LOG.debug("alarm rules plugin loaded: %s" % ",".join(ALARMS_RULES.names()))
+LOG.debug("alarm rules plugin loaded: %s", ",".join(ALARMS_RULES.names()))
 
 ACTIONS_SCHEMA = extension.ExtensionManager(
     notifier.AlarmNotifierService.NOTIFIER_EXTENSIONS_NAMESPACE).names()
