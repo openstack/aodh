@@ -15,6 +15,7 @@
 # under the License.
 
 import cotyledon
+from cotyledon import oslo_config_glue
 from oslo_log import log
 
 from aodh import evaluator as evaluator_svc
@@ -26,27 +27,27 @@ LOG = log.getLogger(__name__)
 
 
 def notifier():
-    conf = service.prepare_service()
-    conf.log_opt_values(LOG, log.DEBUG)
     sm = cotyledon.ServiceManager()
+    conf = service.prepare_service()
+    oslo_config_glue.setup(sm, conf)
     sm.add(notifier_svc.AlarmNotifierService,
            workers=conf.notifier.workers, args=(conf,))
     sm.run()
 
 
 def evaluator():
-    conf = service.prepare_service()
-    conf.log_opt_values(LOG, log.DEBUG)
     sm = cotyledon.ServiceManager()
+    conf = service.prepare_service()
+    oslo_config_glue.setup(sm, conf)
     sm.add(evaluator_svc.AlarmEvaluationService,
            workers=conf.evaluator.workers, args=(conf,))
     sm.run()
 
 
 def listener():
-    conf = service.prepare_service()
-    conf.log_opt_values(LOG, log.DEBUG)
     sm = cotyledon.ServiceManager()
+    conf = service.prepare_service()
+    oslo_config_glue.setup(sm, conf)
     sm.add(event_svc.EventAlarmEvaluationService,
            workers=conf.listener.workers, args=(conf,))
     sm.run()
