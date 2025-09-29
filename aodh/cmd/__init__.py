@@ -14,9 +14,14 @@
 # under the License.
 import os
 import sys
+import warnings
 
 
 def config_generator():
+    warnings.warn('aodh-config-generator command is deprecated, '
+                  'Use oslo-config-generator directly.',
+                  category=DeprecationWarning)
+
     try:
         from oslo_config import generator
         generator.main(
