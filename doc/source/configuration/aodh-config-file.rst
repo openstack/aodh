@@ -9,7 +9,8 @@ No config file is provided with the source code, it will be created during
 the installation. In case where no configuration file was installed, one
 can be easily created by running::
 
-    aodh-config-generator
+    oslo-config-generator \
+        --config-file=etc/aodh/aodh-config-generator.conf
 
 
 .. only:: html
