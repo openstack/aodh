@@ -31,9 +31,7 @@ You can then configure Apache with something like this::
         WSGIProcessGroup aodh-api
         WSGIScriptAlias / /usr/lib/python2.7/dist-packages/aodh/api/app
         WSGIApplicationGroup %{GLOBAL}
-        <IfVersion >= 2.4>
-            ErrorLogFormat "%{cu}t %M"
-        </IfVersion>
+        ErrorLogFormat "%{cu}t %M"
         ErrorLog /var/log/httpd/aodh_error.log
         CustomLog /var/log/httpd/aodh_access.log combined
     </VirtualHost>
