@@ -469,7 +469,7 @@ class Alarm(base.Base):
                         else:
                             pw = ':delete'
                             trust_id_used = True
-                        netloc = '{}{}@{}'.format(trust_id, pw, url.netloc)
+                        netloc = f'{trust_id}{pw}@{url.netloc}'
                         url = urlparse.SplitResult(url.scheme, netloc,
                                                    url.path, url.query,
                                                    url.fragment)

@@ -48,4 +48,4 @@ def version_descriptor(base_url, version, released_on):
 
 
 def version_url(base_url, version_number):
-    return '{}/{}'.format(base_url, version_number)
+    return f'{base_url}/{version_number}'
