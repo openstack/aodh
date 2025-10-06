@@ -138,8 +138,6 @@ function install_aodh {
     install_aodhclient
     setup_develop $AODH_DIR
     sudo install -d -o $STACK_USER -m 755 $AODH_CONF_DIR
-
-    pip_install uwsgi
 }
 
 # install_aodhclient() - Collect source and prepare
@@ -155,7 +153,7 @@ function install_aodhclient {
 
 # start_aodh() - Start running processes, including screen
 function start_aodh {
-    run_process aodh-api "$AODH_BIN_DIR/uwsgi --ini $AODH_UWSGI_CONF"
+    run_process aodh-api "$(which uwsgi) --ini $AODH_UWSGI_CONF"
 
     # Only die on API if it was actually intended to be turned on
     if is_service_enabled aodh-api; then
