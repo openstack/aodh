@@ -716,7 +716,7 @@ class TestAlarmsHistory(TestAlarmsBase):
         for k, v in expected.items():
             fragment = jsonlib.dumps({k: v}, sort_keys=True)[1:-1]
             self.assertIn(fragment, actual,
-                          '{} not in {}'.format(fragment, actual))
+                          f'{fragment} not in {actual}')
 
     def test_record_alarm_history_config(self):
         self.CONF.set_override('record_history', False)

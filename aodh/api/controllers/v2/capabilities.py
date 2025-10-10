@@ -54,7 +54,7 @@ def _recursive_keypairs(d, separator=':'):
     for name, value in sorted(d.items()):
         if isinstance(value, dict):
             for subname, subvalue in _recursive_keypairs(value, separator):
-                yield ('{}{}{}'.format(name, separator, subname), subvalue)
+                yield (f'{name}{separator}{subname}', subvalue)
         elif isinstance(value, (tuple, list)):
             yield name, _decode_unicode(value)
         else:

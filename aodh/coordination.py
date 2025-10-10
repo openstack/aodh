@@ -71,7 +71,7 @@ class HashRing:
 
         for node in nodes:
             for r in range(replicas):
-                hashed_key = self._hash('{}-{}'.format(node, r))
+                hashed_key = self._hash(f'{node}-{r}')
                 self._ring[hashed_key] = node
                 self._sorted_keys.append(hashed_key)
         self._sorted_keys.sort()
