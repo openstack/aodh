@@ -51,7 +51,7 @@ Finalize installation
         openstack-aodh-listener.service
 
 #. Restart Apache HTTP service to make aodh-api reload the updated
-   configuration::
+   configuration:
 
    .. code-block:: console
 
