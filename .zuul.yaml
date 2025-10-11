@@ -10,7 +10,9 @@
         - grenade-aodh
         - telemetry-dsvm-integration:
             irrelevant-files: &aodh-irrelevant-files
+              - ^\.gitignore$
               - ^\.gitreview$
+              - ^\.pre-commit-config\.yaml$
               - ^(test-|)requirements.txt$
               - ^setup.cfg$
               - ^doc/.*$
