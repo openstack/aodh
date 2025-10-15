@@ -14,6 +14,7 @@ cover/*
 dist/*
 doc/build
 etc/aodh/aodh.conf
+etc/aodh/*.sample
 subunit.log
 
 # Files created by releasenotes build

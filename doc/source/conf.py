@@ -62,12 +62,11 @@ extensions = [
 ]
 
 config_generator_config_file = os.path.join(
-    ROOT, 'aodh/cmd/aodh-config-generator.conf')
+    ROOT, 'etc/aodh/aodh-config-generator.conf')
 sample_config_basename = '_static/aodh'
 
-policy_generator_config_file = (
-    '../../aodh/cmd/aodh-policy-generator.conf'
-)
+policy_generator_config_file = os.path.join(
+    ROOT, 'etc/aodh/aodh-policy-generator.conf')
 sample_policy_basename = '_static/aodh'
 
 wsme_protocols = ['restjson', 'restxml']
