@@ -1,5 +1,10 @@
-aodh
 ====
+Aodh
+====
+
+.. image:: https://governance.openstack.org/tc/badges/aodh.svg
+
+.. Change things from this point on
 
 Aodh is the alarming service for OpenStack.
 
