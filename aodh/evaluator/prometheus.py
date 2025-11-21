@@ -17,6 +17,7 @@ from oslo_config import cfg
 from oslo_log import log
 
 from observabilityclient import client
+from observabilityclient import rbac as obsc_rbac
 
 from aodh.evaluator import threshold
 from aodh import keystone_client
@@ -32,7 +33,13 @@ OPTS = [
                                   "It's not possible to correctly use "
                                   "client-side rbac enforcement from within "
                                   "services. Using it can cause issues.",
-                deprecated_since="Flamingo")
+                deprecated_since="Flamingo"),
+    cfg.StrOpt('prometheus_project_label_name',
+               default="project",
+               help='Name of label used to identify metric project IDs '
+                    'in Prometheus. This label name will be used to '
+                    'restrict queries to the appropriate project.'
+               )
 ]
 
 
@@ -40,6 +47,7 @@ class PrometheusBase(threshold.ThresholdEvaluator):
     def __init__(self, conf):
         super().__init__(conf)
         self._set_obsclient(conf)
+        self.conf = conf
 
     def _set_obsclient(self, conf):
         session = keystone_client.get_session(conf)
@@ -49,7 +57,7 @@ class PrometheusBase(threshold.ThresholdEvaluator):
 
     def _get_metric_data(self, query):
         LOG.debug(f'Querying Prometheus instance on: {query}')
-        return self._prom.query.query(query, disable_rbac=True)
+        return self._prom.query.query(query)
 
 
 class PrometheusEvaluator(PrometheusBase):
@@ -66,10 +74,19 @@ class PrometheusEvaluator(PrometheusBase):
         :returns: state, trending state, statistics, number of samples outside
         threshold and reason
         """
-        metrics = self._get_metric_data(alarm_rule['query'])
+        scope_to_project = alarm_rule.get('scope_to_project', False)
+        query = alarm_rule['query']
+        if scope_to_project:
+            promQLRbac = obsc_rbac.PromQLRbac(
+                self._prom.prometheus_client,
+                scope_to_project,
+                project_label=self.conf.prometheus_project_label_name
+            )
+            query = promQLRbac.modify_query(query)
+        metrics = self._get_metric_data(query)
         if not metrics:
             LOG.warning("Empty result fetched from Prometheus for query"
-                        f" {alarm_rule['query']}")
+                        f" {query}")
 
         statistics = self._sanitize(metrics)
         if not statistics:

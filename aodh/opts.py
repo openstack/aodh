@@ -18,6 +18,7 @@ from oslo_config import cfg
 
 import aodh.api
 import aodh.api.controllers.v2.alarm_rules.gnocchi
+import aodh.api.controllers.v2.alarm_rules.prometheus
 import aodh.api.controllers.v2.alarms
 import aodh.coordination
 import aodh.evaluator
