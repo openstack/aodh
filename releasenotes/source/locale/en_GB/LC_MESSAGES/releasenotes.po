@@ -7,15 +7,16 @@
 # Andi Chandler <andi@gowling.com>, 2022. #zanata
 # Andi Chandler <andi@gowling.com>, 2023. #zanata
 # Andi Chandler <andi@gowling.com>, 2024. #zanata
+# Andi Chandler <andi@gowling.com>, 2026. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: aodh\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-01 15:51+0000\n"
+"POT-Creation-Date: 2025-11-24 11:15+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2024-12-16 05:30+0000\n"
+"PO-Revision-Date: 2026-01-07 04:01+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>\n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en_GB\n"
@@ -55,6 +56,9 @@ msgstr "2.0.1"
 msgid "2.0.2"
 msgstr "2.0.2"
 
+msgid "20.0.0"
+msgstr "20.0.0"
+
 msgid "2023.1 Series Release Notes"
 msgstr "2023.1 Series Release Notes"
 
@@ -66,6 +70,18 @@ msgstr "2024.1 Series Release Notes"
 
 msgid "2024.2 Series Release Notes"
 msgstr "2024.2 Series Release Notes"
+
+msgid "2025.1 Series Release Notes"
+msgstr "2025.1 Series Release Notes"
+
+msgid "2025.2 Series Release Notes"
+msgstr "2025.2 Series Release Notes"
+
+msgid "21.0.0"
+msgstr "21.0.0"
+
+msgid "21.0.0-17"
+msgstr "21.0.0-17"
 
 msgid "3.0.0"
 msgstr "3.0.0"
@@ -194,6 +210,21 @@ msgstr ""
 "Added a new notifier(``trust+heat``) that works together with "
 "``loadbalancer_member_health`` evaluator for auto-healing purpose."
 
+msgid ""
+"Added collection of alarm evaluation counters. These show the number of "
+"times alarms were evaluated as ``alarm``, ``ok`` and ``insufficient data`` "
+"per alarm. These counters are presented by the /v2/metrics API endpoint. "
+"This feature can be enabled or disabled with the ``[DEFAULT]."
+"enable_evaluation_results_metrics`` configuration option. It's disabled by "
+"default."
+msgstr ""
+"Added collection of alarm evaluation counters. These show the number of "
+"times alarms were evaluated as ``alarm``, ``ok`` and ``insufficient data`` "
+"per alarm. These counters are presented by the /v2/metrics API endpoint. "
+"This feature can be enabled or disabled with the ``[DEFAULT]."
+"enable_evaluation_results_metrics`` configuration option. It's disabled by "
+"default."
+
 msgid "Added new tool ``aodh-status upgrade check``."
 msgstr "Added new tool ``aodh-status upgrade check``."
 
@@ -305,6 +336,15 @@ msgstr ""
 "policies from code. Please be aware that when using that file in your "
 "environment."
 
+msgid ""
+"Deprecate the prometheus_disable_rbac config option. The observabilityclient "
+"rbac feature isn't meant for services and will always be disabled from now "
+"on."
+msgstr ""
+"Deprecate the prometheus_disable_rbac config option. The observabilityclient "
+"rbac feature isn't meant for services and will always be disabled from now "
+"on."
+
 msgid "Deprecation Notes"
 msgstr "Deprecation Notes"
 
@@ -407,6 +447,23 @@ msgid "Prelude"
 msgstr "Prelude"
 
 msgid ""
+"Prometheus queries for nonadmin users or for admin users who specify a "
+"particular project are now being restricted to that project or to the "
+"nonadmin user's current project. Admins can still create alarms for "
+"resources across multiple projects without restrictions. This works "
+"similarly to how gnocchi alarms work for some time already. Use the "
+"[DEFAULT].prometheus_project_label_name configuration option to configure "
+"label name used for distinguishing between projects."
+msgstr ""
+"Prometheus queries for non-admin users or for admin users who specify a "
+"particular project are now being restricted to that project or to the non-"
+"admin user's current project. Admins can still create alarms for resources "
+"across multiple projects without restrictions. This works similarly to how "
+"Gnocchi alarms have worked for some time already. Use the [DEFAULT]."
+"prometheus_project_label_name configuration option to configure the label "
+"name used for distinguishing between projects."
+
+msgid ""
 "Python 2.7 support has been dropped. Last release of Aodh to support py2.7 "
 "is OpenStack Train. The minimum version of Python now supported by Aodh is "
 "Python 3.6."
@@ -455,6 +512,13 @@ msgstr "Start using reno to manage release notes."
 
 msgid "Stein Series Release Notes"
 msgstr "Stein Series Release Notes"
+
+msgid ""
+"Support for Python 3.9 has been removed. Now Python 3.10 is the minimum "
+"version supported."
+msgstr ""
+"Support for Python 3.9 has been removed. Now Python 3.10 is the minimum "
+"version supported."
 
 msgid ""
 "Support for queue based communication between alarm evaluator service and "
@@ -512,6 +576,13 @@ msgstr ""
 "parameter is deprecated and will be removed in a future release."
 
 msgid ""
+"The ``aodh-config-generator`` command has been deprecated and will be "
+"removed in a futrue release."
+msgstr ""
+"The ``aodh-config-generator`` command has been deprecated and will be "
+"removed in a future release."
+
+msgid ""
 "The admin user can fetch alarms of all the projects, e.g. ``curl -X GET "
 "\"${aodh_prefix}/v2/alarms?q.field=all_projects&q.op=eq&q.value=true\" X-"
 "Auth-Token:$token``"
@@ -555,6 +626,9 @@ msgstr ""
 
 msgid "The deprecated 'threshold' alarm type has been removed."
 msgstr "The deprecated 'threshold' alarm type has been removed."
+
+msgid "The deprecated ``[DEFAULT] http_timeout`` option has been removed."
+msgstr "The deprecated ``[DEFAULT] http_timeout`` option has been removed."
 
 msgid "The deprecated combination alarms support have been removed."
 msgstr "The deprecated combination alarms support have been removed."
@@ -686,6 +760,13 @@ msgstr ""
 "[`bug 1582131 <https://bugs.launchpad.net/aodh/+bug/1582131>`_] Fix an issue "
 "with adding CA_BUNDLE certificate path as value of \"verify\" parameter in "
 "SSL requests."
+
+msgid ""
+"[`bug 2106029 <https://bugs.launchpad.net/aodh/+bug/2106029>`_] Fix "
+"Prometheus type queries misusing observabilityclient rbac feature."
+msgstr ""
+"[`bug 2106029 <https://bugs.launchpad.net/aodh/+bug/2106029>`_] Fix "
+"Prometheus type queries misusing observabilityclient rbac feature."
 
 msgid ""
 "batch_size and batch_timeout configuration options are added to [listener] "

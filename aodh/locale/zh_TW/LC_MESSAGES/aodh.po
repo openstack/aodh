@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aodh VERSION\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2021-09-15 16:30+0000\n"
+"POT-Creation-Date: 2025-11-24 11:16+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -54,14 +54,6 @@ msgstr "過濾表示式無效：%s"
 #, python-format
 msgid "Not Authorized to access %(aspect)s %(id)s"
 msgstr "未獲授權來存取 %(aspect)s %(id)s"
-
-#, python-format
-msgid ""
-"Notifying alarm %(alarm_name)s %(alarm_id)s of %(severity)s priority from "
-"%(previous)s to %(current)s with action %(action)s because %(reason)s."
-msgstr ""
-"正在以動作 %(action)s 通知優先順序為 %(severity)s 的警示 %(alarm_name)s "
-"%(alarm_id)s（從 %(previous)s 至 %(current)s），因為 %(reason)s。"
 
 #, python-format
 msgid "Order-by expression not valid: %s"
