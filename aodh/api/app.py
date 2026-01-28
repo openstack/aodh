@@ -35,7 +35,6 @@ LOG = log.getLogger(__name__)
 # permit, so to be able to pass an object created before paste load
 # the app, we store them into a global var. But the each loaded app
 # store it's configuration in unique key to be concurrency safe.
-global APPCONFIGS
 APPCONFIGS = {}
 
 
@@ -53,8 +52,6 @@ def setup_app(root, conf):
 
 
 def load_app(conf):
-    global APPCONFIGS
-
     # Build the WSGI app
     cfg_path = conf.api.paste_config
     if not os.path.isabs(cfg_path):
@@ -80,7 +77,6 @@ def load_app(conf):
 
 
 def app_factory(global_config, **local_conf):
-    global APPCONFIGS
     appconfig = APPCONFIGS.get(global_config.get('configkey'))
     return setup_app(root=local_conf.get('root'), **appconfig)
 
