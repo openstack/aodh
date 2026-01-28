@@ -65,16 +65,6 @@ function _aodh_create_accounts {
     fi
 }
 
-# Activities to do before aodh has been installed.
-function preinstall_aodh {
-    # Needed to build psycopg2
-    if is_ubuntu; then
-        install_package libpq-dev
-    else
-        install_package postgresql-devel
-    fi
-}
-
 # cleanup_aodh() - Remove residual data files, anything left over
 # from previous runs that a clean run would need to clean up
 function cleanup_aodh {
@@ -188,11 +178,7 @@ function stop_aodh {
 
 # This is the main for plugin.sh
 if is_service_enabled aodh; then
-    if [[ "$1" == "stack" && "$2" == "pre-install" ]]; then
-        # Set up other services
-        echo_summary "Configuring system services for Aodh"
-        preinstall_aodh
-    elif [[ "$1" == "stack" && "$2" == "install" ]]; then
+    if [[ "$1" == "stack" && "$2" == "install" ]]; then
         echo_summary "Installing Aodh"
         # Use stack_install_service here to account for virtualenv
         stack_install_service aodh
