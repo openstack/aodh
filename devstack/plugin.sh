@@ -55,7 +55,7 @@ function _aodh_prepare_coordination {
 }
 
 # Create aodh related accounts in Keystone
-function _aodh_create_accounts {
+function aodh_create_accounts {
     if is_service_enabled aodh-api; then
 
         create_service_user "aodh" "admin"
@@ -111,11 +111,11 @@ function configure_aodh {
 
 # init_aodh() - Initialize etc.
 function init_aodh {
-    # Get aodh keystone settings in place
-    _aodh_create_accounts
-
-    recreate_database aodh
-    $AODH_BIN_DIR/aodh-dbsync
+    # recreate db only if one of the db services is enabled
+    if is_service_enabled $DATABASE_BACKENDS; then
+        recreate_database aodh
+        $AODH_BIN_DIR/aodh-dbsync
+    fi
 }
 
 # Install Aodh.
@@ -185,6 +185,8 @@ if is_service_enabled aodh; then
     elif [[ "$1" == "stack" && "$2" == "post-config" ]]; then
         echo_summary "Configuring Aodh"
         configure_aodh
+        #  Get aodh keystone settings in place
+        aodh_create_accounts
     elif [[ "$1" == "stack" && "$2" == "extra" ]]; then
         echo_summary "Initializing Aodh"
         # Tidy base for aodh
