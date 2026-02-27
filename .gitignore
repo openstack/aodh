@@ -24,3 +24,7 @@ doc/source/_static/aodh.policy.yaml.sample
 doc/source/_static/aodh.conf.sample
 
 .vscode/
+
+# Files used by AI agents for instructions, rules and project context
+# md is also used for docs, but we can ignore them since openstack uses rst
+*.md
