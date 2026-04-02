@@ -17,7 +17,7 @@
 Installing the API behind mod_wsgi
 ==================================
 
-Aodh comes with a WSGI application file named `aodh/api/app.wsgi` for
+Aodh comes with a WSGI application file named `aodh/wsgi/api.py` for
 configuring the API service to run behind Apache with ``mod_wsgi``. This file
 is installed with the rest of the Aodh application code, and should not need to
 be modified.
@@ -29,7 +29,7 @@ You can then configure Apache with something like this::
     <VirtualHost *:8042>
         WSGIDaemonProcess aodh-api processes=2 threads=10 user=SOMEUSER display-name=%{GROUP}
         WSGIProcessGroup aodh-api
-        WSGIScriptAlias / /usr/lib/python2.7/dist-packages/aodh/api/app
+        WSGIScriptAlias / /usr/lib/python3.11/dist-packages/aodh/wsgi/api.py
         WSGIApplicationGroup %{GLOBAL}
         ErrorLogFormat "%{cu}t %M"
         ErrorLog /var/log/httpd/aodh_error.log
