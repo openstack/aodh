@@ -27,7 +27,7 @@ Install and configure components
    .. code-block:: console
 
       # apt-get install aodh-api aodh-evaluator aodh-notifier \
-        aodh-listener aodh-expirer python-aodhclient
+        aodh-listener aodh-expirer python3-aodhclient
 
 .. include:: configure-common.rst
 
