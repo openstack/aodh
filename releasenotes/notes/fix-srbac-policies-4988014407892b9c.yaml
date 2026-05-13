@@ -1,0 +1,11 @@
+---
+fixes:
+  - |
+    Fixed SRBAC policy definitions to align with the OpenStack-wide
+    `consistent and secure RBAC <https://governance.openstack.org/tc/goals/selected/consistent-and-secure-rbac.html>`_
+    goal. The ``project admin`` persona has been removed in favor of the
+    legacy non-project admin, and all policy rules now use
+    ``project_member_or_admin`` or ``project_reader_or_admin`` composites
+    so that legacy admin tokens continue to work alongside scoped project
+    personas. The alarm creation endpoint now correctly retrieves the
+    target project for policy enforcement.

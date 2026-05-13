@@ -304,7 +304,7 @@ class TestAlarms(TestAlarmsBase):
         json = self._alarm_representation_owned_by(identifiers)
         headers = {}
         headers.update(self.auth_headers)
-        headers['X-Roles'] = 'demo'
+        headers['X-Roles'] = 'member'
         resp = self.post_json('/alarms', params=json, status=401,
                               headers=headers)
         aspect = 'user' if 'user' in identifiers else 'project'
@@ -334,7 +334,7 @@ class TestAlarms(TestAlarmsBase):
         json = self._alarm_representation_owned_by(identifiers)
         headers = {}
         headers.update(self.auth_headers)
-        headers['X-Roles'] = 'demo'
+        headers['X-Roles'] = 'member'
         self.post_json('/alarms', params=json, status=201, headers=headers)
         alarms = list(self.alarm_conn.get_alarms(enabled=False))
         self.assertEqual(1, len(alarms))
@@ -752,7 +752,7 @@ class TestAlarmsHistory(TestAlarmsBase):
         # is created
         member_user = uuidutils.generate_uuid()
         member_project = uuidutils.generate_uuid()
-        member_auth = {'X-Roles': 'member',
+        member_auth = {'X-Roles': 'member,reader',
                        'X-User-Id': member_user,
                        'X-Project-Id': member_project}
         new_alarm = {
@@ -1413,7 +1413,7 @@ class TestAlarmsRulePrometheus(TestAlarmsBase):
 
     def test_post_prometheus_alarm_as_nonadmin(self):
         auth_headers = self.auth_headers
-        auth_headers['X-Roles'] = 'nonadmin'
+        auth_headers['X-Roles'] = 'member'
         resp = self._do_post_alarm(headers=auth_headers)
 
         alarms = list(self.alarm_conn.get_alarms(
@@ -1425,7 +1425,7 @@ class TestAlarmsRulePrometheus(TestAlarmsBase):
         self
     ):
         auth_headers = self.auth_headers
-        auth_headers['X-Roles'] = 'nonadmin'
+        auth_headers['X-Roles'] = 'member'
         resp = self._do_post_alarm(
             headers=auth_headers, project='another_project_id', status=401
         )

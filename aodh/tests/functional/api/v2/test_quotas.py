@@ -25,7 +25,8 @@ class TestQuotas(v2.FunctionalTest):
 
         cls.project = uuidutils.generate_uuid()
         cls.user = uuidutils.generate_uuid()
-        cls.auth_headers = {'X-User-Id': cls.user, 'X-Project-Id': cls.project}
+        cls.auth_headers = {'X-User-Id': cls.user, 'X-Project-Id': cls.project,
+                            'X-Roles': 'member,reader'}
         cls.other_project = uuidutils.generate_uuid()
 
     def test_get_quotas_by_user(self):
