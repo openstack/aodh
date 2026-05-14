@@ -15,7 +15,7 @@ available in the backend.
 .. rest-controller:: aodh.api.controllers.v2.capabilities:CapabilitiesController
    :webprefix: /v2/capabilities
 
-.. autotype:: aodh.api.controllers.v2.capabilities.Capabilities
+.. autoclass:: aodh.api.controllers.v2.capabilities.Capabilities
    :members:
 
 .. _alarms-api:
@@ -29,22 +29,22 @@ Alarms
 .. rest-controller:: aodh.api.controllers.v2.alarms:AlarmController
    :webprefix: /v2/alarms
 
-.. autotype:: aodh.api.controllers.v2.alarms.Alarm
+.. autoclass:: aodh.api.controllers.v2.alarms.Alarm
    :members:
 
-.. autotype:: aodh.api.controllers.v2.alarm_rules.gnocchi.MetricOfResourceRule
+.. autoclass:: aodh.api.controllers.v2.alarm_rules.gnocchi.MetricOfResourceRule
    :members:
 
-.. autotype:: aodh.api.controllers.v2.alarm_rules.gnocchi.AggregationMetricByResourcesLookupRule
+.. autoclass:: aodh.api.controllers.v2.alarm_rules.gnocchi.AggregationMetricByResourcesLookupRule
    :members:
 
-.. autotype:: aodh.api.controllers.v2.alarm_rules.gnocchi.AggregationMetricsByIdLookupRule
+.. autoclass:: aodh.api.controllers.v2.alarm_rules.gnocchi.AggregationMetricsByIdLookupRule
    :members:
 
-.. autotype:: aodh.api.controllers.v2.alarms.AlarmTimeConstraint
+.. autoclass:: aodh.api.controllers.v2.alarms.AlarmTimeConstraint
    :members:
 
-.. autotype:: aodh.api.controllers.v2.alarms.AlarmChange
+.. autoclass:: aodh.api.controllers.v2.alarms.AlarmChange
    :members:
 
 Filtering Queries
@@ -69,7 +69,7 @@ The *filter*, *orderby* and *limit* are all optional fields in a query.
 .. rest-controller:: aodh.api.controllers.v2.query:QueryAlarmHistoryController
    :webprefix: /v2/query/alarms/history
 
-.. autotype:: aodh.api.controllers.v2.query.ComplexQuery
+.. autoclass:: aodh.api.controllers.v2.query.ComplexQuery
    :members:
 
 Composite rule Alarm
