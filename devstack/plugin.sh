@@ -96,9 +96,6 @@ function configure_aodh {
 
     iniset $AODH_CONF database connection $(database_connection_url aodh)
 
-    # NOTE: This must come after database configuration as those can
-    # call cleanup_aodh which will wipe the WSGI config.
-
     # iniset creates these files when it's called if they don't exist.
     write_uwsgi_config "$AODH_UWSGI_CONF" "$AODH_UWSGI" "/alarming" "" "aodh"
 }
