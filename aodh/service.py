@@ -66,7 +66,7 @@ def prepare_service(argv=None, config_files=None, with_gmr=True):
     oslo_i18n.enable_lazy()
     log.register_options(conf)
     log_levels = (
-        conf.default_log_levels +
+        log.get_default_log_levels() +
         [
             'futurist=INFO',
             'keystoneclient=INFO',
