@@ -112,13 +112,11 @@ def get_heat_client_from_trust(conf, trust_id):
 OPTS = [
     cfg.StrOpt('region-name',
                default=os.environ.get('OS_REGION_NAME'),
-               deprecated_name="os-region-name",
                help='Region name to use for OpenStack service endpoints.'),
     cfg.StrOpt('interface',
                default=os.environ.get(
-                   'OS_INTERFACE', os.environ.get('OS_ENDPOINT_TYPE',
-                                                  'public')),
-               deprecated_name="os-endpoint-type",
+                   'OS_INTERFACE',
+                   os.environ.get('OS_ENDPOINT_TYPE', 'public')),
                choices=('public', 'internal', 'admin',
                         'publicURL', 'internalURL', 'adminURL'),
                help='Type of endpoint in Identity service catalog to use for '
@@ -128,9 +126,4 @@ OPTS = [
 
 def register_keystoneauth_opts(conf):
     ka_loading.register_auth_conf_options(conf, CFG_GROUP)
-    ka_loading.register_session_conf_options(
-        conf, CFG_GROUP,
-        deprecated_opts={'cacert': [
-            cfg.DeprecatedOpt('os-cacert', group=CFG_GROUP),
-            cfg.DeprecatedOpt('os-cacert', group="DEFAULT")]
-        })
+    ka_loading.register_session_conf_options(conf, CFG_GROUP)

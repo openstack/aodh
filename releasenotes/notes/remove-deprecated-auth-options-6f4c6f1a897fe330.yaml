@@ -1,0 +1,13 @@
+---
+upgrade:
+  - |
+    The following deprecated options have been removed.
+
+    - ``[service_credentials] os_region_name``: Use
+      ``[service_credentials] region_name`` instead.
+
+    - ``[service_credentials] os_endpoint_type``: Use
+      ``[service_credentials] interface`` instead.
+
+    - ``[service_credentials] os_cacert`` and ``[DEFAULT] os_cacert``:
+      Use ``[service_credentials] cacert`` instead.
