@@ -119,8 +119,8 @@ OPTS = [
                    'OS_INTERFACE', os.environ.get('OS_ENDPOINT_TYPE',
                                                   'public')),
                deprecated_name="os-endpoint-type",
-               choices=('public', 'internal', 'admin', 'auth', 'publicURL',
-                        'internalURL', 'adminURL'),
+               choices=('public', 'internal', 'admin',
+                        'publicURL', 'internalURL', 'adminURL'),
                help='Type of endpoint in Identity service catalog to use for '
                     'communication with OpenStack services.'),
 ]
