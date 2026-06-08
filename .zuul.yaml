@@ -29,6 +29,8 @@
                   $TEMPEST_CONFIG:
                     telemetry_services:
                       metric_backends: gnocchi
+        - telemetry-dsvm-integration-aetos:
+            irrelevant-files: *aodh-irrelevant-files
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
             vars:
@@ -37,6 +39,8 @@
                   $TEMPEST_CONFIG:
                     telemetry_services:
                       metric_backends: gnocchi
+        - telemetry-dsvm-integration-aetos-ipv6-only:
+            irrelevant-files: *aodh-irrelevant-files
     gate:
       jobs:
         - grenade-aodh
@@ -51,6 +55,8 @@
                     service_available:
                       gnocchi: True
                       sg-core: True
+        - telemetry-dsvm-integration-aetos:
+            irrelevant-files: *aodh-irrelevant-files
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
             vars:
@@ -59,6 +65,8 @@
                   $TEMPEST_CONFIG:
                     telemetry_services:
                       metric_backends: gnocchi
+        - telemetry-dsvm-integration-aetos-ipv6-only:
+            irrelevant-files: *aodh-irrelevant-files
 
 - job:
     name: grenade-aodh
