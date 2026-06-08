@@ -804,8 +804,10 @@ class AlarmsController(rest.RestController):
 
         :param data: an alarm within the request body.
         """
+        target = rbac.target_from_segregation_rule(
+            pecan.request, pecan.request.enforcer)
         rbac.enforce('create_alarm', pecan.request,
-                     pecan.request.enforcer, {})
+                     pecan.request.enforcer, target)
 
         conn = pecan.request.storage
         now = timeutils.utcnow()
