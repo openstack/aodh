@@ -362,7 +362,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
         ]
         tzinfo = zoneinfo.ZoneInfo('Europe/Ljubljana')
         dt = datetime.datetime(2014, 1, 1, 15, 0, 0, tzinfo=tzinfo)
-        mock_utcnow.return_value = dt.astimezone(datetime.timezone.utc)
+        mock_utcnow.return_value = dt.astimezone(datetime.UTC)
         self.client.metric.get_measures.return_value = []
         self._evaluate_all_alarms()
         self._assert_all_alarms('ok')
@@ -384,7 +384,7 @@ class TestGnocchiResourceThresholdEvaluate(TestGnocchiEvaluatorBase):
         ]
         tzinfo = zoneinfo.ZoneInfo('Europe/Ljubljana')
         dt = datetime.datetime(2014, 1, 1, 12, 0, 0, tzinfo=tzinfo)
-        mock_utcnow.return_value = dt.astimezone(datetime.timezone.utc)
+        mock_utcnow.return_value = dt.astimezone(datetime.UTC)
         self.client.metric.get_measures.return_value = []
         self._evaluate_all_alarms()
         self._assert_all_alarms('insufficient data')

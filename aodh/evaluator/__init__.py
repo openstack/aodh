@@ -153,7 +153,7 @@ class Evaluator(metaclass=abc.ABCMeta):
         if not alarm.time_constraints:
             return True
 
-        now_utc = timeutils.utcnow().replace(tzinfo=datetime.timezone.utc)
+        now_utc = timeutils.utcnow().replace(tzinfo=datetime.UTC)
         for tc in alarm.time_constraints:
             tz = zoneinfo.ZoneInfo(tc['timezone']) if tc['timezone'] else None
             now_tz = now_utc.astimezone(tz) if tz else now_utc
