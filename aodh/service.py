@@ -61,7 +61,8 @@ LISTENER_OPTS = [
 ]
 
 
-def prepare_service(argv=None, config_files=None, with_gmr=True):
+def prepare_service(argv=None, config_files=None, with_gmr=True,
+                    prog=None):
     conf = cfg.ConfigOpts()
     oslo_i18n.enable_lazy()
     log.register_options(conf)
@@ -88,7 +89,7 @@ def prepare_service(argv=None, config_files=None, with_gmr=True):
                            group=None if group == "DEFAULT" else group)
     keystone_client.register_keystoneauth_opts(conf)
 
-    conf(argv, project='aodh', validate_default_values=True,
+    conf(argv, project='aodh', prog=prog, validate_default_values=True,
          default_config_files=config_files,
          version=version.version_info.version_string())
 

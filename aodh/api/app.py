@@ -82,6 +82,6 @@ def app_factory(global_config, **local_conf):
 
 
 def build_wsgi_app(argv=None):
-    conf = service.prepare_service(argv=argv, with_gmr=False)
+    conf = service.prepare_service(argv=argv, with_gmr=False, prog='aodh-api')
     conf.log_opt_values(LOG, log.DEBUG)
     return load_app(conf)
