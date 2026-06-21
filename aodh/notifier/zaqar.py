@@ -59,7 +59,6 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
 
     def __init__(self, conf):
         super().__init__(conf)
-        self.conf = conf
         self._zclient = None
         self._zendpoint = None
 

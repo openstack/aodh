@@ -53,10 +53,6 @@ OPTS = [
 class RestAlarmNotifier(notifier.AlarmNotifier):
     """Rest alarm notifier."""
 
-    def __init__(self, conf):
-        super().__init__(conf)
-        self.conf = conf
-
     def notify(self, action, alarm_id, alarm_name, severity, previous,
                current, reason, reason_data, headers=None):
         headers = headers or {}

@@ -42,9 +42,8 @@ OPTS = [
 class AlarmNotifier(metaclass=abc.ABCMeta):
     """Base class for alarm notifier plugins."""
 
-    @staticmethod
-    def __init__(conf):
-        pass
+    def __init__(self, conf):
+        self.conf = conf
 
     @abc.abstractmethod
     def notify(self, action, alarm_id, alarm_name, severity, previous,
