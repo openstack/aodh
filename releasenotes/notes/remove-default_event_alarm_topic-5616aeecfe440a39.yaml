@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The deprecated ``[DEFAULT] event_alarm_topuc`` option has been removed.
+    Use the ``[listener] event_alarm_topuc`` option instead.
