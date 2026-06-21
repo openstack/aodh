@@ -52,18 +52,15 @@ LOG = log.getLogger(__name__)
 
 ALARM_API_OPTS = [
     cfg.IntOpt('user_alarm_quota',
-               deprecated_group='DEFAULT',
                default=-1,
                help='Maximum number of alarms defined for a user.'
                ),
     cfg.IntOpt('project_alarm_quota',
-               deprecated_group='DEFAULT',
                default=-1,
                help='Maximum number of alarms defined for a project.'
                ),
     cfg.IntOpt('alarm_max_actions',
                default=-1,
-               deprecated_group='DEFAULT',
                help='Maximum count of actions for each state of an alarm, '
                     'non-positive number means no limit.'),
 ]
