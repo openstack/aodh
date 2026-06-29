@@ -73,36 +73,36 @@ class TestKeystoneClient(tests_base.BaseTestCase):
             cfg.StrOpt('auth_url', default="testdomain")
         ], "service_credentials")
 
-    def test_get_trusted_client_domain_id(self):
+    def test_get_trusted_session_domain_id(self):
         self.config.config(
             **{'group': "service_credentials",
                'user_domain_id': "uuid-domain"})
 
-        client = keystone_client.get_trusted_client(
+        session = keystone_client.get_trusted_session(
             self.config.conf, "testing")
-        self.assertEqual(client.session.auth._user_domain_id, "uuid-domain")
-        self.assertEqual(client.session.auth._user_domain_name, '')
+        self.assertEqual(session.auth._user_domain_id, "uuid-domain")
+        self.assertEqual(session.auth._user_domain_name, '')
 
-    def test_get_trusted_client_domain_name(self):
+    def test_get_trusted_session_domain_name(self):
         self.config.config(
             **{'group': "service_credentials",
                'user_domain_name': "testdomain"})
 
-        client = keystone_client.get_trusted_client(
+        session = keystone_client.get_trusted_session(
             self.config.conf, "testing")
-        self.assertEqual(client.session.auth._user_domain_name, "testdomain")
-        self.assertEqual(client.session.auth._user_domain_id, '')
+        self.assertEqual(session.auth._user_domain_name, "testdomain")
+        self.assertEqual(session.auth._user_domain_id, '')
 
-    def test_get_trusted_client_domain(self):
+    def test_get_trusted_session_domain(self):
         self.config.config(**{'group': "service_credentials",
                               'user_domain_name': "testdomain",
                               'user_domain_id': "uuid-gen",
                               })
 
-        client = keystone_client.get_trusted_client(self.config.conf,
-                                                    "testing")
-        self.assertEqual(client.session.auth._user_domain_name, "testdomain")
-        self.assertEqual(client.session.auth._user_domain_id, "uuid-gen")
+        session = keystone_client.get_trusted_session(self.config.conf,
+                                                      "testing")
+        self.assertEqual(session.auth._user_domain_name, "testdomain")
+        self.assertEqual(session.auth._user_domain_id, "uuid-gen")
 
 
 class TestAlarmNotifier(tests_base.BaseTestCase):
@@ -402,12 +402,12 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         action = 'trust+http://trust-1234@host/action'
         url = 'http://host/action'
 
-        client = mock.MagicMock()
-        client.session.auth.get_access.return_value.auth_token = 'token_1234'
+        session = mock.MagicMock()
+        session.get_auth_headers.return_value = {'X-Auth-Token': 'token_1234'}
 
         self.useFixture(
-            fixtures.MockPatch('aodh.keystone_client.get_trusted_client',
-                               lambda *args: client))
+            fixtures.MockPatch('aodh.keystone_client.get_trusted_session',
+                               lambda *args: session))
 
         with mock.patch.object(requests.Session, 'post') as poster:
             self._msg_notifier.sample({}, 'alarm.update',
@@ -456,12 +456,12 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.assertEqual(1, self.zaqar.posts)
 
     def test_trust_zaqar_notifier_action(self):
-        client = mock.MagicMock()
-        client.session.auth.get_access.return_value.auth_token = 'token_1234'
+        session = mock.MagicMock()
+        session.get_auth_headers.return_value = {'X-Auth-Token': 'token_1234'}
 
         self.useFixture(
-            fixtures.MockPatch('aodh.keystone_client.get_trusted_client',
-                               lambda *args: client))
+            fixtures.MockPatch('aodh.keystone_client.get_trusted_session',
+                               lambda *args: session))
 
         action = 'trust+zaqar://trust-1234:delete@?queue_name=foobar-critical'
         self._msg_notifier.sample({}, 'alarm.update',

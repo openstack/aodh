@@ -40,7 +40,7 @@ def get_client(conf):
     return ks_client_v3.Client(session=sess)
 
 
-def get_trusted_client(conf, trust_id):
+def get_trusted_session(conf, trust_id):
     # Ideally we would use load_session_from_conf_options, but we can't do that
     # *and* specify a trust, so let's create the object manually.
     auth_plugin = password.Password(
@@ -51,13 +51,8 @@ def get_trusted_client(conf, trust_id):
         user_domain_name=conf[CFG_GROUP].user_domain_name,
         trust_id=trust_id)
 
-    sess = ka_loading.load_session_from_conf_options(conf, CFG_GROUP,
+    return ka_loading.load_session_from_conf_options(conf, CFG_GROUP,
                                                      auth=auth_plugin)
-    return ks_client_v3.Client(session=sess)
-
-
-def get_auth_token(client):
-    return client.session.auth.get_access(client.session).auth_token
 
 
 def get_client_on_behalf_user(conf, auth_plugin):
@@ -70,8 +65,7 @@ def get_client_on_behalf_user(conf, auth_plugin):
 def create_trust_id(conf, trustor_user_id, trustor_project_id, roles,
                     auth_plugin):
     """Create a new trust using the aodh service user."""
-    admin_client = get_client(conf)
-    trustee_user_id = admin_client.session.get_user_id()
+    trustee_user_id = get_session(conf).get_user_id()
 
     client = get_client_on_behalf_user(conf, auth_plugin)
     trust = client.trusts.create(trustor_user=trustor_user_id,
@@ -97,8 +91,7 @@ def url_for(conf, **kwargs):
 
 
 def get_heat_client_from_trust(conf, trust_id):
-    ks_client = get_trusted_client(conf, trust_id)
-    sess = ks_client.session
+    sess = get_trusted_session(conf, trust_id)
 
     endpoint = sess.get_endpoint(
         service_type='orchestration',

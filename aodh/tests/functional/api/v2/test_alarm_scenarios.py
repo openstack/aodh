@@ -467,12 +467,10 @@ class TestAlarms(TestAlarmsBase):
         }
         auth = mock.Mock()
         trust_client = mock.Mock()
-        with mock.patch('aodh.keystone_client.get_client') as client:
-            mock_session = mock.Mock()
-            mock_session.get_user_id.return_value = 'my_user'
-            client.return_value = mock.Mock(session=mock_session)
-            with mock.patch('keystoneclient.v3.client.Client') as sub_client:
-                sub_client.return_value = trust_client
+        with mock.patch('aodh.keystone_client.get_session') as session:
+            session.return_value.get_user_id.return_value = 'my_user'
+            with mock.patch('keystoneclient.v3.client.Client') as client:
+                client.return_value = trust_client
                 trust_client.trusts.create.return_value = mock.Mock(id='5678')
                 self.post_json('/alarms', params=json, status=201,
                                headers=self.auth_headers,
@@ -497,11 +495,10 @@ class TestAlarms(TestAlarmsBase):
         self.assertEqual(
             ['trust+http://my.server:1234/foo'], data['ok_actions'])
 
-        with mock.patch('aodh.keystone_client.get_client') as client:
-            client.return_value = mock.Mock(
-                auth_ref=mock.Mock(user_id='my_user'))
-            with mock.patch('keystoneclient.v3.client.Client') as sub_client:
-                sub_client.return_value = trust_client
+        with mock.patch('aodh.keystone_client.get_session') as session:
+            session.return_value.get_user_id.return_value = 'my_user'
+            with mock.patch('keystoneclient.v3.client.Client') as client:
+                client.return_value = trust_client
                 self.delete('/alarms/%s' % alarm.alarm_id,
                             headers=self.auth_headers,
                             status=204,
@@ -556,11 +553,10 @@ class TestAlarms(TestAlarmsBase):
         data = self._get_alarm('a')
         data.update({'ok_actions': ['trust+http://something/ok']})
         trust_client = mock.Mock()
-        with mock.patch('aodh.keystone_client.get_client') as client:
-            client.return_value = mock.Mock(
-                auth_ref=mock.Mock(user_id='my_user'))
-            with mock.patch('keystoneclient.v3.client.Client') as sub_client:
-                sub_client.return_value = trust_client
+        with mock.patch('aodh.keystone_client.get_session') as session:
+            session.return_value.get_user_id.return_value = 'my_user'
+            with mock.patch('keystoneclient.v3.client.Client') as client:
+                client.return_value = trust_client
                 trust_client.trusts.create.return_value = mock.Mock(id='5678')
                 self.put_json('/alarms/%s' % data['alarm_id'],
                               params=data,
@@ -578,11 +574,10 @@ class TestAlarms(TestAlarmsBase):
 
         data.update({'ok_actions': ['http://no-trust-something/ok']})
 
-        with mock.patch('aodh.keystone_client.get_client') as client:
-            client.return_value = mock.Mock(
-                auth_ref=mock.Mock(user_id='my_user'))
-            with mock.patch('keystoneclient.v3.client.Client') as sub_client:
-                sub_client.return_value = trust_client
+        with mock.patch('aodh.keystone_client.get_session') as session:
+            session.return_value.get_user_id.return_value = 'my_user'
+            with mock.patch('keystoneclient.v3.client.Client') as client:
+                client.return_value = trust_client
                 self.put_json('/alarms/%s' % data['alarm_id'],
                               params=data,
                               headers=self.auth_headers)
