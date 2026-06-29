@@ -27,7 +27,6 @@ LOG = log.getLogger(__name__)
 OPTS = [
     cfg.StrOpt('event_alarm_topic',
                default='alarm.all',
-               deprecated_group='DEFAULT',
                help='The topic that aodh uses for event alarm evaluation.'),
     cfg.IntOpt('batch_size',
                default=1,
