@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    The following options are no longer loaded from the ``[DEFAULT]`` section.
+    Use the ``[api]`` section instead.
+
+    - ``user_alarm_quota``
+    - ``project_alarm_quota``
+    - ``alarm_max_actions``
