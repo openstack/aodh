@@ -35,7 +35,6 @@ OPTS = [
                     'single instance of the service is running.'),
     cfg.FloatOpt('heartbeat_interval',
                  default=1.0,
-                 deprecated_name='heartbeat',
                  help='Number of seconds between heartbeats for distributed '
                       'coordination.'),
     cfg.IntOpt('retry_backoff',

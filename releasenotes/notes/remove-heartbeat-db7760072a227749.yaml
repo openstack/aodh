@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The deprecated ``[DEFAULT] heartbeat`` option has been removed. Use
+    the ``[DEFAULT] heartbeat_interval`` option instead.
