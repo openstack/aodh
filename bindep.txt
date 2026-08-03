@@ -10,4 +10,3 @@ mysql-client [platform:dpkg !platform:debian]
 mysql [platform:rpm]
 
 gettext [platform:dpkg]
-python37 [platform:rpm py37]
