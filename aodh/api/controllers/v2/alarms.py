@@ -425,7 +425,7 @@ class Alarm(base.Base):
             url = netutils.urlsplit(action)
             if self._is_trust_url(url):
                 trust_id = url.username
-                if trust_id and url.password == 'delete':
+                if trust_id and url.password == 'delete':  # noqa: S105
                     yield trust_id
 
     def update_actions(self, old_alarm=None):
