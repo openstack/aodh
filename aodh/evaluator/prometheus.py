@@ -56,7 +56,7 @@ class PrometheusBase(threshold.ThresholdEvaluator):
         self._prom = client.Client('1', session, adapter_options=opts)
 
     def _get_metric_data(self, query):
-        LOG.debug(f'Querying Prometheus instance on: {query}')
+        LOG.debug('Querying Prometheus instance on: %s', query)
         return self._prom.query.query(query)
 
 
@@ -64,8 +64,8 @@ class PrometheusEvaluator(PrometheusBase):
 
     def _sanitize(self, metric_data):
         sanitized = [float(m.value) for m in metric_data]
-        LOG.debug(f'Sanited Prometheus metric data: {metric_data}'
-                  f' to statistics: {sanitized}')
+        LOG.debug('Sanited Prometheus metric data: %s to statistics %s',
+                  metric_data, sanitized)
         return sanitized
 
     def evaluate_rule(self, alarm_rule):
@@ -85,8 +85,8 @@ class PrometheusEvaluator(PrometheusBase):
             query = promQLRbac.modify_query(query)
         metrics = self._get_metric_data(query)
         if not metrics:
-            LOG.warning("Empty result fetched from Prometheus for query"
-                        f" {query}")
+            LOG.warning("Empty result fetched from Prometheus for query %s",
+                        query)
 
         statistics = self._sanitize(metrics)
         if not statistics:
@@ -95,6 +95,6 @@ class PrometheusEvaluator(PrometheusBase):
         return self._process_statistics(alarm_rule, statistics)
 
     def _unknown_reason_data(self, alarm, statistics):
-        LOG.warning(f'Transfering alarm {alarm} on unknown reason')
+        LOG.warning('Transfering alarm %s on unknown reason', alarm)
         last = None if not statistics else statistics[-1]
         return self._reason_data('unknown', len(statistics), last)
