@@ -32,7 +32,7 @@ class TrustAlarmNotifierMixin:
                reason, reason_data):
         trust_id = action.username
 
-        client = keystone_client.get_trusted_client(self.conf, trust_id)
+        session = keystone_client.get_trusted_session(self.conf, trust_id)
 
         # Remove the fake user
         netloc = action.netloc.split("@")[1]
@@ -42,7 +42,7 @@ class TrustAlarmNotifierMixin:
         action = parse.SplitResult(scheme, netloc, action.path, action.query,
                                    action.fragment)
 
-        headers = {'X-Auth-Token': keystone_client.get_auth_token(client)}
+        headers = session.get_auth_headers()
         super().notify(
             action, alarm_id, alarm_name, severity, previous, current, reason,
             reason_data, headers)
