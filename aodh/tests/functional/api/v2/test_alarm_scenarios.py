@@ -15,12 +15,12 @@
 """Tests alarm operation."""
 
 import copy
-import datetime
 import json as jsonlib
 import os
 from unittest import mock
 
 import fixtures
+from oslo_utils import timeutils
 from oslo_utils import uuidutils
 import webtest
 
@@ -826,7 +826,7 @@ class TestAlarmsHistory(TestAlarmsBase):
     def test_get_alarm_history_constrained_by_timestamp(self):
         alarm = self._get_alarm('a')
         self._update_alarm('a', dict(name='renamed'))
-        after = datetime.datetime.utcnow().isoformat()
+        after = timeutils.utcnow().isoformat()
         query = dict(field='timestamp', op='gt', value=after)
         history = self._get_alarm_history('a', query=query)
         self.assertEqual(0, len(history))
