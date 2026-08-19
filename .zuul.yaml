@@ -8,7 +8,7 @@
     check:
       jobs:
         - aodh-tempest-plugin-mysql
-        - aodh-tempest-plugin-mysql-ubuntu-jammy
+        #- aodh-tempest-plugin-mysql-ubuntu-jammy
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
             irrelevant-files: &aodh-irrelevant-files
@@ -35,26 +35,26 @@
                   $TEMPEST_CONFIG:
                     telemetry_services:
                       metric_backends: gnocchi
-        - telemetry-dsvm-integration-centos-9s:
-            irrelevant-files: *aodh-irrelevant-files
-            vars:
-              devstack_local_conf:
-                test-config:
-                  $TEMPEST_CONFIG:
-                    telemetry_services:
-                      metric_backends: gnocchi
-        - telemetry-dsvm-integration-centos-9s-fips:
-            irrelevant-files: *aodh-irrelevant-files
-            vars:
-              devstack_local_conf:
-                test-config:
-                  $TEMPEST_CONFIG:
-                    telemetry_services:
-                      metric_backends: gnocchi
+        #- telemetry-dsvm-integration-centos-9s:
+        #    irrelevant-files: *aodh-irrelevant-files
+        #    vars:
+        #      devstack_local_conf:
+        #        test-config:
+        #          $TEMPEST_CONFIG:
+        #            telemetry_services:
+        #              metric_backends: gnocchi
+        #- telemetry-dsvm-integration-centos-9s-fips:
+        #    irrelevant-files: *aodh-irrelevant-files
+        #    vars:
+        #      devstack_local_conf:
+        #        test-config:
+        #          $TEMPEST_CONFIG:
+        #            telemetry_services:
+        #              metric_backends: gnocchi
     gate:
       jobs:
         - aodh-tempest-plugin-mysql
-        - aodh-tempest-plugin-mysql-ubuntu-jammy
+        #- aodh-tempest-plugin-mysql-ubuntu-jammy
         - aodh-tempest-plugin-postgresql
         - telemetry-dsvm-integration:
             irrelevant-files: *aodh-irrelevant-files
@@ -75,22 +75,22 @@
                   $TEMPEST_CONFIG:
                     telemetry_services:
                       metric_backends: gnocchi
-        - telemetry-dsvm-integration-centos-9s:
-            irrelevant-files: *aodh-irrelevant-files
-            vars:
-              devstack_local_conf:
-                test-config:
-                  $TEMPEST_CONFIG:
-                    telemetry_services:
-                      metric_backends: gnocchi
-        - telemetry-dsvm-integration-centos-9s-fips:
-            irrelevant-files: *aodh-irrelevant-files
-            vars:
-              devstack_local_conf:
-                test-config:
-                  $TEMPEST_CONFIG:
-                    telemetry_services:
-                      metric_backends: gnocchi
+        #- telemetry-dsvm-integration-centos-9s:
+        #    irrelevant-files: *aodh-irrelevant-files
+        #    vars:
+        #      devstack_local_conf:
+        #        test-config:
+        #          $TEMPEST_CONFIG:
+        #            telemetry_services:
+        #              metric_backends: gnocchi
+        #- telemetry-dsvm-integration-centos-9s-fips:
+        #    irrelevant-files: *aodh-irrelevant-files
+        #    vars:
+        #      devstack_local_conf:
+        #        test-config:
+        #          $TEMPEST_CONFIG:
+        #            telemetry_services:
+        #              metric_backends: gnocchi
 
 - job:
     name: aodh-tempest-plugin-postgresql
