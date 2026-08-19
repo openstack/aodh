@@ -887,11 +887,10 @@ class AlarmsController(rest.RestController):
                 'only operations %s are allowed' % ALARM_QUERY_OPS_ALLOWED
             )
 
-        if 'all_projects' in keys:
-            if v2_utils.get_query_value(q, 'all_projects', 'boolean'):
-                rbac.enforce('get_alarms:all_projects', pecan.request,
-                             pecan.request.enforcer, target)
-            keys.remove('all_projects')
+        if ('all_projects' in keys and
+                v2_utils.get_query_value(q, 'all_projects', 'boolean')):
+            rbac.enforce('get_alarms:all_projects', pecan.request,
+                         pecan.request.enforcer, target)
         else:
             project_id = pecan.request.headers.get('X-Project-Id')
             is_admin = rbac.is_admin(pecan.request, pecan.request.enforcer)
@@ -905,6 +904,7 @@ class AlarmsController(rest.RestController):
                 request_project = v2_utils.get_query_value(q, 'project_id')
                 if not is_admin and request_project != project_id:
                     raise base.ProjectNotAuthorized(request_project)
+        keys.discard('all_projects')
 
         for query in q:
             if query.field in keys:

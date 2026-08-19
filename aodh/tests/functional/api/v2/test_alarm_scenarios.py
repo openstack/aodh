@@ -219,6 +219,36 @@ class TestAlarms(TestAlarmsBase):
 
         _test('project_id')
 
+    def test_get_alarm_all_projects_true_normal_user(self):
+        response = self.get_json(
+            '/alarms',
+            headers=self.auth_headers,
+            q=[{'field': 'all_projects', 'op': 'eq', 'value': 'true'}],
+            expect_errors=True,
+            status=403
+        )
+        faultstring = 'RBAC Authorization Failed'
+        self.assertIn(faultstring,
+                      response.json['error_message']['faultstring'])
+
+    def test_get_alarm_all_projects_false_normal_user(self):
+        alarms = self.get_json(
+            '/alarms',
+            headers=self.auth_headers,
+            q=[{'field': 'all_projects', 'op': 'eq', 'value': 'false'}]
+        )
+        self.assertEqual(3, len(alarms))
+
+    def test_get_alarm_all_projects_false_normal_user_from_other_project(self):
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Project-Id'] = 'other-project'
+        alarms = self.get_json(
+            '/alarms',
+            headers=auth_headers,
+            q=[{'field': 'all_projects', 'op': 'eq', 'value': 'false'}]
+        )
+        self.assertEqual(0, len(alarms))
+
     def test_get_alarm_forbiden(self):
         pf = os.path.abspath('aodh/tests/functional/api/v2/policy.yaml-test')
         self.CONF.set_override('policy_file', pf, group='oslo_policy')
