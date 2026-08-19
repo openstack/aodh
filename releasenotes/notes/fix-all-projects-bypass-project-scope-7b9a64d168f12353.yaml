@@ -1,0 +1,10 @@
+---
+security:
+  - |
+    `Bug #2161276 <https://bugs.launchpad.net/aodh/+bug/2161276>`_:
+    Fixed a vulnerability where passing ``all_projects=false`` in alarm
+    queries bypassed project scope filtering. Previously, the presence
+    of ``all_projects`` in the query caused the project scoping logic to
+    be skipped entirely, allowing non-admin users to list alarms from
+    all projects. Queries with ``all_projects=false`` or without
+    ``all_projects`` now correctly restrict results to the caller's project.
