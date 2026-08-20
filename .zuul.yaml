@@ -14,7 +14,7 @@
               - ^\.gitignore$
               - ^\.gitreview$
               - ^\.pre-commit-config\.yaml$
-              - ^(test-|)requirements.txt$
+              - ^test-requirements\.txt$
               - ^setup.cfg$
               - ^doc/.*$
               - ^.*\.rst$
