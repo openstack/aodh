@@ -66,3 +66,4 @@ An HTTP request example using ``httpie`` command:
       ]
     }
     EOF
+

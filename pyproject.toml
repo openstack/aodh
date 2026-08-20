@@ -8,6 +8,9 @@ in-place = true
 recursive = true
 ignore = ["E731"]
 
+[tool.doc8]
+ignore = ["D001"]
+
 [tool.ruff]
 line-length = 79
 
