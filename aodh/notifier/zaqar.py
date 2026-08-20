@@ -101,8 +101,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
             return zaqar_client.Client(self._get_endpoint(),
                                        version=2, conf=conf)
         except Exception:
-            LOG.error("Failed to connect to Zaqar service ",
-                      exc_info=True)
+            LOG.exception("Failed to connect to Zaqar service")
 
     def _get_presigned_client_conf(self, queue_info):
         queue_name = queue_info.get('queue_name', [''])[0]
@@ -187,9 +186,8 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
             LOG.error("Required query option missing in action %s",
                       action)
         except Exception:
-            LOG.error("Unknown error occurred; Failed to post message to"
-                      " Zaqar queue",
-                      exc_info=True)
+            LOG.exception("Unknown error occurred; Failed to post message to"
+                          " Zaqar queue")
 
 
 class TrustZaqarAlarmNotifier(trust.TrustAlarmNotifierMixin,
@@ -225,6 +223,5 @@ class TrustZaqarAlarmNotifier(trust.TrustAlarmNotifierMixin,
             queue = client.queue(queue_name)
             queue.post(message)
         except Exception:
-            LOG.error("Unknown error occurred; Failed to post message to"
-                      " Zaqar queue",
-                      exc_info=True)
+            LOG.exception("Unknown error occurred; Failed to post message to"
+                          " Zaqar queue")

@@ -135,8 +135,8 @@ class ThresholdEvaluator(evaluator.Evaluator):
         return self._process_statistics(alarm_rule, statistics)
 
     def _unknown_reason_data(self, alarm, statistics):
-        LOG.warning(f'Expecting {alarm.rule["evaluation_periods"]} datapoints'
-                    f' but only get {len(statistics)}')
+        LOG.warning('Expecting %d datapoints but only get %d',
+                    alarm.rule["evaluation_periods"], len(statistics))
         # Reason is not same as log message because we want to keep
         # consistent since thirdparty software may depend on old format.
         last = None if not statistics else statistics[-1]
