@@ -1,0 +1,10 @@
+---
+upgrade:
+  - |
+    The WSGI script, ``aodh-api``, has been removed. Deployment tools should
+    use python module paths (``aodh.wsgi.api``). In case the WSGI server
+    doesn't support python module paths, (for example mod_wsgi is known not to
+    support it), create a ``.wsgi`` script::
+
+      import aodh.wsgi.api
+      application = aodh.wsgi.api.application
