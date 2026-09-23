@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Added ``rest_notifier_tls_min_version`` and ``rest_notifier_tls_max_version``
+    options to control the TLS protocol versions used for HTTPS alarm action
+    notifications. Accepted values are ``1.2`` and ``1.3``. When unset, the
+    system default applies.

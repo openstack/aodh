@@ -14,6 +14,7 @@
 # under the License.
 import fixtures
 import json
+import ssl
 import time
 from unittest import mock
 
@@ -26,6 +27,7 @@ from urllib import parse as urlparse
 
 from aodh import keystone_client
 from aodh import notifier
+from aodh.notifier import rest
 from aodh import service
 
 from aodh.tests import base as tests_base
@@ -365,6 +367,68 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                 },
                 kwargs['headers'])
             self.assertEqual(DATA_JSON, json.loads(kwargs['data']))
+
+    def _notify_https_and_get_adapter(self, action):
+        real_session = requests.Session()
+        with mock.patch('requests.Session', return_value=real_session):
+            with mock.patch.object(real_session, 'post') as poster:
+                self._msg_notifier.sample(
+                    {}, 'alarm.update', self._notification(action))
+                time.sleep(1)
+                poster.assert_called()
+                return real_session.get_adapter(action)
+
+    def test_notify_alarm_rest_action_with_tls_min_version(self):
+        action = 'https://host/action'
+        self.CONF.set_override('rest_notifier_tls_min_version', '1.2')
+
+        adapter = self._notify_https_and_get_adapter(action)
+        ctx = adapter.poolmanager.connection_pool_kw['ssl_context']
+        self.assertEqual(ssl.TLSVersion.TLSv1_2, ctx.minimum_version)
+        self.assertEqual(ssl.CERT_REQUIRED, ctx.verify_mode)
+
+    def test_notify_alarm_rest_action_with_tls_max_version(self):
+        action = 'https://host/action'
+        self.CONF.set_override('rest_notifier_tls_max_version', '1.3')
+
+        adapter = self._notify_https_and_get_adapter(action)
+        ctx = adapter.poolmanager.connection_pool_kw['ssl_context']
+        self.assertEqual(ssl.TLSVersion.TLSv1_3, ctx.maximum_version)
+
+    def test_notify_alarm_rest_action_with_tls_min_and_max_version(self):
+        action = 'https://host/action'
+        self.CONF.set_override('rest_notifier_tls_min_version', '1.2')
+        self.CONF.set_override('rest_notifier_tls_max_version', '1.3')
+
+        adapter = self._notify_https_and_get_adapter(action)
+        ctx = adapter.poolmanager.connection_pool_kw['ssl_context']
+        self.assertEqual(ssl.TLSVersion.TLSv1_2, ctx.minimum_version)
+        self.assertEqual(ssl.TLSVersion.TLSv1_3, ctx.maximum_version)
+
+    def test_notify_alarm_rest_action_tls_with_verify_disabled(self):
+        action = 'https://host/action'
+        self.CONF.set_override('rest_notifier_tls_min_version', '1.3')
+        self.CONF.set_override('rest_notifier_ssl_verify', False)
+
+        adapter = self._notify_https_and_get_adapter(action)
+        ctx = adapter.poolmanager.connection_pool_kw['ssl_context']
+        self.assertEqual(ssl.TLSVersion.TLSv1_3, ctx.minimum_version)
+        self.assertEqual(ssl.CERT_NONE, ctx.verify_mode)
+
+    def test_notify_alarm_rest_action_without_tls_version_uses_http_adapter(
+            self):
+        action = 'https://host/action'
+        adapter = self._notify_https_and_get_adapter(action)
+        self.assertIsInstance(adapter, requests.adapters.HTTPAdapter)
+        self.assertNotIsInstance(adapter, rest._TLSAdapter)
+
+    def test_build_adapter_rejects_inverted_tls_versions(self):
+        self.CONF.set_override('rest_notifier_tls_min_version', '1.3')
+        self.CONF.set_override('rest_notifier_tls_max_version', '1.2')
+        notifier_obj = rest.RestAlarmNotifier(self.CONF)
+        action = urlparse.urlsplit('https://host/action')
+        self.assertRaises(ValueError, notifier_obj._build_adapter,
+                          action, True, 0)
 
     @staticmethod
     def _fake_urlsplit(*args, **kwargs):

@@ -14,16 +14,26 @@
 # under the License.
 """Rest alarm notifier."""
 import json
+import ssl
 
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import uuidutils
 import requests
+from requests.adapters import HTTPAdapter
 import urllib.parse as urlparse
+from urllib3.util.ssl_ import create_urllib3_context
 
 from aodh import notifier
 
 LOG = log.getLogger(__name__)
+
+TLS_VERSION_CHOICES = ['1.2', '1.3']
+
+_TLS_VERSIONS = {
+    '1.2': ssl.TLSVersion.TLSv1_2,
+    '1.3': ssl.TLSVersion.TLSv1_3,
+}
 
 OPTS = [
     cfg.StrOpt('rest_notifier_certificate_file',
@@ -46,8 +56,53 @@ OPTS = [
                default=0,
                help='Number of retries for REST notifier',
                ),
-
+    cfg.StrOpt('rest_notifier_tls_min_version',
+               default=None,
+               choices=TLS_VERSION_CHOICES,
+               help='Minimum TLS protocol version for HTTPS REST notifier '
+                    'connections. If unset, the system default applies. '
+                    'Accepted values are 1.2 and 1.3, matching '
+                    'keystoneauth1 tls_min_version spelling.'),
+    cfg.StrOpt('rest_notifier_tls_max_version',
+               default=None,
+               choices=TLS_VERSION_CHOICES,
+               help='Maximum TLS protocol version for HTTPS REST notifier '
+                    'connections. If unset, the system default applies. '
+                    'Accepted values are 1.2 and 1.3, matching '
+                    'keystoneauth1 tls_max_version spelling.'),
 ]
+
+
+class _TLSAdapter(HTTPAdapter):
+    """HTTP adapter pinning TLS protocol versions on new connections."""
+
+    def __init__(self, min_version, max_version, verify, **kwargs):
+        self._min_version = min_version
+        self._max_version = max_version
+        # NOTE(dpawlik): requests/urllib3 set verify_mode and load the CA
+        # bundle per request, but CERT_NONE on a context with check_hostname
+        # enabled raises, so the context has to be built knowing whether
+        # we verify.
+        self._cert_reqs = None if verify else ssl.CERT_NONE
+        super().__init__(**kwargs)
+
+    def _create_ssl_context(self):
+        ctx_kwargs = {}
+        if self._min_version is not None:
+            ctx_kwargs['ssl_minimum_version'] = self._min_version
+        if self._max_version is not None:
+            ctx_kwargs['ssl_maximum_version'] = self._max_version
+        if self._cert_reqs is not None:
+            ctx_kwargs['cert_reqs'] = self._cert_reqs
+        return create_urllib3_context(**ctx_kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs['ssl_context'] = self._create_ssl_context()
+        return super().init_poolmanager(*args, **kwargs)
+
+    def proxy_manager_for(self, proxy, **proxy_kwargs):
+        proxy_kwargs['ssl_context'] = self._create_ssl_context()
+        return super().proxy_manager_for(proxy, **proxy_kwargs)
 
 
 class RestAlarmNotifier(notifier.AlarmNotifier):
@@ -96,10 +151,27 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
         # retries (future work).
         max_retries = self.conf.rest_notifier_max_retries
         session = requests.Session()
-        session.mount(action.geturl(),
-                      requests.adapters.HTTPAdapter(max_retries=max_retries))
+        adapter = self._build_adapter(
+            action, kwargs.get('verify', True), max_retries)
+        session.mount(action.geturl(), adapter)
         resp = session.post(action.geturl(), **kwargs)
         LOG.info('Notifying alarm <%(id)s> gets response: %(status_code)s '
                  '%(reason)s.', {'id': alarm_id,
                                  'status_code': resp.status_code,
                                  'reason': resp.reason})
+
+    def _build_adapter(self, action, verify, max_retries):
+        min_opt = self.conf.rest_notifier_tls_min_version
+        max_opt = self.conf.rest_notifier_tls_max_version
+        if action.scheme == 'https' and (min_opt or max_opt):
+            min_version = _TLS_VERSIONS.get(min_opt)
+            max_version = _TLS_VERSIONS.get(max_opt)
+            if (min_version is not None and max_version is not None and
+                    min_version > max_version):
+                raise ValueError(
+                    'rest_notifier_tls_min_version (%s) cannot be greater '
+                    'than rest_notifier_tls_max_version (%s)' %
+                    (min_opt, max_opt))
+            return _TLSAdapter(min_version, max_version, verify,
+                               max_retries=max_retries)
+        return HTTPAdapter(max_retries=max_retries)
