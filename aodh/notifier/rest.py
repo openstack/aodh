@@ -131,6 +131,13 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
         kwargs = {'data': json.dumps(body),
                   'headers': headers}
 
+        # FIXME(rhonjo): Retries are automatically done by urllib3 in requests
+        # library. However, there's no interval between retries in urllib3
+        # implementation. It will be better to put some interval between
+        # retries (future work).
+        max_retries = self.conf.rest_notifier_max_retries
+        session = requests.Session()
+
         if action.scheme == 'https':
             default_verify = int(self.conf.rest_notifier_ssl_verify)
             options = urlparse.parse_qs(action.query)
@@ -145,25 +152,26 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
             if cert:
                 kwargs['cert'] = (cert, key) if key else cert
 
-        # FIXME(rhonjo): Retries are automatically done by urllib3 in requests
-        # library. However, there's no interval between retries in urllib3
-        # implementation. It will be better to put some interval between
-        # retries (future work).
-        max_retries = self.conf.rest_notifier_max_retries
-        session = requests.Session()
-        adapter = self._build_adapter(
-            action, kwargs.get('verify', True), max_retries)
+            adapter = self._build_tls_adapter(verify, max_retries)
+        else:
+            adapter = self._build_adapter(max_retries=max_retries)
+
         session.mount(action.geturl(), adapter)
+
         resp = session.post(action.geturl(), **kwargs)
         LOG.info('Notifying alarm <%(id)s> gets response: %(status_code)s '
                  '%(reason)s.', {'id': alarm_id,
                                  'status_code': resp.status_code,
                                  'reason': resp.reason})
 
-    def _build_adapter(self, action, verify, max_retries):
+    def _build_adapter(self, max_retries):
+        return HTTPAdapter(max_retries=max_retries)
+
+    def _build_tls_adapter(self, verify, max_retries):
         min_opt = self.conf.rest_notifier_tls_min_version
         max_opt = self.conf.rest_notifier_tls_max_version
-        if action.scheme == 'https' and (min_opt or max_opt):
+
+        if min_opt or max_opt:
             min_version = _TLS_VERSIONS.get(min_opt)
             max_version = _TLS_VERSIONS.get(max_opt)
             if (min_version is not None and max_version is not None and
@@ -172,6 +180,7 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
                     'rest_notifier_tls_min_version (%s) cannot be greater '
                     'than rest_notifier_tls_max_version (%s)' %
                     (min_opt, max_opt))
+
             return _TLSAdapter(min_version, max_version, verify,
                                max_retries=max_retries)
-        return HTTPAdapter(max_retries=max_retries)
+        return self._build_adapter(max_retries)

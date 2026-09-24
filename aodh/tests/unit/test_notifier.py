@@ -422,13 +422,11 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
         self.assertIsInstance(adapter, requests.adapters.HTTPAdapter)
         self.assertNotIsInstance(adapter, rest._TLSAdapter)
 
-    def test_build_adapter_rejects_inverted_tls_versions(self):
+    def test_build_tls_adapter_rejects_inverted_tls_versions(self):
         self.CONF.set_override('rest_notifier_tls_min_version', '1.3')
         self.CONF.set_override('rest_notifier_tls_max_version', '1.2')
         notifier_obj = rest.RestAlarmNotifier(self.CONF)
-        action = urlparse.urlsplit('https://host/action')
-        self.assertRaises(ValueError, notifier_obj._build_adapter,
-                          action, True, 0)
+        self.assertRaises(ValueError, notifier_obj._build_tls_adapter, True, 0)
 
     @staticmethod
     def _fake_urlsplit(*args, **kwargs):
