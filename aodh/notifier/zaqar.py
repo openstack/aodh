@@ -62,34 +62,24 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
         self._zclient = None
         self._zendpoint = None
 
-    def _get_endpoint(self):
+    def _get_endpoint(self, session):
         if self._zendpoint is None:
-            try:
-                ks_client = keystone_client.get_client(self.conf)
-                z_srv = ks_client.services.find(
-                    type=self.conf.service_types.zaqar)
-                endpoint_type = self.conf.service_credentials.interface
-                region_name = self.conf.service_credentials.region_name
-                z_endpoint = ks_client.endpoints.find(service_id=z_srv.id,
-                                                      region_id=region_name,
-                                                      interface=endpoint_type)
-                self._zendpoint = z_endpoint.url
-            except Exception:
-                LOG.error("Aodh was configured to use zaqar:// action,"
-                          " but Zaqar endpoint could not be found in"
-                          " Keystone service catalog.")
+            self._zendpoint = session.get_endpoint(
+                service_type=self.conf.service_types.zaqar,
+                interface=self.conf.service_credentials.interface,
+                region_name=self.conf.service_credentials.region_name
+            )
         return self._zendpoint
 
     def get_zaqar_client(self, conf=None):
         try:
             from zaqarclient.queues import client as zaqar_client
+            session = keystone_client.get_session()
+            endpoint = self._get_endpoint(session)
             if conf is not None:
                 session = None
-            else:
-                session = keystone_client.get_session()
-
-            return zaqar_client.Client(self._get_endpoint(),
-                                       version=2, conf=conf, session=session)
+            return zaqar_client.Client(
+                endpoint, version=2, conf=conf, session=session)
         except Exception:
             LOG.exception("Failed to connect to Zaqar service")
 
