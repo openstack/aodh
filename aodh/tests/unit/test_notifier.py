@@ -492,19 +492,16 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
             self.assertEqual(DATA_JSON, json.loads(kwargs['data']))
 
     def test_zaqar_notifier_action(self):
-        with mock.patch.object(notifier.zaqar.ZaqarAlarmNotifier,
-                               '_get_client_conf') as get_conf:
-            action = ('zaqar://?topic=critical'
-                      '&subscriber=http://example.com/data'
-                      '&subscriber=mailto:foo@example.com&ttl=7200')
-            self._msg_notifier.sample({}, 'alarm.update',
-                                      self._notification(action))
-            time.sleep(1)
-            get_conf.assert_called()
-            self.assertEqual(self.zaqar,
-                             self.service.notifiers['zaqar'].obj._zclient)
-            self.assertEqual(2, self.zaqar.subscriptions)
-            self.assertEqual(1, self.zaqar.posts)
+        action = ('zaqar://?topic=critical'
+                  '&subscriber=http://example.com/data'
+                  '&subscriber=mailto:foo@example.com&ttl=7200')
+        self._msg_notifier.sample({}, 'alarm.update',
+                                  self._notification(action))
+        time.sleep(1)
+        self.assertEqual(self.zaqar,
+                         self.service.notifiers['zaqar'].obj._zclient)
+        self.assertEqual(2, self.zaqar.subscriptions)
+        self.assertEqual(1, self.zaqar.posts)
 
     def test_presigned_zaqar_notifier_action(self):
         action = ('zaqar://?'

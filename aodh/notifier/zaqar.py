@@ -80,26 +80,16 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
                           " Keystone service catalog.")
         return self._zendpoint
 
-    def _get_client_conf(self):
-        conf = self.conf.service_credentials
-        return {
-            'auth_opts': {
-                'backend': 'keystone',
-                'options': {
-                    'os_username': conf.username,
-                    'os_password': conf.password,
-                    'os_project_name': conf.project_name,
-                    'os_auth_url': conf.auth_url,
-                    'insecure': ''
-                }
-            }
-        }
-
-    def get_zaqar_client(self, conf):
+    def get_zaqar_client(self, conf=None):
         try:
             from zaqarclient.queues import client as zaqar_client
+            if conf is not None:
+                session = None
+            else:
+                session = keystone_client.get_session()
+
             return zaqar_client.Client(self._get_endpoint(),
-                                       version=2, conf=conf)
+                                       version=2, conf=conf, session=session)
         except Exception:
             LOG.exception("Failed to connect to Zaqar service")
 
@@ -149,7 +139,7 @@ class ZaqarAlarmNotifier(notifier.AlarmNotifier):
     @property
     def client(self):
         if self._zclient is None:
-            self._zclient = self.get_zaqar_client(self._get_client_conf())
+            self._zclient = self.get_zaqar_client()
         return self._zclient
 
     def notify_zaqar(self, action, message, headers=None):
