@@ -45,14 +45,14 @@ class LoadBalancerMemberHealthEvaluator(evaluator.Evaluator):
     @property
     def lb_client(self):
         if self._lb_client is None:
-            endpoint = aodh_keystone.url_for(
-                self.conf,
+            session = aodh_keystone.get_session(self.conf)
+            endpoint = session.get_endpoint(
                 service_type='load-balancer',
                 interface=self.conf.service_credentials.interface,
                 region_name=self.conf.service_credentials.region_name
             )
             self._lb_client = octavia.OctaviaAPI(
-                session=aodh_keystone.get_session(self.conf),
+                session=session,
                 service_type='load-balancer',
                 endpoint=endpoint
             )

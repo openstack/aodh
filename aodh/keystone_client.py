@@ -85,11 +85,6 @@ def delete_trust_id(conf, trust_id, auth_plugin):
         pass
 
 
-def url_for(conf, **kwargs):
-    sess = get_session(conf)
-    return sess.get_endpoint(**kwargs)
-
-
 def get_heat_client_from_trust(conf, trust_id):
     sess = get_trusted_session(conf, trust_id)
 
