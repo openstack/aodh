@@ -50,7 +50,7 @@ class CompositeRule(wtypes.UserType):
         super().__init__()
 
     @staticmethod
-    def valid_composite_rule(rules):
+    def valid_composite_rule(rules, alarm=None):
         if isinstance(rules, dict) and len(rules) == 1:
             and_or_key = list(rules)[0]
             if and_or_key not in ('and', 'or'):
@@ -58,7 +58,7 @@ class CompositeRule(wtypes.UserType):
                     _('Threshold rules should be combined with "and" or "or"'))
             if isinstance(rules[and_or_key], list):
                 for sub_rule in rules[and_or_key]:
-                    CompositeRule.valid_composite_rule(sub_rule)
+                    CompositeRule.valid_composite_rule(sub_rule, alarm)
             else:
                 raise InvalidCompositeRule(rules)
         elif isinstance(rules, dict):
@@ -74,9 +74,17 @@ class CompositeRule(wtypes.UserType):
                             'plugins': plugins}
                 raise base.ClientSideError(err)
             plugin = CompositeRule.threshold_plugins[rule_type].plugin
+            server_side = {}
+            if rule_type == 'prometheus':
+                server_side['scope_to_project'] = rules.pop(
+                    'scope_to_project', None)
             wjson.fromjson(plugin, rules)
-            rule_dict = plugin(**rules).as_dict()
-            rules.update(rule_dict)
+            rule = plugin(**rules, **server_side)
+            if alarm is not None:
+                plugin.validate_alarm(type(alarm)(
+                    type=rule_type, project_id=alarm.project_id,
+                    **{'%s_rule' % rule_type: rule}))
+            rules.update(rule.as_dict())
             rules.update(type=rule_type)
         else:
             raise InvalidCompositeRule(rules)
@@ -102,7 +110,7 @@ class CompositeRule(wtypes.UserType):
 
     @staticmethod
     def validate_alarm(alarm):
-        pass
+        CompositeRule.valid_composite_rule(alarm.composite_rule, alarm)
 
     @staticmethod
     def update_hook(alarm):
