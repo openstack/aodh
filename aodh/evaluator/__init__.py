@@ -79,7 +79,7 @@ class Evaluator(metaclass=abc.ABCMeta):
     @property
     def alarm_change_notifier(self):
         if not self._alarm_change_notifier:
-            transport = messaging.get_transport(self.conf)
+            transport = messaging.get_notification_transport(self.conf)
             self._alarm_change_notifier = messaging.get_notifier(
                 transport, publisher_id="aodh.evaluator")
         return self._alarm_change_notifier

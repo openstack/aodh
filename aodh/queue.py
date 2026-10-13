@@ -31,7 +31,7 @@ LOG = log.getLogger(__name__)
 class AlarmNotifier:
     def __init__(self, conf):
         self.notifier = oslo_messaging.Notifier(
-            messaging.get_transport(conf),
+            messaging.get_notification_transport(conf),
             driver='messagingv2',
             publisher_id="alarming.evaluator",
             topics=[conf.notifier_topic])

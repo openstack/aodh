@@ -24,7 +24,7 @@ def setup():
     oslo_messaging.set_transport_defaults('aodh')
 
 
-def get_transport(conf, url=None, optional=False, cache=True):
+def get_notification_transport(conf, url=None, optional=False, cache=True):
     """Initialise the oslo_messaging layer."""
     cache_key = url or DEFAULT_URL
     transport = TRANSPORTS.get(cache_key)

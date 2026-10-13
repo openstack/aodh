@@ -106,9 +106,10 @@ class BaseTestCase(base.BaseTestCase):
 
         # NOTE(sileht): Ensure a new oslo.messaging driver is loaded
         # between each tests
-        self.transport = messaging.get_transport(conf, "fake://", cache=False)
+        self.transport = messaging.get_notification_transport(
+            conf, "fake://", cache=False)
         self.useFixture(fixtures.MockPatch(
-            'aodh.messaging.get_transport',
+            'aodh.messaging.get_notification_transport',
             return_value=self.transport))
 
     def assertTimestampEqual(self, first, second, msg=None):

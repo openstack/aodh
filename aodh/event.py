@@ -56,7 +56,7 @@ class EventAlarmEvaluationService(cotyledon.Service):
         self.storage_conn = storage.get_connection_from_config(self.conf)
         self.evaluator = event.EventAlarmEvaluator(self.conf)
         self.listener = messaging.get_batch_notification_listener(
-            messaging.get_transport(self.conf),
+            messaging.get_notification_transport(self.conf),
             [oslo_messaging.Target(
                 topic=self.conf.listener.event_alarm_topic)],
             [EventAlarmEndpoint(self.evaluator)], False,
