@@ -67,7 +67,7 @@ class AlarmNotifierService(cotyledon.Service):
     def __init__(self, worker_id, conf):
         super().__init__(worker_id)
         self.conf = conf
-        transport = messaging.get_transport(self.conf)
+        transport = messaging.get_notification_transport(self.conf)
         self.notifiers = extension.ExtensionManager(
             self.NOTIFIER_EXTENSIONS_NAMESPACE,
             invoke_on_load=True,
