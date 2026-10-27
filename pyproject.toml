@@ -35,7 +35,7 @@ Repository = "https://opendev.org/openstack/aodh"
 
 [project.optional-dependencies]
 zaqar = [
-    "python-zaqarclient>=1.2.0", # Apache-2.0
+    "python-zaqarclient>=1.3.0", # Apache-2.0
 ]
 
 [tool.setuptools.packages.find]
