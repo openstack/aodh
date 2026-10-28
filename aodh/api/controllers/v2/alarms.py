@@ -886,6 +886,15 @@ class AlarmsController(rest.RestController):
                 'op', ops,
                 'only operations %s are allowed' % ALARM_QUERY_OPS_ALLOWED
             )
+        # Only one query per field is allowed: a duplicated field could
+        # make the authorization check below operate on the first value
+        # while the storage filter built at the end keeps the last one,
+        # which would bypass the project scope.
+        if len(q) != len(keys):
+            raise wsme.exc.InvalidInput(
+                'field', keys,
+                'duplicate query fields are not allowed'
+            )
 
         if ('all_projects' in keys and
                 v2_utils.get_query_value(q, 'all_projects', 'boolean')):
