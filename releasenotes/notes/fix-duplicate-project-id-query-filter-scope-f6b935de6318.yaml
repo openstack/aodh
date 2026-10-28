@@ -1,0 +1,10 @@
+---
+security:
+  - |
+    `Bug #2167496 <https://bugs.launchpad.net/aodh/+bug/2167496>`_:
+    Fixed an authorization bypass in the alarm listing API where repeated
+    ``project_id`` query filters made the authorization check operate on
+    the first value while the storage query filtered on the last one,
+    allowing a non-admin user to list another project's alarms, including
+    their action URLs. Repeated query fields are now rejected with
+    ``HTTP 400``.
