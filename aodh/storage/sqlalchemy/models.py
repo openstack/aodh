@@ -91,15 +91,14 @@ class Alarm(Base):
     type = Column(String(50))
     severity = Column(String(50))
     description = Column(Text)
-    timestamp = Column(TimestampUTC, default=lambda: timeutils.utcnow())
+    timestamp = Column(TimestampUTC, default=timeutils.utcnow)
 
     user_id = Column(String(128))
     project_id = Column(String(128))
 
     state = Column(String(255))
     state_reason = Column(Text)
-    state_timestamp = Column(TimestampUTC,
-                             default=lambda: timeutils.utcnow())
+    state_timestamp = Column(TimestampUTC, default=timeutils.utcnow)
 
     ok_actions = Column(JSONEncodedDict)
     alarm_actions = Column(JSONEncodedDict)
@@ -109,7 +108,7 @@ class Alarm(Base):
     rule = Column(JSONEncodedDict)
     time_constraints = Column(JSONEncodedDict)
 
-    evaluate_timestamp = Column(DateTime, default=lambda: timeutils.utcnow())
+    evaluate_timestamp = Column(DateTime, default=timeutils.utcnow)
 
 
 class AlarmChange(Base):
@@ -127,7 +126,7 @@ class AlarmChange(Base):
     user_id = Column(String(128))
     type = Column(String(20))
     detail = Column(Text)
-    timestamp = Column(TimestampUTC, default=lambda: timeutils.utcnow())
+    timestamp = Column(TimestampUTC, default=timeutils.utcnow)
     severity = Column(String(50))
 
 
