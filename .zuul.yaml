@@ -7,7 +7,8 @@
       - check-requirements
     check:
       jobs:
-        - grenade-aodh
+        # NOTE(tkajinam): Disabled because 2025.1 reached its EOM
+        #- grenade-aodh
         - telemetry-dsvm-integration:
             irrelevant-files: &aodh-irrelevant-files
               - ^\.gitreview$
@@ -36,7 +37,8 @@
                       metric_backends: gnocchi
     gate:
       jobs:
-        - grenade-aodh
+        # NOTE(tkajinam): Disabled because 2025.1 reached its EOM
+        #- grenade-aodh
         - telemetry-dsvm-integration:
             irrelevant-files: *aodh-irrelevant-files
             vars:
