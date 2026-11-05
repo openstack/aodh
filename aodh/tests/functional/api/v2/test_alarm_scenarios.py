@@ -250,6 +250,48 @@ class TestAlarms(TestAlarmsBase):
         )
         self.assertEqual(0, len(alarms))
 
+    def _create_other_project_alarm(self):
+        alarm = copy.deepcopy(default_alarms(self.auth_headers)[0])
+        alarm.alarm_id = 'd'
+        alarm.name = 'other-project-alarm'
+        alarm.user_id = 'other-user'
+        alarm.project_id = 'other-project'
+        self.alarm_conn.create_alarm(alarm)
+
+    def test_get_alarm_duplicate_project_id_own_project_first(self):
+        self._create_other_project_alarm()
+        project = self.auth_headers['X-Project-Id']
+        q = [{'field': 'project_id', 'op': 'eq', 'value': project},
+             {'field': 'project_id', 'op': 'eq', 'value': 'other-project'}]
+        response = self.get_json(
+            '/alarms',
+            headers=self.auth_headers,
+            q=q,
+            expect_errors=True,
+            status=400
+        )
+        self.assertEqual(400, response.status_code)
+        faultstring = 'duplicate query fields are not allowed'
+        self.assertIn(faultstring,
+                      response.json['error_message']['faultstring'])
+
+    def test_get_alarm_duplicate_project_id_other_project_first(self):
+        self._create_other_project_alarm()
+        project = self.auth_headers['X-Project-Id']
+        q = [{'field': 'project_id', 'op': 'eq', 'value': 'other-project'},
+             {'field': 'project_id', 'op': 'eq', 'value': project}]
+        response = self.get_json(
+            '/alarms',
+            headers=self.auth_headers,
+            q=q,
+            expect_errors=True,
+            status=400
+        )
+        self.assertEqual(400, response.status_code)
+        faultstring = 'duplicate query fields are not allowed'
+        self.assertIn(faultstring,
+                      response.json['error_message']['faultstring'])
+
     def test_get_alarm_forbiden(self):
         pf = os.path.abspath('aodh/tests/functional/api/v2/policy.yaml-test')
         self.CONF.set_override('policy_file', pf, group='oslo_policy')
