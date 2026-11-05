@@ -75,6 +75,7 @@ def prepare_service(argv=None, config_files=None, with_gmr=True,
     )
     log.set_defaults(default_log_levels=log_levels)
     defaults.set_cors_middleware_defaults()
+    defaults.set_tracing_middleware_defaults()
     db_options.set_defaults(conf)
     if profiler_opts:
         profiler_opts.set_defaults(conf)
