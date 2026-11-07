@@ -70,6 +70,21 @@ OPTS = [
                     'connections. If unset, the system default applies. '
                     'Accepted values are 1.2 and 1.3, matching '
                     'keystoneauth1 tls_max_version spelling.'),
+    cfg.FloatOpt('rest_notifier_timeout',
+                 default=300.0,
+                 min=0,
+                 help='Timeout in seconds of the connection and of each '
+                      'read of the REST notifier. 0 disables the timeout, '
+                      'and a destination that accepts the connection and '
+                      'never answers then blocks the notification of the '
+                      'alarm.'),
+    cfg.BoolOpt('rest_notifier_follow_redirects',
+                default=True,
+                help='Whether the REST notifier follows HTTP redirections '
+                     'returned by the alarm action. Disable it to make sure '
+                     'that the notifications, and the X-Auth-Token header '
+                     'of the trust+ actions, are only sent to the URL '
+                     'configured in the alarm action.'),
 ]
 
 
@@ -129,7 +144,9 @@ class RestAlarmNotifier(notifier.AlarmNotifier):
                 'reason_data': reason_data}
         headers['content-type'] = 'application/json'
         kwargs = {'data': json.dumps(body),
-                  'headers': headers}
+                  'headers': headers,
+                  'timeout': self.conf.rest_notifier_timeout or None,
+                  'allow_redirects': self.conf.rest_notifier_follow_redirects}
 
         # FIXME(rhonjo): Retries are automatically done by urllib3 in requests
         # library. However, there's no interval between retries in urllib3

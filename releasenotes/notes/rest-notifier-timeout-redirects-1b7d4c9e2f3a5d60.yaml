@@ -1,0 +1,23 @@
+---
+features:
+  - |
+    The REST alarm notifier (``http``, ``https``, ``trust+http`` and
+    ``trust+https`` actions) has two new options:
+    ``[DEFAULT] rest_notifier_timeout`` sets the timeout, in seconds, of the
+    connection and of each read (``300`` by default, ``0`` disables it), and
+    ``[DEFAULT] rest_notifier_follow_redirects`` (``True`` by default) can be
+    set to ``False`` to stop following the HTTP redirections returned by the
+    alarm actions.
+upgrade:
+  - |
+    The REST alarm notifier now uses a timeout of 300 seconds by default.
+    It previously waited without limit for an alarm action that accepts the
+    connection and never answers, which blocked the notification of the
+    alarm. Set ``[DEFAULT] rest_notifier_timeout = 0`` to restore the
+    previous behaviour.
+security:
+  - |
+    Operators who do not want the notifications of the alarm actions, and the
+    ``X-Auth-Token`` header of the ``trust+http`` and ``trust+https``
+    actions, to be sent to a destination other than the URL of the alarm
+    action can set ``[DEFAULT] rest_notifier_follow_redirects = False``.
