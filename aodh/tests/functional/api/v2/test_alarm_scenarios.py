@@ -1123,6 +1123,48 @@ class TestAlarmsQuotas(TestAlarmsBase):
             status=201
         )
 
+    def _set_project_quota(self, limit):
+        auth_headers = copy.copy(self.auth_headers)
+        auth_headers['X-Roles'] = 'admin'
+        self.post_json('/quotas',
+                       {'project_id': self.project_id,
+                        'quotas': [{'resource': 'alarms', 'limit': limit}]},
+                       headers=auth_headers, status=201)
+
+    def _post_as_users(self, users, per_user, fail=False):
+        status = 403 if fail else 201
+        for user in users:
+            headers = copy.copy(self.auth_headers)
+            headers['X-User-Id'] = user
+            for i in range(per_user):
+                alarm = copy.copy(self.alarm)
+                alarm['name'] = 'alarm-%s-%d' % (user, i)
+                alarm['user_id'] = user
+                resp = self.post_json('/alarms', params=alarm,
+                                      headers=headers, expect_errors=fail,
+                                      status=status)
+                if fail:
+                    self.assertEqual(
+                        'Alarm quota exceeded for user %s on project %s'
+                        % (user, self.project_id),
+                        resp.json['error_message']['faultstring'])
+
+    def test_project_quota_by_quota_api_counts_project_alarms(self):
+        self._set_project_quota(4)
+        users = [uuidutils.generate_uuid() for i in range(3)]
+        self._post_as_users(users[:2], 2)
+        self._post_as_users(users[2:], 2, fail=True)
+        self.assertEqual(4, len(list(self.alarm_conn.get_alarms(
+            project_id=self.project_id))))
+
+    def test_project_quota_by_quota_api_unlimited(self):
+        self.CONF.set_override('project_alarm_quota', 1, 'api')
+        self._set_project_quota(-1)
+        users = [uuidutils.generate_uuid() for i in range(2)]
+        self._post_as_users(users, 2)
+        self.assertEqual(4, len(list(self.alarm_conn.get_alarms(
+            project_id=self.project_id))))
+
     def test_overquota_by_user_quota_config(self):
         self.CONF.set_override('user_alarm_quota', 1, 'api')
         auth_headers = copy.copy(self.auth_headers)

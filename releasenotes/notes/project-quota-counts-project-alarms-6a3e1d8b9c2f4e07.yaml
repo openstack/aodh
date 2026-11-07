@@ -1,0 +1,11 @@
+---
+fixes:
+  - |
+    The alarm quota of a project set through the quota API (or created by
+    the first ``GET /v2/quotas`` of the project, which stores the default
+    ``[api] project_alarm_quota``) is now compared with the number of
+    alarms of the project. It was compared with the number of alarms of
+    the user creating the alarm, so each user of the project could create
+    up to the project limit. A limit of ``-1`` set through the quota API
+    now means no limit, as documented; it previously refused every alarm
+    creation in the project.
