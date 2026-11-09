@@ -28,6 +28,7 @@ from urllib import parse as urlparse
 from aodh import keystone_client
 from aodh import notifier
 from aodh.notifier import rest
+from aodh.notifier import trust
 from aodh import service
 
 from aodh.tests import base as tests_base
@@ -218,7 +219,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       self._notification(action))
             time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
-                                      headers=mock.ANY)
+                                      headers=mock.ANY, timeout=300.0,
+                                      allow_redirects=True)
             args, kwargs = poster.call_args
             self.assertEqual(
                 {
@@ -234,6 +236,56 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                  mock.ANY)
             self.assertEqual(expected, m_log.info.call_args_list[1])
 
+    def _notify_rest(self, action):
+        notifier = rest.RestAlarmNotifier(self.CONF)
+        with mock.patch.object(requests.Session, 'post') as poster:
+            notifier.notify(urlparse.urlsplit(action), 'foobar',
+                            'testalarm', 'critical', 'OK', 'ALARM',
+                            'what ?', {'test': 'test'})
+        poster.assert_called_once_with(action, data=mock.ANY,
+                                       headers=mock.ANY, timeout=mock.ANY,
+                                       allow_redirects=mock.ANY)
+        return poster.call_args[1]
+
+    def test_notify_alarm_rest_action_defaults(self):
+        kwargs = self._notify_rest('http://host/action')
+        self.assertEqual(300.0, kwargs['timeout'])
+        self.assertTrue(kwargs['allow_redirects'])
+
+    def test_notify_alarm_rest_action_timeout(self):
+        self.CONF.set_override('rest_notifier_timeout', 10)
+        kwargs = self._notify_rest('http://host/action')
+        self.assertEqual(10.0, kwargs['timeout'])
+
+    def test_notify_alarm_rest_action_no_timeout(self):
+        self.CONF.set_override('rest_notifier_timeout', 0)
+        kwargs = self._notify_rest('http://host/action')
+        self.assertIsNone(kwargs['timeout'])
+
+    def test_notify_alarm_rest_action_redirects_disabled(self):
+        self.CONF.set_override('rest_notifier_follow_redirects', False)
+        kwargs = self._notify_rest('http://host/action')
+        self.assertFalse(kwargs['allow_redirects'])
+
+    def test_notify_alarm_trust_action_redirects_disabled(self):
+        session = mock.MagicMock()
+        session.get_auth_headers.return_value = {'X-Auth-Token': 'token_1234'}
+        self.useFixture(
+            fixtures.MockPatch('aodh.keystone_client.get_trusted_session',
+                               lambda *args: session))
+        self.CONF.set_override('rest_notifier_follow_redirects', False)
+        notifier = trust.TrustRestAlarmNotifier(self.CONF)
+        with mock.patch.object(requests.Session, 'post') as poster:
+            notifier.notify(
+                urlparse.urlsplit('trust+http://trust-1234@host/action'),
+                'foobar', 'testalarm', 'critical', 'OK', 'ALARM',
+                'what ?', {'test': 'test'})
+        poster.assert_called_once_with(
+            'http://host/action', data=mock.ANY, headers=mock.ANY,
+            timeout=300.0, allow_redirects=False)
+        self.assertEqual('token_1234',
+                         poster.call_args[1]['headers']['X-Auth-Token'])
+
     def test_notify_alarm_rest_action_with_ssl_client_cert(self):
         action = 'https://host/action'
         certificate = "/etc/ssl/cert/whatever.pem"
@@ -246,7 +298,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       self._notification(action))
             time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
-                                      headers=mock.ANY,
+                                      headers=mock.ANY, timeout=300.0,
+                                      allow_redirects=True,
                                       cert=certificate, verify=True)
             args, kwargs = poster.call_args
             self.assertEqual(
@@ -272,7 +325,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       self._notification(action))
             time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
-                                      headers=mock.ANY,
+                                      headers=mock.ANY, timeout=300.0,
+                                      allow_redirects=True,
                                       cert=(certificate, key), verify=True)
             args, kwargs = poster.call_args
             self.assertEqual(
@@ -294,7 +348,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       self._notification(action))
             time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
-                                      headers=mock.ANY,
+                                      headers=mock.ANY, timeout=300.0,
+                                      allow_redirects=True,
                                       verify=False)
             args, kwargs = poster.call_args
             self.assertEqual(
@@ -319,7 +374,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       self._notification(action))
             time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
-                                      headers=mock.ANY,
+                                      headers=mock.ANY, timeout=300.0,
+                                      allow_redirects=True,
                                       verify=ca_bundle)
             args, kwargs = poster.call_args
             self.assertEqual(DATA_JSON, json.loads(kwargs['data']))
@@ -333,7 +389,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       self._notification(action))
             time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
-                                      headers=mock.ANY,
+                                      headers=mock.ANY, timeout=300.0,
+                                      allow_redirects=True,
                                       verify=False)
             args, kwargs = poster.call_args
             self.assertEqual(
@@ -356,7 +413,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       self._notification(action))
             time.sleep(1)
             poster.assert_called_with(action, data=mock.ANY,
-                                      headers=mock.ANY,
+                                      headers=mock.ANY, timeout=300.0,
+                                      allow_redirects=True,
                                       verify=True)
             args, kwargs = poster.call_args
             self.assertEqual(
@@ -476,7 +534,8 @@ class TestAlarmNotifier(tests_base.BaseTestCase):
                                       self._notification(action))
             time.sleep(1)
             poster.assert_called_with(
-                url, data=mock.ANY, headers=mock.ANY)
+                url, data=mock.ANY, headers=mock.ANY, timeout=300.0,
+                allow_redirects=True)
             args, kwargs = poster.call_args
             self.assertEqual(
                 {
@@ -566,3 +625,4 @@ class FakeZaqarQueue:
                                      'previous': 'OK'}}
         self.testcase.assertEqual(expected_message, message)
         self.client.posts += 1
+
