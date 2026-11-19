@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_middleware import cors
+from oslo_middleware import tracing
 
 
 def set_lib_defaults():
@@ -24,6 +25,7 @@ def set_lib_defaults():
     generator.html#modifying-defaults-from-other-namespaces
     """
     set_cors_middleware_defaults()
+    set_tracing_middleware_defaults()
 
 
 def set_cors_middleware_defaults():
@@ -41,3 +43,8 @@ def set_cors_middleware_defaults():
                        'DELETE',
                        'PATCH']
     )
+
+
+def set_tracing_middleware_defaults():
+    """Update default configuration options for oslo.middleware tracing."""
+    tracing.set_defaults(service_name='aodh-api')
