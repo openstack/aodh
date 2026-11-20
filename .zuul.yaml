@@ -31,6 +31,9 @@
                       metric_backends: gnocchi
         - telemetry-dsvm-integration-aetos:
             irrelevant-files: *aodh-irrelevant-files
+        - telemetry-dsvm-integration-tracing:
+            voting: false
+            irrelevant-files: *aodh-irrelevant-files
         - telemetry-dsvm-integration-ipv6-only:
             irrelevant-files: *aodh-irrelevant-files
             vars:
