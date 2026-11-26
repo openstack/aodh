@@ -15,6 +15,7 @@
 """Tests alarm operation."""
 
 import copy
+import datetime
 import json as jsonlib
 import os
 from unittest import mock
@@ -565,6 +566,94 @@ class TestAlarms(TestAlarmsBase):
                             status=204,
                             extra_environ={'keystone.token_auth': auth})
                 trust_client.trusts.delete.assert_called_once_with('5678')
+
+    def _post_evaluate_timestamp_alarm(self, **kwargs):
+        json = {
+            'name': 'evaluate_timestamp',
+            'type': 'gnocchi_aggregation_by_metrics_threshold',
+            RULE_KEY: {
+                'metrics': ['41869681-5776-46d6-91ed-cccc43b6e4e3'],
+                'aggregation_method': 'mean',
+                'threshold': 300.0
+            }
+        }
+        json.update(kwargs)
+        return self.post_json('/alarms', params=json, status=201,
+                              headers=self.auth_headers).json['alarm_id']
+
+    def _get_evaluate_timestamp(self, alarm_id):
+        return list(self.alarm_conn.get_alarms(
+            alarm_id=alarm_id))[0].evaluate_timestamp
+
+    def _assert_evaluate_timestamp(self, alarm_id, before, after):
+        # MySQL stores the value without the fractional seconds
+        evaluate_timestamp = self._get_evaluate_timestamp(alarm_id)
+        self.assertLessEqual(before.replace(microsecond=0),
+                             evaluate_timestamp)
+        self.assertLessEqual(evaluate_timestamp,
+                             after + datetime.timedelta(seconds=1))
+
+    def test_post_alarm_sets_evaluate_timestamp(self):
+        before = timeutils.utcnow()
+        alarm_id = self._post_evaluate_timestamp_alarm()
+        after = timeutils.utcnow()
+        self._assert_evaluate_timestamp(alarm_id, before, after)
+
+    def test_post_alarm_ignores_evaluate_timestamp(self):
+        for value in ('2099-01-01T00:00:00', '2000-01-01T00:00:00', None):
+            before = timeutils.utcnow()
+            alarm_id = self._post_evaluate_timestamp_alarm(
+                name='evaluate_timestamp_%s' % value,
+                evaluate_timestamp=value)
+            after = timeutils.utcnow()
+            self._assert_evaluate_timestamp(alarm_id, before, after)
+
+    def test_put_alarm_keeps_evaluate_timestamp(self):
+        alarm_id = self._post_evaluate_timestamp_alarm()
+        created = self._get_evaluate_timestamp(alarm_id)
+
+        # a PUT without evaluate_timestamp, as sent by the clients that
+        # build the body from scratch
+        data = self._get_alarm(alarm_id)
+        del data['evaluate_timestamp']
+        data['description'] = 'changed'
+        self.put_json('/alarms/%s' % alarm_id, params=data,
+                      headers=self.auth_headers)
+        self.assertEqual(created, self._get_evaluate_timestamp(alarm_id))
+
+        for value in ('2099-01-01T00:00:00', '2000-01-01T00:00:00', None):
+            data['evaluate_timestamp'] = value
+            self.put_json('/alarms/%s' % alarm_id, params=data,
+                          headers=self.auth_headers)
+            self.assertEqual(created, self._get_evaluate_timestamp(alarm_id))
+
+        history = self.get_json('/alarms/%s/history' % alarm_id,
+                                headers=self.auth_headers)
+        self.assertEqual(['rule change', 'creation'],
+                         [change['type'] for change in history])
+        self.assertEqual({'description': 'changed'},
+                         jsonlib.loads(history[0]['detail']))
+
+    def test_put_alarm_fixes_null_evaluate_timestamp(self):
+        alarm_id = self._post_evaluate_timestamp_alarm()
+        # an alarm stored with a NULL evaluate_timestamp by a previous
+        # version of the API
+        alarm = list(self.alarm_conn.get_alarms(alarm_id=alarm_id))[0]
+        alarm.evaluate_timestamp = None
+        self.alarm_conn.update_alarm(alarm)
+        self.assertIsNone(self._get_evaluate_timestamp(alarm_id))
+
+        data = self._get_alarm(alarm_id)
+        data['description'] = 'changed'
+        before = timeutils.utcnow()
+        self.put_json('/alarms/%s' % alarm_id, params=data,
+                      headers=self.auth_headers)
+        after = timeutils.utcnow()
+        self._assert_evaluate_timestamp(alarm_id, before, after)
+        history = self.get_json('/alarms/%s/history' % alarm_id,
+                                headers=self.auth_headers)
+        self.assertEqual({'description': 'changed'},
+                         jsonlib.loads(history[0]['detail']))
 
     def test_put_alarm_as_admin(self):
         json = {

@@ -15,6 +15,7 @@
 """Tests for aodh.evaluator.AlarmEvaluationService.
 """
 import fixtures
+import itertools
 import time
 from unittest import mock
 
@@ -194,6 +195,85 @@ class TestAlarmEvaluationService(tests_base.BaseTestCase):
         target = svc.partition_coordinator.extract_my_subset
         self.assertEqual(0, target.call_count)
         self.assertEqual(0, self.threshold_eval.evaluate.call_count)
+
+    def _get_alarms(self, alarms, null_alarms):
+        def get_alarms(**kwargs):
+            if kwargs['evaluate_timestamp'] is None:
+                return null_alarms
+            return alarms
+        return get_alarms
+
+    def test_evaluation_cycle_null_evaluate_timestamp(self):
+        alarm = mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
+                          alarm_id='a')
+        null_alarm = mock.Mock(
+            type='gnocchi_aggregation_by_metrics_threshold',
+            alarm_id='b', evaluate_timestamp=None)
+
+        self._fake_pc.is_active.return_value = False
+        self._fake_conn.get_alarms.side_effect = self._get_alarms(
+            [alarm], [null_alarm])
+        self._fake_conn.conditional_update.return_value = True
+
+        svc = evaluator.AlarmEvaluationService(0, self.CONF)
+        self.addCleanup(svc.terminate)
+        time.sleep(1)
+
+        calls = svc.storage_conn.get_alarms.call_args_list
+        self.assertEqual(
+            [{'lt': mock.ANY}, None],
+            [c[1]['evaluate_timestamp'] for c in calls[:2]])
+        for c in calls[:2]:
+            self.assertEqual(True, c[1]['enabled'])
+            self.assertEqual({'ne': 'event'}, c[1]['type'])
+        self.assertEqual([mock.call(alarm), mock.call(null_alarm)],
+                         self.threshold_eval.evaluate.call_args_list)
+        self.assertEqual(
+            {'alarm_id': 'b', 'evaluate_timestamp': None},
+            self._fake_conn.conditional_update.call_args_list[1][0][2])
+
+    def test_evaluation_cycle_alarm_in_both_queries(self):
+        alarm = mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
+                          alarm_id='a')
+
+        self._fake_pc.is_active.return_value = False
+        self._fake_conn.get_alarms.side_effect = self._get_alarms(
+            [alarm], [alarm])
+        self._fake_conn.conditional_update.return_value = True
+
+        svc = evaluator.AlarmEvaluationService(0, self.CONF)
+        self.addCleanup(svc.terminate)
+        time.sleep(1)
+
+        self.threshold_eval.evaluate.assert_called_once_with(alarm)
+
+    def test_evaluation_cycle_coordinated_null_evaluate_timestamp(self):
+        alarm = mock.Mock(type='gnocchi_aggregation_by_metrics_threshold',
+                          alarm_id='a')
+        null_alarm = mock.Mock(
+            type='gnocchi_aggregation_by_metrics_threshold',
+            alarm_id='b', evaluate_timestamp=None)
+
+        # not active when the service starts, so that the evaluation is
+        # not delayed
+        self._fake_pc.is_active.side_effect = itertools.chain(
+            [False, False], itertools.repeat(True))
+        self._fake_pc.extract_my_subset.return_value = ['a', 'b']
+        self._fake_conn.get_alarms.side_effect = self._get_alarms(
+            [alarm], [null_alarm])
+
+        svc = evaluator.AlarmEvaluationService(0, self.CONF)
+        self.addCleanup(svc.terminate)
+        time.sleep(1)
+
+        svc.partition_coordinator.extract_my_subset.assert_called_once_with(
+            svc.PARTITIONING_GROUP_NAME, ['a', 'b'])
+        self.assertEqual([mock.call(alarm), mock.call(null_alarm)],
+                         self.threshold_eval.evaluate.call_args_list)
+        # only the alarm without evaluate_timestamp is updated
+        self._fake_conn.conditional_update.assert_called_once_with(
+            mock.ANY, {'evaluate_timestamp': mock.ANY},
+            {'alarm_id': 'b', 'evaluate_timestamp': None})
 
 
 class TestPrometheusEvaluator(tests_base.BaseTestCase):

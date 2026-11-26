@@ -1,0 +1,12 @@
+---
+fixes:
+  - |
+    Updating an alarm with ``PUT /v2/alarms/{alarm_id}`` without the
+    ``evaluate_timestamp`` field no longer stores a NULL value, which made
+    the evaluator skip the alarm forever. The ``evaluate_timestamp`` field
+    is managed by the service: the value sent by clients on alarm creation
+    and update is now ignored, like the other fields filled in by the
+    service (``timestamp``, ``state_timestamp``). The evaluator now also
+    evaluates the existing alarms without ``evaluate_timestamp`` and fills
+    in the field, so these alarms are fixed without any action of their
+    owners.

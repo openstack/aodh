@@ -286,6 +286,15 @@ class AlarmEvaluationService(cotyledon.Service):
                     alarm.alarm_id
                 )
                 return
+        elif alarm.evaluate_timestamp is None:
+            # NOTE: fill in the evaluate_timestamp of the alarms stored
+            # without it by the API before the fix of bug #2173654, so that
+            # they are selected by the next evaluation cycles.
+            self.storage_conn.conditional_update(
+                sql_models.Alarm,
+                {'evaluate_timestamp': timeutils.utcnow()},
+                {'alarm_id': alarm.alarm_id, 'evaluate_timestamp': None},
+            )
 
         LOG.debug('Evaluating alarm %s', alarm.alarm_id)
         try:
@@ -296,11 +305,18 @@ class AlarmEvaluationService(cotyledon.Service):
     def _assigned_alarms(self):
         before = (timeutils.utcnow() - datetime.timedelta(
             seconds=self.conf.evaluator.evaluation_interval / 2))
-        selected = self.storage_conn.get_alarms(
-            enabled=True,
-            type={'ne': 'event'},
-            evaluate_timestamp={'lt': before},
-        )
+        selected = {}
+        # NOTE: also select the alarms without evaluate_timestamp, which
+        # the API stored when an alarm was updated without this field
+        # (bug #2173654). These alarms are never selected by the query on
+        # evaluate_timestamp.
+        for evaluate_timestamp in ({'lt': before}, None):
+            for alarm in self.storage_conn.get_alarms(
+                    enabled=True,
+                    type={'ne': 'event'},
+                    evaluate_timestamp=evaluate_timestamp):
+                selected.setdefault(alarm.alarm_id, alarm)
+        selected = list(selected.values())
 
         if self.partition_coordinator.is_active():
             all_alarm_ids = [a.alarm_id for a in selected]

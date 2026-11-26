@@ -660,6 +660,7 @@ class AlarmController(rest.RestController):
         elif data.project_id == wtypes.Unset:
             data.project_id = alarm_in.project_id
         data.timestamp = now
+        data.evaluate_timestamp = alarm_in.evaluate_timestamp or now
         if alarm_in.state != data.state:
             data.state_timestamp = now
             data.state_reason = ALARM_REASON_MANUAL
@@ -683,7 +684,7 @@ class AlarmController(rest.RestController):
 
         change = {k: v for k, v in updated_alarm.items()
                   if v != old_alarm[k] and k not in
-                  ['timestamp', 'state_timestamp']}
+                  ['timestamp', 'state_timestamp', 'evaluate_timestamp']}
         self._record_change(change, now, on_behalf_of=alarm.project_id)
         return Alarm.from_db_model_scrubbed(alarm)
 
@@ -835,6 +836,7 @@ class AlarmsController(rest.RestController):
         data.timestamp = now
         data.state_timestamp = now
         data.state_reason = ALARM_REASON_DEFAULT
+        data.evaluate_timestamp = now
 
         ALARMS_RULES[data.type].plugin.create_hook(data)
 

@@ -22,6 +22,7 @@ from oslo_utils import timeutils
 
 from aodh import storage
 from aodh.storage import models as alarm_models
+from aodh.storage.sqlalchemy import models as sql_models
 from aodh.tests import constants
 from aodh.tests.functional import db as tests_db
 
@@ -229,6 +230,37 @@ class AlarmTest(AlarmTestBase):
 
         all = list(self.alarm_conn.get_alarms())
         self.assertEqual(1, len(all))
+
+    def test_list_by_evaluate_timestamp(self):
+        # the queries of the evaluator: alarms evaluated before a date and
+        # alarms without evaluate_timestamp
+        self.add_some_alarms()
+        orange = list(self.alarm_conn.get_alarms(name='orange-alert'))[0]
+        orange.evaluate_timestamp = None
+        self.alarm_conn.update_alarm(orange)
+        alarms = list(self.alarm_conn.get_alarms(
+            evaluate_timestamp={'lt': datetime.datetime(2100, 1, 1)}))
+        self.assertEqual(['red-alert', 'yellow-alert'],
+                         sorted(a.name for a in alarms))
+        alarms = list(self.alarm_conn.get_alarms(evaluate_timestamp=None))
+        self.assertEqual(['orange-alert'], [a.name for a in alarms])
+
+    def test_conditional_update_null_evaluate_timestamp(self):
+        self.add_some_alarms()
+        orange = list(self.alarm_conn.get_alarms(name='orange-alert'))[0]
+        orange.evaluate_timestamp = None
+        self.alarm_conn.update_alarm(orange)
+        now = timeutils.utcnow()
+
+        self.assertTrue(self.alarm_conn.conditional_update(
+            sql_models.Alarm, {'evaluate_timestamp': now},
+            {'alarm_id': orange.alarm_id, 'evaluate_timestamp': None}))
+        orange = list(self.alarm_conn.get_alarms(name='orange-alert'))[0]
+        self.assertEqual(now, orange.evaluate_timestamp)
+        # the value is no longer NULL, a second update does nothing
+        self.assertFalse(self.alarm_conn.conditional_update(
+            sql_models.Alarm, {'evaluate_timestamp': timeutils.utcnow()},
+            {'alarm_id': orange.alarm_id, 'evaluate_timestamp': None}))
 
     def test_update_deleted_alarm_failed(self):
         self.add_some_alarms()
