@@ -1,0 +1,12 @@
+---
+fixes:
+  - |
+    [`bug 2168896 <https://bugs.launchpad.net/aodh/+bug/2168896>`_]
+    Fixed creating or updating a composite alarm with ``prometheus``
+    sub-rules, which failed with
+    ``Unknown attribute for argument data: scope_to_project`` once a
+    ``prometheus`` alarm had been created or updated by the same
+    ``aodh-api`` process. The sub-rules of a composite alarm are now
+    validated and restricted to a project in the same way as alarms of
+    the same type. Existing composite alarms are restricted the next
+    time they are updated.

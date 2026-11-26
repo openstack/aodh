@@ -25,6 +25,7 @@ from oslo_utils import uuidutils
 import webtest
 
 from aodh.api import app
+from aodh.api.controllers.v2.alarm_rules import gnocchi
 from aodh import messaging
 from aodh.storage import models
 from aodh.tests import constants
@@ -1534,6 +1535,8 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
 
     def setUp(self):
         super().setUp()
+        gnocchi_rule = gnocchi.AlarmGnocchiThresholdRule
+        gnocchi_rule._get_aggregation_methods.cache_clear()
         self.sub_rule1 = {
             "type": "gnocchi_aggregation_by_metrics_threshold",
             "metrics": ['41869681-5776-46d6-91ed-cccc43b6e4e3',
@@ -1570,6 +1573,20 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
                    {
                        "and": [self.sub_rule2, self.sub_rule3]
                    }]}
+        self.prometheus_sub_rule1 = {
+            "type": "prometheus",
+            "query": "ceilometer_cpu",
+            "threshold": 80,
+            "comparison_operator": "gt"
+        }
+        self.prometheus_sub_rule2 = {
+            "type": "prometheus",
+            "query": "ceilometer_memory_usage",
+            "threshold": 90,
+            "comparison_operator": "gt"
+        }
+        self.prometheus_composite_rule = {
+            "or": [self.prometheus_sub_rule1, self.prometheus_sub_rule2]}
 
     def test_post_with_composite_rule(self):
         json = {
@@ -1640,6 +1657,166 @@ class TestAlarmsCompositeRule(TestAlarmsBase):
                        % (float, bool))
         self.assertEqual(faultstring,
                          response.json['error_message']['faultstring'])
+
+    def _do_post_prometheus_composite_alarm(self, headers, project=None):
+        json = {
+            "type": "composite",
+            "name": "composite_alarm",
+            "composite_rule": self.prometheus_composite_rule,
+            "repeat_actions": False
+        }
+        if project:
+            json['project_id'] = project
+        return self.post_json('/alarms', params=json, status=201,
+                              headers=headers)
+
+    def test_post_with_prometheus_sub_rules(self):
+        resp = self._do_post_prometheus_composite_alarm(self.auth_headers)
+
+        alarms = list(self.alarm_conn.get_alarms(
+            alarm_id=resp.json['alarm_id']))
+        self.assertEqual(1, len(alarms))
+        for rule in alarms[0].rule['or']:
+            self.assertEqual(self.project_id, rule['scope_to_project'])
+
+    def test_post_with_prometheus_sub_rules_as_admin(self):
+        auth_headers = self.auth_headers
+        auth_headers['X-Roles'] = 'admin'
+        resp = self._do_post_prometheus_composite_alarm(auth_headers)
+
+        alarms = list(self.alarm_conn.get_alarms(
+            alarm_id=resp.json['alarm_id']))
+        self.assertEqual(1, len(alarms))
+        for rule in alarms[0].rule['or']:
+            self.assertIsNone(rule['scope_to_project'])
+
+    def test_post_prometheus_sub_rules_as_admin_on_behalf_of_another_project(
+        self
+    ):
+        auth_headers = self.auth_headers
+        auth_headers['X-Roles'] = 'admin'
+        project_id = uuidutils.generate_uuid()
+        resp = self._do_post_prometheus_composite_alarm(auth_headers,
+                                                        project=project_id)
+
+        alarms = list(self.alarm_conn.get_alarms(
+            alarm_id=resp.json['alarm_id']))
+        self.assertEqual(1, len(alarms))
+        for rule in alarms[0].rule['or']:
+            self.assertEqual(project_id, rule['scope_to_project'])
+
+    def test_post_with_prometheus_sub_rules_after_prometheus_alarm(self):
+        json = {
+            'name': 'prometheus_alarm',
+            'type': 'prometheus',
+            'prometheus_rule': {
+                'query': 'ceilometer_cpu',
+                'comparison_operator': 'gt',
+                'threshold': 80,
+            }
+        }
+        self.post_json('/alarms', params=json, status=201,
+                       headers=self.auth_headers)
+        resp = self._do_post_prometheus_composite_alarm(self.auth_headers)
+
+        alarms = list(self.alarm_conn.get_alarms(
+            alarm_id=resp.json['alarm_id']))
+        self.assertEqual(1, len(alarms))
+        for rule in alarms[0].rule['or']:
+            self.assertEqual(self.project_id, rule['scope_to_project'])
+
+    def test_post_with_prometheus_sub_rule_with_scope_to_project(self):
+        self.prometheus_sub_rule1['scope_to_project'] = 'another_project'
+        resp = self._do_post_prometheus_composite_alarm(self.auth_headers)
+
+        alarms = list(self.alarm_conn.get_alarms(
+            alarm_id=resp.json['alarm_id']))
+        self.assertEqual(1, len(alarms))
+        for rule in alarms[0].rule['or']:
+            self.assertEqual(self.project_id, rule['scope_to_project'])
+
+    def test_put_with_prometheus_sub_rules(self):
+        resp = self._do_post_prometheus_composite_alarm(self.auth_headers)
+        alarm_id = resp.json['alarm_id']
+        self._update_alarm(alarm_id, {'name': 'renamed_composite_alarm'})
+
+        alarms = list(self.alarm_conn.get_alarms(alarm_id=alarm_id))
+        self.assertEqual(1, len(alarms))
+        self.assertEqual('renamed_composite_alarm', alarms[0].name)
+        for rule in alarms[0].rule['or']:
+            self.assertEqual(self.project_id, rule['scope_to_project'])
+
+    def test_put_with_prometheus_sub_rules_stored_without_scope(self):
+        self.alarm_conn.create_alarm(models.Alarm(
+            name='composite_alarm',
+            type='composite',
+            enabled=True,
+            alarm_id='h',
+            description='h',
+            state='insufficient data',
+            state_reason='Not evaluated',
+            severity='low',
+            state_timestamp=constants.MIN_DATETIME,
+            timestamp=constants.MIN_DATETIME,
+            ok_actions=[],
+            insufficient_data_actions=[],
+            alarm_actions=[],
+            repeat_actions=False,
+            user_id=self.auth_headers['X-User-Id'],
+            project_id=self.auth_headers['X-Project-Id'],
+            time_constraints=[],
+            rule=self.prometheus_composite_rule))
+        self._update_alarm('h', {'name': 'renamed_composite_alarm'})
+
+        alarms = list(self.alarm_conn.get_alarms(alarm_id='h'))
+        self.assertEqual(1, len(alarms))
+        for rule in alarms[0].rule['or']:
+            self.assertEqual(self.project_id, rule['scope_to_project'])
+
+    def test_post_with_sub_rule_with_invalid_aggregation_method(self):
+        self.sub_rule1['aggregation_method'] = 'invalid'
+        json = {
+            "type": "composite",
+            "name": "composite_alarm",
+            "composite_rule": self.rule,
+            "repeat_actions": False
+        }
+        response = self.post_json('/alarms', params=json, status=400,
+                                  expect_errors=True,
+                                  headers=self.auth_headers)
+        self.assertIn('aggregation_method should be in',
+                      response.json['error_message']['faultstring'])
+
+    def test_post_with_gnocchi_aggregation_sub_rule_project_constraint(self):
+        sub_rule = {
+            "type": "gnocchi_aggregation_by_resources_threshold",
+            "metric": "cpu",
+            "resource_type": "instance",
+            "query": '{"=": {"server_group": "my_autoscaling_group"}}',
+            "threshold": 0.8,
+            "aggregation_method": "mean",
+            "comparison_operator": "gt"
+        }
+        json = {
+            "type": "composite",
+            "name": "composite_alarm",
+            "composite_rule": {"or": [sub_rule, self.sub_rule1]},
+            "repeat_actions": False
+        }
+        with mock.patch.object(gnocchi.AggregationMetricByResourcesLookupRule,
+                               'get_external_project_owner',
+                               return_value=None):
+            self.post_json('/alarms', params=json, status=201,
+                           headers=self.auth_headers)
+
+        expected_query = {"and": [
+            {"=": {"created_by_project_id": self.project_id}},
+            {"=": {"server_group": "my_autoscaling_group"}},
+        ]}
+        alarms = list(self.alarm_conn.get_alarms())
+        self.assertEqual(1, len(alarms))
+        self.assertEqual(expected_query,
+                         jsonlib.loads(alarms[0].rule['or'][0]['query']))
 
 
 class TestPaginationQuery(TestAlarmsBase):

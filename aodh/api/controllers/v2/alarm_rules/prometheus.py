@@ -36,6 +36,10 @@ class PrometheusRule(base.AlarmRule):
     query = wsme.wsattr(wtypes.text, mandatory=True)
     "The Prometheus query"
 
+    def __init__(self, scope_to_project=None, **kwargs):
+        super().__init__(**kwargs)
+        self.scope_to_project = scope_to_project
+
     @classmethod
     def validate_alarm(cls, alarm):
         super().validate_alarm(alarm)
@@ -43,9 +47,9 @@ class PrometheusRule(base.AlarmRule):
         rule = alarm.prometheus_rule
 
         auth_project = v2_utils.get_auth_project(alarm.project_id)
-        cls.scope_to_project = None
+        rule.scope_to_project = None
         if auth_project:
-            cls.scope_to_project = auth_project
+            rule.scope_to_project = auth_project
         return rule
 
     def as_dict(self):
